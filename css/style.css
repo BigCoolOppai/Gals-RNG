@@ -1,0 +1,807 @@
+/* Общие стили */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #1a1a2e; /* Темно-сине-фиолетовый фон */
+    color: #e0e0e0; /* Светло-серый текст */
+    min-height: 100vh;
+    overflow-x: hidden; /* Предотвращение горизонтального скролла */
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Orbitron', sans-serif;
+    color: #f0f0f0; /* Белый для заголовков */
+}
+
+.btn {
+    font-family: 'Orbitron', sans-serif;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.btn-primary {
+    background-color: #007bff; /* Основной синий Bootstrap */
+    border-color: #007bff;
+    box-shadow: 0 0 10px #007bff, 0 0 5px #007bff inset;
+}
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #0056b3;
+    border-color: #0056b3;
+    box-shadow: 0 0 15px #0056b3, 0 0 8px #0056b3 inset;
+}
+
+.btn-info {
+    background-color: #17a2b8; /* Бирюзовый Bootstrap */
+    border-color: #17a2b8;
+    box-shadow: 0 0 10px #17a2b8, 0 0 5px #17a2b8 inset;
+}
+.btn-info:hover, .btn-info:focus {
+    background-color: #117a8b;
+    border-color: #117a8b;
+    box-shadow: 0 0 15px #117a8b, 0 0 8px #117a8b inset;
+}
+
+.btn-danger {
+    box-shadow: 0 0 10px #dc3545, 0 0 5px #dc3545 inset;
+}
+.btn-danger:hover, .btn-danger:focus {
+    box-shadow: 0 0 15px #c82333, 0 0 8px #c82333 inset;
+}
+
+
+.nav-tabs .nav-link {
+    color: #adb5bd; /* Цвет неактивных вкладок */
+    border: 1px solid transparent;
+    border-bottom-color: #343a40; /* Темная граница под вкладками */
+}
+
+.nav-tabs .nav-link.active {
+    color: #f0f0f0; /* Цвет активной вкладки */
+    background-color: #2c2c44; /* Фон активной вкладки, чуть светлее основного фона */
+    border-color: #495057 #495057 #2c2c44;
+    box-shadow: 0 -2px 5px rgba(73, 80, 87, 0.5) inset;
+}
+
+.tab-content {
+    background-color: #232339; /* Фон для содержимого вкладок */
+    padding: 20px;
+    border: 1px solid #343a40;
+    border-top: none;
+    border-radius: 0 0 .25rem .25rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.list-group-item {
+    background-color: #2a2a40; /* Фон элементов списка в магазине */
+    border-color: #343a40;
+}
+.list-group-item strong {
+    color: #e0e0e0;
+}
+.list-group-item .badge {
+    font-size: 0.9em;
+}
+
+.currency-icon {
+    font-size: 1.2em;
+    margin-right: 0.2em;
+}
+
+/* Стили для анимации ролла */
+.roll-animation-container {
+    display: flex; /* Для мульти-ролла */
+    justify-content: center; /* Для мульти-ролла */
+    align-items: center; /* Для мульти-ролла */
+    width: 100%;
+    height: 80px; /* Высота контейнера анимации */
+    background-color: #111; /* Темный фон для анимации */
+    border: 2px solid #444;
+    border-radius: 5px;
+    overflow: hidden; /* Важно для эффекта прокрутки */
+    position: relative; /* Для центральной линии */
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.7);
+}
+
+.roll-slot-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    position: relative; /* Для маркера */
+}
+.roll-slot-wrapper::before { /* Центральный маркер */
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 3px; /* Ширина маркера */
+    background-color: rgba(255, 255, 255, 0.8); /* Цвет маркера */
+    transform: translateX(-50%);
+    z-index: 2; /* Поверх прокручивающихся элементов */
+    box-shadow: 0 0 8px #fff;
+}
+
+
+.roll-slot {
+    width: 90%; /* Чтобы было немного отступов от краев .roll-animation-container */
+    /* max-width: 250px; */ /* Можно ограничить максимальную ширину */
+    margin: 0 auto; /* Центрируем сам слот, если он меньше 100% */
+    height: 100%;
+    display: flex; /* Для выравнивания текста внутри */
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8em; /* Размер шрифта для названия редкости */
+    font-weight: bold;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    border-radius: 5px; /* Скруглим углы */
+    transition: background-color 0.1s ease-out, color 0.1s ease-out, transform 0.1s ease-out; /* Плавность смены */
+    /* Убираем transform, он нам не нужен для translateX */
+}
+.roll-slot.fast-roll {
+    transition-duration: 0.75s; /* Ускоренная анимация */
+}
+
+
+/* Стили для разных редкостей (примеры, будут дополняться в JS) */
+/* Новый стиль для "Хлама" */
+.rarity-garbage { color: #e0e0e0; background: linear-gradient(135deg, #795548, #5d4037); }
+.rarity-common { color: #9e9e9e; background: linear-gradient(135deg, #616161, #424242); }
+.rarity-rare { color: #e0e0e0; background: linear-gradient(135deg, #2196f3, #1976d2); }
+.rarity-epic { color: #e0e0e0; background: linear-gradient(135deg, #9c27b0, #7b1fa2); }
+.rarity-legendary { color: #212121; background: linear-gradient(135deg, #ff9800, #fb8c00); text-shadow: 0 0 5px #fff, 0 0 10px #ffeb3b; }
+.rarity-mythic { color: #fff; background: linear-gradient(135deg, #f44336, #d32f2f); text-shadow: 0 0 8px #fff, 0 0 15px #ff5252, 0 0 5px #000; }
+
+/* Стили для разных редкостей теперь будут применяться к .roll-slot */
+/* Например, в JS будем делать: rollSlot.className = 'roll-slot rarity-mythic'; */
+.roll-slot.rarity-common { color: #9e9e9e; background: linear-gradient(135deg, #616161, #424242); }
+.roll-slot.rarity-rare { color: #e0e0e0; background: linear-gradient(135deg, #2196f3, #1976d2); }
+.roll-slot.rarity-epic { color: #e0e0e0; background: linear-gradient(135deg, #9c27b0, #7b1fa2); }
+.roll-slot.rarity-legendary { color: #212121; background: linear-gradient(135deg, #ff9800, #fb8c00); text-shadow: 0 0 5px #fff, 0 0 10px #ffeb3b; }
+.roll-slot.rarity-mythic { color: #fff; background: linear-gradient(135deg, #f44336, #d32f2f); text-shadow: 0 0 8px #fff, 0 0 15px #ff5252, 0 0 5px #000; }
+.roll-slot.rarity-garbage { color: #e0e0e0; background: linear-gradient(135deg, #795548, #5d4037); }
+/* Стили для Unbound */
+.roll-slot.rarity-unbound {
+    color: #f3e5f5; /* Очень светлый, почти белый сиреневый текст */
+    background: linear-gradient(135deg, #8e24aa 0%, #6a1b9a 50%, #4a148c 100%); /* Глубокий фиолетовый градиент */
+    text-shadow: 0 0 5px #fff, 0 0 10px #d1c4e9, 0 0 15px #7e57c2;
+    box-shadow: inset 0 0 10px rgba(206, 147, 216, 0.3); /* Легкое внутреннее свечение */
+}
+.inventory-card.border-unbound {
+    border-color: #8e24aa; 
+    --rarity-glow-color: #c386ed; /* Светлый фиолетовый для свечения рамки */
+}
+/* Стили для Uranium */
+.roll-slot.rarity-uranium {
+    color: #002000; /* Очень темный зеленый, почти черный текст для контраста */
+    background: linear-gradient(135deg, #76ff03 0%, #64dd17 60%, #aeea00 100%); /* Ярко-зеленый градиент */
+    text-shadow: 0 0 3px #fff, 0 0 6px #c6ff00, 0 0 9px #76ff03;
+    border: 1px solid rgba(255,255,255,0.2); /* Легкая рамка для четкости */
+}
+.inventory-card.border-uranium {
+    border-color: #64dd17; 
+    --rarity-glow-color: #b0ff57; /* Светло-зеленый для свечения рамки */
+}
+
+
+/* Стили для ERROR */
+.roll-slot.rarity-error {
+    font-family: 'Courier New', Courier, monospace; /* Моноширинный шрифт для "технического" вида */
+    color: #ff5252; /* Ярко-красный текст */
+    background-color: #111; /* Очень темный фон */
+    text-shadow: 0 0 5px #ff1744, 0 0 10px #ff1744, 2px 2px 0px #00e5ff, -2px -2px 0px #e91e63; /* Глитч-эффект для текста */
+    animation: error-text-glitch 0.1s infinite steps(1, end) alternate, error-bg-flicker 0.5s infinite linear;
+    position: relative;
+    overflow: hidden;
+    border: 1px dashed #555;
+}
+.roll-slot.rarity-error::before,
+.roll-slot.rarity-error::after {
+    content: attr(data-text); /* Будем передавать текст через data-атрибут */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #111;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.roll-slot.rarity-error::before {
+    left: 2px;
+    text-shadow: -2px 0 #00e5ff; /* Cyan */
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    animation: error-glitch-anim-1 1.5s infinite linear alternate-reverse;
+}
+.roll-slot.rarity-error::after {
+    left: -2px;
+    text-shadow: 2px 0 #e91e63; /* Pink */
+    clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+    animation: error-glitch-anim-2 2s infinite linear alternate-reverse;
+}
+
+@keyframes error-text-glitch {
+    0% { transform: translate(0,0); }
+    100% { transform: translate(2px, -1px) skewX(-5deg); }
+}
+@keyframes error-bg-flicker {
+    0%, 100% { background-color: #111; }
+    50% { background-color: #000; }
+}
+@keyframes error-glitch-anim-1 {
+    0% { clip-path: polygon(0 2%, 100% 2%, 100% 5%, 0 5%); }
+    10% { clip-path: polygon(0 15%, 100% 15%, 100% 20%, 0 20%); }
+    /* ... (больше шагов для плавности и разнообразия) ... */
+    100% { clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%); }
+}
+@keyframes error-glitch-anim-2 {
+    0% { clip-path: polygon(0 80%, 100% 80%, 100% 85%, 0 85%); }
+    15% { clip-path: polygon(0 40%, 100% 40%, 100% 43%, 0 43%); }
+    /* ... (больше шагов для плавности и разнообразия) ... */
+    100% { clip-path: polygon(0 10%, 100% 10%, 100% 35%, 0 35%); }
+}
+
+.inventory-card.border-error {
+    border-color: #ff3d00; 
+    --rarity-glow-color: #ff6e40;
+}
+
+/* Стили для Devil (Макима) */
+.roll-slot.rarity-devil {
+    color: #f5e6e6; /* Очень светлый, почти белый с розовым оттенком текст */
+    background: linear-gradient(145deg, #210000 0%, #5c0c0c 40%, #8d1313 70%, #a01c1c 100%);
+    /* Можно добавить тонкий паттерн спиралей или цепей на фон через background-image */
+    text-shadow: 0 0 6px #fff, 0 0 10px #ff8a80, 0 0 2px #000;
+    border: 1px solid #3d0000;
+    font-family: 'Georgia', 'Times New Roman', serif; /* Элегантный, но строгий шрифт */
+    letter-spacing: 0.05em;
+}
+.inventory-card.border-devil {
+    border-color: #a01c1c; 
+    --rarity-glow-color: #d73a3a;
+}
+
+/* Стили для Jackpot (Хакари) */
+.roll-slot.rarity-jackpot {
+    color: #422B00; /* Темно-коричневый, почти черный текст */
+    background: 
+        radial-gradient(ellipse at center, rgba(255,236,179,0.8) 0%, rgba(255,209,128,0.5) 40%, rgba(255,179,0,0.2) 70%, rgba(255,179,0,0) 100%),
+        linear-gradient(45deg, #FFD700, #FFA000, #FF6F00, #FFB300);
+    background-blend-mode: overlay, normal;
+    text-shadow: 0 0 5px rgba(255,255,255,0.9), 0 0 10px #fff59d, 0 0 15px #ffeb3b;
+    font-weight: 900;
+    font-family: 'Impact', Haettenschweiler, 'Arial Narrow Bold', sans-serif; /* "Шумный", казино-стиль */
+    animation: jackpot-pulse-glow 1s infinite alternate;
+    border: 2px outset #FFCA28; /* Выпуклая золотая рамка */
+}
+@keyframes jackpot-pulse-glow {
+    from {
+        text-shadow: 0 0 5px rgba(255,255,255,0.9), 0 0 10px #fff59d, 0 0 15px #ffeb3b;
+        box-shadow: inset 0 0 15px #ffe082, 0 0 5px #ffc107;
+    }
+    to {
+        text-shadow: 0 0 8px rgba(255,255,255,1), 0 0 18px #fff9c4, 0 0 25px #ffecb3;
+        box-shadow: inset 0 0 25px #fff176, 0 0 15px #ffd54f;
+    }
+}
+.inventory-card.border-jackpot {
+    border-color: #ffb300; 
+    --rarity-glow-color: #ffe54c;
+}
+
+/* Стили для Timestop (Дио) */
+.roll-slot.rarity-timestop {
+    color: #212121; /* Темный текст на ярком фоне */
+    background: 
+        repeating-linear-gradient(
+            -55deg,
+            #FDD835,
+            #FDD835 10px,
+            #FBC02D 10px,
+            #FBC02D 20px
+        ); /* Диагональные полосы двух оттенков желтого */
+    text-shadow: 1px 1px 0px #FFFDE7, -1px -1px 0px #FFF9C4, 0 0 8px rgba(0,0,0,0.3);
+    font-family: 'Cinzel Decorative', cursive; /* Декоративный, "царственный" шрифт */
+    font-weight: bold;
+    border: 2px solid #F57F17; /* Темно-оранжевая рамка */
+    animation: timestop-bg-scroll 20s linear infinite; /* Медленная прокрутка фона */
+    position: relative;
+}
+.roll-slot.rarity-timestop::after { /* Эффект "ауры" или трескающегося времени */
+    content: " หยุดเวลา "; /* Текст на тайском "Остановка времени" - отсылка к ZA WARUDO, можно заменить на "ZA WARUDO!" или иконку */
+    font-family: sans-serif; /* Обычный шрифт для символов */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.5);
+    color: rgba(0, 0, 0, 0.15); /* Полупрозрачный темный текст на фоне */
+    font-size: 1.5em; /* Большой размер для фона */
+    font-weight: bold;
+    z-index: -1; /* Позади основного текста */
+    opacity: 0.5;
+}
+@keyframes timestop-bg-scroll {
+    0% { background-position: 0 0; }
+    100% { background-position: -400px 400px; } /* Значения для прокрутки фона */
+}
+.inventory-card.border-timestop {
+    border-color: #FBC02D; 
+    --rarity-glow-color: #FFF59D;
+}
+
+/* Мигающая анимация для Exalted или подобных очень редких */
+.rarity-exalted-example { /* Пример, если будет такая редкость */
+    color: #fff;
+    background: linear-gradient(135deg, #ffd700, #ffc107);
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff0;
+    animation: exalted-glow 1s infinite alternate;
+}
+@keyframes exalted-glow {
+    from { box-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700 inset; }
+    to { box-shadow: 0 0 20px #ffeb3b, 0 0 30px #ffeb3b inset; }
+}
+
+
+/* Для мульти-ролла: каждый слот будет маленькой версией этого */
+.multi-roll-slots-container {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    height: 100%;
+}
+.multi-roll-slot-wrapper { /* Этот остается как контейнер для каждого мини-слота */
+    flex: 1; 
+    margin: 0 5px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    overflow: hidden; /* Важно, если вдруг текст будет вылезать */
+    position: relative; /* Маркер для мульти-слотов можно убрать, если не нужен */
+    background-color: #181818;
+    height: 100%;
+    display: flex; /* Для центрирования roll-slot внутри */
+    justify-content: center;
+    align-items: center;
+}
+
+.multi-roll-slot-wrapper .roll-slot { /* Стили для roll-slot внутри мульти-ролла */
+    width: 95%; /* Чуть больше, чтобы занять почти весь mini-wrapper */
+    font-size: 1em; /* Меньший шрифт для мульти-ролла */
+    padding: 5px;
+    line-height: 1.2; /* Для лучшего отображения коротких названий */
+}
+/* Анимация "встряски" при остановке (опционально) */
+.roll-slot.landed {
+    animation: land-shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+}
+.multi-roll-slots-container .rarity-item {
+    min-width: 100px; /* Меньшая ширина для мульти-ролла */
+    font-size: 1em; /* Меньший шрифт */
+    padding: 0 10px;
+}
+
+@keyframes land-shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0) scale(1.02); }
+    20%, 80% { transform: translate3d(2px, 0, 0) scale(1.02); }
+    30%, 50%, 70% { transform: translate3d(-2px, 0, 0) scale(1.02); }
+    40%, 60% { transform: translate3d(2px, 0, 0) scale(1.02); }
+  }
+
+
+/* Стили для результата ролла (полученной карточки) */
+.roll-result-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+.received-card-animation-wrapper {
+    perspective: 1000px; /* Для 3D эффекта появления */
+}
+.received-card {
+    width: 200px; /* Ширина отображаемой карточки */
+    /* height: auto; вычисляется из aspect-ratio */
+    aspect-ratio: 1024 / 1360; /* Сохраняем пропорции */
+    border: 3px solid #fff;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4), 0 0 15px var(--rarity-glow-color, transparent); /* Цвет свечения будет задаваться JS */
+    background-color: #333; /* Фоллбэк, если изображение не загрузится */
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 15px;
+    animation: card-appear 0.7s ease-out forwards;
+    transform-style: preserve-3d; /* Для анимаций */
+}
+@keyframes card-appear {
+    0% { transform: translateY(50px) rotateY(-30deg) scale(0.8); opacity: 0; }
+    100% { transform: translateY(0) rotateY(0deg) scale(1); opacity: 1; }
+}
+.received-card-name {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-top: 5px;
+    animation: text-fade-in 0.5s 0.5s ease-out forwards;
+    opacity: 0;
+}
+@keyframes text-fade-in {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+.duplicate-reward-text {
+    font-size: 1.1em;
+    color: #ffd700; /* Золотой для награды */
+    margin-top: 5px;
+    animation: text-fade-in 0.5s 0.7s ease-out forwards;
+    opacity: 0;
+}
+
+/* Стили для инвентаря */
+.inventory-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 2px solid transparent; /* Граница будет цветной в зависимости от редкости */
+    background-color: #2c2c44;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    cursor: pointer;
+    aspect-ratio: 1024 / 1360; /* Сохраняем пропорции превью */
+}
+.inventory-card:hover {
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4), 0 0 15px var(--rarity-glow-color, #777);
+}
+.inventory-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Или 'contain' если хотите видеть всю карточку, но могут быть поля */
+    display: block;
+}
+.inventory-card-name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 8px;
+    font-size: 0.9em;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* Границы для карточек инвентаря по редкости */
+.inventory-card.border-garbage { border-color: #795548; --rarity-glow-color: #795548;}
+.inventory-card.border-common { border-color: #9e9e9e; --rarity-glow-color: #9e9e9e;}
+.inventory-card.border-rare { border-color: #2196f3; --rarity-glow-color: #2196f3;}
+.inventory-card.border-epic { border-color: #9c27b0; --rarity-glow-color: #9c27b0;}
+.inventory-card.border-legendary { border-color: #ff9800; --rarity-glow-color: #ff9800;}
+.inventory-card.border-mythic { border-color: #f44336; --rarity-glow-color: #f44336;}
+
+/* Магазин - стили для купленных/надетых предметов */
+.shop-item.purchased .btn, .shop-item.equipped .btn {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.equipped-item-chip {
+    background-color: #3a3a52;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.equipped-item-chip .btn-remove-equip {
+    font-size: 0.7em;
+    padding: 0.1em 0.4em;
+    margin-left: 5px;
+}
+
+/* Настройки */
+#skipAnimationSettings .form-check {
+    padding-left: 2.5em; /* Больше места для кастомного чекбокса (если будет) */
+}
+#skipAnimationSettings .form-check-label {
+    padding-top: 0.1em;
+}
+
+/* Модальное окно */
+#cardModal .modal-content {
+    border: 2px solid #444;
+    box-shadow: 0 0 25px rgba(0,0,0,0.5);
+}
+#modalCardRarity {
+    font-weight: bold;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .rarity-item {
+        min-width: 120px;
+        font-size: 1.2em;
+    }
+    .received-card {
+        width: 150px;
+    }
+    .multi-roll-slots-container .rarity-item {
+        min-width: 80px;
+        font-size: 0.8em;
+    }
+}
+@media (max-width: 576px) {
+    h1 { font-size: 1.8em; }
+    .player-stats { flex-direction: column; gap: 0.5rem;}
+    .roll-animation-container { height: 60px; }
+    .rarity-item {
+        min-width: 100px;
+        font-size: 1em;
+    }
+    .btn-lg {
+        padding: .5rem 1rem;
+        font-size: 1rem;
+    }
+    .multi-roll-slots-container {
+        /* Можно сделать, чтобы они переносились, если не влезают */
+        /* flex-wrap: wrap; */
+        /* height: auto;  Если переносятся, высота должна быть auto */
+    }
+    .multi-roll-slots-container .rarity-item {
+        min-width: 60px; /* Еще меньше, чтобы влезло 5 на маленьких экранах */
+        font-size: 0.7em;
+        padding: 0 5px;
+    }
+}
+/* css/style.css */
+.inventory-card.locked {
+    background-color: #343a40; /* Темный фон */
+    cursor: default;
+    border-color: #495057; /* Темная граница */
+    position: relative; /* Для позиционирования вопросительного знака */
+}
+.inventory-card.locked:hover {
+    transform: none; /* Убираем эффект ховера */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Оставляем базовую тень */
+}
+.inventory-card.locked .inventory-card-image {
+    opacity: 0.1; /* Делаем изображение (если оно есть) почти невидимым */
+    filter: grayscale(100%) blur(2px);
+}
+.inventory-card.locked .inventory-card-name {
+    background: rgba(0,0,0,0.5);
+    color: #adb5bd;
+    font-style: italic;
+}
+.inventory-card.locked::after { /* Вопросительный знак */
+    content: '?';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3em; /* Размер знака вопроса */
+    color: rgba(255, 255, 255, 0.3);
+    font-weight: bold;
+    z-index: 2;
+}
+
+#globalGlitchOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    display: none; /* По умолчанию скрыт */
+    background: transparent; 
+    overflow: hidden; /* Важно для псевдоэлементов и линий */
+}
+
+#globalGlitchOverlay.active-effect-error {
+    display: block;
+    animation: screen-shake 0.05s infinite linear alternate; /* Основной тремор экрана */
+}
+
+/* Псевдоэлементы для цветных глитч-слоев, когда #globalGlitchOverlay.active-effect-error активен */
+#globalGlitchOverlay.active-effect-error::before,
+#globalGlitchOverlay.active-effect-error::after {
+    content: ""; /* Важно для отображения псевдоэлементов */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.4; /* Сделаем их чуть менее интенсивными для начала */
+} 
+
+
+/* Мы будем создавать слои для красного и цианового глитча через JS */
+.glitch-color-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0; /* GSAP будет управлять opacity */
+}
+
+/* Стили для динамически создаваемых линий */
+.glitch-line {
+    position: absolute; 
+    left: 0;
+    width: 100%;
+    opacity: 0; /* GSAP будет управлять opacity */
+}
+
+/* Анимации (эти остаются как есть) */
+@keyframes screen-shake {
+    0% { transform: translate(1px, 1px) rotate(0.1deg); }
+    25% { transform: translate(-1px, 1px) rotate(-0.05deg); }
+    50% { transform: translate(-1px, -1px) rotate(-0.1deg); }
+    75% { transform: translate(1px, -1px) rotate(0.05deg); }
+    100% { transform: translate(1px, -1px) rotate(0.1deg); }
+}
+
+@keyframes glitch-color-shift-red {
+    0% { transform: translateX(3px) translateY(-1px); }
+    100% { transform: translateX(-3px) translateY(1px); }
+}
+@keyframes glitch-color-shift-cyan {
+    0% { transform: translateX(-2px) translateY(2px); }
+    100% { transform: translateX(2px) translateY(-2px); }
+}
+
+
+/* --- Эффект для Uranium (Ураночка) --- */
+body.visual-effect-uranium::before {
+    content: '';
+    position: fixed;
+    /* Делаем свечение чуть меньше, чтобы оно не было слишком навязчивым, 
+       используем отрицательные значения для top/left/right/bottom, 
+       чтобы box-shadow мог "выйти" за пределы экрана */
+    top: -20px; 
+    left: -20px; 
+    right: -20px; 
+    bottom: -20px;
+    /* Внутренняя тень создает эффект свечения от краев экрана,
+       внешняя тень создает общую ауру вокруг */
+    box-shadow: 
+        inset 0 0 30px 15px rgba(118, 255, 3, 0.35), /* Внутреннее зеленое свечение */
+        0 0 35px 10px rgba(118, 255, 3, 0.25);      /* Внешняя зеленая аура */
+    opacity: 0; /* Начальная прозрачность для анимации */
+    pointer-events: none; /* Чтобы не мешало взаимодействию */
+    z-index: 9990; /* Под глитч-оверлеем, если он есть, но выше остального контента */
+    animation: uranium-glow-pulse 2.5s infinite alternate ease-in-out;
+    border-radius: 30px; /* Скругляем углы свечения, чтобы было мягче */
+}
+
+@keyframes uranium-glow-pulse {
+    0% { 
+        opacity: 0.6; 
+        transform: scale(0.98); 
+        box-shadow: 
+            inset 0 0 25px 10px rgba(118, 255, 3, 0.3),
+            0 0 25px 5px rgba(118, 255, 3, 0.2);
+    }
+    100% { /* В середине пульсации делаем свечение ярче и чуть больше */
+        opacity: 0.9; 
+        transform: scale(1.00); 
+        box-shadow: 
+            inset 0 0 40px 20px rgba(180, 255, 87, 0.45), /* Более светлый оттенок для пика */
+            0 0 45px 15px rgba(180, 255, 87, 0.35);
+    }
+}
+
+/* --- Эффект для Timestop (Дио) --- */
+
+/* Класс, который будет добавляться к body */
+body.visual-effect-timestop {
+    /* Анимация инверсии/смены палитры */
+    animation: timestop-palette-shift 0.3s forwards, /* Быстрый переход в палитру */
+               timestop-subtle-pulse 8s infinite alternate ease-in-out 0.3s; /* Легкая пульсация после */
+}
+
+/* Анимация основной цветовой палитры Timestop */
+@keyframes timestop-palette-shift {
+    0% {
+        filter: grayscale(0%) sepia(0%) hue-rotate(0deg) invert(0%);
+    }
+    100% {
+        filter: sepia(60%) contrast(110%) hue-rotate(-20deg) invert(85%) saturate(150%) brightness(0.9);
+        /* Экспериментируйте с этими значениями! 
+           Цель - получить характерную "негативную" или желто-фиолетовую палитру.
+           Invert(85%) даст сильную инверсию. Hue-rotate может сдвинуть цвета.
+        */
+    }
+}
+
+/* Легкая пульсация или изменение оттенка во время действия эффекта */
+@keyframes timestop-subtle-pulse {
+    0% {
+        filter: sepia(60%) contrast(110%) hue-rotate(-20deg) invert(85%) saturate(150%) brightness(0.9);
+    }
+    50% {
+        filter: sepia(70%) contrast(115%) hue-rotate(-25deg) invert(85%) saturate(160%) brightness(0.95);
+    }
+    100% {
+        filter: sepia(60%) contrast(110%) hue-rotate(-20deg) invert(85%) saturate(150%) brightness(0.9);
+    }
+}
+
+
+/* Стили для оверлея, на котором будут искажения */
+#globalGlitchOverlay.active-effect-timestop {
+    display: block;
+    background: transparent; /* Оверлей сам по себе прозрачный */
+    /* z-index уже установлен для #globalGlitchOverlay */
+}
+
+/* Создаем "волны" или "линзы" искажения через псевдоэлементы оверлея */
+#globalGlitchOverlay.active-effect-timestop::before,
+#globalGlitchOverlay.active-effect-timestop::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    border-radius: 50%; /* Круглые волны */
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Первая волна искажения */
+#globalGlitchOverlay.active-effect-timestop::before {
+    width: 10px;
+    height: 10px;
+    border: 3px solid rgba(255, 235, 59, 0.4); /* Полупрозрачный желтый, цвет Дио */
+    /* box-shadow: 0 0 15px 5px rgba(255, 235, 59, 0.3); */
+    animation: timestop-ripple 2.5s 2 ease-out;
+    animation-delay: 0s; /* Первая волна сразу */
+}
+
+/* Вторая волна искажения, с задержкой и другими параметрами */
+#globalGlitchOverlay.active-effect-timestop::after {
+    width: 10px;
+    height: 10px;
+    border: 2px dashed rgba(156, 39, 176, 0.3); /* Полупрозрачный фиолетовый, другой цвет Дио */
+    /* box-shadow: 0 0 10px 3px rgba(156, 39, 176, 0.2); */
+    animation: timestop-ripple 2.5s 2 ease-out;
+    animation-delay: 0.7s; /* Вторая волна с задержкой */
+}
+
+@keyframes timestop-ripple {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0.7;
+    }
+    80% {
+        opacity: 0.1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(150); /* Волна расходится очень широко */
+        opacity: 0;
+    }
+}
+
+/* Опционально: Текст "ZA WARUDO" на оверлее */
+#globalGlitchOverlay.active-effect-timestop .timestop-text { /* Будем создавать этот элемент JS */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 5vw; /* Размер зависит от ширины экрана */
+    font-family: 'Impact', 'Arial Black', sans-serif;
+    color: rgba(255, 235, 59, 0.7); /* Золотой */
+    text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 0 15px rgba(0,0,0,0.5);
+    opacity: 0;
+    animation: za-warudo-text-appear 3s forwards ease-out;
+    animation-delay: 0.1s; /* Появляется после смены палитры */
+}
+
+@keyframes za-warudo-text-appear {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(3); filter: blur(10px); }
+    30% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0px); }
+    80% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0px); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); filter: blur(5px); }
+}

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gal's RNG</title>
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Google Fonts (Optional, for a more modern look) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Background Music Placeholder -->
+     <audio id="backgroundMusic" loop>       
+    </audio> 
+
+    <div class="container-fluid py-4">
+        <header class="text-center mb-4">
+            <h1>Gal's RNG</h1>
+            <div class="player-stats d-flex justify-content-center align-items-center gap-3 mt-3">
+                <div>
+                    <span class="currency-icon">💎</span>
+                    <span id="currencyDisplay">0</span> Призматических осколков
+                </div>
+                <div>
+                    🍀 Удача: <span id="luckDisplay">1.00</span>
+                </div>
+            </div>
+            <div id="activeBoostsDisplay" class="mt-2 small">
+                <!-- Активные бусты будут отображаться здесь -->
+            </div>
+        </header>
+
+        <main>
+            <!-- Roll Section -->
+            <section id="rollSection" class="text-center mb-4">
+                <div id="rollAnimationContainer" class="roll-animation-container mb-3">
+                    <!-- Одиночный слот для анимации -->
+                    <div class="roll-slot-wrapper single-roll-slot-wrapper">
+                         <div class="roll-slot" id="rollSlot">
+                            <!-- Сюда будут добавляться элементы редкостей для анимации -->
+                        </div>
+                    </div>
+                    <!-- Слоты для мульти-ролла (скрыты по умолчанию) -->
+                    <div id="multiRollSlotsContainer" class="multi-roll-slots-container d-none">
+                        <!-- 5 слотов будут генерироваться здесь JS-ом -->
+                    </div>
+                </div>
+
+                <div id="rollResultContainer" class="roll-result-container mb-3" style="min-height: 300px;">
+                    <!-- Результат ролла (карточка) будет отображаться здесь -->
+                </div>
+                <button id="rollButton" class="btn btn-primary btn-lg me-2">Roll!</button>
+                <button id="multiRollButton" class="btn btn-info btn-lg d-none me-2">Multi-Roll x5</button>
+                <button id="autorollButton" class="btn btn-success btn-lg">Autoroll</button>
+                <div id="luckyRollDisplay" class="text-center mt-2 small text-info"></div>
+            </section>
+
+            <!-- Tabs for Inventory, Shop, Settings -->
+            <ul class="nav nav-tabs mb-3" id="mainTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventory" type="button" role="tab" aria-controls="inventory" aria-selected="true">Инвентарь</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="shop-tab" data-bs-toggle="tab" data-bs-target="#shop" type="button" role="tab" aria-controls="shop" aria-selected="false">Магазин</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="false">Настройки</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="mainTabsContent">
+                <!-- Inventory Tab -->
+                <div class="tab-pane fade show active" id="inventory" role="tabpanel" aria-labelledby="inventory-tab">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2>Открытые карточки</h2>
+                        <div id="inventoryCounter" class="text-muted">Открыто: 0 / 0</div>
+                    </div>
+                    <div id="inventoryGrid" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3">
+                        <!-- Карточки инвентаря будут отображаться здесь -->
+                    </div>
+                </div>
+
+                <!-- Shop Tab -->
+                <div class="tab-pane fade" id="shop" role="tabpanel" aria-labelledby="shop-tab">
+                    <h2 class="mb-3">Магазин</h2>
+                    <div class="row">
+                        <!-- Boosts -->
+                        <div class="col-md-6 mb-4">
+                            <h4>Бусты Удачи (временные)</h4>
+                            <div id="boostShop" class="list-group">
+                                <!-- Элементы бустов будут добавлены сюда JS -->
+                            </div>
+                        </div>
+                        <!-- Equipment -->
+                        <div class="col-md-6 mb-4">
+                            <h4>Экипировка (постоянная, макс. 3)</h4>
+                            <div id="equipmentShop" class="list-group">
+                                <!-- Элементы экипировки будут добавлены сюда JS -->
+                            </div>
+                            <h5 class="mt-3">Надето:</h5>
+                            <div id="equippedItemsDisplay" class="d-flex flex-wrap gap-2">
+                                <!-- Отображение надетой экипировки -->
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <h4>Улучшения</h4>
+                    <div id="upgradesShop" class="list-group">
+                        <!-- Элементы улучшений будут добавлены сюда JS -->
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+                    <h2 class="mb-3">Настройки</h2>
+                    <h4>Управление данными:</h4>
+                    <button id="resetProgressButton" class="btn btn-danger">Сбросить прогресс</button>
+                    <p class="form-text mt-1">Внимание! Это действие удалит все ваши данные и не может быть отменено.</p>
+                    <hr>
+                    <h4>Громкость музыки:</h4>
+                    <div class="d-flex align-items-center">
+                        <input type="range" class="form-range me-2" id="musicVolumeSlider" min="0" max="1" step="0.01" value="0">
+                        <span id="musicVolumeLabel">0%</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- НОВЫЙ ФУТЕР -->
+        <footer class="text-center mt-5 mb-3">
+            <hr>
+            <p class="text-muted small">
+                Gal's RNG - Версия 0.1.1 "QoL Update"
+            </p>
+            <!-- Можно добавить еще что-то, например, копирайт или ссылку на вас -->
+            <p class="text-muted small">&copy; 2025 BigCoolOppai</p>
+        </footer>
+        <!-- КОНЕЦ НОВОГО ФУТЕРА -->
+
+        <!-- Modal for displaying full card image -->
+        <div class="modal fade" id="cardModal" tabindex="-1" aria-labelledby="cardModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content bg-dark text-light">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title" id="cardModalLabel">Карточка</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img id="modalCardImage" src="" alt="Card Image" class="img-fluid mb-3" style="max-height: 70vh;">
+                        <p id="modalCardRarity" class="mb-1"></p>
+                        <p id="modalCardChance" class="text-muted small mb-1"></p>
+                        <p id="modalCardDescription"></p>
+                        <div id="visualEffectControls" class="mt-3"> <!-- Контейнер для кнопки -->
+                        <button id="toggleVisualEffectButton" class="btn btn-sm"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Flip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/MotionPathPlugin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrambleTextPlugin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/TextPlugin.min.js"></script>
+
+    <!-- RoughEase, ExpoScaleEase and SlowMo are all included in the EasePack file -->    
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/EasePack.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
+    <!-- CustomBounce requires CustomEase -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomBounce.min.js"></script>
+    <!-- CustomWiggle requires CustomEase -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomWiggle.min.js"></script>
+    <!-- Game Scripts -->
+    <script src="js/cards.js"></script>
+    <script src="js/saveManager.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/visualEffects.js"></script> <!-- <<--- НОВЫЙ ФАЙЛ -->
+    <script src="js/ui.js"></script>
+    <script>
+        // Initial load
+        document.addEventListener('DOMContentLoaded', () => {
+            Game.init(); // Инициализация игры
+            UI.init();   // Инициализация UI
+
+            // Placeholder for music toggle if you uncomment the HTML
+             const musicToggle = document.getElementById('toggleMusicButton');
+             const backgroundMusic = document.getElementById('backgroundMusic');
+             if (musicToggle && backgroundMusic) {
+                 musicToggle.addEventListener('click', () => {
+                     if (backgroundMusic.paused) {
+                         backgroundMusic.play().catch(e => console.error("Error playing music:", e));
+                         musicToggle.textContent = 'Выключить музыку';
+                    } else {
+                         backgroundMusic.pause();
+                         musicToggle.textContent = 'Включить музыку';
+                     }
+                 });
+             }
+        });
+    </script>
+    <div id="globalGlitchOverlay"></div>
+</body>
+</html>
