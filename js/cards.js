@@ -1,6 +1,67 @@
 // js/cards.js
 
 const RARITIES_DATA = [
+ // --- НОВАЯ РЕДКОСТЬ: MOTIVATION (Вергилий) ---
+    {
+        id: "motivation",
+        name: "Мотивация", // Или "Искатель Силы", "Путь Чести"
+        probabilityBase: 1/2111, // Пример
+        color: "#0d47a1", // Глубокий синий (Blue 900)
+        glowColor: "#64b5f6", // Яркий голубой для свечения (Blue 300)
+        cssClass: "rarity-motivation",
+        currencyOnDuplicate: 211,
+        card: {
+            name: "Альфа и Омега", // Имя карты, можно конкретизировать
+            image: "img/cardMotivation.png",
+            description: "Сила. Мотивация. СИЛА. Эти слова олицетворяют эту девушку, которая искусно владеет своей катаной и не теряет концентрации. (К слову её любимое блюдо - Berry Delight)"
+        }
+    },
+    // --- НОВАЯ РЕДКОСТЬ: SMOKINSEXYSTYLE (Данте Ж) ---
+    {
+        id: "smokinsexystyle", // или sss
+        name: "S.S.S.", // Или "Демонический Шик", "Багровый Вихрь"
+        probabilityBase: 1/1999, // Пример
+        color: "#b71c1c", // Глубокий красный (Red 900)
+        glowColor: "#ef9a9a", // Светло-красный/розовый для свечения (Red 200)
+        cssClass: "rarity-smokinsexystyle", // или rarity-sss
+        currencyOnDuplicate: 199,
+        card: {
+            name: "Получеловек",
+            image: "img/cardSmokinSexyStyle.png",
+            description: "Время зажечь! Эта вечеринка становится всё безумнее! - именно эти слова произнесла эта леди после ухода в неизвестном направлении."
+        }
+    },
+    
+    // --- НОВАЯ РЕДКОСТЬ: COSMIC (Темная космическая сущность) ---
+    {
+        id: "cosmic",
+        name: "Темный космос", // Или "Космическая Бездна", "Тёмная Эгида"
+        probabilityBase: 1/1618, // Пример
+        color: "#311b92", // Темный индиго/фиолетовый (Indigo 900)
+        glowColor: "#7e57c2", // Приглушенный фиолетовый для свечения (Deep Purple 400)
+        cssClass: "rarity-cosmic",
+        currencyOnDuplicate: 161,
+        card: {
+            name: "Звёздная эльфийка",
+            image: "img/cardCosmic.png",
+            description: "Из пустоты, где гаснут звёзды, она взирает на хрупкость миров. Её голод вечен, а взгляд направлен в бездну. Лучше бы ты не попадался ей на глаза лишний раз."
+        }
+    },
+    // --- НОВАЯ РЕДКОСТЬ: SPACE (Светлая космическая сущность) ---
+    {
+        id: "space",
+        name: "Космическая", // Или "Звёздный Шёлк", "Свет Небес"
+        probabilityBase: 1/1042, // Пример
+        color: "#0097a7", // Яркий циан/бирюза (Cyan 700)
+        glowColor: "#80deea", // Очень светлый циан/бирюза (Cyan 200)
+        cssClass: "rarity-space",
+        currencyOnDuplicate: 142,
+        card: {
+            name: "Ткачиха Туманностей",
+            image: "img/cardSpace.png",
+            description: "Она плетёт узоры из звёздной пыли, освещая путь заблудшим душам в бесконечности. Ткачиха доброжелательна ко всем посетителям её мрачного места обитания."
+        }
+    },
     {
         id: "timestop", // Дио
         name: "ZA WARUDO", // Или "Королева Мира"

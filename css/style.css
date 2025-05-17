@@ -311,7 +311,7 @@ h1, h2, h3, h4, h5, h6 {
     position: relative;
 }
 .roll-slot.rarity-timestop::after { /* Эффект "ауры" или трескающегося времени */
-    content: " หยุดเวลา "; /* Текст на тайском "Остановка времени" - отсылка к ZA WARUDO, можно заменить на "ZA WARUDO!" или иконку */
+    content: " 時間が止まっている "; /* Текст на тайском "Остановка времени" - отсылка к ZA WARUDO, можно заменить на "ZA WARUDO!" или иконку */
     font-family: sans-serif; /* Обычный шрифт для символов */
     position: absolute;
     top: 50%;
@@ -804,4 +804,161 @@ body.visual-effect-timestop {
     30% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0px); }
     80% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0px); }
     100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); filter: blur(5px); }
+}
+
+/* --- Стили для COSMIC (Темная) редкости в ролле --- */
+.roll-slot.rarity-cosmic {
+    color: #b39ddb; /* Приглушенный фиолетовый текст */
+    background: 
+        radial-gradient(ellipse at center, rgba(49, 27, 146, 0.5) 0%, transparent 70%), /* Темное внутреннее свечение */
+        linear-gradient(180deg, #1A0B3F 0%, #231152 40%, #311b92 70%, #1C0A38 100%); /* Очень темный фиолетово-черный градиент */
+    text-shadow: 0 0 8px rgba(126, 87, 194, 0.7), 0 0 3px #000;
+    font-family: 'Cinzel Decorative', cursive; /* Шрифт с "древним" или "загадочным" ощущением */
+    font-weight: bold;
+    border: 1px solid #2c0b50;
+    box-shadow: inset 0 0 20px rgba(10, 5, 30, 0.8);
+    position: relative;
+    overflow: hidden;
+}
+.roll-slot.rarity-cosmic::before { /* Эффект "черной дыры" или "искривления" */
+    content: "";
+    position: absolute;
+    width: 150%; height: 150%;
+    top: -25%; left: -25%;
+    background: radial-gradient(circle, transparent 30%, rgba(10, 5, 20, 0.6) 60%, rgba(5, 0, 10, 0.8) 80%);
+    animation: cosmic-vortex-spin 30s linear infinite;
+    opacity: 0.7;
+}
+@keyframes cosmic-vortex-spin {
+    0% { transform: rotate(0deg) scale(1); }
+    100% { transform: rotate(360deg) scale(1.1); }
+}
+.roll-slot.rarity-cosmic > span { position: relative; z-index: 1; }
+
+
+/* --- Стили для MOTIVATION (Вергилий) редкости в ролле --- */
+.roll-slot.rarity-motivation {
+    color: #e3f2fd; /* Светло-голубой, почти белый текст */
+    background: 
+        linear-gradient(to bottom, rgba(255,255,255,0.1) 0%,rgba(255,255,255,0) 20%), /* Легкий блик сверху */
+        linear-gradient(170deg, #0D47A1 0%, #1565C0 45%, #1976D2 65%, #0B3C8A 100%); /* Строгий синий градиент */
+    text-shadow: 0 0 10px #81d4fa, 0 0 18px #4fc3f7, 0 0 2px #000;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Четкий, современный, без засечек */
+    font-weight: 600; /* Полужирный */
+    letter-spacing: 0.03em;
+    border: 1px solid #0d47a1; /* Темно-синяя рамка */
+    box-shadow: inset 0 0 10px rgba(25, 118, 210, 0.5), 0 0 5px rgba(79, 195, 247, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+/* Эффект "концентрированной энергии" или "режущих линий" */
+.roll-slot.rarity-motivation::after {
+    content: "";
+    position: absolute;
+    top: 10%; left: -50%;
+    width: 200%; height: 80%;
+    background: 
+        repeating-linear-gradient(
+            75deg, /* Угол наклона линий */
+            transparent,
+            transparent 8px,
+            rgba(129, 212, 250, 0.1) 8px, /* Полупрозрачные голубые линии */
+            rgba(129, 212, 250, 0.1) 10px
+        );
+    opacity: 0.8;
+    animation: motivation-lines-scroll 3s linear infinite;
+    pointer-events: none;
+}
+@keyframes motivation-lines-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(20px); } /* Сдвиг для эффекта движения линий */
+}
+.roll-slot.rarity-motivation > span { position: relative; z-index: 1; }
+
+
+/* --- Стили для SMOKINSEXYSTYLE (Данте Ж) редкости в ролле --- */
+.roll-slot.rarity-smokinsexystyle { /* или rarity-sss */
+    color: #ffebee; /* Очень светлый красноватый текст */
+    background: 
+        linear-gradient(45deg, rgba(0,0,0,0.4) 0%, transparent 50%, rgba(0,0,0,0.4) 100%), /* Диагональные тени */
+        linear-gradient(135deg, #B71C1C 0%, #D32F2F 40%, #E53935 70%, #C62828 100%); /* Насыщенный красный градиент */
+    text-shadow: 0 0 8px #ffcdd2, 0 0 15px #ef9a9a, 0 0 2px #000;
+    font-family: 'Playfair Display SC', serif; /* Стильный шрифт с засечками, немного "готичный" */
+    font-weight: bold;
+    text-transform: uppercase; /* Для дерзости */
+    border: 1px solid #7f0000; /* Темно-красная рамка */
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.6), 0 0 10px rgba(255,82,82,0.4);
+    position: relative;
+    overflow: hidden;
+}
+/* Эффект "демонического огня" или "искр" */
+.roll-slot.rarity-smokinsexystyle::before {
+    content: "";
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background-image: radial-gradient(circle at 3px 5px, rgba(255,138,101,0.6) 1px, transparent 0),  /* Оранжевые искры */
+                      radial-gradient(circle at 8px 2px, rgba(255,205,210,0.5) 1px, transparent 0); /* Розовые искры */
+    background-size: 25px 25px;
+    opacity: 0;
+    animation: sss-sparks-fade 1.5s ease-out infinite;
+}
+@keyframes sss-sparks-fade {
+    0%, 100% { opacity: 0; transform: scale(0.8) rotate(0deg); }
+    50% { opacity: 0.6; transform: scale(1.1) rotate(10deg); }
+}
+.roll-slot.rarity-smokinsexystyle > span { position: relative; z-index: 1; }
+
+
+/* --- Стили для SPACE (Светлая) редкости в ролле --- */
+.roll-slot.rarity-space {
+    color: #004d40; /* Темный бирюзовый текст для контраста */
+    background: 
+        radial-gradient(ellipse at 50% 100%, rgba(224, 247, 250, 0.4) 0%, transparent 60%), /* Свечение снизу */
+        linear-gradient(30deg, #E0F7FA 0%, #B2EBF2 30%, #80DEEA 60%, #4DD0E1 100%); /* Светлый циан-бирюзовый градиент */
+    text-shadow: 0 0 6px #fff, 0 0 12px #e0f7fa, 1px 1px 1px rgba(0,0,0,0.1);
+    font-family: 'Quicksand', sans-serif; /* Легкий, воздушный шрифт */
+    font-weight: 500;
+    border: 1px solid #b2ebf2; /* Светлая рамка */
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.5), 0 0 8px rgba(178, 235, 242, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+/* Эффект "звездной пыли" или "сияющих частиц" */
+.roll-slot.rarity-space::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: 
+        repeating-radial-gradient(circle at 20% 30%, rgba(255,255,255,0.2) 0, transparent 1px, transparent 10px),
+        repeating-radial-gradient(circle at 80% 70%, rgba(255,255,255,0.15) 0, transparent 1px, transparent 15px);
+    background-size: 100% 100%; /* Чтобы градиенты покрывали всю область */
+    opacity: 0;
+    animation: space-dust-shimmer 4s ease-in-out infinite alternate;
+}
+@keyframes space-dust-shimmer {
+    0% { opacity: 0.3; transform: scale(1) rotate(0deg); }
+    100% { opacity: 0.7; transform: scale(1.05) rotate(5deg); }
+}
+.roll-slot.rarity-space > span { position: relative; z-index: 1; }
+
+.inventory-card.border-cosmic {
+    border-color: #311b92; 
+    --rarity-glow-color: #7e57c2; 
+}
+
+.inventory-card.border-motivation {
+    border-color: #0d47a1;
+    --rarity-glow-color: #64b5f6;
+}
+
+.inventory-card.border-smokinsexystyle { /* или border-sss */
+    border-color: #b71c1c;
+    --rarity-glow-color: #ef9a9a;
+}
+
+.inventory-card.border-space {
+    border-color: #0097a7;
+    --rarity-glow-color: #80deea;
 }
