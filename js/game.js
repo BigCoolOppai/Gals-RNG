@@ -183,6 +183,10 @@ const Game = (() => {
         if (typeof UI !== 'undefined' && UI.updateLuckyRollDisplay) {
             UI.updateLuckyRollDisplay(playerData.luckyRollCounter, playerData.luckyRollThreshold);
         }
+        if (!playerData.stats) { // На всякий случай, если stats не инициализирован (хотя saveManager должен это делать)
+            playerData.stats = SaveManager.getDefaultPlayerData().stats;
+        }
+        playerData.stats.totalRolls++;
 
         const baseEffectiveLuck = getEffectiveLuck(); // Получаем базовую удачу без учета Лаки Ролла
         // Применяем множитель Лаки Ролла (currentLuckMultiplier будет 1.0, если это не Лаки Ролл)
@@ -257,10 +261,20 @@ const Game = (() => {
             finalDuplicateReward += Math.ceil(baseDuplicateReward * goldenTicketEquipped.effect.value);
             console.log(`Golden Ticket Bonus: Original: ${baseDuplicateReward}, New: ${finalDuplicateReward}`);
         }
+        
 
         if (finalDuplicateReward > 0) {
-            addCurrency(finalDuplicateReward); // addCurrency остается без изменений
+            addCurrency(finalDuplicateReward);
+            // Обновляем статистику по валюте за дубликаты
+            playerData.stats.currencyFromDuplicates += finalDuplicateReward; 
         }
+        
+        // Обновляем статистику по выпавшим редкостям
+        if (!playerData.stats.rollsByRarity) playerData.stats.rollsByRarity = {}; // Инициализация, если нужно
+        if (!playerData.stats.rollsByRarity[rarityData.id]) {
+            playerData.stats.rollsByRarity[rarityData.id] = 0;
+        }
+        playerData.stats.rollsByRarity[rarityData.id]++;
         
         // Логика для "Длани Неудачника"
         if (playerData.misfortuneStacks === undefined) playerData.misfortuneStacks = 0; // Инициализация, если нет

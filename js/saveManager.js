@@ -20,6 +20,12 @@ const SaveManager = (() => {
         misfortuneStacks: 0, // Текущее количество стаков для "Длани Неудачника"
         activeVisualEffectRarityId: null, // <<--- ДОБАВИТЬ: ID редкости карты с активным визуальным эффектом
         musicVolume: 0, // По умолчанию громкость 0
+        stats: { // <--- НОВЫЙ ОБЪЕКТ СТАТИСТИКИ
+        totalRolls: 0,
+        // currencySpentOnRolls: 0, // Пока не нужно, если роллы бесплатные
+        currencyFromDuplicates: 0,
+        rollsByRarity: {} // Объект: { rarityId1: count1, rarityId2: count2, ... }
+        },
         lastPlayed: new Date().toISOString()
         
     });
@@ -47,13 +53,17 @@ const SaveManager = (() => {
                 // Простая проверка и дополнение недостающих полей из дефолтных
                 let defaultData = getDefaultPlayerData();
                 let mergedData = { ...defaultData, ...parsedData };
-                // Глубокое слияние для вложенных объектов, таких как purchasedUpgrades и settings
+                // Глубокое слияние для вложенных объектов
                 mergedData.purchasedUpgrades = { ...defaultData.purchasedUpgrades, ...(parsedData.purchasedUpgrades || {}) };
                 
-                
+                // НОВОЕ: Глубокое слияние для объекта stats
+                mergedData.stats = { 
+                    ...defaultData.stats, 
+                    ...(parsedData.stats || {}),
+                    // Убедимся, что rollsByRarity всегда объект, даже если в старом сейве его не было или stats был пуст
+                    rollsByRarity: { ...(defaultData.stats.rollsByRarity || {}), ...((parsedData.stats && parsedData.stats.rollsByRarity) || {}) }
+                };
 
-
-                // Важно: Проверить активные бусты и удалить просроченные при загрузке
                 mergedData.activeBoosts = (mergedData.activeBoosts || []).filter(boost => {
                     return boost.endTime && new Date(boost.endTime) > new Date();
                 });

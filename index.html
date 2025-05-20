@@ -72,6 +72,9 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="false">Настройки</button>
                 </li>
+                <li class="nav-item" role="presentation">
+                <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="false">Статистика</button>
+                </li>
             </ul>
 
             <div class="tab-content" id="mainTabsContent">
@@ -129,6 +132,38 @@
                         <span id="musicVolumeLabel">0%</span>
                     </div>
                 </div>
+                <div class="tab-pane fade" id="stats" role="tabpanel" aria-labelledby="stats-tab">
+                <h2 class="mb-3">Статистика Игрока</h2>
+                <div id="playerStatsContainer" class="row">
+                    <div class="col-md-6 mb-3"> <!-- Добавил mb-3 для отступа на малых экранах -->
+                        <h4>Общая статистика:</h4>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Всего роллов сделано: 
+                                <span id="statsTotalRolls" class="badge bg-primary rounded-pill">0</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Уникальных карт открыто: 
+                                <span id="statsUniqueCardsOpened" class="badge bg-primary rounded-pill">0 / 0</span>
+                            </li>
+                            <!-- <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Потрачено осколков на роллы (WIP): 
+                                <span id="statsCurrencySpentOnRolls" class="badge bg-primary rounded-pill">0</span>
+                            </li> -->
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Получено осколков за дубликаты: 
+                                <span id="statsCurrencyFromDuplicates" class="badge bg-primary rounded-pill">0</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 mb-3"> <!-- Добавил mb-3 -->
+                        <h4>Статистика по редкостям:</h4>
+                        <div id="statsByRarityContainer" class="list-group">
+                            <!-- Сюда будут добавлены статы по каждой редкости -->
+                        </div>
+                    </div>
+                </div>
+            </div>
             </div>
         </main>
 

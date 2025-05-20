@@ -9,6 +9,7 @@ const UI = (() => {
     let boostShop, equipmentShop, upgradesShop, equippedItemsDisplay;
     // skipAnimationSettings удален
     let cardModal, modalCardImage, modalCardName, modalCardRarity, modalCardDescription;
+    let statsTotalRollsEl, statsUniqueCardsOpenedEl, statsCurrencyFromDuplicatesEl, statsByRarityContainerEl;
 
     // Состояние UI
     let isRolling = false;
@@ -57,72 +58,85 @@ const UI = (() => {
         musicVolumeLabel = document.getElementById('musicVolumeLabel');
         backgroundMusicElement = document.getElementById('backgroundMusic');
 
+        statsTotalRollsEl = document.getElementById('statsTotalRolls');
+        statsUniqueCardsOpenedEl = document.getElementById('statsUniqueCardsOpened');
+        statsCurrencyFromDuplicatesEl = document.getElementById('statsCurrencyFromDuplicates');
+        statsByRarityContainerEl = document.getElementById('statsByRarityContainer');
+
         document.getElementById('resetProgressButton')?.addEventListener('click', Game.resetGame);
     }
 
     // --- Инициализация UI ---
+    // js/ui.js
+
     function init() {
         cacheDOMElements();
         setupEventListeners();
-        renderShop(); // Должен быть до updateAll, чтобы playerData был свежим
-        updateAll(Game.getPlayerData()); // Загружаем все данные
-        Game.checkActiveBoosts(); // Проверяем бусты
-        const playerData = Game.getPlayerData();
-        if (playerData && typeof playerData.luckyRollCounter !== 'undefined') {
-            updateLuckyRollDisplay(playerData.luckyRollCounter, playerData.luckyRollThreshold);
-        }
+        renderShop(); // renderShop обычно сам получает данные из Game.getPlayerData()
+
+        // 1. Получаем данные ИГРЫ ОДИН РАЗ для инициализации UI
+        const initialPlayerData = Game.getPlayerData(); 
+
+        // 2. Вызываем updateAll, передавая ему полученные данные.
+        // updateAll внутри себя вызовет renderStats(initialPlayerData), если вы добавили это туда.
+        updateAll(initialPlayerData); 
+
+        // 3. Проверяем активные бусты (может обновить UI через свои внутренние вызовы)
+        Game.checkActiveBoosts(); 
+
+        // 4. Часть кода, которая обновляет специфичные элементы UI при инициализации,
+        //    используя уже полученные 'initialPlayerData'.
+        //    Lucky Roll display УЖЕ должен обновляться внутри updateAll.
+        //    Если нет, то:
+        // if (initialPlayerData && typeof initialPlayerData.luckyRollCounter !== 'undefined') {
+        //     updateLuckyRollDisplay(initialPlayerData.luckyRollCounter, initialPlayerData.luckyRollThreshold);
+        // }
+        //    Но лучше, чтобы updateAll был единственным источником правды для таких обновлений.
+
         // Установка громкости
         if (musicVolumeSlider && backgroundMusicElement) {
-            musicVolumeSlider.value = playerData.musicVolume;
-            backgroundMusicElement.volume = playerData.musicVolume;
-            if (musicVolumeLabel) musicVolumeLabel.textContent = `${Math.round(playerData.musicVolume * 100)}%`;
+            // Убедимся, что initialPlayerData и musicVolume существуют
+            if (initialPlayerData && typeof initialPlayerData.musicVolume === 'number') {
+                musicVolumeSlider.value = initialPlayerData.musicVolume;
+                backgroundMusicElement.volume = initialPlayerData.musicVolume;
+                if (musicVolumeLabel) musicVolumeLabel.textContent = `${Math.round(initialPlayerData.musicVolume * 100)}%`;
+            } else {
+                // Устанавливаем дефолтное значение, если в playerData нет musicVolume
+                musicVolumeSlider.value = 0; // или ваше дефолтное значение
+                backgroundMusicElement.volume = 0;
+                if (musicVolumeLabel) musicVolumeLabel.textContent = `0%`;
+                console.warn("UI.init: initialPlayerData.musicVolume is undefined, defaulting to 0.");
+            }
         }
-        const initialEffectId = Game.getPlayerData().activeVisualEffectRarityId;
-        applyVisualEffect(initialEffectId, true); // Применяем сохраненный эффект через новый модуль
-        // Если src не был установлен эффектом (или эффекта нет), устанавливаем дефолтный
-        if (backgroundMusicElement) {
-            // Старая неверная строка:
-            // const effectDefinition = initialEffectId ? VisualEffects.effects[initialEffectId] : null;
-            // const currentEffectMusic = effectDefinition && effectDefinition.music;
 
-            // ИСПРАВЛЕННАЯ ЛОГИКА ПОЛУЧЕНИЯ МУЗЫКИ ДЛЯ ЭФФЕКТА:
+        // Применение начального визуального эффекта
+        // Убедимся, что initialPlayerData существует
+        const initialEffectId = initialPlayerData ? initialPlayerData.activeVisualEffectRarityId : null;
+        applyVisualEffect(initialEffectId, true); 
+
+        // Логика начальной загрузки музыки
+        if (backgroundMusicElement) {
             const musicForInitialEffect = initialEffectId ? VisualEffects.effectMusicMap[initialEffectId] : null;
             const targetInitialTrack = musicForInitialEffect || VisualEffects.defaultMusicTrack;
 
-            // Устанавливаем src + load, если он еще не установлен или отличается.
-            // VisualEffects.apply с isInitialLoad=true также пытается это сделать.
-            // Этот блок здесь - подстраховка или если apply не вызывается до этого момента с нужными параметрами.
             if (!backgroundMusicElement.currentSrc || !backgroundMusicElement.currentSrc.endsWith(targetInitialTrack)) {
                 backgroundMusicElement.src = targetInitialTrack;
-                backgroundMusicElement.load(); // Важно вызвать load
+                backgroundMusicElement.load();
                 console.log("UI.init: Initial music source explicitly set to:", targetInitialTrack);
             }
-            
-            // Вызов UI.applyVisualEffect должен быть после того, как `backgroundMusicElement`
-            // потенциально получил свой `src` из блока выше, или он должен сам это делать.
-            // Сейчас VisualEffects.apply(..., isInitialLoad=true) сам устанавливает src.
-            // Так что вызов applyVisualEffect(initialEffectId, true) ДО этого блока или ПОСЛЕ него
-            // должен привести к одному результату, если они оба проверяют currentSrc.
-            // Логичнее, чтобы applyVisualEffect отвечал за это.
-            // Вызываем applyVisualEffect здесь, чтобы он применил визуальную часть и музыку
-            // с учетом isInitialLoad=true
-            UI.applyVisualEffect(initialEffectId, true);
+            // Повторный вызов applyVisualEffect здесь, если он отвечает за запуск музыки, 
+            // может быть избыточен, если VisualEffects.apply уже это сделал при первом вызове.
+            // UI.applyVisualEffect(initialEffectId, true); // Этот вызов уже был выше.
 
-
-            const playerData = Game.getPlayerData(); // Получаем снова, если нужно
-            if (playerData.musicVolume > 0) {
-                // Попытка воспроизведения после взаимодействия с пользователем (например, слайдер громкости)
-                // или если браузер разрешает автоплей.
-                // Этот play() здесь может быть проблематичным без явного пользовательского действия.
-                // Лучше, чтобы музыка начинала играть после первого изменения громкости > 0,
-                // что у вас уже есть в handleVolumeChange.
-                // backgroundMusicElement.play().catch(e => {
-                //     console.warn("UI.init: Initial music play failed (autoplay policy?):", e);
-                // });
-                // Вместо этого, просто убедимся, что состояние кнопки/UI отражает состояние плеера.
-                // Если у вас будет кнопка play/pause, ее нужно будет обновить.
-            }
+            // Логика автоплея/паузы при громкости > 0 была у вас корректной (не трогаем)
+            // if (initialPlayerData && initialPlayerData.musicVolume > 0) { ... }
         }
+
+        // Строка, которая вызывала ошибку, больше не нужна,
+        // так как renderStats вызывается из updateAll:
+        // if (playerDataForInit && playerDataForInit.stats) { 
+        //     renderStats(playerDataForInit);
+        // }
     }
 
     function setupEventListeners() {
@@ -130,6 +144,96 @@ const UI = (() => {
         multiRollButton.addEventListener('click', handleManualMultiRoll);
         autorollButton.addEventListener('click', toggleAutoroll);
         musicVolumeSlider.addEventListener('input', handleVolumeChange);
+        // НОВЫЙ КОД: Обновление статистики при активации вкладки
+        const statsTabButton = document.getElementById('stats-tab');
+        if (statsTabButton) {
+            statsTabButton.addEventListener('shown.bs.tab', function (event) {
+                // 'shown.bs.tab' - это событие Bootstrap, которое срабатывает ПОСЛЕ того, как вкладка стала активной
+                console.log("Stats tab shown, updating stats..."); // Для дебага
+                const currentPlayerData = Game.getPlayerData(); // Получаем самые свежие данные
+                if (currentPlayerData && currentPlayerData.stats) {
+                    renderStats(currentPlayerData); // Перерисовываем статистику
+                }
+            });
+        }
+    }
+
+    function getTextColorForBg(hexColor) {
+        if (!hexColor || hexColor.length < 7) return '#FFFFFF'; // Фоллбэк на белый
+        const r = parseInt(hexColor.slice(1, 3), 16);
+        const g = parseInt(hexColor.slice(3, 5), 16);
+        const b = parseInt(hexColor.slice(5, 7), 16);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        return brightness > 135 ? '#000000' : '#FFFFFF'; // Порог можно настроить
+    }
+
+    // js/ui.js
+
+    function renderStats(playerData) {
+        if (!playerData || !playerData.stats) {
+            console.warn("renderStats: playerData or playerData.stats is missing.");
+            return;
+        }
+
+        const stats = playerData.stats;
+        const seenRaritiesSet = new Set(playerData.seenRarities || []); // Создаем Set из виденных редкостей для быстрой проверки
+
+        if (statsTotalRollsEl) {
+            statsTotalRollsEl.textContent = stats.totalRolls || 0;
+        }
+        if (statsUniqueCardsOpenedEl) {
+            const validCardRarityIds = new Set(RARITIES_DATA.map(r => r.id));
+            const totalPossibleCards = RARITIES_DATA.filter(r => r.id !== 'garbage' && validCardRarityIds.has(r.id)).length; // Убедимся, что считаем только валидные
+            
+            // Считаем открытые только из тех, что есть в RARITIES_DATA (на случай старых ID в инвентаре)
+            const openedCount = playerData.inventory.filter(id => id !== 'garbage' && validCardRarityIds.has(id)).length;
+            statsUniqueCardsOpenedEl.textContent = `${openedCount} / ${totalPossibleCards}`;
+        }
+        if (statsCurrencyFromDuplicatesEl) {
+            statsCurrencyFromDuplicatesEl.textContent = stats.currencyFromDuplicates || 0;
+        }
+
+        if (statsByRarityContainerEl) {
+            statsByRarityContainerEl.innerHTML = ''; // Очищаем предыдущие
+            
+            // Фильтруем RARITIES_DATA, оставляем только те, что игрок видел (и не "мусор", если он не выпадал)
+            const raritiesToShowInStats = RARITIES_DATA.filter(rarity => {
+                // "Мусор" показываем только если он был выбит хотя бы раз (т.е. есть в rollsByRarity)
+                // ИЛИ если он есть в seenRarities (хотя обычно он не должен там быть, если не коллекционный)
+                if (rarity.id === 'garbage') {
+                    return stats.rollsByRarity && stats.rollsByRarity[rarity.id] > 0;
+                }
+                // Для остальных редкостей - проверяем, видел ли их игрок
+                return seenRaritiesSet.has(rarity.id);
+            });
+
+            // Можно дополнительно отсортировать raritiesToShowInStats, если нужно,
+            // например, по порядку из RARITIES_DATA (от редких к частым)
+            // или по количеству выпадений. Сейчас они будут в порядке из RARITIES_DATA.
+
+            raritiesToShowInStats.forEach(rarity => {
+                const count = stats.rollsByRarity[rarity.id] || 0;
+                // Если для виденной редкости счетчик роллов 0 (маловероятно, но возможно при ручном редактировании сейва),
+                // можно ее не показывать, или показывать с нулем. Сейчас показываем с нулем.
+                // if (count === 0 && rarity.id !== 'garbage') return; // Опционально: не показывать виденные, но не выбитые
+
+                const textColor = getTextColorForBg(rarity.color);
+
+                const listItem = document.createElement('a');
+                listItem.href = "#";
+                listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                listItem.style.cursor = 'default';
+                listItem.onclick = (e) => e.preventDefault();
+
+                listItem.innerHTML = `
+                    ${rarity.name}
+                    <span class="badge rounded-pill" style="background-color:${rarity.color}; color:${textColor};">
+                        ${count}
+                    </span>
+                `;
+                statsByRarityContainerEl.appendChild(listItem);
+            });
+        }
     }
 
     function handleVolumeChange(event) {
@@ -229,6 +333,9 @@ const UI = (() => {
         toggleMultiRollButton(playerData.purchasedUpgrades.multiRollX5);
         if (playerData && typeof playerData.luckyRollCounter !== 'undefined') {
             updateLuckyRollDisplay(playerData.luckyRollCounter, playerData.luckyRollThreshold);
+        }
+        if (playerData && playerData.stats) { // Проверяем наличие stats
+            renderStats(playerData);
         }
     }
 
@@ -440,11 +547,8 @@ const UI = (() => {
             }
     
     
-            updateCurrencyDisplay(latestPlayerData.currency);
-            renderInventory(latestPlayerData.inventory);
-            if (typeof UI.updateLuckyRollDisplay === "function" && typeof latestPlayerData.luckyRollCounter !== 'undefined') {
-                 UI.updateLuckyRollDisplay(latestPlayerData.luckyRollCounter, latestPlayerData.luckyRollThreshold);
-            }
+            // ЗАМЕНЯЕМ БЛОК ОБНОВЛЕНИЙ НА ОДИН ВЫЗОВ:
+            UI.updateAll(latestPlayerData); // Это обновит валюту, инвентарь, lucky roll И СТАТИСТИКУ
     
             if (isAutorolling && isCalledByAutoroll) {
                 // Если это был авторолл, планируем следующий
@@ -506,11 +610,8 @@ function handleMultiRollButtonClick(isCalledByAutoroll = false) {
                     // Если авторолл АКТИВЕН, ручные кнопки остаются заблокированными.
                 }
 
-                updateCurrencyDisplay(latestPlayerData.currency);
-                renderInventory(latestPlayerData.inventory);
-                 if (typeof UI.updateLuckyRollDisplay === "function" && typeof latestPlayerData.luckyRollCounter !== 'undefined') {
-                    UI.updateLuckyRollDisplay(latestPlayerData.luckyRollCounter, latestPlayerData.luckyRollThreshold);
-                }
+                // ЗАМЕНЯЕМ БЛОК ОБНОВЛЕНИЙ НА ОДИН ВЫЗОВ:
+                UI.updateAll(latestPlayerData); // Это обновит валюту, инвентарь, lucky roll И СТАТИСТИКУ
 
                 if (isAutorolling && isCalledByAutoroll) {
                     const autorollDelay = 700; // Чуть больше задержка для мультиролла
