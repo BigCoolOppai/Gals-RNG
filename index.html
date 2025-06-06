@@ -223,11 +223,13 @@
     <script src="js/game.js"></script>
     <script src="js/visualEffects.js"></script> <!-- <<--- НОВЫЙ ФАЙЛ -->
     <script src="js/ui.js"></script>
+    <script src="js/debug.js"></script>
     <script>
         // Initial load
         document.addEventListener('DOMContentLoaded', () => {
             Game.init(); // Инициализация игры
             UI.init();   // Инициализация UI
+            Debug.init();
 
             // Placeholder for music toggle if you uncomment the HTML
              const musicToggle = document.getElementById('toggleMusicButton');
@@ -245,6 +247,42 @@
              }
         });
     </script>
+    <!-- DEBUG PANEL -->
+    <div id="debugPanel" style="display: none;">
+        <div class="debug-header">
+            <h3>Дебаг-панель</h3>
+            <button id="debugCloseBtn" class="debug-close-btn">×</button>
+        </div>
+
+        <div class="debug-section">
+            <h4>Валюта</h4>
+            <input type="number" id="debugCurrencyInput" placeholder="Количество" value="1000">
+            <div class="debug-btn-group">
+                <button id="debugAddCurrencyBtn">Добавить</button>
+                <button id="debugSpendCurrencyBtn">Отнять</button>
+                <button id="debugSetCurrencyBtn">Установить</button>
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <h4>Карточки</h4>
+            <button id="debugUnlockAllBtn">Открыть все карты</button>
+            <select id="debugCardSelect">
+                <option value="">-- Выберите карту для открытия --</option>
+            </select>
+            <button id="debugUnlockOneBtn">Открыть выбранную</button>
+        </div>
+
+        <div class="debug-section">
+            <h4>Гарантированный ролл</h4>
+            <select id="debugRaritySelect">
+                <option value="">-- Выберите редкость --</option>
+            </select>
+            <button id="debugGuaranteedRollBtn">Сделать ролл</button>
+            <small>Внимание: этот ролл не будет иметь анимации, но обновит все данные.</small>
+        </div>
+    </div>
+    <!-- END DEBUG PANEL -->
     <div id="globalGlitchOverlay"></div>
 </body>
 </html>

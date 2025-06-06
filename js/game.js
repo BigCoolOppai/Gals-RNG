@@ -156,7 +156,7 @@ const Game = (() => {
 
     
     // --- Ролл Карточек ---
-    function performRoll() {
+    function performRoll(guaranteedRarityId = null) {
         // --- НАЧАЛО БЛОКА ДЛЯ ЛАКИ РОЛЛА ---
         let isLuckyRollActiveThisRoll = false; // Флаг, был ли этот ролл Лаки
         let currentLuckMultiplier = 1.0; // Множитель по умолчанию
@@ -197,6 +197,11 @@ const Game = (() => {
         // let remainingProbability = 1.0; // Как вы и указали, не используется активно
         let determinedRarityId = null;
 
+        if (guaranteedRarityId && getRarityDataById(guaranteedRarityId)) {
+        determinedRarityId = guaranteedRarityId;
+        console.log(`Performing GUARANTEED roll for: ${guaranteedRarityId}`);
+        } else {
+
         for (const rarity of RARITIES_DATA) {
             if (rarity.id === 'garbage') continue;
 
@@ -226,6 +231,7 @@ const Game = (() => {
                 determinedRarityId = RARITIES_DATA[RARITIES_DATA.length - 1].id;
             }
         }
+    }
         
         // Передаем determinedRarityId в processRollResult.
         // Флаг isLuckyRollActiveThisRoll можно передать, если он нужен в processRollResult для каких-то эффектов.
@@ -321,7 +327,45 @@ const Game = (() => {
             isNew,
             duplicateReward: finalDuplicateReward // Передаем итоговую награду в UI
         };
-}
+    }
+
+    // Добавить эту функцию в модуль Game
+    function unlockAllCards() {
+        const allCardIds = RARITIES_DATA.map(r => r.id);
+        
+        // Используем Set, чтобы избежать дубликатов, если что-то уже открыто
+        const newInventory = [...new Set([...playerData.inventory, ...allCardIds])];
+        playerData.inventory = newInventory;
+        
+        // Также помечаем все редкости как "виденные"
+        const newSeenRarities = [...new Set([...playerData.seenRarities, ...allCardIds])];
+        playerData.seenRarities = newSeenRarities;
+
+        console.log("All cards unlocked!");
+
+        // Обновляем весь UI, чтобы показать изменения в инвентаре и т.д.
+        if (typeof UI !== 'undefined') {
+            UI.updateAll(getPlayerData()); // updateAll перерисует все что нужно
+        }
+        saveGame();
+    }
+
+    function setCurrency(amount) {
+        const value = parseInt(amount, 10);
+        if (isNaN(value) || value < 0) {
+            console.error("Invalid currency amount:", amount);
+            return;
+        }
+        playerData.currency = value;
+        console.log(`Currency set to: ${playerData.currency}`);
+        
+        // Обновляем UI, чтобы изменения были видны
+        if (typeof UI !== 'undefined') {
+            UI.updateCurrencyDisplay(playerData.currency);
+            UI.renderShop(); // Важно, чтобы обновить состояние кнопок в магазине!
+        }
+        saveGame();
+    }
 
     // --- Магазин ---
     function purchaseShopItem(itemId, itemType) {
@@ -566,5 +610,9 @@ const Game = (() => {
         setActiveVisualEffect,
         clearActiveVisualEffect,
         setMusicVolume,
+        unlockAllCards,
+        setCurrency,
+        addCardToInventory,
+        
     };
 })();

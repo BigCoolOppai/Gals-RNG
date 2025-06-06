@@ -1047,4 +1047,93 @@ body.visual-effect-timestop {
     --rarity-glow-color: #ffca28;
 }
 
+/* --- DEBUG PANEL STYLES --- */
+#debugPanel {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 300px;
+    background-color: #2c2c44;
+    border: 2px solid #6c757d;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    z-index: 10000;
+    color: #f0f0f0;
+    padding: 15px;
+    font-family: 'Roboto', sans-serif;
+}
+
+#debugPanel .debug-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #495057;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+#debugPanel h3, #debugPanel h4 {
+    font-family: 'Orbitron', sans-serif;
+    margin: 0;
+}
+
+#debugPanel h4 {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+}
+
+#debugPanel .debug-section {
+    margin-bottom: 15px;
+}
+#debugPanel .debug-section:last-child {
+    margin-bottom: 0;
+}
+
+#debugPanel input, #debugPanel select, #debugPanel button {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    border: 1px solid #6c757d;
+    background-color: #3a3a52;
+    color: #f0f0f0;
+    font-size: 14px;
+}
+
+#debugPanel button {
+    background-color: #007bff;
+    border-color: #007bff;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+#debugPanel button:hover {
+    background-color: #0056b3;
+}
+
+#debugPanel .debug-btn-group {
+    display: flex;
+    gap: 5px;
+}
+
+#debugPanel .debug-close-btn {
+    background: none;
+    border: none;
+    color: #f0f0f0;
+    font-size: 24px;
+    line-height: 1;
+    padding: 0 5px;
+    cursor: pointer;
+    opacity: 0.7;
+    width: auto;
+    margin: 0;
+}
+#debugPanel .debug-close-btn:hover {
+    opacity: 1;
+}
+
+#debugPanel small {
+    color: #adb5bd;
+    font-size: 12px;
+}
+
 

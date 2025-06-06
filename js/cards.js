@@ -1,6 +1,6 @@
 // js/cards.js
 
-const RARITIES_DATA = [
+window.RARITIES_DATA = [
     {
         id: "blackhole",
         name: "Сверхмассивная",
