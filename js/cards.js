@@ -1,6 +1,62 @@
 // js/cards.js
 
 const RARITIES_DATA = [
+    {
+        id: "blackhole",
+        name: "Сверхмассивная",
+        probabilityBase: 1/9876543, 
+        color: "#0d47a1", 
+        color: "#E65100", // Orange 900 - глубокий, огненный оранжевый
+        glowColor: "#ffca28", // Amber 400 - яркое желто-оранжевое свечение
+        currencyOnDuplicate: 987654,
+        card: {
+            name: "FY-3741 alpha", 
+            image: "img/cardBlackHole.png",
+            description: "Ты нашёл одно из редчайших существ во вселенной. Оу, и кажется, она занимается чем-то интересным~~"
+        }
+    },
+    {
+        id: "berserk",
+        name: "Яростная",
+        probabilityBase: 1/30000, 
+        color: "#c62828", // Red 800 - глубокий красный
+        glowColor: "#ff8a80", // Red A100 - огненно-розовое свечение 
+        cssClass: "rarity-berserk",
+        currencyOnDuplicate: 3000,
+        card: {
+            name: "Стаг", 
+            image: "img/cardBerserker.png",
+            description: "Как видишь, она пережила многое в своей жизни. Она была заклеймена печатью Жертвы. Теперь её ярости нет предела... (а еще у неё есть крутой меч и броня)"
+        }
+    },
+    {
+        id: "bee",
+        name: "Жужжащая", 
+        probabilityBase: 1/15000, 
+        color: "#ffb300", // Amber 700 - медовый/золотой
+        glowColor: "#ffd54f", // Amber 300 - светлое золотое свечение
+        cssClass: "rarity-bee",
+        currencyOnDuplicate: 1500,
+        card: {
+            name: "Королева Пчел", 
+            image: "img/cardQueenBee.png",
+            description: "Это существо явно недовольно тем что ты вторгся к нему в улей. Лучше беги."
+        }
+    },
+    {
+        id: "russian",
+        name: "Родная",
+        probabilityBase: 1/10000, 
+        color: "#B71C1C", // Red 900 - насыщенный клюквенный
+        glowColor: "#f5f5f5", // Grey 100 - почти белое свечение
+        cssClass: "rarity-russian",
+        currencyOnDuplicate: 1000,
+        card: {
+            name: "Клюква Медведева", 
+            image: "img/cardRussian.png",
+            description: "Знаешь, ~ик~, я ведь очень люблю свою страну!Просто, дайте, ~ик~, я спать... "
+        }
+    },
  // --- НОВАЯ РЕДКОСТЬ: MOTIVATION (Вергилий) ---
     {
         id: "motivation",
