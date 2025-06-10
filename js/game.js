@@ -174,7 +174,7 @@ const Game = (() => {
             console.log(`✨ LUCKY ROLL TRIGGERED! Luck will be multiplied by ${currentLuckMultiplier}. Counter reset.`);
             playerData.luckyRollCounter = 0; // Сбрасываем счетчик НЕМЕДЛЕННО
             if (typeof UI !== 'undefined' && UI.showNotification) {
-                UI.showNotification("✨ Lucky Roll! Удача умножена! ✨", "success");
+                UI.showNotification(L.get('notifications.luckyRollTriggered'), "success");
             }
         }
         // --- КОНЕЦ БЛОКА ДЛЯ ЛАКИ РОЛЛА ---
@@ -319,7 +319,7 @@ const Game = (() => {
             card: rarityData.card,
             rarity: { 
                 id: rarityData.id, 
-                name: rarityData.name, 
+                name: L.get(rarityData.nameKey), 
                 color: rarityData.color, 
                 glowColor: rarityData.glowColor, 
                 cssClass: rarityData.cssClass 
