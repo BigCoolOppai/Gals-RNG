@@ -73,12 +73,7 @@ const UI = (() => {
         cacheDOMElements();
         setupEventListeners();
         renderShop(); // renderShop обычно сам получает данные из Game.getPlayerData()
-
-        // 1. Получаем данные ИГРЫ ОДИН РАЗ для инициализации UI
         const initialPlayerData = Game.getPlayerData(); 
-
-        // 2. Вызываем updateAll, передавая ему полученные данные.
-        // updateAll внутри себя вызовет renderStats(initialPlayerData), если вы добавили это туда.
         updateAll(initialPlayerData); 
 
         // 3. Проверяем активные бусты (может обновить UI через свои внутренние вызовы)
@@ -144,6 +139,12 @@ const UI = (() => {
         multiRollButton.addEventListener('click', handleManualMultiRoll);
         autorollButton.addEventListener('click', toggleAutoroll);
         musicVolumeSlider.addEventListener('input', handleVolumeChange);
+        // Добавляем обработчики для кнопок языка
+        document.getElementById('lang-ru')?.addEventListener('click', () => L.setLanguage('ru'));
+        document.getElementById('lang-en')?.addEventListener('click', () => L.setLanguage('en'));
+        // Подсвечиваем активный язык
+        const currentLang = L.getCurrentLanguage();
+        document.getElementById(`lang-${currentLang}`)?.classList.add('active');
         // НОВЫЙ КОД: Обновление статистики при активации вкладки
         const statsTabButton = document.getElementById('stats-tab');
         if (statsTabButton) {
@@ -226,7 +227,7 @@ const UI = (() => {
                 listItem.onclick = (e) => e.preventDefault();
 
                 listItem.innerHTML = `
-                    ${rarity.name}
+                    ${L.get(rarity.nameKey)}
                     <span class="badge rounded-pill" style="background-color:${rarity.color}; color:${textColor};">
                         ${count}
                     </span>
@@ -351,10 +352,10 @@ const UI = (() => {
     function updateLuckyRollDisplay(current, threshold) {
         if (luckyRollDisplay) {
             if (threshold > 0 && current < threshold) { // Показываем, только если есть прогресс и порог задан
-                luckyRollDisplay.textContent = `До Lucky Roll: ${threshold - current}`;
+                luckyRollDisplay.textContent = `${L.get('ui.luckyRollCounter')}: ${threshold - current}`;
                 luckyRollDisplay.style.opacity = '1';
             } else {
-                luckyRollDisplay.textContent = '✨ Lucky Roll следующий! ✨'; // Или просто скрываем
+                luckyRollDisplay.textContent = L.get('ui.luckyRollNext');
                 // Можно сделать, чтобы текст "Lucky Roll следующий!" показывался только когда current === 0 после сброса
                 if (current === 0 && threshold > 0) {
                     // Уже сработало или только что сбросилось, можно так и написать
@@ -637,7 +638,7 @@ function handleMultiRollButtonClick(isCalledByAutoroll = false) {
         if (totalCurrencyFromMultiRoll > 0) {
             const summaryText = document.createElement('p');
             summaryText.className = 'text-center mt-3';
-            summaryText.innerHTML = `Всего получено за дубликаты: <span class="currency-icon">💎</span>${totalCurrencyFromMultiRoll}`;
+            summaryText.innerHTML = `${L.get('ui.totalDuplicateReward')}: <span class="currency-icon">💎</span>${totalCurrencyFromMultiRoll}`;
             rollResultContainer.appendChild(summaryText);
         }
         const multiResultsDisplay = document.createElement('div');
@@ -673,15 +674,15 @@ function handleMultiRollButtonClick(isCalledByAutoroll = false) {
         cardElement.setAttribute('title', `Редкость: ${rollResult.rarity.name}`);
         const nameElement = document.createElement('h3');
         nameElement.className = 'received-card-name';
-        nameElement.textContent = `Вы получили: ${rollResult.card.name}!`;
-        if (rollResult.isNew) nameElement.innerHTML += ' <span class="badge bg-warning">НОВАЯ!</span>';
+        nameElement.textContent = `${L.get('ui.youGot')}: ${rollResult.card.name}!`;
+        if (rollResult.isNew) nameElement.innerHTML += ` <span class="badge bg-warning">${L.get('ui.isNew')}</span>`;
         cardWrapper.appendChild(cardElement);
         rollResultContainer.appendChild(cardWrapper);
         rollResultContainer.appendChild(nameElement);
         if (rollResult.duplicateReward > 0) {
             const rewardText = document.createElement('p');
             rewardText.className = 'duplicate-reward-text';
-            rewardText.innerHTML = `Получено за дубликат: <span class="currency-icon">💎</span>${rollResult.duplicateReward}`;
+            rewardText.innerHTML = `${L.get('ui.duplicateReward')}: <span class="currency-icon">💎</span>${rollResult.duplicateReward}`;
             rollResultContainer.appendChild(rewardText);
         }
     }
@@ -726,27 +727,27 @@ function handleMultiRollButtonClick(isCalledByAutoroll = false) {
             col.appendChild(cardDiv);
             inventoryGrid.appendChild(col);
         });
-        inventoryCounterElement.textContent = `Открыто: ${openedCount} / ${RARITIES_DATA.length}`;
+        inventoryCounterElement.textContent = `${L.get('ui.opened')}: ${openedCount} / ${RARITIES_DATA.length}`;
     }
 
     function showCardModal(rarityData) {
         modalCardImage.src = rarityData.card.image;
         modalCardImage.alt = rarityData.card.name;
         modalCardName.textContent = rarityData.card.name;
-        modalCardRarity.textContent = `Редкость: ${rarityData.name}`;
+        modalCardRarity.textContent = `${L.get('ui.rarity')}: ${L.get(rarityData.nameKey)}`;
         if (modalCardChance) { // Если элемент есть
             let chanceText = "";
             if (rarityData.probabilityBase) {
                 if (rarityData.probabilityBase >= 1) { 
-                    chanceText = "Гарантировано (если другое не выпало)";
+                    chanceText = L.get('ui.guaranteed');
                 } else {
                     const denominator = Math.round(1 / rarityData.probabilityBase);
-                    chanceText = `Базовый шанс: 1/${denominator}`;
+                    chanceText = `${L.get('ui.baseChance')}: 1/${denominator}`;
                 }
             }
             modalCardChance.textContent = chanceText;
         }
-        modalCardDescription.textContent = rarityData.card.description;
+        modalCardDescription.textContent = L.get(rarityData.card.descriptionKey);
         modalCardRarity.style.color = rarityData.color;
         // Удален дубликат: modalCardDescription.textContent = rarityData.card.description;
 
@@ -764,10 +765,10 @@ function handleMultiRollButtonClick(isCalledByAutoroll = false) {
             // Начальное состояние кнопки
             if (currentActiveEffectId === rarityData.id) {
                 toggleBtn.classList.add('btn-danger');
-                toggleBtn.textContent = 'Деактивировать эффект';
+                toggleBtn.textContent = L.get('ui.deactivateEffect');
             } else {
                 toggleBtn.classList.add('btn-success');
-                toggleBtn.textContent = 'Активировать эффект';
+                toggleBtn.textContent = L.get('ui.activateEffect');
             }
             
             visualEffectControls.appendChild(toggleBtn);
@@ -801,7 +802,7 @@ function handleMultiRollButtonClick(isCalledByAutoroll = false) {
             });
 
         } else {
-            visualEffectControls.innerHTML = '<p class="text-muted small">У этой карты нет визуального эффекта.</p>';
+            visualEffectControls.innerHTML = `<p class="text-muted small">${L.get('ui.noVisualEffect')}</p>`;
         }
         cardModal.show();
     }
@@ -835,11 +836,11 @@ function handleMultiRollButtonClick(isCalledByAutoroll = false) {
         boostShop.innerHTML = SHOP_DATA.boosts.map(boost => `
             <div class="list-group-item shop-item d-flex justify-content-between align-items-center">
                 <div>
-                    <strong>${boost.name}</strong>
-                    <small class="d-block text-muted">${boost.description}</small>
+                    <strong>${L.get(boost.nameKey)}</strong>
+                    <small class="d-block text-muted">${L.get(boost.descriptionKey)}</small>
                 </div>
                 <button class="btn btn-sm btn-success buy-boost-btn" data-item-id="${boost.id}" ${playerData.currency < boost.cost ? 'disabled' : ''}>
-                    Купить <span class="badge bg-warning text-dark">${boost.cost} 💎</span>
+                    ${L.get('ui.buy')} <span class="badge bg-warning text-dark">${boost.cost} 💎</span>
                 </button>
             </div>
         `).join('');
@@ -856,15 +857,15 @@ function handleMultiRollButtonClick(isCalledByAutoroll = false) {
                 buttonHtml = `<button class="btn btn-sm btn-outline-primary equip-btn" data-item-id="${equip.id}" ${playerData.equippedItems.length >= MAX_EQUIPPED_ITEMS ? 'disabled title="Максимум экипировки"' : ''}>Надеть</button>`;
             } else {
                  buttonHtml = `<button class="btn btn-sm btn-success buy-equip-btn" data-item-id="${equip.id}" ${playerData.currency < equip.cost ? 'disabled' : ''}>
-                    Купить <span class="badge bg-warning text-dark">${equip.cost} 💎</span>
+                    ${L.get('ui.buy')} <span class="badge bg-warning text-dark">${equip.cost} 💎</span>
                 </button>`;
             }
 
             return `
             <div class="list-group-item shop-item d-flex justify-content-between align-items-center ${isPurchased ? 'purchased' : ''} ${isEquipped ? 'equipped' : ''}">
                 <div>
-                    <strong>${equip.name}</strong>
-                    <small class="d-block text-muted">${equip.description}</small>
+                    <strong>${L.get(equip.nameKey)}</strong>
+                    <small class="d-block text-muted">${L.get(equip.descriptionKey)}</small>
                 </div>
                 ${buttonHtml}
             </div>
@@ -876,8 +877,8 @@ function handleMultiRollButtonClick(isCalledByAutoroll = false) {
             return `
             <div class="list-group-item shop-item d-flex justify-content-between align-items-center ${isUpgradePurchased ? 'purchased' : ''}">
                 <div>
-                    <strong>${upgrade.name}</strong>
-                    <small class="d-block text-muted">${upgrade.description}</small>
+                    <strong>${L.get(upgrade.nameKey)}</strong>
+                    <small class="d-block text-muted">${L.get(upgrade.descriptionKey)}</small>
                 </div>
                 <button class="btn btn-sm btn-success buy-upgrade-btn" data-item-id="${upgrade.id}" 
                     ${isUpgradePurchased ? 'disabled' : ''} 
@@ -1023,7 +1024,7 @@ function handleMultiRollButtonClick(isCalledByAutoroll = false) {
     
             itemChip.innerHTML = `
                 <span>${equippedItemData.name} <small class="text-white-75">(${itemInfoText})</small></span>
-                <button class="btn btn-xs btn-outline-light btn-remove-equip ms-2" data-item-id="${equippedItemData.id}" title="Снять предмет" style="border-color: rgba(255,255,255,0.5); color: rgba(255,255,255,0.7);">&times;</button>
+                <button class="btn btn-xs btn-outline-light btn-remove-equip ms-2" data-item-id="${equippedItemData.id}" title="${L.get('ui.unequipItem')} style="border-color: rgba(255,255,255,0.5); color: rgba(255,255,255,0.7);">&times;</button>
             `;
             
             const removeButton = itemChip.querySelector('.btn-remove-equip');

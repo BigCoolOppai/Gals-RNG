@@ -401,13 +401,13 @@ const Game = (() => {
             // Проверку на "уже куплено" добавим.
             if (playerData.inventory.includes("purchased_"+itemId)) { // Используем префикс для купленной экипировки
                  console.log("Equipment item already purchased:", itemData.name);
-                 alert(`Предмет "${itemData.name}" уже куплен.`);
+                 alert(`${L.get(itemData.nameKey)} ${L.get('notifications.itemPurchased')}`);
                  return false;
             }
         }
         if (itemType === 'upgrade' && playerData.purchasedUpgrades[itemData.targetProperty]) {
             console.log("Upgrade already purchased:", itemData.name);
-            alert(`Улучшение "${itemData.name}" уже куплено.`);
+            alert(`${L.get(itemData.nameKey)} ${L.get('notifications.upgradeAlreadyPurchased')}`);
             return false;
         }
 
@@ -423,7 +423,7 @@ const Game = (() => {
                 if (playerData.equippedItems.length < MAX_EQUIPPED_ITEMS) {
                     equipItem(itemData);
                 } else {
-                    alert(`${itemData.name} куплен, но нет места для экипировки. Освободите слот.`);
+                    alert(`${L.get(itemData.nameKey)} ${L.get('notifications.itemPurchased')}`);
                 }
             } else if (itemType === 'upgrade') {
                 playerData.purchasedUpgrades[itemData.targetProperty] = true;
@@ -450,7 +450,7 @@ const Game = (() => {
         const newBoost = {
             id: boostData.id,
             type: boostData.type,
-            name: boostData.name, // Для отображения
+            name: L.get(boostData.nameKey),
             endTime: new Date().getTime() + boostData.durationSeconds * 1000,
             luckBonus: boostData.luckBonus
         };

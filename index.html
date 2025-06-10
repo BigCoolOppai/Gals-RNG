@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-bs-theme="dark">
+<html lang="ru" id="htmlRoot" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,10 +25,10 @@
             <div class="player-stats d-flex justify-content-center align-items-center gap-3 mt-3">
                 <div>
                     <span class="currency-icon">💎</span>
-                    <span id="currencyDisplay">0</span> Призматических осколков
+                    <span id="currencyDisplay">0</span> <span data-i18n="ui.prismaticShards">Призматических осколков</span>
                 </div>
                 <div>
-                    🍀 Удача: <span id="luckDisplay">1.00</span>
+                    <span data-i18n="ui.luck">🍀 Удача</span>: <span id="luckDisplay">1.00</span>
                 </div>
             </div>
             <div id="activeBoostsDisplay" class="mt-2 small">
@@ -64,16 +64,16 @@
             <!-- Tabs for Inventory, Shop, Settings -->
             <ul class="nav nav-tabs mb-3" id="mainTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventory" type="button" role="tab" aria-controls="inventory" aria-selected="true">Инвентарь</button>
+                    <button class="nav-link active" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventory" type="button" role="tab" aria-controls="inventory" aria-selected="true" data-i18n="ui.inventory">Инвентарь</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="shop-tab" data-bs-toggle="tab" data-bs-target="#shop" type="button" role="tab" aria-controls="shop" aria-selected="false">Магазин</button>
+                    <button class="nav-link" id="shop-tab" data-bs-toggle="tab" data-bs-target="#shop" type="button" role="tab" aria-controls="shop" aria-selected="false" data-i18n="ui.shop">Магазин</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="false">Настройки</button>
+                    <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="false" data-i18n="ui.settings">Настройки</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="false">Статистика</button>
+                <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="false" data-i18n="ui.stats">Статистика</button>
                 </li>
             </ul>
 
@@ -81,7 +81,7 @@
                 <!-- Inventory Tab -->
                 <div class="tab-pane fade show active" id="inventory" role="tabpanel" aria-labelledby="inventory-tab">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2>Открытые карточки</h2>
+                        <h2 data-i18n="ui.openedCards">Открытые карточки</h2>
                         <div id="inventoryCounter" class="text-muted">Открыто: 0 / 0</div>
                     </div>
                     <div id="inventoryGrid" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3">
@@ -91,29 +91,29 @@
 
                 <!-- Shop Tab -->
                 <div class="tab-pane fade" id="shop" role="tabpanel" aria-labelledby="shop-tab">
-                    <h2 class="mb-3">Магазин</h2>
+                    <h2 class="mb-3" data-i18n="ui.shop">Магазин</h2>
                     <div class="row">
                         <!-- Boosts -->
                         <div class="col-md-6 mb-4">
-                            <h4>Бусты Удачи (временные)</h4>
+                            <h4 data-i18n="ui.boostsTemporary">Бусты Удачи (временные)</h4>
                             <div id="boostShop" class="list-group">
                                 <!-- Элементы бустов будут добавлены сюда JS -->
                             </div>
                         </div>
                         <!-- Equipment -->
                         <div class="col-md-6 mb-4">
-                            <h4>Экипировка (постоянная, макс. 3)</h4>
+                            <h4 data-i18n="ui.equipmentPermanent">Экипировка (постоянная, макс. 3)</h4>
                             <div id="equipmentShop" class="list-group">
                                 <!-- Элементы экипировки будут добавлены сюда JS -->
                             </div>
-                            <h5 class="mt-3">Надето:</h5>
+                            <h5 class="mt-3" data-i18n="ui.equipped">Надето:</h5>
                             <div id="equippedItemsDisplay" class="d-flex flex-wrap gap-2">
                                 <!-- Отображение надетой экипировки -->
                             </div>
                         </div>
                     </div>
                     <hr>
-                    <h4>Улучшения</h4>
+                    <h4 data-i18n="ui.upgrades">Улучшения</h4>
                     <div id="upgradesShop" class="list-group">
                         <!-- Элементы улучшений будут добавлены сюда JS -->
                     </div>
@@ -121,29 +121,35 @@
 
                 <!-- Settings Tab -->
                 <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
-                    <h2 class="mb-3">Настройки</h2>
-                    <h4>Управление данными:</h4>
-                    <button id="resetProgressButton" class="btn btn-danger">Сбросить прогресс</button>
-                    <p class="form-text mt-1">Внимание! Это действие удалит все ваши данные и не может быть отменено.</p>
+                    <h2 class="mb-3" data-i18n="ui.settings">Настройки</h2>
+                    <h4>Язык / Language</h4>
+                    <div class="btn-group" role="group" aria-label="Language switch">
+                      <button type="button" class="btn btn-outline-secondary" id="lang-ru">Русский</button>
+                      <button type="button" class="btn btn-outline-secondary" id="lang-en">English</button>
+                    </div>
                     <hr>
-                    <h4>Громкость музыки:</h4>
+                    <h4 data-i18n="ui.dataManagement">Управление данными:</h4>
+                    <button id="resetProgressButton" class="btn btn-danger" data-i18n="ui.resetProgress">Сбросить прогресс</button>
+                    <p class="form-text mt-1" data-i18n="ui.resetWarning">Внимание! Это действие удалит все ваши данные и не может быть отменено.</p>
+                    <hr>
+                    <h4 data-i18n="ui.musicVolume">Громкость музыки:</h4>
                     <div class="d-flex align-items-center">
                         <input type="range" class="form-range me-2" id="musicVolumeSlider" min="0" max="1" step="0.01" value="0">
                         <span id="musicVolumeLabel">0%</span>
                     </div>
                 </div>
                 <div class="tab-pane fade" id="stats" role="tabpanel" aria-labelledby="stats-tab">
-                <h2 class="mb-3">Статистика Игрока</h2>
+                <h2 class="mb-3"  data-i18n="ui.playerStats">Статистика Игрока</h2>
                 <div id="playerStatsContainer" class="row">
                     <div class="col-md-6 mb-3"> <!-- Добавил mb-3 для отступа на малых экранах -->
-                        <h4>Общая статистика:</h4>
+                        <h4 data-i18n="ui.generalStats">Общая статистика:</h4>
                         <ul class="list-group">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Всего роллов сделано: 
+                                <span data-i18n="ui.totalRolls">Всего роллов сделано:</span>
                                 <span id="statsTotalRolls" class="badge bg-primary rounded-pill">0</span>
                             </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Уникальных карт открыто: 
+                            <li class="list-group-item d-flex justify-content-between align-items-center ">
+                                <span data-i18n="ui.uniqueCardsOpened">Уникальных карт открыто:</span> 
                                 <span id="statsUniqueCardsOpened" class="badge bg-primary rounded-pill">0 / 0</span>
                             </li>
                             <!-- <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -151,13 +157,13 @@
                                 <span id="statsCurrencySpentOnRolls" class="badge bg-primary rounded-pill">0</span>
                             </li> -->
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Получено осколков за дубликаты: 
+                                <span data-i18n="ui.currencyFromDuplicates">Получено осколков за дубликаты:</span>
                                 <span id="statsCurrencyFromDuplicates" class="badge bg-primary rounded-pill">0</span>
                             </li>
                         </ul>
                     </div>
                     <div class="col-md-6 mb-3"> <!-- Добавил mb-3 -->
-                        <h4>Статистика по редкостям:</h4>
+                        <h4 data-i18n="ui.statsByRarity">Статистика по редкостям:</h4>
                         <div id="statsByRarityContainer" class="list-group">
                             <!-- Сюда будут добавлены статы по каждой редкости -->
                         </div>
@@ -171,7 +177,7 @@
         <footer class="text-center mt-5 mb-3">
             <hr>
             <p class="text-muted small">
-                Gal's RNG - Версия 0.1.3a "New Rarities"
+                Gal's RNG - Version 0.1.3b "Localization"
             </p>
             <!-- Можно добавить еще что-то, например, копирайт или ссылку на вас -->
             <p class="text-muted small">&copy; 2025 BigCoolOppai</p>
@@ -183,7 +189,7 @@
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content bg-dark text-light">
                     <div class="modal-header border-secondary">
-                        <h5 class="modal-title" id="cardModalLabel">Карточка</h5>
+                        <h5 class="modal-title" id="cardModalLabel" data-i18n="ui.card">Карточка</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body text-center">
@@ -220,13 +226,16 @@
     <!-- Game Scripts -->
     <script src="js/cards.js"></script>
     <script src="js/saveManager.js"></script>
+    <script src="js/localization.js"></script>
+
     <script src="js/game.js"></script>
     <script src="js/visualEffects.js"></script> <!-- <<--- НОВЫЙ ФАЙЛ -->
     <script src="js/ui.js"></script>
     <script src="js/debug.js"></script>
     <script>
         // Initial load
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            await L.init(); // Ждем инициализации локализации
             Game.init(); // Инициализация игры
             UI.init();   // Инициализация UI
             Debug.init();

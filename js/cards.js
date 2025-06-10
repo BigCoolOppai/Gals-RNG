@@ -3,287 +3,286 @@
 window.RARITIES_DATA = [
     {
         id: "blackhole",
-        name: "Сверхмассивная",
+        nameKey: "cards.blackhole.name",
         probabilityBase: 1/9876543, 
-        color: "#0d47a1", 
         color: "#E65100", // Orange 900 - глубокий, огненный оранжевый
         glowColor: "#ffca28", // Amber 400 - яркое желто-оранжевое свечение
         currencyOnDuplicate: 987654,
         card: {
             name: "FY-3741 alpha", 
             image: "img/cardBlackHole.png",
-            description: "Ты нашёл одно из редчайших существ во вселенной. Оу, и кажется, она занимается чем-то интересным~~"
+            descriptionKey: "cards.blackhole.description"
         }
     },
     {
         id: "berserk",
-        name: "Яростная",
+        nameKey: "cards.berserk.name",
         probabilityBase: 1/30000, 
         color: "#c62828", // Red 800 - глубокий красный
         glowColor: "#ff8a80", // Red A100 - огненно-розовое свечение 
         cssClass: "rarity-berserk",
         currencyOnDuplicate: 3000,
         card: {
-            name: "Стаг", 
+            name: "Stug", 
             image: "img/cardBerserker.png",
-            description: "Как видишь, она пережила многое в своей жизни. Она была заклеймена печатью Жертвы. Теперь её ярости нет предела... (а еще у неё есть крутой меч и броня)"
+            descriptionKey: "cards.berserk.description"
         }
     },
     {
         id: "bee",
-        name: "Жужжащая", 
+        nameKey: "cards.bee.name", 
         probabilityBase: 1/15000, 
         color: "#ffb300", // Amber 700 - медовый/золотой
         glowColor: "#ffd54f", // Amber 300 - светлое золотое свечение
         cssClass: "rarity-bee",
         currencyOnDuplicate: 1500,
         card: {
-            name: "Королева Пчел", 
+            name: "Queen Bee", 
             image: "img/cardQueenBee.png",
-            description: "Это существо явно недовольно тем что ты вторгся к нему в улей. Лучше беги."
+            descriptionKey: "cards.bee.description"
         }
     },
     {
         id: "russian",
-        name: "Родная",
+        nameKey: "cards.russian.name",
         probabilityBase: 1/10000, 
         color: "#B71C1C", // Red 900 - насыщенный клюквенный
         glowColor: "#f5f5f5", // Grey 100 - почти белое свечение
         cssClass: "rarity-russian",
         currencyOnDuplicate: 1000,
         card: {
-            name: "Клюква Медведева", 
+            name: "Klyukva Medvedeva", 
             image: "img/cardRussian.png",
-            description: "Знаешь, ~ик~, я ведь очень люблю свою страну!Просто, дайте, ~ик~, я спать... "
+            descriptionKey: "cards.russian.description"
         }
     },
  // --- НОВАЯ РЕДКОСТЬ: MOTIVATION (Вергилий) ---
     {
         id: "motivation",
-        name: "Мотивация", // Или "Искатель Силы", "Путь Чести"
+        nameKey: "cards.motivation.name",
         probabilityBase: 1/2111, // Пример
         color: "#0d47a1", // Глубокий синий (Blue 900)
         glowColor: "#64b5f6", // Яркий голубой для свечения (Blue 300)
         cssClass: "rarity-motivation",
         currencyOnDuplicate: 211,
         card: {
-            name: "Альфа и Омега", // Имя карты, можно конкретизировать
+            name: "Alpha and Omega", // Имя карты, можно конкретизировать
             image: "img/cardMotivation.png",
-            description: "Сила. Мотивация. СИЛА. Эти слова олицетворяют эту девушку, которая искусно владеет своей катаной и не теряет концентрации. (К слову её любимое блюдо - Berry Delight)"
+            descriptionKey: "cards.motivation.description"
         }
     },
     // --- НОВАЯ РЕДКОСТЬ: SMOKINSEXYSTYLE (Данте Ж) ---
     {
         id: "smokinsexystyle", // или sss
-        name: "S.S.S.", // Или "Демонический Шик", "Багровый Вихрь"
+        nameKey: "cards.smokinsexystyle.name",
         probabilityBase: 1/1999, // Пример
         color: "#b71c1c", // Глубокий красный (Red 900)
         glowColor: "#ef9a9a", // Светло-красный/розовый для свечения (Red 200)
         cssClass: "rarity-smokinsexystyle", // или rarity-sss
         currencyOnDuplicate: 199,
         card: {
-            name: "Получеловек",
+            name: "Subhuman",
             image: "img/cardSmokinSexyStyle.png",
-            description: "Время зажечь! Эта вечеринка становится всё безумнее! - именно эти слова произнесла эта леди после ухода в неизвестном направлении."
+            descriptionKey: "cards.smokinsexystyle.description"
         }
     },
     
     // --- НОВАЯ РЕДКОСТЬ: COSMIC (Темная космическая сущность) ---
     {
         id: "cosmic",
-        name: "Темный космос", // Или "Космическая Бездна", "Тёмная Эгида"
+        nameKey: "cards.cosmic.name",
         probabilityBase: 1/1618, // Пример
         color: "#311b92", // Темный индиго/фиолетовый (Indigo 900)
         glowColor: "#7e57c2", // Приглушенный фиолетовый для свечения (Deep Purple 400)
         cssClass: "rarity-cosmic",
         currencyOnDuplicate: 161,
         card: {
-            name: "Звёздная эльфийка",
+            name: "Star Elf",
             image: "img/cardCosmic.png",
-            description: "Из пустоты, где гаснут звёзды, она взирает на хрупкость миров. Её голод вечен, а взгляд направлен в бездну. Лучше бы ты не попадался ей на глаза лишний раз."
+            descriptionKey: "cards.cosmic.description"
         }
     },
     // --- НОВАЯ РЕДКОСТЬ: SPACE (Светлая космическая сущность) ---
     {
         id: "space",
-        name: "Космическая", // Или "Звёздный Шёлк", "Свет Небес"
+        nameKey: "cards.space.name",
         probabilityBase: 1/1042, // Пример
         color: "#0097a7", // Яркий циан/бирюза (Cyan 700)
         glowColor: "#80deea", // Очень светлый циан/бирюза (Cyan 200)
         cssClass: "rarity-space",
         currencyOnDuplicate: 142,
         card: {
-            name: "Ткачиха Туманностей",
+            name: "Nebula Weaver",
             image: "img/cardSpace.png",
-            description: "Она плетёт узоры из звёздной пыли, освещая путь заблудшим душам в бесконечности. Ткачиха доброжелательна ко всем посетителям её мрачного места обитания."
+            descriptionKey: "cards.space.description"
         }
     },
     {
         id: "timestop", // Дио
-        name: "ZA WARUDO", // Или "Королева Мира"
+        nameKey: "cards.timestop.name",
         probabilityBase: 1/1024, // или ваш шанс
         color: "#FBC02D",
         glowColor: "#FFF59D",
         cssClass: "rarity-timestop",
         currencyOnDuplicate: 124, // например
         card: {
-            name: "Д.И.О.Н.А", // Ваше имя
+            name: "D.I.O.N.A.", // Ваше имя
             image: "img/cardTimestop.png", // Ваш путь
-            description: "Хо, ты приближаешься ко мне? Вместо того чтобы бежать ты идёшь прямо ко мне?"
+            descriptionKey: "cards.timestop.description"
         }
     },
     {
         id: "jackpot", // Хакари
-        name: "Джекпот", // Или "Королева Азарта"
+        nameKey: "cards.jackpot.name",
         probabilityBase: 1/777,
         color: "#ffb300",
         glowColor: "#ffe54c",
         cssClass: "rarity-jackpot",
         currencyOnDuplicate: 77, // например
         card: {
-            name: "Хакария", // Ваше имя
+            name: "Hakaria", // Ваше имя
             image: "img/cardJackpot.png", // Ваш путь
-            description: "Вы верите в удачу? Вы знали что 99.9% игроков останавливаются перед выигрышем? Время депать! TUCA DONKA!"
+            descriptionKey: "cards.jackpot.description"
         }
     },
     {
         id: "devil", // Макима
-        name: "Дьявольская", // Или "Повелительница Контроля"
+        nameKey: "cards.devil.name",
         probabilityBase: 1/666,
         color: "#a01c1c",
         glowColor: "#d73a3a",
         cssClass: "rarity-devil",
         currencyOnDuplicate: 66, // например
         card: {
-            name: "Макима, Демон Контроля", // Ваше имя
+            name: "Makima, Demon of Control", // Ваше имя
             image: "img/cardDevil.png", // Ваш путь
-            description: "Все под контролем. По крайней мере у неё. Макима иди на х%№!"
+            descriptionKey: "cards.devil.description"
         }
     },
     {
         id: "error",
-        name: "ERROR",
+        nameKey: "cards.error.name",
         probabilityBase: 1/404,
         color: "#ff3d00",
         glowColor: "#ff6e40",
         cssClass: "rarity-error",
         currencyOnDuplicate: 44,
         card: {
-            name: "ОШИ_Б-БКА_DATA",
+            name: "ER-RR_R_DATA",
             image: "img/cardError.png",
-            description: "Мало кто знает кто или что это. Известно лишь то, что это злостное порождение цифровой реальности..."
+            descriptionKey: "cards.error.description"
         }
     },
     {
         id: "uranium",
-        name: "Урановый",
+        nameKey: "cards.uranium.name",
         probabilityBase: 1/238,
         color: "#76ff03",
         glowColor: "#b0ff57",
         cssClass: "rarity-uranium",
         currencyOnDuplicate: 30,
         card: {
-            name: "Ураночка",
+            name: "Uranium-chan",
             image: "img/cardUranium.png",
-            description: "Ураночка встречается только в самых индустриальных районах, говорят люди встретившие её, светились от счастья."
+            descriptionKey: "cards.uranium.description"
         }
     },
     {
         id: "unbound",
-        name: "Неприкаянный",
+        nameKey: "cards.unbound.name",
         probabilityBase: 1/64,
         color: "#a958dd",
         glowColor: "#c386ed",
         cssClass: "rarity-unbound",
         currencyOnDuplicate: 20,
         card: {
-            name: "Ханма",
+            name: "Hanma",
             image: "img/cardUnbound.png",
-            description: "Эта невероятно сильная женщина всегда сбегает из тюрьмы! Кстати, что-то у неё знакомое имя..."
+            descriptionKey: "cards.unbound.description"
         }
     },
     {
         id: "mythic",
-        name: "Мифический",
+        nameKey: "cards.mythic.name",
         probabilityBase: 1/32,
         color: "#f44336",
         glowColor: "#ff5252",
         cssClass: "rarity-mythic",
         currencyOnDuplicate: 15,
         card: {
-            name: "Кармилла",
+            name: "Carmilla",
             image: "img/cardMythic.png",
-            description: "Кармилла - древний и могущественный дампир, что питается кровью несчастных попавших ей на пути. К слову пить она может и другие телесные жидкости..."
+            descriptionKey: "cards.mythic.description"
         }
     },
     {
         id: "legendary",
-        name: "Легендарный",
+        nameKey: "cards.legendary.name",
         probabilityBase: 1/16,
         color: "#ff9800",
         glowColor: "#ffeb3b",
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 10,
         card: {
-            name: "Миса",
+            name: "Misa",
             image: "img/cardLegendary.png",
-            description: "Миса - вечная тусовщица. Быть приглашённым на её вечеринку - большая честь, повезло тебе."
+            descriptionKey: "cards.legendary.description"
         }
     },
     {
         id: "epic",
-        name: "Эпический",
+        nameKey: "cards.epic.name",
         probabilityBase: 1/8,
         color: "#9c27b0",
         glowColor: "#ba68c8",
         cssClass: "rarity-epic",
         currencyOnDuplicate: 7,
         card: {
-            name: "Гаэль",
+            name: "Gael",
             image: "img/cardEpic.png",
-            description: "Гаэль не застать на улице просто так, она скорее будет бегать стометровку или тренировать мышцы."
+            descriptionKey: "cards.epic.description"
         }
     },
     {
         id: "rare",
-        name: "Редкий",
+        nameKey: "cards.rare.name",
         probabilityBase: 1/4,
         color: "#2196f3",
         glowColor: "#64b5f6",
         cssClass: "rarity-rare",
         currencyOnDuplicate: 5,
         card: {
-            name: "Мила",
+            name: "Mila",
             image: "img/cardRare.png",
-            description: "Мила редко выходит из дома из-за своей слепоты, тебе повезло её встретить!"
+            descriptionKey: "cards.rare.description"
         }
     },
     {
         id: "common",
-        name: "Обычный",
+        nameKey: "cards.common.name",
         probabilityBase: 1/2, // Шанс на обычную, если более редкие не выпали
         color: "#9e9e9e",
         glowColor: "#bdbdbd",
         cssClass: "rarity-common",
         currencyOnDuplicate: 2, // Обычные дубликаты теперь дают немного
         card: {
-            name: "Ева",
+            name: "Eve",
             image: "img/cardCommon.png",
-            description: "Обычная Ева. Её все любят, но она слишком базовая что-ли..."
+            descriptionKey: "cards.common.description"
         }
     },
     { // Новая "мусорная" редкость - ГАРАНТИРОВАНА, если ничего другое не выпало
         id: "garbage",
-        name: "Хлам", // Или "Мусор", "Утиль"
+        nameKey: "cards.garbage.name",
         probabilityBase: 1.0, // Эта вероятность будет использоваться только если ВСЕ предыдущие не сработали
         color: "#795548", // Коричневатый, как мусор
         glowColor: "#8d6e63",
         cssClass: "rarity-garbage",
         currencyOnDuplicate: 0, // Мусорные дубликаты ничего не дают
         card: {
-            name: "Мусорный идол", // Или что-то подобное
+            name: "Garbage Idol", // Или что-то подобное
             image: "img/cardGarbage.png", // Убедитесь, что создали это изображение
-            description: "Она никому не нужна... может хоть ты не выбросишь её?"
+            descriptionKey: "cards.garbage.description"
         }
     }
 ];
@@ -293,19 +292,19 @@ window.RARITIES_DATA = [
 
 const SHOP_DATA = {
     boosts: [
-        { id: "boost_small", name: "Малый Буст Удачи", description: "+0.1 к удаче на 30 секунд.", cost: 75, durationSeconds: 30, luckBonus: 0.1, type: "luck_boost" },
-        { id: "boost_medium", name: "Средний Буст Удачи", description: "+0.25 к удаче на 2 минуты.", cost: 250, durationSeconds: 120, luckBonus: 0.25, type: "luck_boost" },
-        { id: "boost_large", name: "Большой Буст Удачи", description: "+0.5 к удаче на 5 минут.", cost: 600, durationSeconds: 300, luckBonus: 0.5, type: "luck_boost" },
-        { id: "boost_titanic", name: "Титанический Буст Удачи", description: "+1.0 к удаче на 10 минут.", cost: 1500, durationSeconds: 600, luckBonus: 1.0, type: "luck_boost" },
+        { id: "boost_small", nameKey: "shop.boosts.boost_small.name", descriptionKey: "shop.boosts.boost_small.description", cost: 75, durationSeconds: 30, luckBonus: 0.1, type: "luck_boost" },
+        { id: "boost_medium", nameKey: "shop.boosts.boost_medium.name", descriptionKey: "shop.boosts.boost_medium.description", cost: 250, durationSeconds: 120, luckBonus: 0.25, type: "luck_boost" },
+        { id: "boost_large", nameKey: "shop.boosts.boost_large.name", descriptionKey: "shop.boosts.boost_large.description", cost: 600, durationSeconds: 300, luckBonus: 0.5, type: "luck_boost" },
+        { id: "boost_titanic", nameKey: "shop.boosts.boost_titanic.name", descriptionKey: "shop.boosts.boost_titanic.description", cost: 1500, durationSeconds: 600, luckBonus: 1.0, type: "luck_boost" },
     ],
     equipment: [
-        { id: "equip_talisman", name: "Талисман Новичка", description: "+0.05 к удаче (постоянно).", cost: 300, luckBonus: 0.05, type: "equipment" },
-        { id: "equip_ring", name: "Кольцо Искателя", description: "+0.1 к удаче (постоянно).", cost: 750, luckBonus: 0.1, type: "equipment" },
-        { id: "equip_artifact", name: "Артефакт Провидца", description: "+0.15 к удаче (постоянно).", cost: 1800, luckBonus: 0.15, type: "equipment" },
+        { id: "equip_talisman", nameKey: "shop.equipment.equip_talisman.name", descriptionKey: "shop.equipment.equip_talisman.description", cost: 300, luckBonus: 0.05, type: "equipment" },
+        { id: "equip_ring", nameKey: "shop.equipment.equip_ring.name", descriptionKey: "shop.equipment.equip_ring.description", cost: 750, luckBonus: 0.1, type: "equipment" },
+        { id: "equip_artifact", nameKey: "shop.equipment.equip_artifact.name", descriptionKey: "shop.equipment.equip_artifact.description", cost: 1800, luckBonus: 0.15, type: "equipment" },
         {
             id: "equip_golden_ticket",
-            name: "Золотой Билет",
-            description: "Увеличивает осколки за дубликаты на 10% (округляется вверх).",
+            nameKey: "shop.equipment.equip_golden_ticket.name",
+            descriptionKey: "shop.equipment.equip_golden_ticket.description",
             cost: 550, // Стоимость можно будет настроить
             type: "equipment",
             // luckBonus здесь нет, так как эффект другой
@@ -313,8 +312,8 @@ const SHOP_DATA = {
         },
         {
             id: "equip_hand_of_misfortune", // Или cloak_of_misfortune
-            name: "Длань Неудачника",
-            description: "За каждый Garbage, Common или Rare подряд +0.05 к удаче. Сбрасывается при выпадении чего-то лучше.",
+            nameKey: "shop.equipment.equip_hand_of_misfortune.name",
+            descriptionKey: "shop.equipment.equip_hand_of_misfortune.description",
             cost: 1500, // Стоимость можно будет настроить
             type: "equipment",
             // luckBonus здесь нет, так как бонус динамический
@@ -327,10 +326,12 @@ const SHOP_DATA = {
         }
     ],
     upgrades: [
-        { id: "upgrade_fast_roll", name: "Быстрый Ролл", description: "Уменьшает время анимации ролла до ~0.75 сек.", cost: 1000, type: "permanent_upgrade", targetProperty: "fastRoll" },
-        { id: "upgrade_multi_roll_x5", name: "Мульти-Ролл x5", description: "Разблокирует возможность делать 5 роллов одновременно.", cost: 5000, type: "permanent_upgrade", targetProperty: "multiRollX5" },
+        { id: "upgrade_fast_roll", nameKey: "shop.upgrades.upgrade_fast_roll.name", descriptionKey: "shop.upgrades.upgrade_fast_roll.description", cost: 1000, type: "permanent_upgrade", targetProperty: "fastRoll" },
+        { id: "upgrade_multi_roll_x5", nameKey: "shop.upgrades.upgrade_multi_roll_x5.name", descriptionKey: "shop.upgrades.upgrade_multi_roll_x5.description", cost: 5000, type: "permanent_upgrade", targetProperty: "multiRollX5" },
     ]
 };
+
+
 
 // Константы для игры
 const MAX_EQUIPPED_ITEMS = 3;
