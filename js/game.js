@@ -86,26 +86,31 @@ const Game = (() => {
     }
 
     // --- Удача ---
-    function calculateCurrentLuck() { // Эта функция теперь для отображения, getEffectiveLuck - для расчетов
-        let luckFromCore = (playerData.luckCoreLevel || 0) * 0.01;
+    function calculateCurrentLuck() {
+        const luckFromCore = (playerData.luckCoreLevel || 0) * 0.01;
         let currentDisplayLuck = BASE_LUCK + luckFromCore;
-    
+        
+        // ИСПРАВЛЕНИЕ: Объявление переменной вынесено сюда, в начало функции.
+        let misfortuneBonus = 0;
+
         playerData.equippedItems.forEach(item => {
-            if (item.luckBonus) { // Стандартные бонусы к удаче
+            if (item.luckBonus) {
                 currentDisplayLuck += item.luckBonus;
             }
-            // Для "Длани Неудачника" бонус уже учтен в getEffectiveLuck, но для дисплея можно добавить
             if (item.effect && item.effect.type === "cumulative_luck_on_low_rolls") {
-                if (playerData.misfortuneStacks === undefined) playerData.misfortuneStacks = 0;
-                misfortuneBonus = playerData.misfortuneStacks * item.effect.bonusPerStack;
-                if (item.effect.maxStacks) { // Ограничение максимального бонуса от стаков
-                    misfortuneBonus = Math.min(misfortuneBonus, item.effect.maxStacks * item.effect.bonusPerStack);
+                const currentStacks = playerData.misfortuneStacks || 0;
+                let bonusFromStacks = currentStacks * item.effect.bonusPerStack;
+                if (item.effect.maxStacks) {
+                    bonusFromStacks = Math.min(bonusFromStacks, item.effect.maxStacks * item.effect.bonusPerStack);
                 }
+                // Присваиваем значение, а не переобъявляем
+                misfortuneBonus = bonusFromStacks; 
             }
         });
+
+        // Теперь переменная misfortuneBonus здесь видна
         currentDisplayLuck += misfortuneBonus;
-    
-        // Добавляем удачу от активных бустов (самый сильный)
+        
         let maxBoostBonus = 0;
         playerData.activeBoosts.forEach(boost => {
             if (boost.type === "luck_boost" && boost.luckBonus > maxBoostBonus) {
@@ -114,10 +119,6 @@ const Game = (() => {
         });
         currentDisplayLuck += maxBoostBonus;
         
-        // Добавляем бонус от Лаки Ролла, ЕСЛИ ОН АКТИВЕН В ЭТОТ МОМЕНТ
-        // (Это сложно показать в общем отображении удачи, т.к. он разовый. 
-        // Лучше не включать его в calculateCurrentLuck, а показывать отдельно при срабатывании)
-    
         return parseFloat(currentDisplayLuck.toFixed(2));
     }
 

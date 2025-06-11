@@ -159,6 +159,7 @@ const UI = (() => {
                 }
             });
         }
+        
     }
 
     function getTextColorForBg(hexColor) {
@@ -866,8 +867,9 @@ const UI = (() => {
         equippedItemsDisplay.innerHTML = equippedItems.length === 0 
             ? `<p class="text-muted small">${L.get('ui.noEquippedItems')}</p>`
             : equippedItems.map(item => {
-                // ИСПРАВЛЕНИЕ: Используем L.get(item.nameKey) вместо item.name
-                const itemName = L.get(item.nameKey); 
+                // ЗАЩИТА: Проверяем, есть ли у предмета nameKey.
+                // Если нет (из-за старого сейва), пытаемся использовать name или ставим заглушку.
+                const itemName = item.nameKey ? L.get(item.nameKey) : (item.name || 'Unknown Item'); 
                 
                 const shopItem = SHOP_DATA.equipment.find(shopItem => shopItem.id === item.id);
                 let effectText = L.get('debug.effect.active');
@@ -884,7 +886,6 @@ const UI = (() => {
         equippedItemsDisplay.querySelectorAll('.btn-remove-equip').forEach(btn => {
             btn.addEventListener('click', () => {
                 Game.unequipItem(btn.dataset.itemId);
-                // Вместо нескольких вызовов - один
                 UI.updateAll(Game.getPlayerData());
             });
         });

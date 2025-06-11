@@ -25,14 +25,19 @@ const L = (() => {
 
     // Главная функция для получения текста по ключуD
     function get(key) {
-        // Ключ может быть вложенным, например 'shop.boosts.boost_small.name'
+        // ЗАЩИТА: Если ключ не является строкой, возвращаем его как есть.
+        if (typeof key !== 'string' || !key) {
+            console.warn(`Translation key is not a valid string:`, key);
+            return key || ''; // Возвращаем пустую строку, если key это null или undefined
+        }
+
         const keys = key.split('.');
         let result = window.locales ? window.locales[currentLanguage] : undefined;
         for (const k of keys) {
             result = result ? result[k] : undefined;
             if (result === undefined) {
                 console.warn(`Translation key not found: ${key}`);
-                return key; // Возвращаем сам ключ, если перевод не найден
+                return key;
             }
         }
         return result;
