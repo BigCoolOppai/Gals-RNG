@@ -132,6 +132,8 @@ const UI = (() => {
         // if (playerDataForInit && playerDataForInit.stats) { 
         //     renderStats(playerDataForInit);
         // }
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
     }
 
     function setupEventListeners() {
@@ -256,11 +258,25 @@ const UI = (() => {
 }
 
     // --- Управление Автороллом ---
-    function toggleAutoroll() {
+     function toggleAutoroll() {
+        isAutorolling = !isAutorolling;
+        autorollButton.textContent = L.get(isAutorolling ? 'ui.stopAutoroll' : 'ui.autoroll');
+        autorollButton.classList.toggle('btn-success', !isAutorolling);
+        autorollButton.classList.toggle('btn-danger', isAutorolling);
+        rollButton.disabled = isAutorolling;
+        multiRollButton.disabled = isAutorolling;
         if (isAutorolling) {
-            stopAutoroll();
+            console.log("Autoroll STARTED");
+            performNextAutoroll();
         } else {
-            startAutoroll();
+            clearTimeout(autorollTimer);
+            autorollTimer = null;
+            if (!isRolling) { // Разблокируем, если нет активной анимации
+                const playerData = Game.getPlayerData();
+                rollButton.disabled = false;
+                multiRollButton.disabled = !playerData.purchasedUpgrades.multiRollX5;
+            }
+            console.log("Autoroll STOPPED");
         }
     }
 
@@ -296,20 +312,10 @@ const UI = (() => {
     }
 
     function performNextAutoroll() {
-        if (!isAutorolling || isRolling) { // Не запускаем новый, если авторолл выключен или уже идет ролл
-            return;
-        }
-
-        const playerData = Game.getPlayerData(); // Получаем playerData
-
-        // Роллы бесплатные, так что проверка на валюту не нужна
-        if (playerData && playerData.purchasedUpgrades.multiRollX5) { // Проверяем playerData
-            console.log("Autoroll: Performing Multi-Roll");
-            handleMultiRollButtonClick(true); // true = вызвано автороллом
-        } else {
-            console.log("Autoroll: Performing Single Roll");
-            handleRollButtonClick(true); // true = вызвано автороллом
-        }
+        if (!isAutorolling || isRolling) return;
+        const playerData = Game.getPlayerData();
+        const handler = playerData.purchasedUpgrades.multiRollX5 ? handleMultiRollButtonClick : handleRollButtonClick;
+        handler(true); // true = вызвано автороллом
     }
 
     // Создаем обертки для ручных вызовов
@@ -327,7 +333,7 @@ const UI = (() => {
         updateCurrencyDisplay(playerData.currency);
         updateLuckDisplay();
         updateActiveBoostsDisplay();
-        renderInventory(playerData.inventory); // Обновляем инвентарь (включая счетчик)
+        renderInventory(playerData); // Обновляем инвентарь (включая счетчик)
         renderShop(); // Обновляем магазин (состояние кнопок)
         // renderSettings() удален
         updateEquippedItemsDisplay(playerData.equippedItems);
@@ -350,78 +356,49 @@ const UI = (() => {
 
     // js/ui.js
     function updateLuckyRollDisplay(current, threshold) {
-        if (luckyRollDisplay) {
-            if (threshold > 0 && current < threshold) { // Показываем, только если есть прогресс и порог задан
-                luckyRollDisplay.textContent = `${L.get('ui.luckyRollCounter')}: ${threshold - current}`;
-                luckyRollDisplay.style.opacity = '1';
-            } else {
-                luckyRollDisplay.textContent = L.get('ui.luckyRollNext');
-                // Можно сделать, чтобы текст "Lucky Roll следующий!" показывался только когда current === 0 после сброса
-                if (current === 0 && threshold > 0) {
-                    // Уже сработало или только что сбросилось, можно так и написать
-                } else {
-                    luckyRollDisplay.textContent = '';
-                }
-                luckyRollDisplay.style.opacity = current === 0 ? '1' : '0'; // Показываем ярко, если следующий - лаки
-            }
+        if (!luckyRollDisplay) return;
+        if (threshold > 0 && current < threshold) {
+            luckyRollDisplay.textContent = `${L.get('ui.luckyRollCounter')}: ${threshold - current}`;
+            luckyRollDisplay.style.opacity = '1';
+        } else if (threshold > 0 && current >= threshold) {
+            luckyRollDisplay.textContent = L.get('ui.luckyRollNext');
+            luckyRollDisplay.style.opacity = '1';
+        } else {
+            luckyRollDisplay.textContent = '';
+            luckyRollDisplay.style.opacity = '0';
         }
     }
 
     // Универсальная функция для отображения уведомлений
-    function showNotification(message, type = 'info', duration = 4000) { // type: 'info', 'success', 'warning', 'danger'
-        // Пытаемся найти специальный контейнер для уведомлений, если нет - используем rollResultContainer
-        let notificationContainer = document.getElementById('notificationsContainer'); 
-        if (!notificationContainer) {
-            // Если нет спец. контейнера, можно создать его динамически или использовать существующий
-            // Для простоты пока будем использовать/создавать его в body для fixed позиционирования
-            notificationContainer = document.createElement('div');
-            notificationContainer.id = 'notificationsContainer';
-            notificationContainer.style.position = 'fixed';
-            notificationContainer.style.top = '20px';
-            notificationContainer.style.right = '20px';
-            notificationContainer.style.zIndex = '1060'; // Выше большинства элементов Bootstrap
-            notificationContainer.style.width = 'auto';
-            notificationContainer.style.maxWidth = '350px';
-            document.body.appendChild(notificationContainer);
+    function showNotification(message, type = 'info', duration = 4000) {
+        let container = document.getElementById('notificationsContainer'); 
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'notificationsContainer';
+            Object.assign(container.style, { position: 'fixed', top: '20px', right: '20px', zIndex: '1060', width: 'auto', maxWidth: '350px' });
+            document.body.appendChild(container);
         }
-
         const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show mb-2`; // Добавил mb-2 для отступа между уведомлениями
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show mb-2`;
         alertDiv.setAttribute('role', 'alert');
-        alertDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        
-        notificationContainer.appendChild(alertDiv); // Добавляем новое уведомление
-
-        // Автоматически скрыть через 'duration' миллисекунд
-        setTimeout(() => {
-            const bsAlert = bootstrap.Alert.getOrCreateInstance(alertDiv);
-            if (bsAlert) {
-                bsAlert.close();
-            } else if (alertDiv.parentElement) { // Если Bootstrap не инициализировал, удаляем вручную
-                 alertDiv.remove();
-            }
-            // Если контейнер стал пустым после удаления, его тоже можно удалить (опционально)
-            // if (notificationContainer.children.length === 0 && notificationContainer.id === 'notificationsContainerDynamic') {
-            //     notificationContainer.remove();
-            // }
-        }, duration);
+        alertDiv.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+        container.appendChild(alertDiv);
+        setTimeout(() => bootstrap.Alert.getOrCreateInstance(alertDiv)?.close(), duration);
     }
 
     function updateActiveBoostsDisplay() {
         if (!activeBoostsDisplay) return;
         const playerData = Game.getPlayerData();
-        activeBoostsDisplay.innerHTML = '';
         if (playerData.activeBoosts.length > 0) {
             const boostsHTML = playerData.activeBoosts.map(boost => {
-                const timeLeft = Math.max(0, Math.round((boost.endTime - new Date().getTime()) / 1000));
+                const timeLeft = Math.max(0, Math.round((boost.endTime - Date.now()) / 1000));
                 const minutes = Math.floor(timeLeft / 60);
                 const seconds = timeLeft % 60;
-                return `<span class="badge bg-success me-1">${boost.name}: ${minutes}м ${seconds}с</span>`;
+                return `<span class="badge bg-success me-1">${boost.name}: ${minutes}m ${seconds}s</span>`;
             }).join('');
-            activeBoostsDisplay.innerHTML = `Активные бусты: ${boostsHTML}`;
+            activeBoostsDisplay.innerHTML = `${L.get('ui.activeBoosts')}: ${boostsHTML}`;
+        } else {
+            activeBoostsDisplay.innerHTML = '';
         }
     }
     
@@ -507,122 +484,91 @@ const UI = (() => {
     function getRandomRarity() { const r = getRandomRarityFull(); return { id: r.id, name: L.get(r.nameKey), cssClass: r.cssClass }; }
     function getRandomRarityNear(targetRarity) { const r = getRandomRarityNearFull(targetRarity); return { id: r.id, name: L.get(r.nameKey), cssClass: r.cssClass }; }
 
+    function setButtonsDisabled(disabled, isCalledByAutoroll) {
+        rollButton.disabled = disabled;
+        multiRollButton.disabled = disabled;
+        if (!isCalledByAutoroll && !isAutorolling) {
+            autorollButton.disabled = disabled;
+        }
+    }
 
-    
+    function onRollsCompleted(multiRollResults, isCalledByAutoroll) {
+        isRolling = false;
+        if (!isAutorolling) {
+            setButtonsDisabled(false, false);
+            const playerData = Game.getPlayerData();
+            multiRollButton.disabled = !playerData.purchasedUpgrades.multiRollX5;
+        }
+
+        if (multiRollResults.length > 0) {
+            displayMultiRollSummary(multiRollResults);
+        }
+        
+        updateAll(Game.getPlayerData());
+
+        if (isAutorolling) {
+            const delay = multiRollResults.length > 0 ? 700 : 500;
+            autorollTimer = setTimeout(performNextAutoroll, delay);
+        }
+    }
     // --- Обработчики кнопок Ролла ---
     function handleRollButtonClick(isCalledByAutoroll = false) {
         if (isRolling) return;
         isRolling = true;
-        // Блокируем ручные кнопки
-        rollButton.disabled = true;
-       multiRollButton.disabled = true;
+        setButtonsDisabled(true, isCalledByAutoroll);
         
-        // Блокируем кнопку авторолла, только если это ручной запуск И авторолл НЕ активен
-        if (!isCalledByAutoroll && !isAutorolling) { 
-        autorollButton.disabled = true;
-        }
-    // Если авторолл уже активен, кнопка "Остановить Авторолл" должна оставаться активной
         rollResultContainer.innerHTML = '';
-        if (activeSingleRollClearCallback) activeSingleRollClearCallback();
-    
+        activeSingleRollClearCallback?.();
+        
         rollAnimationContainer.querySelector('.single-roll-slot-wrapper').classList.remove('d-none');
         multiRollSlotsContainer.classList.add('d-none');
-        multiRollSlotsContainer.innerHTML = '';
-    
-            const rollResult = Game.performRoll(); 
 
-            activeSingleRollClearCallback = startRollAnimation(rollSlot, rollResult.rarity, () => {
+        const rollResult = Game.performRoll(); 
+        activeSingleRollClearCallback = startRollAnimation(rollSlot, rollResult.rarity, () => {
             activeSingleRollClearCallback = null; 
             displayRollResult(rollResult);
-            isRolling = false;
-        
-            const latestPlayerData = Game.getPlayerData();
-            // Логика разблокировки кнопок
-            if (!isAutorolling) { // Если авторолл НЕ активен (был выключен или не запускался)
-                rollButton.disabled = false;
-                if (latestPlayerData.purchasedUpgrades.multiRollX5) multiRollButton.disabled = false;
-                autorollButton.disabled = false; // Разблокируем кнопку "Авторолл"
-            } else {
-                // Если авторолл АКТИВЕН, ручные кнопки остаются заблокированными.
-                // Кнопка "Остановить Авторолл" уже должна быть активна (управляется start/stopAutoroll).
-            }
-    
-    
-            // ЗАМЕНЯЕМ БЛОК ОБНОВЛЕНИЙ НА ОДИН ВЫЗОВ:
-            UI.updateAll(latestPlayerData); // Это обновит валюту, инвентарь, lucky roll И СТАТИСТИКУ
-    
-            if (isAutorolling && isCalledByAutoroll) {
-                // Если это был авторолл, планируем следующий
-                const autorollDelay = 500; // Задержка перед следующим автороллом (мс)
-                autorollTimer = setTimeout(performNextAutoroll, autorollDelay);
-            }
+            onRollsCompleted([], isCalledByAutoroll);
         });
     }
 
     // Замените вашу существующую handleMultiRollButtonClick на эту:
-function handleMultiRollButtonClick(isCalledByAutoroll = false) {
-    if (isRolling) return;
-    isRolling = true;
-    // Блокируем все кнопки ролла
-    rollButton.disabled = true;
-    multiRollButton.disabled = true;
-    // Блокируем кнопку авторолла, только если это ручной запуск И авторолл НЕ активен
-    if (!isCalledByAutoroll && !isAutorolling) {
-        autorollButton.disabled = true;
-    }
+     function handleMultiRollButtonClick(isCalledByAutoroll = false) {
+        if (isRolling) return;
+        isRolling = true;
+        setButtonsDisabled(true, isCalledByAutoroll);
 
-    rollResultContainer.innerHTML = '';
-    activeMultiRollClearCallbacks.forEach(cb => cb());
-    activeMultiRollClearCallbacks = [];
+        rollResultContainer.innerHTML = '';
+        activeMultiRollClearCallbacks.forEach(cb => cb());
+        activeMultiRollClearCallbacks = [];
 
-    rollAnimationContainer.querySelector('.single-roll-slot-wrapper').classList.add('d-none');
-    multiRollSlotsContainer.classList.remove('d-none');
-    multiRollSlotsContainer.innerHTML = '';
+        multiRollSlotsContainer.classList.remove('d-none');
+        multiRollSlotsContainer.innerHTML = '';
+        rollAnimationContainer.querySelector('.single-roll-slot-wrapper').classList.add('d-none');
+        
+        const numRolls = 5;
+        let completedAnimations = 0;
+        const allRollResults = [];
 
-    const numRolls = 5;
-    let completedAnimations = 0;
-    const allRollResults = [];
+        for (let i = 0; i < numRolls; i++) {
+            const slotWrapper = document.createElement('div');
+            slotWrapper.className = 'multi-roll-slot-wrapper';
+            const slot = document.createElement('div');
+            slot.className = 'roll-slot';
+            slotWrapper.appendChild(slot);
+            multiRollSlotsContainer.appendChild(slotWrapper);
 
-    for (let i = 0; i < numRolls; i++) {
-        const multiSlotWrapper = document.createElement('div');
-        multiSlotWrapper.className = 'multi-roll-slot-wrapper';
-        const currentMultiInnerSlot = document.createElement('div');
-        currentMultiInnerSlot.className = 'roll-slot';
-        currentMultiInnerSlot.id = `multiRollInnerSlot-${i}`;
-        multiSlotWrapper.appendChild(currentMultiInnerSlot);
-        multiRollSlotsContainer.appendChild(multiSlotWrapper);
+            const rollResult = Game.performRoll();
+            allRollResults.push(rollResult);
 
-        const rollResult = Game.performRoll();
-        allRollResults.push(rollResult);
-
-        const clearCb = startRollAnimation(currentMultiInnerSlot, rollResult.rarity, () => {
-            completedAnimations++;
-            if (completedAnimations === numRolls) {
-                isRolling = false; // Общий флаг роллинга снимаем
-                handleAllMultiRollsCompleted(allRollResults); 
-
-                const latestPlayerData = Game.getPlayerData();
-                // Разблокируем кнопки в зависимости от состояния авторолла
-                if (!isAutorolling) { // Если авторолл НЕ активен
-                    rollButton.disabled = false;
-                    if (latestPlayerData.purchasedUpgrades.multiRollX5) multiRollButton.disabled = false;
-                    autorollButton.disabled = false; // Разблокируем кнопку "Авторолл"
-                } else {
-                    // Если авторолл АКТИВЕН, ручные кнопки остаются заблокированными.
+            const clearCb = startRollAnimation(slot, rollResult.rarity, () => {
+                completedAnimations++;
+                if (completedAnimations === numRolls) {
+                    onRollsCompleted(allRollResults, isCalledByAutoroll);
                 }
-
-                // ЗАМЕНЯЕМ БЛОК ОБНОВЛЕНИЙ НА ОДИН ВЫЗОВ:
-                UI.updateAll(latestPlayerData); // Это обновит валюту, инвентарь, lucky roll И СТАТИСТИКУ
-
-                if (isAutorolling && isCalledByAutoroll) {
-                    const autorollDelay = 700; // Чуть больше задержка для мультиролла
-                    autorollTimer = setTimeout(performNextAutoroll, autorollDelay);
-                }
-            }
-        });
-        activeMultiRollClearCallbacks.push(clearCb);
+            });
+            activeMultiRollClearCallbacks.push(clearCb);
+        }
     }
-}
 
     function handleAllMultiRollsCompleted(allRollResults) {
         const playerData = Game.getPlayerData();
@@ -671,10 +617,13 @@ function handleMultiRollButtonClick(isCalledByAutoroll = false) {
         cardElement.style.backgroundImage = `url('${rollResult.card.image}')`;
         cardElement.style.borderColor = rollResult.rarity.color;
         cardElement.style.setProperty('--rarity-glow-color', rollResult.rarity.glowColor);
-        cardElement.setAttribute('title', `Редкость: ${rollResult.rarity.name}`);
+        cardElement.setAttribute('title', `${L.get('ui.rarity')}: ${rollResult.rarity.name}`);
         const nameElement = document.createElement('h3');
         nameElement.className = 'received-card-name';
-        nameElement.textContent = `${L.get('ui.youGot')}: ${rollResult.card.name}!`;
+        
+        // ИСПРАВЛЕНИЕ 1: Используем rollResult.card.name, который уже переведен в game.js
+        nameElement.textContent = `${L.get('ui.youGot')}: ${rollResult.card.name}!`; 
+        
         if (rollResult.isNew) nameElement.innerHTML += ` <span class="badge bg-warning">${L.get('ui.isNew')}</span>`;
         cardWrapper.appendChild(cardElement);
         rollResultContainer.appendChild(cardWrapper);
@@ -687,366 +636,262 @@ function handleMultiRollButtonClick(isCalledByAutoroll = false) {
         }
     }
     
+    function displayMultiRollSummary(allRollResults) {
+        let totalCurrency = allRollResults.reduce((sum, res) => sum + res.duplicateReward, 0);
+        if (totalCurrency > 0) {
+            const summaryText = document.createElement('p');
+            summaryText.className = 'text-center mt-3';
+            summaryText.innerHTML = `${L.get('ui.totalDuplicateReward')}: <span class="currency-icon">💎</span>${totalCurrency}`;
+            rollResultContainer.appendChild(summaryText);
+        }
+
+        const multiResultsDisplay = document.createElement('div');
+        multiResultsDisplay.className = 'd-flex flex-wrap justify-content-center gap-2 mt-3';
+        allRollResults.forEach(result => {
+            const cardMini = document.createElement('div');
+            cardMini.style.textAlign = 'center';
+            const img = document.createElement('img');
+            Object.assign(img, { src: result.card.image, alt: result.card.name });
+            Object.assign(img.style, { width: '60px', aspectRatio: '1024 / 1360', border: `2px solid ${result.rarity.color}`, borderRadius: '4px' });
+            cardMini.appendChild(img);
+            const nameP = document.createElement('p');
+            nameP.textContent = result.card.name;
+            nameP.className = 'small mb-0';
+            cardMini.appendChild(nameP);
+            if (result.duplicateReward > 0) {
+                const rewardP = document.createElement('p');
+                rewardP.innerHTML = `+💎${result.duplicateReward}`;
+                rewardP.className = 'small text-warning';
+                cardMini.appendChild(rewardP);
+            }
+            multiResultsDisplay.appendChild(cardMini);
+        });
+        rollResultContainer.appendChild(multiResultsDisplay);
+    }
+    
     // --- Инвентарь с силуэтами и счетчиком ---
-    function renderInventory(playerInventoryIds) {
+    function renderInventory(playerData) {
         if (!inventoryGrid || !inventoryCounterElement) return;
         inventoryGrid.innerHTML = '';
         let openedCount = 0;
+        const totalCards = RARITIES_DATA.filter(r => r.id !== 'garbage').length;
 
-        // Отображаем в порядке от самой частой к самой редкой (визуально снизу вверх по редкости)
-        const sortedRaritiesForDisplay = [...RARITIES_DATA].reverse(); 
+        const sortedRarities = [...RARITIES_DATA].reverse(); 
+        
+        // ИСПРАВЛЕНИЕ 2: Убрал проверку if (rarityData.id === 'garbage') return;
+        // Теперь "Хлам" будет обрабатываться как обычная карта.
+        sortedRarities.forEach(rarityData => {
+            // Но мы все еще не хотим, чтобы "Хлам" был в общем счетчике коллекции.
+            // Поэтому проверка здесь, а не в начале цикла.
+            if (rarityData.id !== 'garbage') {
+                const isOpened = playerData.inventory.includes(rarityData.id);
+                if (isOpened) openedCount++;
+            }
 
-        sortedRaritiesForDisplay.forEach(rarityData => {
-            const isOpened = playerInventoryIds.includes(rarityData.id);
-            if (isOpened) openedCount++;
-
+            // Общая логика для всех карт, включая "Хлам"
+            const isOpened = playerData.inventory.includes(rarityData.id);
             const col = document.createElement('div');
             col.className = 'col';
             const cardDiv = document.createElement('div');
             cardDiv.className = 'inventory-card';
             cardDiv.dataset.rarityId = rarityData.id;
             const img = document.createElement('img');
-            img.alt = isOpened ? rarityData.card.name : "Неизвестная карта";
             img.className = 'inventory-card-image';
             const nameDiv = document.createElement('div');
             nameDiv.className = 'inventory-card-name';
 
             if (isOpened) {
-                cardDiv.classList.add(`border-${rarityData.id}`);
+                cardDiv.classList.add(`border-${rarityData.cssClass}`);
                 cardDiv.style.setProperty('--rarity-glow-color', rarityData.glowColor);
                 img.src = rarityData.card.image;
-                nameDiv.textContent = rarityData.card.name;
+                
+                // ИСПРАВЛЕНИЕ 1: Используем L.get() для имени карты
+                nameDiv.textContent = L.get(rarityData.card.nameKey);
+                
                 cardDiv.addEventListener('click', () => showCardModal(rarityData));
             } else {
+                // Не показываем "Хлам", если он не открыт
+                if (rarityData.id === 'garbage') {
+                    return; 
+                }
                 cardDiv.classList.add('locked');
-                img.src = "img/silhouette_placeholder.png"; // Используем ваш силуэт
-                nameDiv.textContent = "?????"; // Или название редкости: rarityData.name
+                img.src = "img/silhouette_placeholder.png";
+                nameDiv.textContent = "?????";
             }
             cardDiv.appendChild(img);
             cardDiv.appendChild(nameDiv);
             col.appendChild(cardDiv);
             inventoryGrid.appendChild(col);
         });
-        inventoryCounterElement.textContent = `${L.get('ui.opened')}: ${openedCount} / ${RARITIES_DATA.length}`;
+        inventoryCounterElement.textContent = `${L.get('ui.opened')}: ${openedCount} / ${totalCards}`;
     }
 
     function showCardModal(rarityData) {
         modalCardImage.src = rarityData.card.image;
-        modalCardImage.alt = rarityData.card.name;
-        modalCardName.textContent = rarityData.card.name;
+        
+        // ИСПРАВЛЕНИЕ 1: Используем L.get() для имени карты
+        modalCardName.textContent = L.get(rarityData.card.nameKey);
+        
         modalCardRarity.textContent = `${L.get('ui.rarity')}: ${L.get(rarityData.nameKey)}`;
-        if (modalCardChance) { // Если элемент есть
-            let chanceText = "";
-            if (rarityData.probabilityBase) {
-                if (rarityData.probabilityBase >= 1) { 
-                    chanceText = L.get('ui.guaranteed');
-                } else {
-                    const denominator = Math.round(1 / rarityData.probabilityBase);
-                    chanceText = `${L.get('ui.baseChance')}: 1/${denominator}`;
-                }
-            }
-            modalCardChance.textContent = chanceText;
+        modalCardRarity.style.color = rarityData.color;
+        
+        if (rarityData.probabilityBase >= 1) {
+            modalCardChance.textContent = L.get('ui.guaranteed');
+        } else {
+            modalCardChance.textContent = `${L.get('ui.baseChance')}: 1/${Math.round(1 / rarityData.probabilityBase)}`;
         }
         modalCardDescription.textContent = L.get(rarityData.card.descriptionKey);
-        modalCardRarity.style.color = rarityData.color;
-        // Удален дубликат: modalCardDescription.textContent = rarityData.card.description;
 
-        const visualEffectControls = document.getElementById('visualEffectControls');
-        visualEffectControls.innerHTML = ''; // Очищаем кнопки от предыдущей карты
-
-        const currentActiveEffectId = Game.getPlayerData().activeVisualEffectRarityId;
-        const cardHasVisualEffect = (typeof VisualEffects !== 'undefined' && VisualEffects.effects.hasOwnProperty(rarityData.id));
-
-        if (cardHasVisualEffect) {
+        visualEffectControlsContainer.innerHTML = '';
+        const cardHasEffect = VisualEffects.effects.hasOwnProperty(rarityData.id);
+        if (cardHasEffect) {
             const toggleBtn = document.createElement('button');
-            toggleBtn.id = 'toggleVisualEffectButtonActive'; // Можно оставить, если нужен для стилей/тестов
             toggleBtn.classList.add('btn', 'btn-sm');
-
-            // Начальное состояние кнопки
-            if (currentActiveEffectId === rarityData.id) {
-                toggleBtn.classList.add('btn-danger');
-                toggleBtn.textContent = L.get('ui.deactivateEffect');
-            } else {
-                toggleBtn.classList.add('btn-success');
-                toggleBtn.textContent = L.get('ui.activateEffect');
-            }
+            const isActive = Game.getPlayerData().activeVisualEffectRarityId === rarityData.id;
+            toggleBtn.textContent = L.get(isActive ? 'ui.deactivateEffect' : 'ui.activateEffect');
+            toggleBtn.classList.add(isActive ? 'btn-danger' : 'btn-success');
             
-            visualEffectControls.appendChild(toggleBtn);
-
-            // ЕДИНСТВЕННЫЙ ОБРАБОТЧИК КЛИКА
             toggleBtn.addEventListener('click', () => {
-                const isActiveNow = Game.getPlayerData().activeVisualEffectRarityId === rarityData.id;
-                
-                if (isActiveNow) {
-                    Game.clearActiveVisualEffect(); // Предполагается, что это вызовет UI.applyVisualEffect(null) из Game
+                const stillActive = Game.getPlayerData().activeVisualEffectRarityId === rarityData.id;
+                if (stillActive) {
+                    Game.clearActiveVisualEffect();
                 } else {
-                    Game.setActiveVisualEffect(rarityData.id); // Предполагается, что это вызовет UI.applyVisualEffect(rarityData.id) из Game
+                    Game.setActiveVisualEffect(rarityData.id);
                 }
-
-                // Обновляем ТОЛЬКО кнопку в текущей модалке после того, как Game отработает.
-                // Небольшая задержка, чтобы Game успел обновить playerData и вызвать UI.applyVisualEffect.
-                // В идеале, Game.setActive/clear должны возвращать Promise или принимать callback,
-                // чтобы избежать гонки с setTimeout. Но пока так:
-                setTimeout(() => {
-                    const newPlayerData = Game.getPlayerData(); // Получаем свежие данные
-                    if (newPlayerData.activeVisualEffectRarityId === rarityData.id) {
-                        toggleBtn.classList.remove('btn-success');
-                        toggleBtn.classList.add('btn-danger');
-                        toggleBtn.textContent = 'Деактивировать эффект';
-                    } else {
-                        toggleBtn.classList.remove('btn-danger');
-                        toggleBtn.classList.add('btn-success');
-                        toggleBtn.textContent = 'Активировать эффект';
-                    }
-                }, 70); // Чуть увеличим задержку на всякий случай, но это "магическое число"
+                // Закрываем модалку и открываем заново, чтобы обновить состояние кнопки
+                cardModal.hide();
+                // Небольшая задержка, чтобы анимация закрытия успела сработать
+                setTimeout(() => showCardModal(rarityData), 300);
             });
-
+            visualEffectControlsContainer.appendChild(toggleBtn);
         } else {
-            visualEffectControls.innerHTML = `<p class="text-muted small">${L.get('ui.noVisualEffect')}</p>`;
+            visualEffectControlsContainer.innerHTML = `<p class="text-muted small">${L.get('ui.noVisualEffect')}</p>`;
         }
         cardModal.show();
     }
-
-        function applyVisualEffect(rarityId) { // rarityId - это effectId для модуля VisualEffects
-        const targets = {
-            body: document.body,
-            glitchOverlay: document.getElementById('globalGlitchOverlay'),
-            audioPlayer: backgroundMusicElement
-            // Можно передать и другие общие элементы, если эффекты их используют
-        };
-        VisualEffects.apply(rarityId, targets);
+        function applyVisualEffect(rarityId, isInitialLoad = false) {
+        const targets = { body: document.body, glitchOverlay: document.getElementById('globalGlitchOverlay'), audioPlayer: backgroundMusicElement };
+        VisualEffects.apply(rarityId, targets, isInitialLoad);
     }
 
     
     
     // --- Магазин ---
     function renderShop() {
-        if (!boostShop || !equipmentShop || !upgradesShop) {
-            console.error("Shop DOM elements not found!");
-            return;
-        }
-
+        if (!boostShop || !equipmentShop || !upgradesShop) return;
         const playerData = Game.getPlayerData();
-        if (!playerData) {
-            console.error("Player data not available for rendering shop.");
-            return;
+        
+        const renderSection = (container, data, type) => {
+            container.innerHTML = data.map(item => {
+                const isPurchased = (type === 'equipment' && playerData.inventory.includes("purchased_" + item.id)) || (type === 'upgrade' && playerData.purchasedUpgrades[item.targetProperty]);
+                const isEquipped = type === 'equipment' && playerData.equippedItems.find(e => e.id === item.id);
+                const canAfford = playerData.currency >= item.cost;
+
+                let buttonHtml;
+                if (isEquipped) {
+                    buttonHtml = `<button class="btn btn-sm btn-secondary" disabled>${L.get('ui.nowEquipped')}</button>`;
+                } else if (isPurchased) {
+                    const isDisabled = type === 'equipment' && playerData.equippedItems.length >= MAX_EQUIPPED_ITEMS;
+                    buttonHtml = `<button class="btn btn-sm btn-outline-primary equip-btn" data-item-id="${item.id}" ${isDisabled ? `disabled title="${L.get('ui.maxEquipment')}"` : ''}>${L.get('ui.equip')}</button>`;
+                } else {
+                    buttonHtml = `<button class="btn btn-sm btn-success buy-${type}-btn" data-item-id="${item.id}" ${!canAfford ? 'disabled' : ''}>${L.get('ui.buy')} <span class="badge bg-warning text-dark">${item.cost} 💎</span></button>`;
+                }
+
+                return `
+                <div class="list-group-item shop-item d-flex justify-content-between align-items-center ${isPurchased ? 'purchased' : ''} ${isEquipped ? 'equipped' : ''}">
+                    <div><strong>${L.get(item.nameKey)}</strong><small class="d-block text-muted">${L.get(item.descriptionKey)}</small></div>
+                    <div>${buttonHtml}</div>
+                </div>`;
+            }).join('');
+        };
+        
+        renderSection(boostShop, SHOP_DATA.boosts, 'boost');
+        renderSection(equipmentShop, SHOP_DATA.equipment, 'equipment');
+        renderSection(upgradesShop, SHOP_DATA.upgrades, 'upgrade');
+
+        // <<< НАЧАЛО НОВОГО БЛОКА ДЛЯ ЯДРА УДАЧИ >>>
+        // Мы можем добавить его после 'upgradesShop'
+        const luckCoreSection = document.getElementById('luckCoreSection'); // Нам понадобится новый div в HTML
+        if (luckCoreSection) {
+            const currentBonus = ((Game.getPlayerData().luckCoreLevel || 0) * 0.01).toFixed(2);
+            const nextCost = Game.getLuckCoreAmplificationCost();
+            const canAfford = Game.getPlayerData().currency >= nextCost;
+
+            luckCoreSection.innerHTML = `
+                <hr>
+                <h4 data-i18n="shop.luck_core.title">Усиление Ядра Удачи</h4>
+                <div class="list-group">
+                    <div class="list-group-item shop-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong data-i18n="shop.luck_core.current_bonus">Текущий бонус</strong>: <span class="text-success">+${currentBonus}</span>
+                            <small class="d-block text-muted" data-i18n="shop.luck_core.description">Увеличивает базовую удачу навсегда.</small>
+                        </div>
+                        <button id="amplifyLuckCoreBtn" class="btn btn-lg btn-warning" ${!canAfford ? 'disabled' : ''}>
+                        <span data-i18n="shop.luck_core.amplify">Усилить</span> (+0.01)
+                        <br>
+                        <span class="badge bg-dark">${nextCost} 💎</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('amplifyLuckCoreBtn')?.addEventListener('click', () => {
+                Game.amplifyLuckCore();
+            });
         }
+        // <<< КОНЕЦ НОВОГО БЛОКА >>>
 
-        // Бусты
-        boostShop.innerHTML = SHOP_DATA.boosts.map(boost => `
-            <div class="list-group-item shop-item d-flex justify-content-between align-items-center">
-                <div>
-                    <strong>${L.get(boost.nameKey)}</strong>
-                    <small class="d-block text-muted">${L.get(boost.descriptionKey)}</small>
-                </div>
-                <button class="btn btn-sm btn-success buy-boost-btn" data-item-id="${boost.id}" ${playerData.currency < boost.cost ? 'disabled' : ''}>
-                    ${L.get('ui.buy')} <span class="badge bg-warning text-dark">${boost.cost} 💎</span>
-                </button>
-            </div>
-        `).join('');
-
-        // Экипировка
-        equipmentShop.innerHTML = SHOP_DATA.equipment.map(equip => {
-            const isPurchased = playerData.inventory.includes("purchased_"+equip.id); // Проверяем, куплен ли предмет
-            const isEquipped = playerData.equippedItems.find(e => e.id === equip.id);
-            let buttonHtml;
-
-            if (isEquipped) {
-                buttonHtml = `<button class="btn btn-sm btn-secondary" disabled>Надето</button>`;
-            } else if (isPurchased) {
-                buttonHtml = `<button class="btn btn-sm btn-outline-primary equip-btn" data-item-id="${equip.id}" ${playerData.equippedItems.length >= MAX_EQUIPPED_ITEMS ? 'disabled title="Максимум экипировки"' : ''}>Надеть</button>`;
-            } else {
-                 buttonHtml = `<button class="btn btn-sm btn-success buy-equip-btn" data-item-id="${equip.id}" ${playerData.currency < equip.cost ? 'disabled' : ''}>
-                    ${L.get('ui.buy')} <span class="badge bg-warning text-dark">${equip.cost} 💎</span>
-                </button>`;
-            }
-
-            return `
-            <div class="list-group-item shop-item d-flex justify-content-between align-items-center ${isPurchased ? 'purchased' : ''} ${isEquipped ? 'equipped' : ''}">
-                <div>
-                    <strong>${L.get(equip.nameKey)}</strong>
-                    <small class="d-block text-muted">${L.get(equip.descriptionKey)}</small>
-                </div>
-                ${buttonHtml}
-            </div>
-            `}).join('');
-
-        // Улучшения
-        upgradesShop.innerHTML = SHOP_DATA.upgrades.map(upgrade => {
-            const isUpgradePurchased = playerData.purchasedUpgrades[upgrade.targetProperty];
-            return `
-            <div class="list-group-item shop-item d-flex justify-content-between align-items-center ${isUpgradePurchased ? 'purchased' : ''}">
-                <div>
-                    <strong>${L.get(upgrade.nameKey)}</strong>
-                    <small class="d-block text-muted">${L.get(upgrade.descriptionKey)}</small>
-                </div>
-                <button class="btn btn-sm btn-success buy-upgrade-btn" data-item-id="${upgrade.id}" 
-                    ${isUpgradePurchased ? 'disabled' : ''} 
-                    ${playerData.currency < upgrade.cost && !isUpgradePurchased ? 'disabled' : ''}>
-                    ${isUpgradePurchased ? 'Куплено' : `Купить <span class="badge bg-warning text-dark">${upgrade.cost} 💎</span>`}
-                </button>
-            </div>
-        `}).join('');
-
-        addShopEventListeners(); // Добавляем слушатели после генерации HTML
+        
+        addShopEventListeners();
     }
     function addShopEventListeners() {
-        boostShop.querySelectorAll('.buy-boost-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.buy-boost-btn, .buy-equipment-btn, .buy-upgrade-btn, .equip-btn').forEach(btn => {
+            btn.addEventListener('click', e => {
                 const itemId = e.currentTarget.dataset.itemId;
-                if (Game.purchaseShopItem(itemId, 'boost')) {
-                    updateCurrencyDisplay(Game.getPlayerData().currency);
-                    // updateLuckDisplay(); // Вызывается из Game.activateBoost -> checkActiveBoosts -> UI.updateActiveBoostsDisplay
-                    // updateActiveBoostsDisplay(); // Вызывается из Game.activateBoost
-                    renderShop(); // Обновить состояние кнопок и доступность
-                } else {
-                    alert("Недостаточно Призматических осколков!");
+                if (btn.classList.contains('buy-boost-btn')) Game.purchaseShopItem(itemId, 'boost');
+                else if (btn.classList.contains('buy-equipment-btn')) Game.purchaseShopItem(itemId, 'equipment');
+                else if (btn.classList.contains('buy-upgrade-btn')) Game.purchaseShopItem(itemId, 'upgrade');
+                else if (btn.classList.contains('equip-btn')) {
+                    const itemData = SHOP_DATA.equipment.find(eq => eq.id === itemId);
+                    if (itemData) Game.equipItem(itemData);
                 }
-            });
-        });
-
-        equipmentShop.querySelectorAll('.buy-equip-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const itemId = e.currentTarget.dataset.itemId;
-                if (Game.purchaseShopItem(itemId, 'equipment')) {
-                    updateCurrencyDisplay(Game.getPlayerData().currency);
-                    updateLuckDisplay();
-                    updateEquippedItemsDisplay(Game.getPlayerData().equippedItems);
-                    renderShop();
-                } else {
-                    // Проверяем, не куплен ли он уже, чтобы не показывать ошибку о валюте, если он просто уже есть
-                    if (!Game.getPlayerData().inventory.includes("purchased_"+itemId)) {
-                        alert("Недостаточно Призматических осколков!");
-                    }
-                }
-            });
-        });
-
-        equipmentShop.querySelectorAll('.equip-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const itemId = e.currentTarget.dataset.itemId;
-                const itemData = SHOP_DATA.equipment.find(eq => eq.id === itemId);
-                if (itemData && Game.equipItem(itemData)) {
-                    renderShop(); // Обновить кнопки (например, "Надеть" станет "Надето")
-                    updateEquippedItemsDisplay(Game.getPlayerData().equippedItems);
-                    updateLuckDisplay();
-                }
-            });
-        });
-
-        upgradesShop.querySelectorAll('.buy-upgrade-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const itemId = e.currentTarget.dataset.itemId;
-                const upgradeData = SHOP_DATA.upgrades.find(u=>u.id === itemId); // Находим данные об улучшении
-                if (upgradeData && Game.purchaseShopItem(itemId, 'upgrade')) {
-                    updateCurrencyDisplay(Game.getPlayerData().currency);
-                    renderShop(); // Обновить кнопку на "Куплено"
-                    // Если это Fast Roll, обновить скорость анимации (хотя она проверяется в startRollAnimation)
-                    // if (upgradeData.targetProperty === 'fastRoll') { UI.updateRollSpeed(true); } - updateRollSpeed пока не активна
-                    if (upgradeData.targetProperty === 'multiRollX5') { UI.toggleMultiRollButton(true); }
-                } else {
-                    // Проверяем, не куплено ли уже улучшение
-                    if (upgradeData && !Game.getPlayerData().purchasedUpgrades[upgradeData.targetProperty]) {
-                         alert("Недостаточно Призматических осколков!");
-                    }
-                }
+                renderShop();
+                updateEquippedItemsDisplay(Game.getPlayerData().equippedItems);
             });
         });
     }
     function updateEquippedItemsDisplay(equippedItems = []) {
-        if (!equippedItemsDisplay) {
-            console.warn("equippedItemsDisplay DOM element not found.");
-            return;
-        }
-    
-        equippedItemsDisplay.innerHTML = '';
-    
-        if (equippedItems.length === 0) {
-            equippedItemsDisplay.innerHTML = `<p class="text-muted small"> ${L.get('ui.noEquippedItems')} </p>`;
-            return;
-        }
-    
-        equippedItems.forEach(equippedItemData => { // Переименовал item в equippedItemData для ясности
-            const itemChip = document.createElement('div');
-            // Используем классы Bootstrap для "чипов", можно настроить по вкусу
-            itemChip.className = 'equipped-item-chip badge bg-info text-dark me-1 mb-1 p-2'; // Изменил цвет на bg-info для лучшей читаемости
-    
-            let itemInfoText = ""; // Текст, описывающий эффект предмета
-    
-            // Пытаемся получить полное описание предмета из SHOP_DATA, чтобы отобразить его эффект
-            const shopItemDefinition = SHOP_DATA.equipment.find(shopItem => shopItem.id === equippedItemData.id);
-    
-            if (shopItemDefinition) {
-                // Если у предмета есть прямой luckBonus, показываем его
-                if (typeof shopItemDefinition.luckBonus === 'number') {
-                    itemInfoText = `+${shopItemDefinition.luckBonus.toFixed(2)} удачи`; // toFixed(2) для красивого отображения
-                } 
-                // Если у предмета есть поле effect, пытаемся его описать
-                else if (shopItemDefinition.effect) {
-                    switch (shopItemDefinition.effect.type) {
-                        case "duplicate_currency_bonus_percent":
-                            itemInfoText = `+${shopItemDefinition.effect.value * 100}% 💎 за дубли`;
-                            break;
-                        case "cumulative_luck_on_low_rolls":
-                            // Для "Длани Неудачника" можно показать базовый бонус за стак
-                            // Динамическое отображение стаков лучше делать в отдельном элементе UI
-                            itemInfoText = `Накоп. удача (+${shopItemDefinition.effect.bonusPerStack} за стак)`;
-                            break;
-                        default:
-                            // Если тип эффекта неизвестен, берем краткое описание из SHOP_DATA
-                            itemInfoText = shopItemDefinition.description.split('.')[0];
-                            if (itemInfoText.length > 30) { // Обрезаем, если слишком длинное
-                                itemInfoText = itemInfoText.substring(0, 27) + "...";
-                            }
-                            break;
-                    }
-                } 
-                // Если нет ни luckBonus, ни effect, но есть описание в SHOP_DATA
-                else if (shopItemDefinition.description) {
-                     itemInfoText = shopItemDefinition.description.split('.')[0];
-                     if (itemInfoText.length > 30) {
-                        itemInfoText = itemInfoText.substring(0, 27) + "...";
-                    }
-                }
-                // Если ничего из вышеперечисленного, но есть имя
-                else {
-                    itemInfoText = "Активен"; // Общий текст
-                }
-            } else {
-                // Если предмет не найден в SHOP_DATA (не должно происходить, но на всякий случай)
-                // Пытаемся использовать данные из самого equippedItemData (если они там есть)
-                if (typeof equippedItemData.luckBonus === 'number') {
-                     itemInfoText = `+${equippedItemData.luckBonus.toFixed(2)} удачи`;
-                } else {
-                    itemInfoText = "Неизвестный эффект";
-                }
-            }
-    
-            itemChip.innerHTML = `
-                <span>${equippedItemData.name} <small class="text-white-75">(${itemInfoText})</small></span>
-                <button class="btn btn-xs btn-outline-light btn-remove-equip ms-2" data-item-id="${equippedItemData.id}" title="${L.get('ui.unequipItem')} style="border-color: rgba(255,255,255,0.5); color: rgba(255,255,255,0.7);">&times;</button>
-            `;
-            
-            const removeButton = itemChip.querySelector('.btn-remove-equip');
-            if (removeButton) {
-                removeButton.addEventListener('click', () => {
-                    Game.unequipItem(equippedItemData.id);
-                    renderShop(); 
-                    updateEquippedItemsDisplay(Game.getPlayerData().equippedItems); 
-                    updateLuckDisplay(); 
-                });
-            }
-            equippedItemsDisplay.appendChild(itemChip);
+        if (!equippedItemsDisplay) return;
+
+        equippedItemsDisplay.innerHTML = equippedItems.length === 0 
+            ? `<p class="text-muted small">${L.get('ui.noEquippedItems')}</p>`
+            : equippedItems.map(item => {
+                // ИСПРАВЛЕНИЕ: Используем L.get(item.nameKey) вместо item.name
+                const itemName = L.get(item.nameKey); 
+                
+                const shopItem = SHOP_DATA.equipment.find(shopItem => shopItem.id === item.id);
+                let effectText = L.get('debug.effect.active');
+                if (shopItem?.luckBonus) effectText = `+${shopItem.luckBonus.toFixed(2)} ${L.get('ui.luck').toLowerCase()}`;
+                else if (shopItem?.effect?.type === 'duplicate_currency_bonus_percent') effectText = `+${shopItem.effect.value * 100}% 💎`;
+                else if (shopItem?.effect?.type === 'cumulative_luck_on_low_rolls') effectText = `${L.get('debug.effect.cumulative')} (+${shopItem.effect.bonusPerStack}/${L.get('debug.effect.stack')})`;
+
+                return `<div class="equipped-item-chip badge bg-info text-dark me-1 mb-1 p-2">
+                    <span>${itemName} <small class="text-white-75">(${effectText})</small></span>
+                    <button class="btn btn-xs btn-outline-light btn-remove-equip ms-2" data-item-id="${item.id}" title="${L.get('ui.unequipItem')}">×</button>
+                </div>`;
+            }).join('');
+
+        equippedItemsDisplay.querySelectorAll('.btn-remove-equip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                Game.unequipItem(btn.dataset.itemId);
+                // Вместо нескольких вызовов - один
+                UI.updateAll(Game.getPlayerData());
+            });
         });
     }
-    function toggleMultiRollButton(isPurchased) { if (multiRollButton) { multiRollButton.classList.toggle('d-none', !isPurchased); } }
-
+    function toggleMultiRollButton(isPurchased) {
+        if (multiRollButton) multiRollButton.classList.toggle('d-none', !isPurchased);
+    }
     // --- Публичный интерфейс ---
-    return {
-        init, updateAll, updateCurrencyDisplay, updateLuckDisplay, updateActiveBoostsDisplay,
-        renderInventory, renderShop, /* renderSettings удален */ updateEquippedItemsDisplay,
-        toggleMultiRollButton, showNotification,        // <<--- ДОБАВИТЬ ЭКСПОРТ
-        updateLuckyRollDisplay, applyVisualEffect
-
-    };
+    return { init, updateAll, renderShop, showNotification, updateEquippedItemsDisplay, updateLuckyRollDisplay, applyVisualEffect, toggleMultiRollButton };
 })();

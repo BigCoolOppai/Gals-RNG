@@ -39,10 +39,10 @@ const L = (() => {
     }
     
     // Применяет переводы ко всем статичным элементам на странице
-    function applyToDOM() {
+        function applyToDOM() {
+        // Обработка обычных текстов
         document.querySelectorAll('[data-i18n]').forEach(element => {
             const key = element.getAttribute('data-i18n');
-            // Проверяем, в какой атрибут вставить текст (полезно для placeholder'ов)
             const targetAttr = element.getAttribute('data-i18n-target') || 'textContent';
             if (targetAttr === 'textContent') {
                 element.textContent = get(key);
@@ -50,6 +50,14 @@ const L = (() => {
                 element.setAttribute(targetAttr, get(key));
             }
         });
+
+        // <<< НАЧАЛО НОВОГО БЛОКА ДЛЯ ТУЛТИПОВ >>>
+        // Обработка атрибутов title для тултипов
+        document.querySelectorAll('[data-i18n-title]').forEach(element => {
+            const key = element.getAttribute('data-i18n-title');
+            element.setAttribute('title', get(key));
+        });
+        // <<< КОНЕЦ НОВОГО БЛОКА >>>
     }
 
     // Устанавливает язык, загружает его и перезагружает страницу

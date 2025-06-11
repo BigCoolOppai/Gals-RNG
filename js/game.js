@@ -21,13 +21,11 @@ const Game = (() => {
     }
 
     function resetGame() {
-        if (confirm("Вы уверены, что хотите сбросить весь прогресс? Это действие необратимо!")) {
+        if (confirm(L.get('ui.resetWarning'))) {
             playerData = SaveManager.resetPlayerData();
-            // После сброса нужно обновить весь UI
+            // ИСПРАВЛЕНИЕ: Используем updateAll для полного обновления
             if (typeof UI !== 'undefined' && UI.updateAll) {
                  UI.updateAll(playerData);
-                 UI.renderShop(); // Перерисовать магазин, т.к. покупки сброшены
-                 UI.renderSettings(); // Перерисовать настройки
             }
             console.log("Game progress has been reset.");
         }
@@ -38,20 +36,22 @@ const Game = (() => {
         if (amount <= 0) return;
         playerData.currency += amount;
         console.log(`Added ${amount} currency. Total: ${playerData.currency}`);
-        if (typeof UI !== 'undefined') {
-        UI.updateCurrencyDisplay(playerData.currency); // Это у вас уже должно быть
-        UI.renderShop(); // <<--- ДОБАВИТЬ ЭТОТ ВЫЗОВ
-    }
+        // ИСПРАВЛЕНИЕ: Заменяем вызовы мелких функций на один главный
+        if (typeof UI !== 'undefined' && UI.updateAll) {
+            UI.updateAll(getPlayerData()); 
+        }
     }
 
     function spendCurrency(amount) {
         if (playerData.currency >= amount) {
             playerData.currency -= amount;
             console.log(`Spent ${amount} currency. Remaining: ${playerData.currency}`);
-            
             return true;
         }
         console.log(`Not enough currency. Needed: ${amount}, Has: ${playerData.currency}`);
+        if(typeof UI !== 'undefined' && UI.showNotification) {
+            UI.showNotification(L.get('notifications.notEnoughCurrency'), 'danger');
+        }
         return false;
     }
 
@@ -87,8 +87,8 @@ const Game = (() => {
 
     // --- Удача ---
     function calculateCurrentLuck() { // Эта функция теперь для отображения, getEffectiveLuck - для расчетов
-        let currentDisplayLuck = BASE_LUCK;
-        let misfortuneBonus = 0;
+        let luckFromCore = (playerData.luckCoreLevel || 0) * 0.01;
+        let currentDisplayLuck = BASE_LUCK + luckFromCore;
     
         playerData.equippedItems.forEach(item => {
             if (item.luckBonus) { // Стандартные бонусы к удаче
@@ -153,7 +153,26 @@ const Game = (() => {
         return parseFloat(effectiveLuck.toFixed(2)); // Возвращаем базовую эффективную удачу
     }
 
+    // Новая функция для расчета стоимости
+    function getLuckCoreAmplificationCost() {
+        const baseCost = 7500; // Начальная стоимость
+        const multiplier = 1.15; // Множитель (15% за уровень)
+        return Math.floor(baseCost * Math.pow(multiplier, playerData.luckCoreLevel));
+    }
 
+    // Новая функция для покупки улучшения
+    function amplifyLuckCore() {
+        const cost = getLuckCoreAmplificationCost();
+        if (spendCurrency(cost)) {
+            playerData.luckCoreLevel++;
+            console.log(`Luck Core amplified to level ${playerData.luckCoreLevel}. New permanent bonus: +${(playerData.luckCoreLevel * 0.01).toFixed(2)}`);
+            saveGame();
+            // Обновляем UI, чтобы показать новый бонус и новую цену
+            if (typeof UI !== 'undefined') {
+                UI.updateAll(getPlayerData());
+            }
+        }
+    }
     
     // --- Ролл Карточек ---
     function performRoll(guaranteedRarityId = null) {
@@ -316,7 +335,10 @@ const Game = (() => {
         saveGame(); // saveGame остается без изменений
 
         return {
-            card: rarityData.card,
+            card:{
+                 ...rarityData.card,
+                 name: L.get(rarityData.card.nameKey) // Возвращаем переведенное имя карты
+                },
             rarity: { 
                 id: rarityData.id, 
                 name: L.get(rarityData.nameKey), 
@@ -352,17 +374,11 @@ const Game = (() => {
 
     function setCurrency(amount) {
         const value = parseInt(amount, 10);
-        if (isNaN(value) || value < 0) {
-            console.error("Invalid currency amount:", amount);
-            return;
-        }
+        if (isNaN(value) || value < 0) return;
         playerData.currency = value;
-        console.log(`Currency set to: ${playerData.currency}`);
-        
-        // Обновляем UI, чтобы изменения были видны
+        // ИСПРАВЛЕНИЕ: Используем updateAll
         if (typeof UI !== 'undefined') {
-            UI.updateCurrencyDisplay(playerData.currency);
-            UI.renderShop(); // Важно, чтобы обновить состояние кнопок в магазине!
+            UI.updateAll(getPlayerData());
         }
         saveGame();
     }
@@ -497,45 +513,36 @@ const Game = (() => {
 // Внутри модуля Game
 
 // --- Экипировка ---
-    function equipItem(itemData) { // itemData - это объект из SHOP_DATA
+    function equipItem(itemData) {
         if (playerData.equippedItems.length >= MAX_EQUIPPED_ITEMS) {
-            alert("Максимальное количество экипировки надето.");
+            UI.showNotification(L.get('ui.maxEquipment'), 'warning');
             return false;
         }
         if (playerData.equippedItems.find(e => e.id === itemData.id)) {
-            alert("Этот предмет уже надет.");
             return false;
         }
 
-        // Создаем объект для сохранения в playerData.equippedItems
-        // Копируем все необходимые поля из itemData (который пришел из SHOP_DATA)
+        // ИСПРАВЛЕНИЕ: Сохраняем КЛЮЧ (nameKey), а не переведенное имя (name)
         const equipToSave = {
             id: itemData.id,
-            name: itemData.name,
-            // Копируем luckBonus, только если он есть и является числом
-            luckBonus: typeof itemData.luckBonus === 'number' ? itemData.luckBonus : undefined,
-            // ВАЖНО: Глубоко копируем объект effect, если он есть
+            nameKey: itemData.nameKey, // <--- ГЛАВНОЕ ИЗМЕНЕНИЕ
+            luckBonus: itemData.luckBonus,
             effect: itemData.effect ? JSON.parse(JSON.stringify(itemData.effect)) : undefined 
-            // ИЛИ поверхностная копия, если внутри effect нет вложенных объектов, которые могут меняться:
-            // effect: itemData.effect ? { ...itemData.effect } : undefined 
         };
 
         playerData.equippedItems.push(equipToSave);
-        console.log(`Equipped: ${itemData.name}`, equipToSave); // Логируем, что именно было сохранено в playerData
-        
-        if (typeof UI !== 'undefined' && UI.updateLuckDisplay) UI.updateLuckDisplay();
-        if (typeof UI !== 'undefined' && UI.updateEquippedItemsDisplay) UI.updateEquippedItemsDisplay(playerData.equippedItems); // Передаем обновленный массив
         saveGame();
+        // Обновляем UI после сохранения
+        if (typeof UI !== 'undefined') {
+            UI.updateAll(getPlayerData());
+        }
         return true;
     }
 
     function unequipItem(itemId) {
-        const itemIndex = playerData.equippedItems.findIndex(e => e.id === itemId);
-        if (itemIndex > -1) {
-            const unequippedItem = playerData.equippedItems.splice(itemIndex, 1)[0];
-            console.log(`Unequipped: ${unequippedItem.name}`);
-            if (typeof UI !== 'undefined' && UI.updateLuckDisplay) UI.updateLuckDisplay();
-            if (typeof UI !== 'undefined' && UI.updateEquippedItemsDisplay) UI.updateEquippedItemsDisplay();
+        const initialLength = playerData.equippedItems.length;
+        playerData.equippedItems = playerData.equippedItems.filter(e => e.id !== itemId);
+        if (playerData.equippedItems.length < initialLength) {
             saveGame();
             return true;
         }
@@ -593,26 +600,10 @@ const Game = (() => {
 
     // Публичный интерфейс модуля
     return {
-        init,
-        getPlayerData,
-        saveGame,
-        resetGame,
-        addCurrency,
-        spendCurrency,
-        performRoll,
-        purchaseShopItem,
-        equipItem, // Может быть вызван из UI, если игрок выбирает из купленных, но не надетых
-        unequipItem,
-        setSkipAnimationForDuplicate,
-        calculateCurrentLuck, // Для отображения
-        getEffectiveLuck, // Для расчетов
-        checkActiveBoosts, // Экспортируем для UI, если понадобится обновить таймеры бустов
-        setActiveVisualEffect,
-        clearActiveVisualEffect,
-        setMusicVolume,
-        unlockAllCards,
-        setCurrency,
-        addCardToInventory,
-        
+        init, getPlayerData, saveGame, resetGame, addCurrency, spendCurrency, performRoll,
+        purchaseShopItem, equipItem, unequipItem, calculateCurrentLuck, getEffectiveLuck,
+        checkActiveBoosts, setActiveVisualEffect, clearActiveVisualEffect, setMusicVolume,
+        unlockAllCards, setCurrency, addCardToInventory, amplifyLuckCore,
+        getLuckCoreAmplificationCost
     };
 })();

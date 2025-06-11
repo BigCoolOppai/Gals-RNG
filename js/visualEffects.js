@@ -171,6 +171,132 @@ const VisualEffects = {
     },
 
     effects: {
+        'jackpot': function(targets) {
+            const { glitchOverlay } = targets;
+            if (!glitchOverlay) return null;
+
+            // --- Переменные для хранения ссылок на элементы и анимации ---
+            let elementsToCleanup = [];
+            let mainTimeline = gsap.timeline(); // Используем одну временную шкалу
+
+            // --- Начальная настройка ---
+            glitchOverlay.innerHTML = '';
+            glitchOverlay.style.display = 'block';
+            glitchOverlay.classList.add('active-effect-jackpot');
+
+            const cardImagePath = 'img/effects/jackpot1.png';
+            const reelHeight = 350;
+            const reelItemsCount = 30;
+
+            // --- ФУНКЦИЯ ДЛЯ СОЗДАНИЯ АУРЫ (теперь она независима) ---
+            const createAura = () => {
+                // Если эффект был очищен, пока мы ждали, не создаем ауру
+                if (!glitchOverlay.classList.contains('active-effect-jackpot')) {
+                    return;
+                }
+                console.log("Creating Persistent Aura.");
+                const auraContainer = document.createElement('div');
+                auraContainer.className = 'aura-container'; // Даем класс для легкой очистки
+                glitchOverlay.appendChild(auraContainer);
+                elementsToCleanup.push(auraContainer);
+
+                for (let i = 0; i < 120; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'jackpot-aura-particle';
+                    auraContainer.appendChild(particle);
+
+                    const isLeft = Math.random() > 0.5;
+                    const startX = isLeft ? gsap.utils.random(-80, window.innerWidth * 0.15) : gsap.utils.random(window.innerWidth * 0.85, window.innerWidth + 80);
+                    
+                    gsap.set(particle, {
+                        x: startX,
+                        y: gsap.utils.random(-80, window.innerHeight + 80),
+                        scale: gsap.utils.random(0.2, 1.5),
+                    });
+
+                    // Анимация жизни частицы (бесконечный цикл)
+                    gsap.to(particle, {
+                        duration: gsap.utils.random(2, 4),
+                        x: `+=${(isLeft ? 1 : -1) * gsap.utils.random(40, 100)}`,
+                        y: `+=${gsap.utils.random(-120, 120)}`,
+                        opacity: 0,
+                        scale: `*=${gsap.utils.random(0.7, 1.8)}`,
+                        ease: "power2.out",
+                        repeat: -1,
+                        delay: gsap.utils.random(0, 3)
+                    });
+                }
+            };
+            
+            // --- СОЗДАНИЕ СЛОТОВ ---
+            const slotsContainer = document.createElement('div');
+            slotsContainer.className = 'jackpot-slots-container';
+            glitchOverlay.appendChild(slotsContainer);
+            elementsToCleanup.push(slotsContainer); // Добавляем в массив для очистки
+
+            const reels = [];
+            for (let i = 0; i < 3; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'jackpot-slot';
+                const reel = document.createElement('div');
+                reel.className = 'jackpot-reel';
+                for (let j = 0; j < reelItemsCount; j++) {
+                    const img = document.createElement('img');
+                    img.src = cardImagePath;
+                    reel.appendChild(img);
+                }
+                slot.appendChild(reel);
+                slotsContainer.appendChild(slot);
+                reels.push(reel);
+            }
+
+            // --- ПОСЛЕДОВАТЕЛЬНАЯ АНИМАЦИЯ ---
+            
+            // 1. Появление и вращение
+            mainTimeline.from(slotsContainer, { duration: 0.5, opacity: 0, scale: 0.8, ease: "back.out(1.7)" })
+                .to(reels, { y: `-=${reelHeight * (reelItemsCount - 5)}`, duration: 2, ease: "power1.in", stagger: 0.1 });
+
+            // 2. Остановка барабанов
+            const stopReel = (reelIndex, targetPosition) => {
+                const reel = reels[reelIndex];
+                const randomOffset = Math.floor(Math.random() * 5 - 2);
+                const finalPosition = -(targetPosition + randomOffset) * reelHeight;
+                return gsap.to(reel, { y: finalPosition, duration: 2.5, ease: "back.out(1)" });
+            };
+            mainTimeline.add(stopReel(1, 15), "-=0.5")
+                .add(stopReel(0, 15), ">-2.0")
+                .add(stopReel(2, 15), ">-2.0");
+
+            // 3. Вспышка
+            mainTimeline.to(glitchOverlay, { backgroundColor: 'rgba(46, 204, 113, 0.7)', duration: 0.1, repeat: 3, yoyo: true, ease: 'none' }, ">-0.3")
+                .set(glitchOverlay, { backgroundColor: 'transparent' });
+
+            // 4. Плавно убираем слоты
+            mainTimeline.to(slotsContainer, { duration: 1.0, opacity: 0, scale: 0.9, ease: "power1.in" });
+
+            // 5. ПОСЛЕ ВСЕГО ЭТОГО, вызываем создание ауры.
+            mainTimeline.call(createAura);
+
+
+            // --- ФУНКЦИЯ ОЧИСТКИ ---
+            return () => {
+                if (mainTimeline) mainTimeline.kill();
+                // GSAP.killTweensOf() - более надежный способ остановить анимации,
+                // чем просто удалять элементы, к которым они привязаны.
+                gsap.killTweensOf(".jackpot-aura-particle");
+                
+                // Удаляем все созданные элементы
+                elementsToCleanup.forEach(el => {
+                    if (el.parentNode) {
+                        el.remove();
+                    }
+                });
+                
+                glitchOverlay.classList.remove('active-effect-jackpot');
+                glitchOverlay.style.display = 'none';
+                console.log("Jackpot effect (Final Attempt) cleaned up.");
+            };
+        },
         'error': function(targets, isInitialLoad) {
             const { glitchOverlay, body } = targets;
             if (!glitchOverlay) return null;

@@ -7,26 +7,28 @@ if (!window.locales) {
 window.locales.en = {
     // Cards
     cards: {
-        blackhole: { name: "Supermassive", description: "You've found one of the rarest creatures in the universe. Oh, and it seems she's up to something interesting~~" },
-        berserk: { name: "Furious", description: "As you can see, she has endured much in her life. She was branded with the Mark of Sacrifice. Now her fury knows no bounds... (and she has a cool sword and armor)." },
-        bee: { name: "Buzzing", description: "This creature is clearly unhappy that you've invaded its hive. You better run." },
-        russian: { name: "Homely", description: "You know, *hic*, I really love my country! Just, let me, *hic*, sleep..." },
-        motivation: { name: "Motivation", description: "Power. Motivation. POWER. These words embody this girl, who skillfully wields her katana and never loses focus. (By the way, her favorite dish is Berry Delight)." },
-        smokinsexystyle: { name: "S.S.S.", description: "Time to light it up! This party's getting crazy! - these were the exact words this lady spoke before disappearing in an unknown direction." },
-        cosmic: { name: "Dark Cosmos", description: "From the void where stars die, she gazes upon the fragility of worlds. Her hunger is eternal, and her gaze is fixed on the abyss. You'd be better off not crossing her path." },
-        space: { name: "Cosmic", description: "She weaves patterns from stardust, illuminating the path for lost souls in the infinity. The weaver is kind to all visitors of her gloomy habitat." },
-        timestop: { name: "THE WORLD", description: "Oh, you're approaching me? Instead of running away, you're coming right to me?" },
-        jackpot: { name: "Jackpot", description: "Do you believe in luck? Did you know that 99.9% of gamblers quit right before they're about to hit it big? Time to deposit! TUCA DONKA!" },
-        devil: { name: "Devilish", description: "Everything is under control. At least for her. Makima go to h*ll!" },
-        error: { name: "ERROR", description: "Few know who or what this is. It is only known that it is a malevolent spawn of the digital reality..." },
-        uranium: { name: "Uranium", description: "Uranium-chan is only found in the most industrial areas; they say people who met her were glowing with happiness." },
-        unbound: { name: "Unbound", description: "This incredibly strong woman always escapes from prison! By the way, her name sounds kind of familiar..." },
-        mythic: { name: "Mythic", description: "Carmilla is an ancient and powerful dhampir who feeds on the blood of the unfortunate who cross her path. By the way, she can drink other bodily fluids too..." },
-        legendary: { name: "Legendary", description: "Misa is an eternal party-goer. Being invited to her party is a great honor; you're lucky." },
-        epic: { name: "Epic", description: "You won't just find Gael on the street; she's more likely to be running a 100-meter dash or training her muscles." },
-        rare: { name: "Rare", description: "Mila rarely leaves her home due to her blindness; you're lucky to have met her!" },
-        common: { name: "Common", description: "Just a regular Eve. Everyone likes her, but she's a bit too basic, isn't she..." },
-        garbage: { name: "Junk", description: "Nobody wants her... maybe you won't throw her away?" }
+        hybrid: { name: "Hybrid", cardName: "Alex", description: "Alex is a sweet, yet sassy gyaru. And it seems she has a little secret ;)... or maybe not so little either" },
+        platinum: { name: "Noble", cardName: "Miss Platina", description: "Cold, unapproachable, and incredibly valuable. Rarely shows her true emotions." },
+        blackhole: { name: "Supermassive", cardName: "FY-3741 alpha", description: "You've found one of the rarest creatures in the universe. Oh, and it seems she's up to something interesting~~" },
+        berserk: { name: "Furious", cardName: "Stug", description: "As you can see, she has endured much in her life. She was branded with the Mark of Sacrifice. Now her fury knows no bounds... (and she has a cool sword and armor)." },
+        bee: { name: "Buzzing", cardName: "Queen Bee", description: "This creature is clearly unhappy that you've invaded its hive. You better run." },
+        russian: { name: "Homely", cardName: "Klyukva Medvedeva", description: "You know, *hic*, I really love my country! Just, let me, *hic*, sleep..." },
+        motivation: { name: "Motivation", cardName: "Alpha and Omega", description: "Power. Motivation. POWER. These words embody this girl, who skillfully wields her katana and never loses focus. (By the way, her favorite dish is Berry Delight)." },
+        smokinsexystyle: { name: "S.S.S.", cardName: "Subhuman", description: "Time to light it up! This party's getting crazy! - these were the exact words this lady spoke before disappearing in an unknown direction." },
+        cosmic: { name: "Dark Cosmos", cardName: "Star Elf", description: "From the void where stars die, she gazes upon the fragility of worlds. Her hunger is eternal, and her gaze is fixed on the abyss. You'd be better off not crossing her path." },
+        space: { name: "Cosmic", cardName: "Nebula Weaver", description: "She weaves patterns from stardust, illuminating the path for lost souls in the infinity. The weaver is kind to all visitors of her gloomy habitat." },
+        timestop: { name: "THE WORLD", cardName: "D.I.O.N.A.", description: "Oh, you're approaching me? Instead of running away, you're coming right to me?" },
+        jackpot: { name: "Jackpot", cardName: "Hakaria", description: "Do you believe in luck? Did you know that 99.9% of gamblers quit right before they're about to hit it big? Time to deposit! TUCA DONKA!" },
+        devil: { name: "Devilish", cardName: "Makima, Demon of Control", description: "Everything is under control. At least for her. Makima go to h*ll!" },
+        error: { name: "ERROR", cardName: "ER-RR_R_DATA", description: "Few know who or what this is. It is only known that it is a malevolent spawn of the digital reality..." },
+        uranium: { name: "Uranium", cardName: "Uranium-chan", description: "Uranium-chan is only found in the most industrial areas; they say people who met her were glowing with happiness." },
+        unbound: { name: "Unbound", cardName: "Hanma", description: "This incredibly strong woman always escapes from prison! By the way, her name sounds kind of familiar..." },
+        mythic: { name: "Mythic", cardName: "Carmilla", description: "Carmilla is an ancient and powerful dhampir who feeds on the blood of the unfortunate who cross her path. By the way, she can drink other bodily fluids too..." },
+        legendary: { name: "Legendary", cardName: "Misa", description: "Misa is an eternal party-goer. Being invited to her party is a great honor; you're lucky." },
+        epic: { name: "Epic", cardName: "Gael", description: "You won't just find Gael on the street; she's more likely to be running a 100-meter dash or training her muscles." },
+        rare: { name: "Rare", cardName: "Mila", description: "Mila rarely leaves her home due to her blindness; you're lucky to have met her!" },
+        common: { name: "Common", cardName: "Eve", description: "Just a regular Eva. Everyone likes her, but she's a bit too basic, isn't she..." },
+        garbage: { name: "Junk", cardName: "Garbage Idol", description: "Nobody wants her... maybe you won't throw her away?" }
     },
     // Shop Items
     shop: {
@@ -46,7 +48,13 @@ window.locales.en = {
         upgrades: {
             upgrade_fast_roll: { name: "Fast Roll", description: "Reduces roll animation time to ~0.75 sec." },
             upgrade_multi_roll_x5: { name: "Multi-Roll x5", description: "Unlocks the ability to perform 5 rolls at once." }
-        }
+        },
+        luck_core: {
+        title: "Luck Core Amplification",
+        current_bonus: "Current Bonus",
+        description: "Permanently increases base luck. The cost increases with each level.",
+        amplify: "Amplify"
+    }
     },
     // UI Elements
     ui: {
@@ -96,7 +104,8 @@ window.locales.en = {
         youGot: "You got",
         isNew: "NEW!",
         duplicateReward: "Received for duplicate",
-        totalDuplicateReward: "Total received for duplicates"
+        totalDuplicateReward: "Total received for duplicates",
+        luckTooltipTitle: "Luck is your main success multiplier. It doesn't just increase chances; it makes every roll 'higher quality'.\n\n- With a luck of 1.0, your chances are standard.\n- With a luck of 2.0, your odds of getting a rare card are twice as high compared to the odds of failing.\n\nLuck is especially effective for pulling the rarest cards!"
     },
     // Notifications
     notifications: {
@@ -105,5 +114,17 @@ window.locales.en = {
         itemPurchased: "purchased, but there's no space to equip it. Free up a slot.",
         alreadyPurchased: "is already purchased.",
         upgradeAlreadyPurchased: "is already purchased."
+    },
+    debug: {
+        notifications: {
+            allCardsUnlocked: "All cards unlocked!",
+            cardAdded: "Card added for rarity:",
+            guaranteedRoll: "Performed a guaranteed roll for"
+        },
+        effect: {
+            active: "Active",
+            cumulative: "Cumul.",
+            stack: "stack"
+        }
     }
 };

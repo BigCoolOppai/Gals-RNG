@@ -5,11 +5,13 @@ window.RARITIES_DATA = [
         id: "blackhole",
         nameKey: "cards.blackhole.name",
         probabilityBase: 1/9876543, 
-        color: "#E65100", // Orange 900 - глубокий, огненный оранжевый
-        glowColor: "#ffca28", // Amber 400 - яркое желто-оранжевое свечение
+        color: "#E65100",
+        glowColor: "#ffca28",
+        cssClass: "rarity-blackhole",
         currencyOnDuplicate: 987654,
         card: {
             name: "FY-3741 alpha", 
+            nameKey: "cards.blackhole.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardBlackHole.png",
             descriptionKey: "cards.blackhole.description"
         }
@@ -18,26 +20,43 @@ window.RARITIES_DATA = [
         id: "berserk",
         nameKey: "cards.berserk.name",
         probabilityBase: 1/30000, 
-        color: "#c62828", // Red 800 - глубокий красный
-        glowColor: "#ff8a80", // Red A100 - огненно-розовое свечение 
+        color: "#c62828",
+        glowColor: "#ff8a80", 
         cssClass: "rarity-berserk",
         currencyOnDuplicate: 3000,
         card: {
             name: "Stug", 
+            nameKey: "cards.berserk.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardBerserker.png",
             descriptionKey: "cards.berserk.description"
+        }
+    },
+    {
+        id: "hybrid",
+        nameKey: "cards.hybrid.name",
+        probabilityBase: 1/20000, 
+        color: "#6a1b9a", // Deep Purple 800
+        glowColor: "#64ffda", // Teal A400
+        cssClass: "rarity-hybrid",
+        currencyOnDuplicate: 2000,
+        card: {
+            name: "Alex", 
+            nameKey: "cards.hybrid.cardName",
+            image: "img/cardHybrid.png", // Вам нужно будет создать это изображение
+            descriptionKey: "cards.hybrid.description"
         }
     },
     {
         id: "bee",
         nameKey: "cards.bee.name", 
         probabilityBase: 1/15000, 
-        color: "#ffb300", // Amber 700 - медовый/золотой
-        glowColor: "#ffd54f", // Amber 300 - светлое золотое свечение
+        color: "#ffb300",
+        glowColor: "#ffd54f",
         cssClass: "rarity-bee",
         currencyOnDuplicate: 1500,
         card: {
             name: "Queen Bee", 
+            nameKey: "cards.bee.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardQueenBee.png",
             descriptionKey: "cards.bee.description"
         }
@@ -46,116 +65,134 @@ window.RARITIES_DATA = [
         id: "russian",
         nameKey: "cards.russian.name",
         probabilityBase: 1/10000, 
-        color: "#B71C1C", // Red 900 - насыщенный клюквенный
-        glowColor: "#f5f5f5", // Grey 100 - почти белое свечение
+        color: "#B71C1C",
+        glowColor: "#f5f5f5",
         cssClass: "rarity-russian",
         currencyOnDuplicate: 1000,
         card: {
             name: "Klyukva Medvedeva", 
+            nameKey: "cards.russian.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardRussian.png",
             descriptionKey: "cards.russian.description"
         }
     },
- // --- НОВАЯ РЕДКОСТЬ: MOTIVATION (Вергилий) ---
+    {
+        id: "platinum",
+        nameKey: "cards.platinum.name",
+        probabilityBase: 1/7810, 
+        color: "#78909c", // Blue Grey 500
+        glowColor: "#ffffff", // Чисто белое свечение
+        cssClass: "rarity-platinum",
+        currencyOnDuplicate: 781,
+        card: {
+            name: "Platina", 
+            nameKey: "cards.platinum.cardName",
+            image: "img/cardPlatinum.png", // Вам нужно будет создать это изображение
+            descriptionKey: "cards.platinum.description"
+        }
+    },
     {
         id: "motivation",
         nameKey: "cards.motivation.name",
-        probabilityBase: 1/2111, // Пример
-        color: "#0d47a1", // Глубокий синий (Blue 900)
-        glowColor: "#64b5f6", // Яркий голубой для свечения (Blue 300)
+        probabilityBase: 1/2111,
+        color: "#0d47a1",
+        glowColor: "#64b5f6",
         cssClass: "rarity-motivation",
         currencyOnDuplicate: 211,
         card: {
-            name: "Alpha and Omega", // Имя карты, можно конкретизировать
+            name: "Alpha and Omega",
+            nameKey: "cards.motivation.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardMotivation.png",
             descriptionKey: "cards.motivation.description"
         }
     },
-    // --- НОВАЯ РЕДКОСТЬ: SMOKINSEXYSTYLE (Данте Ж) ---
     {
-        id: "smokinsexystyle", // или sss
+        id: "smokinsexystyle",
         nameKey: "cards.smokinsexystyle.name",
-        probabilityBase: 1/1999, // Пример
-        color: "#b71c1c", // Глубокий красный (Red 900)
-        glowColor: "#ef9a9a", // Светло-красный/розовый для свечения (Red 200)
-        cssClass: "rarity-smokinsexystyle", // или rarity-sss
+        probabilityBase: 1/1999,
+        color: "#b71c1c",
+        glowColor: "#ef9a9a",
+        cssClass: "rarity-smokinsexystyle",
         currencyOnDuplicate: 199,
         card: {
             name: "Subhuman",
+            nameKey: "cards.smokinsexystyle.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardSmokinSexyStyle.png",
             descriptionKey: "cards.smokinsexystyle.description"
         }
     },
-    
-    // --- НОВАЯ РЕДКОСТЬ: COSMIC (Темная космическая сущность) ---
     {
         id: "cosmic",
         nameKey: "cards.cosmic.name",
-        probabilityBase: 1/1618, // Пример
-        color: "#311b92", // Темный индиго/фиолетовый (Indigo 900)
-        glowColor: "#7e57c2", // Приглушенный фиолетовый для свечения (Deep Purple 400)
+        probabilityBase: 1/1618,
+        color: "#311b92",
+        glowColor: "#7e57c2",
         cssClass: "rarity-cosmic",
         currencyOnDuplicate: 161,
         card: {
             name: "Star Elf",
+            nameKey: "cards.cosmic.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardCosmic.png",
             descriptionKey: "cards.cosmic.description"
         }
     },
-    // --- НОВАЯ РЕДКОСТЬ: SPACE (Светлая космическая сущность) ---
     {
         id: "space",
         nameKey: "cards.space.name",
-        probabilityBase: 1/1042, // Пример
-        color: "#0097a7", // Яркий циан/бирюза (Cyan 700)
-        glowColor: "#80deea", // Очень светлый циан/бирюза (Cyan 200)
+        probabilityBase: 1/1042,
+        color: "#0097a7",
+        glowColor: "#80deea",
         cssClass: "rarity-space",
         currencyOnDuplicate: 142,
         card: {
             name: "Nebula Weaver",
+            nameKey: "cards.space.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardSpace.png",
             descriptionKey: "cards.space.description"
         }
     },
     {
-        id: "timestop", // Дио
+        id: "timestop",
         nameKey: "cards.timestop.name",
-        probabilityBase: 1/1024, // или ваш шанс
+        probabilityBase: 1/1024,
         color: "#FBC02D",
         glowColor: "#FFF59D",
         cssClass: "rarity-timestop",
-        currencyOnDuplicate: 124, // например
+        currencyOnDuplicate: 124,
         card: {
-            name: "D.I.O.N.A.", // Ваше имя
-            image: "img/cardTimestop.png", // Ваш путь
+            name: "D.I.O.N.A.",
+            nameKey: "cards.timestop.cardName", // <-- ДОБАВЛЕНО
+            image: "img/cardTimestop.png",
             descriptionKey: "cards.timestop.description"
         }
     },
     {
-        id: "jackpot", // Хакари
+        id: "jackpot",
         nameKey: "cards.jackpot.name",
         probabilityBase: 1/777,
         color: "#ffb300",
         glowColor: "#ffe54c",
         cssClass: "rarity-jackpot",
-        currencyOnDuplicate: 77, // например
+        currencyOnDuplicate: 77,
         card: {
-            name: "Hakaria", // Ваше имя
-            image: "img/cardJackpot.png", // Ваш путь
+            name: "Hakaria",
+            nameKey: "cards.jackpot.cardName", // <-- ДОБАВЛЕНО
+            image: "img/cardJackpot.png",
             descriptionKey: "cards.jackpot.description"
         }
     },
     {
-        id: "devil", // Макима
+        id: "devil",
         nameKey: "cards.devil.name",
         probabilityBase: 1/666,
         color: "#a01c1c",
         glowColor: "#d73a3a",
         cssClass: "rarity-devil",
-        currencyOnDuplicate: 66, // например
+        currencyOnDuplicate: 66,
         card: {
-            name: "Makima, Demon of Control", // Ваше имя
-            image: "img/cardDevil.png", // Ваш путь
+            name: "Makima, Demon of Control",
+            nameKey: "cards.devil.cardName", // <-- ДОБАВЛЕНО
+            image: "img/cardDevil.png",
             descriptionKey: "cards.devil.description"
         }
     },
@@ -169,6 +206,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 44,
         card: {
             name: "ER-RR_R_DATA",
+            nameKey: "cards.error.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardError.png",
             descriptionKey: "cards.error.description"
         }
@@ -183,6 +221,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 30,
         card: {
             name: "Uranium-chan",
+            nameKey: "cards.uranium.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardUranium.png",
             descriptionKey: "cards.uranium.description"
         }
@@ -197,6 +236,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 20,
         card: {
             name: "Hanma",
+            nameKey: "cards.unbound.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardUnbound.png",
             descriptionKey: "cards.unbound.description"
         }
@@ -211,6 +251,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 15,
         card: {
             name: "Carmilla",
+            nameKey: "cards.mythic.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardMythic.png",
             descriptionKey: "cards.mythic.description"
         }
@@ -225,6 +266,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 10,
         card: {
             name: "Misa",
+            nameKey: "cards.legendary.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardLegendary.png",
             descriptionKey: "cards.legendary.description"
         }
@@ -239,6 +281,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 7,
         card: {
             name: "Gael",
+            nameKey: "cards.epic.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardEpic.png",
             descriptionKey: "cards.epic.description"
         }
@@ -253,6 +296,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 5,
         card: {
             name: "Mila",
+            nameKey: "cards.rare.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardRare.png",
             descriptionKey: "cards.rare.description"
         }
@@ -260,28 +304,30 @@ window.RARITIES_DATA = [
     {
         id: "common",
         nameKey: "cards.common.name",
-        probabilityBase: 1/2, // Шанс на обычную, если более редкие не выпали
+        probabilityBase: 1/2,
         color: "#9e9e9e",
         glowColor: "#bdbdbd",
         cssClass: "rarity-common",
-        currencyOnDuplicate: 2, // Обычные дубликаты теперь дают немного
+        currencyOnDuplicate: 2,
         card: {
             name: "Eve",
+            nameKey: "cards.common.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardCommon.png",
             descriptionKey: "cards.common.description"
         }
     },
-    { // Новая "мусорная" редкость - ГАРАНТИРОВАНА, если ничего другое не выпало
+    {
         id: "garbage",
         nameKey: "cards.garbage.name",
-        probabilityBase: 1.0, // Эта вероятность будет использоваться только если ВСЕ предыдущие не сработали
-        color: "#795548", // Коричневатый, как мусор
+        probabilityBase: 1.0,
+        color: "#795548",
         glowColor: "#8d6e63",
         cssClass: "rarity-garbage",
-        currencyOnDuplicate: 0, // Мусорные дубликаты ничего не дают
+        currencyOnDuplicate: 0,
         card: {
-            name: "Garbage Idol", // Или что-то подобное
-            image: "img/cardGarbage.png", // Убедитесь, что создали это изображение
+            name: "Garbage Idol",
+            nameKey: "cards.garbage.cardName", // <-- ДОБАВЛЕНО
+            image: "img/cardGarbage.png",
             descriptionKey: "cards.garbage.description"
         }
     }

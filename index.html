@@ -27,9 +27,9 @@
                     <span class="currency-icon">💎</span>
                     <span id="currencyDisplay">0</span> <span data-i18n="ui.prismaticShards">Призматических осколков</span>
                 </div>
-                <div>
-                    <span data-i18n="ui.luck">🍀 Удача</span>: <span id="luckDisplay">1.00</span>
-                </div>
+                <span data-bs-toggle="tooltip" data-bs-placement="bottom" data-i18n-title="ui.luckTooltipTitle">
+                <span data-i18n="ui.luck">🍀 Удача</span>: <span id="luckDisplay">1.00</span>
+                </span>
             </div>
             <div id="activeBoostsDisplay" class="mt-2 small">
                 <!-- Активные бусты будут отображаться здесь -->
@@ -117,6 +117,7 @@
                     <div id="upgradesShop" class="list-group">
                         <!-- Элементы улучшений будут добавлены сюда JS -->
                     </div>
+                    <div id="luckCoreSection" class="mt-4"></div>
                 </div>
 
                 <!-- Settings Tab -->

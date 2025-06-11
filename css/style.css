@@ -1136,4 +1136,83 @@ body.visual-effect-timestop {
     font-size: 12px;
 }
 
+/* --- Jackpot Visual Effect (REWORKED V2) --- */
+
+/* Контейнер для анимации */
+#globalGlitchOverlay.active-effect-jackpot {
+    overflow: hidden;
+}
+
+/* Общий контейнер для трех вертикальных слотов */
+.jackpot-slots-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 95vw; /* ИЗМЕНЕНИЕ: Увеличена ширина до 95% */
+    max-width: 1200px; /* Увеличен и макс. размер */
+    height: 350px; /* Немного увеличена высота видимой области */
+    display: flex;
+    justify-content: space-around;
+    perspective: 1000px;
+}
+
+/* Один вертикальный слот */
+.jackpot-slot {
+    width: 32%; /* Немного подогнана ширина под 3 слота */
+    height: 100%;
+    overflow: hidden;
+    /* ИЗМЕНЕНИЕ: Убраны border, background и box-shadow */
+}
+
+/* Лента с картинками внутри слота */
+.jackpot-reel {
+    position: relative;
+    will-change: transform;
+}
+
+.jackpot-reel img {
+    display: block;
+    width: 100%;
+    height: 350px; /* Высота совпадает с .jackpot-slot */
+    object-fit: contain;
+    padding: 5px; /* Уменьшен padding для большего размера картинки */
+}
+
+/* "Шершавая" пламенная аура */
+.jackpot-aura-particle {
+    position: absolute;
+    background-color: #2ecc71; /* Основной зеленый цвет */
+    border-radius: 50%;
+    pointer-events: none;
+    will-change: transform, opacity;
+    mix-blend-mode: screen; 
+}
+
+/* Стили для Hybrid (Гибридная) */
+.roll-slot.rarity-hybrid {
+    color: #e1bee7;
+    background: linear-gradient(145deg, #4a148c 0%, #311b92 100%);
+    text-shadow: 0 0 8px #a7ffeb, 0 0 15px #64ffda;
+    border: 1px solid #8e24aa;
+    font-family: 'Orbitron', sans-serif;
+}
+.inventory-card.border-hybrid {
+    border-color: #6a1b9a; 
+    --rarity-glow-color: #64ffda;
+}
+
+/* Стили для Platinum (Благородная) */
+.roll-slot.rarity-platinum {
+    color: #263238;
+    background: linear-gradient(145deg, #cfd8dc 0%, #90a4ae 100%);
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff;
+    border: 1px solid #b0bec5;
+    font-family: 'Playfair Display SC', serif;
+    font-weight: bold;
+}
+.inventory-card.border-platinum {
+    border-color: #78909c; 
+    --rarity-glow-color: #ffffff;
+}
 

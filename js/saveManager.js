@@ -5,6 +5,7 @@ const SaveManager = (() => {
 
     const getDefaultPlayerData = () => ({
         version: "1.0.0", // Версия для возможной миграции данных в будущем
+        luckCoreLevel: 0,
         currency: 0, // Призматические осколки
         inventory: [], // Массив ID открытых редкостей (карт)
         seenRarities: [], // Массив ID редкостей, которые игрок видел хотя бы раз
@@ -46,34 +47,49 @@ const SaveManager = (() => {
             const savedData = localStorage.getItem(SAVE_KEY);
             if (savedData) {
                 const parsedData = JSON.parse(savedData);
-                // Здесь можно добавить логику миграции, если версия данных изменилась
-                // Например, если !parsedData.version || parsedData.version < "1.0.0"
-                // То можно дополнить parsedData новыми полями из getDefaultPlayerData()
-                
-                // Простая проверка и дополнение недостающих полей из дефолтных
                 let defaultData = getDefaultPlayerData();
                 let mergedData = { ...defaultData, ...parsedData };
-                // Глубокое слияние для вложенных объектов
-                mergedData.purchasedUpgrades = { ...defaultData.purchasedUpgrades, ...(parsedData.purchasedUpgrades || {}) };
                 
-                // НОВОЕ: Глубокое слияние для объекта stats
+                mergedData.purchasedUpgrades = { ...defaultData.purchasedUpgrades, ...(parsedData.purchasedUpgrades || {}) };
                 mergedData.stats = { 
                     ...defaultData.stats, 
                     ...(parsedData.stats || {}),
-                    // Убедимся, что rollsByRarity всегда объект, даже если в старом сейве его не было или stats был пуст
                     rollsByRarity: { ...(defaultData.stats.rollsByRarity || {}), ...((parsedData.stats && parsedData.stats.rollsByRarity) || {}) }
                 };
 
-                mergedData.activeBoosts = (mergedData.activeBoosts || []).filter(boost => {
-                    return boost.endTime && new Date(boost.endTime) > new Date();
-                });
+                // Фильтруем просроченные бусты
+                mergedData.activeBoosts = (mergedData.activeBoosts || []).filter(boost => boost.endTime && new Date(boost.endTime) > new Date());
 
-                console.log("Game data loaded.");
+                // =====================================================================
+                // <<< НАЧАЛО БЛОКА МИГРАЦИИ СТАРЫХ СОХРАНЕНИЙ ДЛЯ ПРЕДМЕТОВ >>>
+                // =====================================================================
+                if (mergedData.equippedItems && mergedData.equippedItems.length > 0) {
+                    mergedData.equippedItems = mergedData.equippedItems.map(item => {
+                        // Проверяем, это старый формат (с `name`) или новый (с `nameKey`)
+                        if (item.name && !item.nameKey) {
+                            // Это старый формат. Нужно найти ключ и преобразовать.
+                            const shopDefinition = SHOP_DATA.equipment.find(shopItem => shopItem.id === item.id);
+                            if (shopDefinition) {
+                                return {
+                                    ...item, // Копируем все старые поля (id, luckBonus, effect)
+                                    nameKey: shopDefinition.nameKey, // Добавляем правильный ключ
+                                    name: undefined // Удаляем старое жестко закодированное имя
+                                };
+                            }
+                        }
+                        // Если это уже новый формат или предмет не найден, возвращаем как есть
+                        return item;
+                    }).filter(Boolean); // Убираем предметы, которые не удалось смигрировать
+                }
+                // =====================================================================
+                // <<< КОНЕЦ БЛОКА МИГРАЦИИ >>>
+                // =====================================================================
+
+                console.log("Game data loaded and migrated.");
                 return mergedData;
             }
         } catch (error) {
             console.error("Error loading game data:", error);
-            // Если ошибка загрузки (например, поврежденные данные), возвращаем дефолтные
         }
         console.log("No saved data found or error loading, starting new game.");
         return getDefaultPlayerData();
