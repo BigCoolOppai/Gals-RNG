@@ -1,5 +1,5 @@
 // js/game.js
-
+const PRESTIGE_LUCK_PER_CARD = 0.015;
 const Game = (() => {
     let playerData = {}; // Здесь будут храниться все данные игрока
 
@@ -29,6 +29,12 @@ const Game = (() => {
             }
             console.log("Game progress has been reset.");
         }
+    }
+
+    function getRebirthCost() {
+        const baseCost = 1000000; // Начальная стоимость первого ребёрза
+        const multiplier = 3.5;   // Цена каждого следующего ребёрза будет в 3.5 раза выше
+        return Math.floor(baseCost * Math.pow(multiplier, playerData.prestigeLevel));
     }
 
     // --- Валюта ---
@@ -71,24 +77,56 @@ const Game = (() => {
         if (!playerData.inventory.includes(rarityId)) {
             playerData.inventory.push(rarityId);
             isNew = true;
-            console.log(`New card added to inventory: ${rarityData.card.name} (${rarityData.name})`);
         }
+
+        // <<< НАЧАЛО ИЗМЕНЕНИЯ >>>
+        // Если это альт-карта, а родительская еще не открыта,
+        // добавляем родительскую в инвентарь, чтобы слот появился.
+        if (rarityData.displayParentId && !playerData.inventory.includes(rarityData.displayParentId)) {
+            playerData.inventory.push(rarityData.displayParentId);
+        }
+        // <<< КОНЕЦ ИЗМЕНЕНИЯ >>>
 
         if (!playerData.seenRarities.includes(rarityId)) {
             playerData.seenRarities.push(rarityId);
-            // Если UI уже инициализирован, обновить настройки, чтобы показать новую опцию
-            if (typeof UI !== 'undefined' && UI.renderSettings) {
-                UI.renderSettings();
-            }
-            console.log(`New rarity seen: ${rarityData.name}`);
         }
         return isNew;
+    }
+
+    // Rebirth
+    function performRebirth() {
+        const cost = getRebirthCost();
+        if (playerData.currency < cost) {
+            UI.showNotification(L.get('notifications.notEnoughForRebirth'), 'danger');
+            return;
+        }
+
+        if (confirm(L.get('ui.rebirth.confirmation'))) {
+            const uniqueCardsCount = new Set(playerData.inventory.filter(id => id !== 'garbage')).size;
+            const luckBonus = uniqueCardsCount * PRESTIGE_LUCK_PER_CARD;
+
+            const defaultData = SaveManager.getDefaultPlayerData();
+            
+            playerData.currency = 0;
+            playerData.activeBoosts = [];
+            playerData.equippedItems = [];
+            playerData.luckCoreLevel = 0;
+            playerData.misfortuneStacks = 0;
+            playerData.purchasedUpgrades = defaultData.purchasedUpgrades;
+
+            playerData.prestigeLevel++;
+            playerData.prestigeLuckBonus += luckBonus;
+
+            saveGame();
+            UI.showNotification(`${L.get('ui.rebirth.success')} +${luckBonus.toFixed(3)} ${L.get('ui.luck').toLowerCase()}`, 'success', 8000);
+            UI.updateAll(playerData);
+        }
     }
 
     // --- Удача ---
     function calculateCurrentLuck() {
         const luckFromCore = (playerData.luckCoreLevel || 0) * 0.01;
-        let currentDisplayLuck = BASE_LUCK + luckFromCore;
+        let currentDisplayLuck = BASE_LUCK + luckFromCore + (playerData.prestigeLuckBonus || 0);
         
         // ИСПРАВЛЕНИЕ: Объявление переменной вынесено сюда, в начало функции.
         let misfortuneBonus = 0;
@@ -123,7 +161,7 @@ const Game = (() => {
     }
 
     function getEffectiveLuck() {
-        let effectiveLuck = BASE_LUCK;
+        let effectiveLuck = BASE_LUCK + (playerData.prestigeLuckBonus || 0);
         let misfortuneBonus = 0;
     
         // Бонусы от экипировки
@@ -177,6 +215,10 @@ const Game = (() => {
     
     // --- Ролл Карточек ---
     function performRoll(guaranteedRarityId = null) {
+        // Фильтруем пул карт по уровню престижа игрока
+        const availableRarities = RARITIES_DATA.filter(r => 
+            (r.minPrestige || 0) <= playerData.prestigeLevel
+        );
         // --- НАЧАЛО БЛОКА ДЛЯ ЛАКИ РОЛЛА ---
         let isLuckyRollActiveThisRoll = false; // Флаг, был ли этот ролл Лаки
         let currentLuckMultiplier = 1.0; // Множитель по умолчанию
@@ -222,7 +264,7 @@ const Game = (() => {
         console.log(`Performing GUARANTEED roll for: ${guaranteedRarityId}`);
         } else {
 
-        for (const rarity of RARITIES_DATA) {
+        for (const rarity of availableRarities) {
             if (rarity.id === 'garbage') continue;
 
             let P_base = rarity.probabilityBase;
@@ -459,24 +501,30 @@ const Game = (() => {
 
     // --- Бусты ---
     function activateBoost(boostData) {
-        // Удаляем старый буст того же типа, если он слабее или такой же
-        // Или просто заменяем, если бусты одного типа не стакаются, а заменяются более сильным/новым
-        // По условию: "не стакаются, применяется самый сильный активный" - эта логика в getEffectiveLuck
-        // Здесь просто добавляем в список активных
+        const now = Date.now();
+        // Ищем существующий буст с таким же ID
+        const existingBoost = playerData.activeBoosts.find(b => b.id === boostData.id);
 
-        const newBoost = {
-            id: boostData.id,
-            type: boostData.type,
-            name: L.get(boostData.nameKey),
-            endTime: new Date().getTime() + boostData.durationSeconds * 1000,
-            luckBonus: boostData.luckBonus
-        };
-        playerData.activeBoosts.push(newBoost);
-        console.log(`Boost activated: ${boostData.name}. Ends at: ${new Date(newBoost.endTime).toLocaleTimeString()}`);
-        checkActiveBoosts(); // Запустить проверку и обновление таймеров
-        if (typeof UI !== 'undefined' && UI.updateActiveBoostsDisplay) UI.updateActiveBoostsDisplay();
-        if (typeof UI !== 'undefined' && UI.updateLuckDisplay) UI.updateLuckDisplay();
-
+        if (existingBoost) {
+            // Если нашли, продлеваем его
+            const remainingTime = Math.max(0, existingBoost.endTime - now);
+            existingBoost.endTime = now + remainingTime + (boostData.durationSeconds * 1000);
+            console.log(`Boost '${L.get(boostData.nameKey)}' duration extended. New end time: ${new Date(existingBoost.endTime).toLocaleTimeString()}`);
+        } else {
+            // Если не нашли, добавляем как новый
+            const newBoost = {
+                id: boostData.id,
+                type: boostData.type,
+                name: L.get(boostData.nameKey),
+                endTime: now + (boostData.durationSeconds * 1000),
+                luckBonus: boostData.luckBonus
+            };
+            playerData.activeBoosts.push(newBoost);
+            console.log(`Boost activated: ${L.get(boostData.nameKey)}. Ends at: ${new Date(newBoost.endTime).toLocaleTimeString()}`);
+        }
+        
+        // Запускаем/перезапускаем таймер проверки
+        checkActiveBoosts();
     }
 
     let boostCheckInterval = null;
@@ -605,6 +653,6 @@ const Game = (() => {
         purchaseShopItem, equipItem, unequipItem, calculateCurrentLuck, getEffectiveLuck,
         checkActiveBoosts, setActiveVisualEffect, clearActiveVisualEffect, setMusicVolume,
         unlockAllCards, setCurrency, addCardToInventory, amplifyLuckCore,
-        getLuckCoreAmplificationCost
+        getLuckCoreAmplificationCost, performRebirth, getRebirthCost
     };
 })();

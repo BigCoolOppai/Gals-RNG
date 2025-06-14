@@ -109,18 +109,7 @@ h1, h2, h3, h4, h5, h6 {
     height: 100%;
     position: relative; /* Для маркера */
 }
-.roll-slot-wrapper::before { /* Центральный маркер */
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 3px; /* Ширина маркера */
-    background-color: rgba(255, 255, 255, 0.8); /* Цвет маркера */
-    transform: translateX(-50%);
-    z-index: 2; /* Поверх прокручивающихся элементов */
-    box-shadow: 0 0 8px #fff;
-}
+
 
 
 .roll-slot {
@@ -1213,6 +1202,156 @@ body.visual-effect-timestop {
 }
 .inventory-card.border-platinum {
     border-color: #78909c; 
+    --rarity-glow-color: #ffffff;
+}
+
+/* Стили для Alt Error */
+.roll-slot.rarity-error-alt {
+    color: #ffd180; /* Светло-оранжевый текст */
+    background: 
+        linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+        repeating-conic-gradient(#ff6d00 0% 25%, #ff3d00 0% 50%);
+    background-size: 20px 20px;
+    text-shadow: 0 0 5px #ffab00, 0 0 10px #e65100;
+    border: 1px solid #bf360c;
+    font-family: 'Orbitron', sans-serif;
+    animation: error-alt-bg-pan 4s linear infinite;
+}
+@keyframes error-alt-bg-pan {
+    from { background-position: 0 0; }
+    to { background-position: 20px 20px; }
+}
+
+.inventory-card.border-error_alt_1 {
+    border-color: #ff6d00;
+    --rarity-glow-color: #ff9e80;
+}
+
+/* --- Witchy Rarity Styles --- */
+
+/* SVG фильтр для "жидкого" эффекта */
+.svg-filters-witchy {
+  position: absolute;
+  visibility: hidden;
+  width: 1px;
+  height: 1px;
+}
+
+.roll-slot.rarity-witchy {
+    color: #4a148c; /* Темно-фиолетовый текст для контраста */
+    background-color: #f3e5f5; /* Очень светлый лавандовый фон */
+    border: 2px solid #ab47bc;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+    position: relative;
+    overflow: hidden;
+    /* Применяем SVG фильтр */
+    filter: url('#witchy-goo-filter');
+}
+
+/* Псевдоэлементы для создания "капель" */
+.roll-slot.rarity-witchy::before,
+.roll-slot.rarity-witchy::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: #e1bee7; /* Более темный лавандовый */
+    animation: witchy-drip 8s infinite ease-in-out;
+}
+
+.roll-slot.rarity-witchy::before {
+    width: 150%;
+    height: 150%;
+    top: -25%;
+    left: -25%;
+    animation-delay: -2s;
+}
+
+.roll-slot.rarity-witchy::after {
+    width: 120%;
+    height: 120%;
+    top: 50%;
+    left: 10%;
+    animation-delay: -5s;
+}
+
+@keyframes witchy-drip {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(10px, 20px) rotate(45deg); }
+  50% { transform: translate(-20px, -10px) rotate(90deg); }
+  75% { transform: translate(5px, -15px) rotate(135deg); }
+}
+
+
+.inventory-card.border-witchy {
+    border-color: #fafafa;
+    --rarity-glow-color: #7b1fa2;
+}
+
+/* Alt Blackhole (Singularity) */
+.roll-slot.rarity-blackhole-alt {
+    color: #ffcc80;
+    background: radial-gradient(ellipse at center, #212121 0%, #000000 70%);
+    text-shadow: 0 0 5px #ffab00, 0 0 10px #ff6d00, 0 0 20px #e65100, 0 0 30px #dd2c00;
+    border: 1px solid #ff3d00;
+    font-family: 'Orbitron', sans-serif;
+    animation: blackhole-orange-pulse 3s infinite alternate;
+}
+.inventory-card.border-blackhole_alt_1 {
+    border-color: #ff3d00;
+    --rarity-glow-color: #ff9e80;
+}
+
+/* Alt Uranium (Unstable) */
+.roll-slot.rarity-uranium-alt {
+    color: #fff;
+    background-color: #1b5e20;
+    background-image: 
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.05) 75%, rgba(255,255,255,0.05)),
+        repeating-linear-gradient(-45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.05) 75%, rgba(255,255,255,0.05));
+    background-size: 20px 20px;
+    text-shadow: 0 0 10px #c8e6c9, 0 0 20px #81c784, 0 0 30px #a5d6a7;
+    border: 1px solid #4caf50;
+    animation: uranium-flicker 0.1s infinite;
+}
+@keyframes uranium-flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.95; }
+}
+.inventory-card.border-uranium_alt_1 {
+    border-color: #1b5e20;
+    --rarity-glow-color: #a5d6a7;
+}
+
+/* Alt Unbound (Unchained) */
+.roll-slot.rarity-unbound-alt {
+    color: #ffe0b2;
+    background: linear-gradient(160deg, #f4511e, #bf360c);
+    text-shadow: 0 0 5px #ffab91, 1px 1px 3px rgba(0,0,0,0.7);
+    border: 1px solid #d84315;
+    text-transform: uppercase;
+    font-family: 'Impact', sans-serif;
+    animation: fire-pulse 2s infinite ease-in-out;
+}
+@keyframes fire-pulse {
+    from { box-shadow: inset 0 0 20px #8f230a; }
+    to { box-shadow: inset 0 0 35px #d95d1e; }
+}
+.inventory-card.border-unbound_alt_1 {
+    border-color: #e65100;
+    --rarity-glow-color: #ffcc80;
+}
+
+/* Alt Space (Primordial) */
+.roll-slot.rarity-space-alt {
+    color: #0d47a1;
+    background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%);
+    text-shadow: 0 0 10px #fff, 0 0 20px #b3e5fc;
+    border: 1px solid #90caf9;
+    font-family: 'Playfair Display SC', serif;
+}
+.inventory-card.border-space_alt_1 {
+    border-color: #80deea;
     --rarity-glow-color: #ffffff;
 }
 

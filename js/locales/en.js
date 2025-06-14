@@ -28,7 +28,13 @@ window.locales.en = {
         epic: { name: "Epic", cardName: "Gael", description: "You won't just find Gael on the street; she's more likely to be running a 100-meter dash or training her muscles." },
         rare: { name: "Rare", cardName: "Mila", description: "Mila rarely leaves her home due to her blindness; you're lucky to have met her!" },
         common: { name: "Common", cardName: "Eve", description: "Just a regular Eva. Everyone likes her, but she's a bit too basic, isn't she..." },
-        garbage: { name: "Junk", cardName: "Garbage Idol", description: "Nobody wants her... maybe you won't throw her away?" }
+        garbage: { name: "Junk", cardName: "Garbage Idol", description: "Nobody wants her... maybe you won't throw her away?" },
+        error_alt_1: { name: "Corrupted Core", cardName: "3NN_MI#S EVV-VrYw_ER?", description: "Her digital code has mutated. Stability is an illusion, and her reality is crumbling into pixels.She's been passive threat. Now, she's active..." },
+        witchy: { name: "Witchy", cardName: "Jizzy, the Cummoner", description: "She's a master summoner, but she uses very... organic materials for her rituals. Her creations are powerful, yet short-lived." },
+        blackhole_alt_1: { name: "Singularity", cardName: "Event Horizon", description: "The point of no return. Everything that enters her sight ceases to exist as we know it. Not even light can escape. And neither can you." },
+        uranium_alt_1: { name: "Unstable", cardName: "Unstable Uranium-chan", description: "She doesn't just glow anymore. She is the source of energy. The chain reaction has begun, and you'd better stay away. Far away." },
+        unbound_alt_1: { name: "Unchained", cardName: "Hanma, Awakened", description: "The chains are broken. Pain has become her fuel. She no longer runs—now, everyone runs from her." },
+        space_alt_1: { name: "Primordial", cardName: "Reality Weaver", description: "She has witnessed the birth and death of stars. To her, galaxies are but threads in the infinite tapestry of existence." },
     },
     // Shop Items
     shop: {
@@ -54,7 +60,7 @@ window.locales.en = {
         current_bonus: "Current Bonus",
         description: "Permanently increases base luck. The cost increases with each level.",
         amplify: "Amplify"
-    }
+        }
     },
     // UI Elements
     ui: {
@@ -105,7 +111,28 @@ window.locales.en = {
         isNew: "NEW!",
         duplicateReward: "Received for duplicate",
         totalDuplicateReward: "Total received for duplicates",
-        luckTooltipTitle: "Luck is your main success multiplier. It doesn't just increase chances; it makes every roll 'higher quality'.\n\n- With a luck of 1.0, your chances are standard.\n- With a luck of 2.0, your odds of getting a rare card are twice as high compared to the odds of failing.\n\nLuck is especially effective for pulling the rarest cards!"
+        luckTooltipTitle: "Luck is your main success multiplier. It doesn't just increase chances; it makes every roll 'higher quality'.\n\n- With a luck of 1.0, your chances are standard.\n- With a luck of 2.0, your odds of getting a rare card are twice as high compared to the odds of failing.\n\nLuck is especially effective for pulling the rarest cards!",
+        sortBy: "Sort by:",
+        sort: {
+            rarity_desc: "Rarity (desc)",
+            rarity_asc: "Rarity (asc)",
+            name_asc: "Name (A-Z)"
+        },
+        newCardNotification: {
+        title: "✨ NEW CARD! ✨",
+        closeBtn: "Awesome!"
+        },
+        rebirth: {
+            title: "Rebirth",
+            description: "Reset your progress to gain a permanent luck bonus for each unique card collected.",
+            warning: "This will reset your currency, shop upgrades, boosts, equipment, and Luck Core level. Your card collection and statistics will be preserved.",
+            current_cards: "Unique cards collected: {count}",
+            potential_bonus: "Luck bonus upon rebirth: {bonus}",
+            button: "Rebirth",
+            confirmation: "ARE YOU SURE?\n\nYou will lose almost all progress except for your card collection. This action is irreversible!",
+            success: "Rebirth successful! Received a permanent luck bonus of:",
+            locked_after: "after R{level}"
+        }
     },
     // Notifications
     notifications: {
@@ -119,7 +146,8 @@ window.locales.en = {
         notifications: {
             allCardsUnlocked: "All cards unlocked!",
             cardAdded: "Card added for rarity:",
-            guaranteedRoll: "Performed a guaranteed roll for"
+            guaranteedRoll: "Performed a guaranteed roll for",
+            notEnoughForRebirth: "Not enough shards for Rebirth!"
         },
         effect: {
             active: "Active",

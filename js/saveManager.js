@@ -4,7 +4,9 @@ const SaveManager = (() => {
     const SAVE_KEY = 'rngCardGameSaveData';
 
     const getDefaultPlayerData = () => ({
-        version: "1.0.0", // Версия для возможной миграции данных в будущем
+        version: "0.1.5", // Версия для возможной миграции данных в будущем
+        prestigeLevel: 0,
+        prestigeLuckBonus: 0.0,
         luckCoreLevel: 0,
         currency: 0, // Призматические осколки
         inventory: [], // Массив ID открытых редкостей (карт)

@@ -2,6 +2,23 @@
 
 window.RARITIES_DATA = [
     {
+        id: "blackhole_alt_1",
+        nameKey: "cards.blackhole_alt_1.name",
+        displayParentId: "blackhole",
+        minPrestige: 1,
+        probabilityBase: 1 / 98765432,
+        color: "#ff3d00", // Ярко-оранжевый
+        glowColor: "#ff9e80", // Светло-оранжевый
+        cssClass: "rarity-blackhole-alt",
+        currencyOnDuplicate: 9876543,
+        card: {
+            name: "Event Horizon", 
+            nameKey: "cards.blackhole_alt_1.cardName",
+            image: "img/altBlackhole.png",
+            descriptionKey: "cards.blackhole_alt_1.description"
+        }
+    },
+    {
         id: "blackhole",
         nameKey: "cards.blackhole.name",
         probabilityBase: 1/9876543, 
@@ -17,6 +34,72 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "error_alt_1",
+        nameKey: "cards.error_alt_1.name",
+        displayParentId: "error", // <<< Указывает на родительскую карту
+        minPrestige: 1,           // <<< Требуемый уровень престижа
+        probabilityBase: 1/4040403,   // <<< Редкость
+        color: "#ff6d00",
+        glowColor: "#ff9e80",
+        cssClass: "rarity-error-alt", // Новый класс для стиля
+        currencyOnDuplicate: 404403,
+        card: {
+            name: "ERROR, Corrupted Core", 
+            nameKey: "cards.error_alt_1.cardName",
+            image: "img/altError.png", // Вам нужно будет создать это изображение
+            descriptionKey: "cards.error_alt_1.description"
+        }
+    },
+    {
+        id: "error",
+        nameKey: "cards.error.name",
+        probabilityBase: 1/404403,
+        color: "#ff3d00",
+        glowColor: "#ff6e40",
+        cssClass: "rarity-error",
+        currencyOnDuplicate: 40404,
+        card: {
+            name: "ER-RR_R_DATA",
+            nameKey: "cards.error.cardName", // <-- ДОБАВЛЕНО
+            image: "img/cardError.png",
+            descriptionKey: "cards.error.description"
+        }
+    },
+    {
+        id: "uranium_alt_1",
+        nameKey: "cards.uranium_alt_1.name",
+        displayParentId: "uranium",
+        minPrestige: 1,
+        probabilityBase: 1 / 238000, // 1/238 * 100
+        color: "#1b5e20", // Темно-зеленый
+        glowColor: "#a5d6a7", // Светло-зеленый
+        cssClass: "rarity-uranium-alt",
+        currencyOnDuplicate: 23800,
+        card: {
+            name: "Uranium-235", 
+            nameKey: "cards.uranium_alt_1.cardName",
+            image: "img/altUranium.png",
+            descriptionKey: "cards.uranium_alt_1.description"
+        }
+    },
+    {
+        id: "space_alt_1",
+        nameKey: "cards.space_alt_1.name",
+        displayParentId: "space",
+        minPrestige: 1,
+        probabilityBase: 1 / 104200, // 1/1042 * 100
+        color: "#80deea", // Светло-голубой
+        glowColor: "#ffffff", // Белый
+        cssClass: "rarity-space-alt",
+        currencyOnDuplicate: 1420,
+        card: {
+            name: "Reality Weaver", 
+            nameKey: "cards.space_alt_1.cardName",
+            image: "img/altSpace.png",
+            descriptionKey: "cards.space_alt_1.description"
+        }
+    },
+    {
         id: "berserk",
         nameKey: "cards.berserk.name",
         probabilityBase: 1/30000, 
@@ -29,6 +112,23 @@ window.RARITIES_DATA = [
             nameKey: "cards.berserk.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardBerserker.png",
             descriptionKey: "cards.berserk.description"
+        }
+    },
+    {
+        id: "witchy",
+        nameKey: "cards.witchy.name",
+        minPrestige: 1,           // <<< Карта доступна только после 1-го ребёрза
+        // НЕТ displayParentId, т.к. это уникальная карта со своим слотом
+        probabilityBase: 1/25000, // Сделаем ее достаточно редкой
+        color: "#fafafa",          // Очень светлый, почти белый цвет
+        glowColor: "#7b1fa2",      // Яркое фиолетовое свечение
+        cssClass: "rarity-witchy",  // Новый CSS класс
+        currencyOnDuplicate: 2500,
+        card: {
+            name: "Jizzy, the Cummoner", 
+            nameKey: "cards.witchy.cardName",
+            image: "img/cardWitchy.png", // Вам нужно будет создать это изображение
+            descriptionKey: "cards.witchy.description"
         }
     },
     {
@@ -59,6 +159,23 @@ window.RARITIES_DATA = [
             nameKey: "cards.bee.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardQueenBee.png",
             descriptionKey: "cards.bee.description"
+        }
+    },
+    {
+        id: "unbound_alt_1",
+        nameKey: "cards.unbound_alt_1.name",
+        displayParentId: "unbound",
+        minPrestige: 1,
+        probabilityBase: 1 / 12800, // 1/64 * 100
+        color: "#e65100", // Огненно-оранжевый
+        glowColor: "#ffcc80", // Светло-оранжевый
+        cssClass: "rarity-unbound-alt",
+        currencyOnDuplicate: 1280,
+        card: {
+            name: "Hanma, Awakened", 
+            nameKey: "cards.unbound_alt_1.cardName",
+            image: "img/altUnbound.png",
+            descriptionKey: "cards.unbound_alt_1.description"
         }
     },
     {
@@ -197,21 +314,6 @@ window.RARITIES_DATA = [
         }
     },
     {
-        id: "error",
-        nameKey: "cards.error.name",
-        probabilityBase: 1/404,
-        color: "#ff3d00",
-        glowColor: "#ff6e40",
-        cssClass: "rarity-error",
-        currencyOnDuplicate: 44,
-        card: {
-            name: "ER-RR_R_DATA",
-            nameKey: "cards.error.cardName", // <-- ДОБАВЛЕНО
-            image: "img/cardError.png",
-            descriptionKey: "cards.error.description"
-        }
-    },
-    {
         id: "uranium",
         nameKey: "cards.uranium.name",
         probabilityBase: 1/238,
@@ -229,7 +331,7 @@ window.RARITIES_DATA = [
     {
         id: "unbound",
         nameKey: "cards.unbound.name",
-        probabilityBase: 1/64,
+        probabilityBase: 1/128,
         color: "#a958dd",
         glowColor: "#c386ed",
         cssClass: "rarity-unbound",
@@ -244,7 +346,7 @@ window.RARITIES_DATA = [
     {
         id: "mythic",
         nameKey: "cards.mythic.name",
-        probabilityBase: 1/32,
+        probabilityBase: 1/64,
         color: "#f44336",
         glowColor: "#ff5252",
         cssClass: "rarity-mythic",
@@ -259,7 +361,7 @@ window.RARITIES_DATA = [
     {
         id: "legendary",
         nameKey: "cards.legendary.name",
-        probabilityBase: 1/16,
+        probabilityBase: 1/32,
         color: "#ff9800",
         glowColor: "#ffeb3b",
         cssClass: "rarity-legendary",
@@ -274,7 +376,7 @@ window.RARITIES_DATA = [
     {
         id: "epic",
         nameKey: "cards.epic.name",
-        probabilityBase: 1/8,
+        probabilityBase: 1/16,
         color: "#9c27b0",
         glowColor: "#ba68c8",
         cssClass: "rarity-epic",
@@ -289,7 +391,7 @@ window.RARITIES_DATA = [
     {
         id: "rare",
         nameKey: "cards.rare.name",
-        probabilityBase: 1/4,
+        probabilityBase: 1/8,
         color: "#2196f3",
         glowColor: "#64b5f6",
         cssClass: "rarity-rare",
@@ -304,7 +406,7 @@ window.RARITIES_DATA = [
     {
         id: "common",
         nameKey: "cards.common.name",
-        probabilityBase: 1/2,
+        probabilityBase: 1/4,
         color: "#9e9e9e",
         glowColor: "#bdbdbd",
         cssClass: "rarity-common",
@@ -360,7 +462,7 @@ const SHOP_DATA = {
             id: "equip_hand_of_misfortune", // Или cloak_of_misfortune
             nameKey: "shop.equipment.equip_hand_of_misfortune.name",
             descriptionKey: "shop.equipment.equip_hand_of_misfortune.description",
-            cost: 1500, // Стоимость можно будет настроить
+            cost: 5000, // Стоимость можно будет настроить
             type: "equipment",
             // luckBonus здесь нет, так как бонус динамический
             effect: { 
@@ -373,7 +475,7 @@ const SHOP_DATA = {
     ],
     upgrades: [
         { id: "upgrade_fast_roll", nameKey: "shop.upgrades.upgrade_fast_roll.name", descriptionKey: "shop.upgrades.upgrade_fast_roll.description", cost: 1000, type: "permanent_upgrade", targetProperty: "fastRoll" },
-        { id: "upgrade_multi_roll_x5", nameKey: "shop.upgrades.upgrade_multi_roll_x5.name", descriptionKey: "shop.upgrades.upgrade_multi_roll_x5.description", cost: 5000, type: "permanent_upgrade", targetProperty: "multiRollX5" },
+        { id: "upgrade_multi_roll_x5", nameKey: "shop.upgrades.upgrade_multi_roll_x5.name", descriptionKey: "shop.upgrades.upgrade_multi_roll_x5.description", cost: 7500, type: "permanent_upgrade", targetProperty: "multiRollX5" },
     ]
 };
 

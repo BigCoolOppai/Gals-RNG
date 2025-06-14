@@ -10,15 +10,21 @@ const UI = (() => {
     // skipAnimationSettings удален
     let cardModal, modalCardImage, modalCardName, modalCardRarity, modalCardDescription;
     let statsTotalRollsEl, statsUniqueCardsOpenedEl, statsCurrencyFromDuplicatesEl, statsByRarityContainerEl;
+    let inventorySortSelect;
 
     // Состояние UI
     let isRolling = false;
+    let boostTimerInterval = null;
     let isAutorolling = false; 
     let autorollTimer = null;   
     let activeSingleRollClearCallback = null;
     let activeMultiRollClearCallbacks = [];
 
     let currentEffectCleanup = null; 
+
+    let newCardModal, newCardModalImage, newCardModalName, newCardModalRarity;
+    let newCardQueue = []; // Очередь для показа новых карт
+    let isShowingNewCard = false;
 
 
     function cacheDOMElements() {
@@ -64,6 +70,13 @@ const UI = (() => {
         statsByRarityContainerEl = document.getElementById('statsByRarityContainer');
 
         document.getElementById('resetProgressButton')?.addEventListener('click', Game.resetGame);
+
+        inventorySortSelect = document.getElementById('inventorySort');
+
+        newCardModal = new bootstrap.Modal(document.getElementById('newCardModal'));
+        newCardModalImage = document.getElementById('newCardModalImage');
+        newCardModalName = document.getElementById('newCardModalName');
+        newCardModalRarity = document.getElementById('newCardModalRarity');
     }
 
     // --- Инициализация UI ---
@@ -159,6 +172,12 @@ const UI = (() => {
                 }
             });
         }
+        inventorySortSelect.addEventListener('change', () => {
+            // Сохраняем выбор пользователя
+            localStorage.setItem('inventorySortOrder', inventorySortSelect.value);
+            // Перерисовываем инвентарь с новым порядком
+            renderInventory(Game.getPlayerData());
+        });
         
     }
 
@@ -238,6 +257,34 @@ const UI = (() => {
                 statsByRarityContainerEl.appendChild(listItem);
             });
         }
+    }
+
+    function showNewCard(rollResult) {
+        newCardQueue.push(rollResult);
+        processNewCardQueue();
+    }
+
+    function processNewCardQueue() {
+        if (isShowingNewCard || newCardQueue.length === 0) {
+            return;
+        }
+        isShowingNewCard = true;
+        const result = newCardQueue.shift(); // Берем первую карту из очереди
+
+        
+        newCardModalImage.src = result.card.image;
+        newCardModalName.textContent = result.card.name;
+        newCardModalRarity.textContent = `${L.get('ui.rarity')}: ${result.rarity.name}`;
+        newCardModalRarity.style.color = result.rarity.color;
+        
+        newCardModal.show();
+        
+        // Слушатель на закрытие модалки
+        const modalEl = document.getElementById('newCardModal');
+        modalEl.addEventListener('hidden.bs.modal', () => {
+            isShowingNewCard = false;
+            processNewCardQueue(); // Проверяем, есть ли еще карты в очереди
+        }, { once: true });
     }
 
     function handleVolumeChange(event) {
@@ -337,6 +384,7 @@ const UI = (() => {
         renderInventory(playerData); // Обновляем инвентарь (включая счетчик)
         renderShop(); // Обновляем магазин (состояние кнопок)
         // renderSettings() удален
+        renderRebirthSection();
         updateEquippedItemsDisplay(playerData.equippedItems);
         toggleMultiRollButton(playerData.purchasedUpgrades.multiRollX5);
         if (playerData && typeof playerData.luckyRollCounter !== 'undefined') {
@@ -389,18 +437,72 @@ const UI = (() => {
 
     function updateActiveBoostsDisplay() {
         if (!activeBoostsDisplay) return;
+
         const playerData = Game.getPlayerData();
-        if (playerData.activeBoosts.length > 0) {
-            const boostsHTML = playerData.activeBoosts.map(boost => {
+        const activeBoosts = playerData.activeBoosts;
+
+        if (activeBoosts.length > 0) {
+            const boostsHTML = activeBoosts.map(boost => {
                 const timeLeft = Math.max(0, Math.round((boost.endTime - Date.now()) / 1000));
                 const minutes = Math.floor(timeLeft / 60);
                 const seconds = timeLeft % 60;
-                return `<span class="badge bg-success me-1">${boost.name}: ${minutes}m ${seconds}s</span>`;
+                // Добавляем '0' перед секундами, если их меньше 10
+                const paddedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+                return `<span class="badge bg-success me-1">${boost.name}: ${minutes}:${paddedSeconds}</span>`;
             }).join('');
             activeBoostsDisplay.innerHTML = `${L.get('ui.activeBoosts')}: ${boostsHTML}`;
+
+            // Если есть бусты, а таймер еще не запущен - ЗАПУСКАЕМ ЕГО.
+            if (!boostTimerInterval) {
+                console.log("Starting boost timer interval.");
+                boostTimerInterval = setInterval(updateActiveBoostsDisplay, 1000);
+            }
         } else {
+            // Если бустов нет, очищаем дисплей и таймер.
             activeBoostsDisplay.innerHTML = '';
+            if (boostTimerInterval) {
+                console.log("Stopping boost timer interval.");
+                clearInterval(boostTimerInterval);
+                boostTimerInterval = null;
+            }
         }
+    }
+
+    //rebirh
+    function renderRebirthSection() {
+        const rebirthSection = document.getElementById('rebirth');
+        if (!rebirthSection) return;
+
+        const playerData = Game.getPlayerData();
+        const nextCost = Game.getRebirthCost();
+        const canAfford = playerData.currency >= nextCost;
+        const uniqueCardsCount = new Set(playerData.inventory.filter(id => id !== 'garbage')).size;
+        const potentialBonus = (uniqueCardsCount * PRESTIGE_LUCK_PER_CARD).toFixed(3);
+
+        // ИСПРАВЛЕНИЕ: Мы получаем текст через L.get() сразу при создании HTML.
+        // Статичные атрибуты data-i18n больше не нужны в этой секции, так как она полностью динамическая.
+        rebirthSection.innerHTML = `
+            <div class="text-center p-md-5">
+                <h2 class="mb-3">${L.get('ui.rebirth.title')}</h2>
+                <p class="lead text-muted mb-4">${L.get('ui.rebirth.description')}</p>
+                <div class="card bg-dark-subtle p-4 mx-auto" style="max-width: 600px;">
+                    <div class="card-body">
+                        <p class="fs-5">${L.get('ui.rebirth.current_cards').replace('{count}', uniqueCardsCount)}</p>
+                        <p class="fs-5">${L.get('ui.rebirth.potential_bonus').replace('{bonus}', `<strong class="text-success">+${potentialBonus}</strong>`)}</p>
+                        <hr>
+                        <p class="text-warning-emphasis">${L.get('ui.rebirth.warning')}</p>
+                        <button id="rebirthButton" class="btn btn-lg btn-danger w-100 mt-3" ${!canAfford ? 'disabled' : ''}>
+                            <span>${L.get('ui.rebirth.button')}</span>
+                            <span class="d-block small">${nextCost.toLocaleString()} 💎</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // ОШИБОЧНЫЙ ВЫЗОВ УДАЛЕН: L.applyToDOM();
+        
+        document.getElementById('rebirthButton')?.addEventListener('click', Game.performRebirth);
     }
     
     // --- Анимация Ролла (быстрая смена на одном месте) ---
@@ -493,23 +595,35 @@ const UI = (() => {
         }
     }
 
-    function onRollsCompleted(multiRollResults, isCalledByAutoroll) {
+    function onRollsCompleted(results, isCalledByAutoroll) {
         isRolling = false;
         if (!isAutorolling) {
             setButtonsDisabled(false, false);
             const playerData = Game.getPlayerData();
-            multiRollButton.disabled = !playerData.purchasedUpgrades.multiRollX5;
+            if (playerData) {
+                multiRollButton.disabled = !playerData.purchasedUpgrades.multiRollX5;
+            }
         }
 
-        if (multiRollResults.length > 0) {
-            displayMultiRollSummary(multiRollResults);
+        if (results.length > 1) {
+            displayMultiRollSummary(results);
         }
         
+        // ИСПРАВЛЕНИЕ: Используем правильное имя переменной - 'results'
+        results.forEach(result => {
+            if (result.isNew) {
+                showNewCard(result);
+            }
+        });
+
         updateAll(Game.getPlayerData());
 
         if (isAutorolling) {
-            const delay = multiRollResults.length > 0 ? 700 : 500;
-            autorollTimer = setTimeout(performNextAutoroll, delay);
+            // Проверяем, не вызвана ли модалка с новой картой. Если да, авторолл уже будет на паузе.
+            if (!isShowingNewCard) {
+                const delay = results.length > 1 ? 700 : 500;
+                autorollTimer = setTimeout(performNextAutoroll, delay);
+            }
         }
     }
     // --- Обработчики кнопок Ролла ---
@@ -528,7 +642,7 @@ const UI = (() => {
         activeSingleRollClearCallback = startRollAnimation(rollSlot, rollResult.rarity, () => {
             activeSingleRollClearCallback = null; 
             displayRollResult(rollResult);
-            onRollsCompleted([], isCalledByAutoroll);
+            onRollsCompleted([rollResult], isCalledByAutoroll);
         });
     }
 
@@ -673,24 +787,44 @@ const UI = (() => {
     // --- Инвентарь с силуэтами и счетчиком ---
     function renderInventory(playerData) {
         if (!inventoryGrid || !inventoryCounterElement) return;
+
+        const sortOrder = localStorage.getItem('inventorySortOrder') || 'rarity_desc';
+        if (inventorySortSelect) inventorySortSelect.value = sortOrder;
+
         inventoryGrid.innerHTML = '';
-        let openedCount = 0;
-        const totalCards = RARITIES_DATA.filter(r => r.id !== 'garbage').length;
 
-        const sortedRarities = [...RARITIES_DATA].reverse(); 
-        
-        // ИСПРАВЛЕНИЕ 2: Убрал проверку if (rarityData.id === 'garbage') return;
-        // Теперь "Хлам" будет обрабатываться как обычная карта.
-        sortedRarities.forEach(rarityData => {
-            // Но мы все еще не хотим, чтобы "Хлам" был в общем счетчике коллекции.
-            // Поэтому проверка здесь, а не в начале цикла.
-            if (rarityData.id !== 'garbage') {
-                const isOpened = playerData.inventory.includes(rarityData.id);
-                if (isOpened) openedCount++;
-            }
+        // --- НАЧАЛО ИЗМЕНЕНИЯ ---
+        // 1. Фильтруем ВЕСЬ список карт, оставляя только те, что доступны игроку
+        const availableRarities = RARITIES_DATA.filter(r => 
+            (r.minPrestige || 0) <= playerData.prestigeLevel
+        );
+        // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
-            // Общая логика для всех карт, включая "Хлам"
-            const isOpened = playerData.inventory.includes(rarityData.id);
+        let sortedRarities = [...availableRarities];
+
+        // Логика сортировки теперь применяется к отфильтрованному списку
+        switch (sortOrder) {
+            case 'rarity_asc':
+                sortedRarities.reverse(); // Примечание: reverse() мутирует массив, но т.к. мы создали копию, это безопасно
+                break;
+            case 'name_asc':
+                sortedRarities.sort((a, b) => 
+                    L.get(a.card.nameKey).localeCompare(L.get(b.card.nameKey), L.getCurrentLanguage())
+                );
+                break;
+            case 'rarity_desc':
+            default:
+                // Сортировка по probabilityBase УЖЕ выполнена в RARITIES_DATA, так что ничего не делаем
+                break;
+        }
+
+        const parentCards = sortedRarities.filter(r => !r.displayParentId);
+
+        parentCards.forEach(rarityData => {
+            const allCardVersions = [rarityData, ...availableRarities.filter(r => r.displayParentId === rarityData.id)];
+            const openedVersions = allCardVersions.filter(v => playerData.inventory.includes(v.id));
+            const isAnyVersionOpened = openedVersions.length > 0;
+
             const col = document.createElement('div');
             col.className = 'col';
             const cardDiv = document.createElement('div');
@@ -701,73 +835,119 @@ const UI = (() => {
             const nameDiv = document.createElement('div');
             nameDiv.className = 'inventory-card-name';
 
-            if (isOpened) {
-                cardDiv.classList.add(`border-${rarityData.cssClass}`);
-                cardDiv.style.setProperty('--rarity-glow-color', rarityData.glowColor);
-                img.src = rarityData.card.image;
+            if (isAnyVersionOpened) {
+                const displayVersion = openedVersions[openedVersions.length - 1];
                 
-                // ИСПРАВЛЕНИЕ 1: Используем L.get() для имени карты
-                nameDiv.textContent = L.get(rarityData.card.nameKey);
+                img.src = displayVersion.card.image;
+                nameDiv.textContent = L.get(displayVersion.card.nameKey);
+                cardDiv.classList.add(`border-${displayVersion.cssClass || displayVersion.id}`);
+                cardDiv.style.setProperty('--rarity-glow-color', displayVersion.glowColor);
                 
-                cardDiv.addEventListener('click', () => showCardModal(rarityData));
+                // Передаем в модалку только существующие версии, а не все возможные
+                const allPossibleVersions = [rarityData, ...RARITIES_DATA.filter(r => r.displayParentId === rarityData.id)];
+                cardDiv.addEventListener('click', () => showCardModal(allPossibleVersions));
             } else {
-                // Не показываем "Хлам", если он не открыт
-                if (rarityData.id === 'garbage') {
-                    return; 
-                }
                 cardDiv.classList.add('locked');
                 img.src = "img/silhouette_placeholder.png";
                 nameDiv.textContent = "?????";
             }
+            
             cardDiv.appendChild(img);
             cardDiv.appendChild(nameDiv);
             col.appendChild(cardDiv);
             inventoryGrid.appendChild(col);
         });
-        inventoryCounterElement.textContent = `${L.get('ui.opened')}: ${openedCount} / ${totalCards}`;
-    }
 
-    function showCardModal(rarityData) {
-        modalCardImage.src = rarityData.card.image;
-        
-        // ИСПРАВЛЕНИЕ 1: Используем L.get() для имени карты
-        modalCardName.textContent = L.get(rarityData.card.nameKey);
-        
-        modalCardRarity.textContent = `${L.get('ui.rarity')}: ${L.get(rarityData.nameKey)}`;
-        modalCardRarity.style.color = rarityData.color;
-        
-        if (rarityData.probabilityBase >= 1) {
-            modalCardChance.textContent = L.get('ui.guaranteed');
-        } else {
-            modalCardChance.textContent = `${L.get('ui.baseChance')}: 1/${Math.round(1 / rarityData.probabilityBase)}`;
-        }
-        modalCardDescription.textContent = L.get(rarityData.card.descriptionKey);
+        // Обновляем счетчик
+        const uniqueOpenedCount = new Set(playerData.inventory.filter(id => id !== 'garbage')).size;
+        // Общее количество карт теперь зависит от уровня престижа
+        const totalPossibleCount = availableRarities.filter(r => r.id !== 'garbage').length;
+        inventoryCounterElement.textContent = `${L.get('ui.opened')}: ${uniqueOpenedCount} / ${totalPossibleCount}`;
+}
 
-        visualEffectControlsContainer.innerHTML = '';
-        const cardHasEffect = VisualEffects.effects.hasOwnProperty(rarityData.id);
-        if (cardHasEffect) {
-            const toggleBtn = document.createElement('button');
-            toggleBtn.classList.add('btn', 'btn-sm');
-            const isActive = Game.getPlayerData().activeVisualEffectRarityId === rarityData.id;
-            toggleBtn.textContent = L.get(isActive ? 'ui.deactivateEffect' : 'ui.activateEffect');
-            toggleBtn.classList.add(isActive ? 'btn-danger' : 'btn-success');
+    function showCardModal(cardVersions) {
+        const versionSwitcher = document.getElementById('versionSwitcher');
+        const visualEffectControls = document.getElementById('visualEffectControls');
+        const playerData = Game.getPlayerData();
+
+        // Очищаем контейнеры
+        versionSwitcher.innerHTML = '';
+        visualEffectControls.innerHTML = '';
+        
+        // Функция для отрисовки деталей выбранной версии
+        const showVersionDetails = (version) => {
+            modalCardImage.src = version.card.image;
+            modalCardName.textContent = L.get(version.card.nameKey);
+            modalCardRarity.textContent = `${L.get('ui.rarity')}: ${L.get(version.nameKey)}`;
+            modalCardDescription.textContent = L.get(version.card.descriptionKey);
+            modalCardRarity.style.color = version.color;
+
+            if (version.probabilityBase >= 1) {
+                modalCardChance.textContent = L.get('ui.guaranteed');
+            } else {
+                modalCardChance.textContent = `${L.get('ui.baseChance')}: 1/${Math.round(1 / version.probabilityBase)}`;
+            }
             
-            toggleBtn.addEventListener('click', () => {
-                const stillActive = Game.getPlayerData().activeVisualEffectRarityId === rarityData.id;
-                if (stillActive) {
-                    Game.clearActiveVisualEffect();
+            // Обновляем кнопку активации эффекта для текущей версии
+            visualEffectControls.innerHTML = ''; // Очищаем старую кнопку
+            const cardHasEffect = VisualEffects.effects.hasOwnProperty(version.id);
+            if (cardHasEffect) {
+                const toggleBtn = document.createElement('button');
+                toggleBtn.classList.add('btn', 'btn-sm');
+                const isActive = playerData.activeVisualEffectRarityId === version.id;
+                toggleBtn.textContent = L.get(isActive ? 'ui.deactivateEffect' : 'ui.activateEffect');
+                toggleBtn.classList.add(isActive ? 'btn-danger' : 'btn-success');
+                
+                toggleBtn.addEventListener('click', () => {
+                    if (isActive) {
+                        Game.clearActiveVisualEffect();
+                    } else {
+                        Game.setActiveVisualEffect(version.id);
+                    }
+                    // Перерисовываем модалку, чтобы обновить состояние кнопки
+                    cardModal.hide();
+                    setTimeout(() => showCardModal(cardVersions), 300);
+                });
+                visualEffectControls.appendChild(toggleBtn);
+            } else {
+                visualEffectControls.innerHTML = `<p class="text-muted small">${L.get('ui.noVisualEffect')}</p>`;
+            }
+        };
+
+        // Создаем переключатель, если версий больше одной
+        if (cardVersions.length > 1) {
+            const group = document.createElement('div');
+            group.className = 'btn-group';
+            group.setAttribute('role', 'group');
+
+            cardVersions.forEach(version => {
+                const isUnlocked = playerData.inventory.includes(version.id);
+
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'btn btn-outline-light';
+                button.textContent = L.get(version.card.nameKey);
+
+                if (isUnlocked) {
+                    button.addEventListener('click', (e) => {
+                        showVersionDetails(version);
+                        group.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                        e.currentTarget.classList.add('active');
+                    });
                 } else {
-                    Game.setActiveVisualEffect(rarityData.id);
+                    button.disabled = true;
+                    button.textContent += ` (${L.get('ui.rebirth.locked_after').replace('{level}', version.minPrestige || 1)})`;
                 }
-                // Закрываем модалку и открываем заново, чтобы обновить состояние кнопки
-                cardModal.hide();
-                // Небольшая задержка, чтобы анимация закрытия успела сработать
-                setTimeout(() => showCardModal(rarityData), 300);
+
+                group.appendChild(button);
             });
-            visualEffectControlsContainer.appendChild(toggleBtn);
-        } else {
-            visualEffectControlsContainer.innerHTML = `<p class="text-muted small">${L.get('ui.noVisualEffect')}</p>`;
+            versionSwitcher.appendChild(group);
+            // Активируем первую кнопку
+            group.firstChild.classList.add('active');
         }
+        
+        // Показываем первую версию по умолчанию
+        showVersionDetails(cardVersions[0]); 
         cardModal.show();
     }
         function applyVisualEffect(rarityId, isInitialLoad = false) {
@@ -782,12 +962,12 @@ const UI = (() => {
         if (!boostShop || !equipmentShop || !upgradesShop) return;
         const playerData = Game.getPlayerData();
         
+        // Функция для рендера бустов, экипировки и улучшений (остается без изменений)
         const renderSection = (container, data, type) => {
             container.innerHTML = data.map(item => {
                 const isPurchased = (type === 'equipment' && playerData.inventory.includes("purchased_" + item.id)) || (type === 'upgrade' && playerData.purchasedUpgrades[item.targetProperty]);
                 const isEquipped = type === 'equipment' && playerData.equippedItems.find(e => e.id === item.id);
                 const canAfford = playerData.currency >= item.cost;
-
                 let buttonHtml;
                 if (isEquipped) {
                     buttonHtml = `<button class="btn btn-sm btn-secondary" disabled>${L.get('ui.nowEquipped')}</button>`;
@@ -797,7 +977,6 @@ const UI = (() => {
                 } else {
                     buttonHtml = `<button class="btn btn-sm btn-success buy-${type}-btn" data-item-id="${item.id}" ${!canAfford ? 'disabled' : ''}>${L.get('ui.buy')} <span class="badge bg-warning text-dark">${item.cost} 💎</span></button>`;
                 }
-
                 return `
                 <div class="list-group-item shop-item d-flex justify-content-between align-items-center ${isPurchased ? 'purchased' : ''} ${isEquipped ? 'equipped' : ''}">
                     <div><strong>${L.get(item.nameKey)}</strong><small class="d-block text-muted">${L.get(item.descriptionKey)}</small></div>
@@ -810,27 +989,27 @@ const UI = (() => {
         renderSection(equipmentShop, SHOP_DATA.equipment, 'equipment');
         renderSection(upgradesShop, SHOP_DATA.upgrades, 'upgrade');
 
-        // <<< НАЧАЛО НОВОГО БЛОКА ДЛЯ ЯДРА УДАЧИ >>>
-        // Мы можем добавить его после 'upgradesShop'
-        const luckCoreSection = document.getElementById('luckCoreSection'); // Нам понадобится новый div в HTML
+        // --- НАЧАЛО БЛОКА, КОТОРЫЙ МЫ ИСПРАВЛЯЕМ ---
+        const luckCoreSection = document.getElementById('luckCoreSection');
         if (luckCoreSection) {
             const currentBonus = ((Game.getPlayerData().luckCoreLevel || 0) * 0.01).toFixed(2);
             const nextCost = Game.getLuckCoreAmplificationCost();
             const canAfford = Game.getPlayerData().currency >= nextCost;
 
+            // ИСПРАВЛЕНИЕ: Теперь все тексты здесь ГАРАНТИРОВАННО берутся через L.get()
             luckCoreSection.innerHTML = `
                 <hr>
-                <h4 data-i18n="shop.luck_core.title">Усиление Ядра Удачи</h4>
+                <h4>${L.get('shop.luck_core.title')}</h4>
                 <div class="list-group">
                     <div class="list-group-item shop-item d-flex justify-content-between align-items-center">
                         <div>
-                            <strong data-i18n="shop.luck_core.current_bonus">Текущий бонус</strong>: <span class="text-success">+${currentBonus}</span>
-                            <small class="d-block text-muted" data-i18n="shop.luck_core.description">Увеличивает базовую удачу навсегда.</small>
+                            <strong>${L.get('shop.luck_core.current_bonus')}</strong>: <span class="text-success">+${currentBonus}</span>
+                            <small class="d-block text-muted">${L.get('shop.luck_core.description')}</small>
                         </div>
                         <button id="amplifyLuckCoreBtn" class="btn btn-lg btn-warning" ${!canAfford ? 'disabled' : ''}>
-                        <span data-i18n="shop.luck_core.amplify">Усилить</span> (+0.01)
+                        <span>${L.get('shop.luck_core.amplify')}</span> (+0.01)
                         <br>
-                        <span class="badge bg-dark">${nextCost} 💎</span>
+                        <span class="badge bg-dark">${nextCost.toLocaleString()} 💎</span>
                         </button>
                     </div>
                 </div>
@@ -840,9 +1019,8 @@ const UI = (() => {
                 Game.amplifyLuckCore();
             });
         }
-        // <<< КОНЕЦ НОВОГО БЛОКА >>>
+        // --- КОНЕЦ ИСПРАВЛЕННОГО БЛОКА ---
 
-        
         addShopEventListeners();
     }
     function addShopEventListeners() {
