@@ -35,6 +35,10 @@ window.locales.en = {
         uranium_alt_1: { name: "Unstable", cardName: "Unstable Uranium-chan", description: "She doesn't just glow anymore. She is the source of energy. The chain reaction has begun, and you'd better stay away. Far away." },
         unbound_alt_1: { name: "Unchained", cardName: "Hanma, Awakened", description: "The chains are broken. Pain has become her fuel. She no longer runs—now, everyone runs from her." },
         space_alt_1: { name: "Primordial", cardName: "Reality Weaver", description: "She has witnessed the birth and death of stars. To her, galaxies are but threads in the infinite tapestry of existence." },
+        legendary_alt_1: { name: "Clownish", cardName: "Misa, the Clowness", description: "Aww, how sweet, Misa threw a clown-themed party... But who's going to finish the cake?" },
+        epic_alt_1: { name: "Velocity", cardName: "Gael, the Blue Streak", description: "She has surpassed her limits. Now she's ready to run towards her goal with incredible speed, and nothing will stand in her way. And what is her goal? Who knows..." },
+        common_alt_1: { name: "GYATT", cardName: "Rizz Eve", description: "It turns out Eve has two very weighty (and soft) arguments for not considering her so ordinary." },
+        space_alt_2: { name: "Galactic", cardName: "Galaxy Weaver", description: "After creating hundreds of galaxies and communicating with more influential cosmic entities, she decided to change her image..." },
     },
     // Shop Items
     shop: {

@@ -83,6 +83,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "space_alt_2",
+        nameKey: "cards.space_alt_2.name",
+        displayParentId: "space",
+        minPrestige: 2,
+        probabilityBase: 1 / 142420, // 1/1042 * 100
+        color: "#80deea", // Светло-голубой
+        glowColor: "#ffffff", // Белый
+        cssClass: "rarity-space-alt",
+        currencyOnDuplicate: 1424,
+        card: {
+            name: "Reality Weaver", 
+            nameKey: "cards.space_alt_2.cardName",
+            image: "img/alt2Space.png",
+            descriptionKey: "cards.space_alt_2.description"
+        }
+    },
+    {
         id: "space_alt_1",
         nameKey: "cards.space_alt_1.name",
         displayParentId: "space",
@@ -209,6 +226,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "legendary_alt_1",
+        nameKey: "cards.legendary_alt_1.name",
+        displayParentId: "legendary",
+        minPrestige: 1,
+        probabilityBase: 1/3200, // В 100 раз реже оригинала
+        color: "#ff4081", // Яркий розовый, как глазурь на торте
+        glowColor: "#f8bbd0", // Светло-розовый
+        cssClass: "rarity-legendary-alt",
+        currencyOnDuplicate: 1000,
+        card: {
+            name: "Misa, the Party Clown", 
+            nameKey: "cards.legendary_alt_1.cardName",
+            image: "img/altLegendary.png", // Вам нужно будет создать это изображение
+            descriptionKey: "cards.legendary_alt_1.description"
+        }
+    },
+    {
         id: "motivation",
         nameKey: "cards.motivation.name",
         probabilityBase: 1/2111,
@@ -251,6 +285,23 @@ window.RARITIES_DATA = [
             nameKey: "cards.cosmic.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardCosmic.png",
             descriptionKey: "cards.cosmic.description"
+        }
+    },
+    {
+        id: "epic_alt_1",
+        nameKey: "cards.epic_alt_1.name",
+        displayParentId: "epic",
+        minPrestige: 1,
+        probabilityBase: 1/1600, // В 100 раз реже оригинала
+        color: "#448aff", // Яркий синий (Blue A200)
+        glowColor: "#bbdefb", // Светло-голубой (Blue 100)
+        cssClass: "rarity-epic-alt",
+        currencyOnDuplicate: 700,
+        card: {
+            name: "Gael, the Blue Streak", 
+            nameKey: "cards.epic_alt_1.cardName",
+            image: "img/altEpic.png", // Вам нужно будет создать это изображение
+            descriptionKey: "cards.epic_alt_1.description"
         }
     },
     {
@@ -311,6 +362,23 @@ window.RARITIES_DATA = [
             nameKey: "cards.devil.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardDevil.png",
             descriptionKey: "cards.devil.description"
+        }
+    },
+    {
+        id: "common_alt_1",
+        nameKey: "cards.common_alt_1.name",
+        displayParentId: "common",
+        minPrestige: 1,
+        probabilityBase: 1 / 400, 
+        color: "#9e9e9e",
+        glowColor: "#bdbdbd", 
+        cssClass: "rarity-common-alt",
+        currencyOnDuplicate: 40,
+        card: {
+            name: "GYATT", 
+            nameKey: "cards.common_alt_1.cardName",
+            image: "img/altCommon.png",
+            descriptionKey: "cards.common_alt_1.description"
         }
     },
     {

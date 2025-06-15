@@ -106,8 +106,9 @@ const VisualEffects = {
         'error': "audio/error-sfx.mp3",
         'timestop': "audio/timestop-sfx.mp3",
         'motivation': "audio/motivation-sfx.mp3",
-        'smokinsexystyle': "audio/smokinsexystyle-sfx.mp3"
-        // 'uranium': "audio/uranium_ambient.mp3"
+        'smokinsexystyle': "audio/smokinsexystyle-sfx.mp3",
+        // 'uranium': "audio/uranium_ambient.mp3",
+        'uranium_alt_1': "audio/altUranium-sfx.mp3"
     },
     // ==========================================================================
     // КОНЕЦ БЛОКА: Музыкальные функции и Карта музыки
@@ -158,9 +159,18 @@ const VisualEffects = {
         }
 
         console.log(`Applying visual effect: ${effectId}`);
-        if (targetElements.glitchOverlay && (effectId === 'error' || effectId === 'timestop' || effectId === 'motivation'  || effectId === 'smokinsexystyle'  || effectId === 'cosmic'  /* || другие эффекты, использующие оверлей */)) {
-            targetElements.glitchOverlay.style.display = 'block';
-        }
+        if (targetElements.glitchOverlay && (
+        effectId === 'error' || 
+        effectId === 'timestop' || 
+        effectId === 'motivation' || 
+        effectId === 'smokinsexystyle' || 
+        effectId === 'cosmic' ||
+        effectId === 'uranium_alt_1' || // Добавлено
+        effectId === 'witchy' ||         // Добавлено
+        effectId === 'blackhole'         // Добавлено
+        )) {
+        targetElements.glitchOverlay.style.display = 'block';
+    }
 
         const effectFunction = this.effects[effectId];
         if (effectFunction) {
@@ -325,17 +335,17 @@ const VisualEffects = {
                         }
                     });
 
-                    // // 1. Анимация дрожания экрана (применяем к body или к основному контейнеру игры)
-                    // // Используем gsap.utils.random для случайных значений
-                    // glitchTl.to(body, { // Или к вашему главному игровому контейнеру
-                    //     duration: 0.03,
-                    //     x: () => gsap.utils.random(-3, 3, 1) + "px", // Случайный сдвиг по X
-                    //     y: () => gsap.utils.random(-3, 3, 1) + "px", // Случайный сдвиг по Y
-                    //     rotation: () => gsap.utils.random(-0.2, 0.2, 0.1) + "deg",
-                    //     ease: "steps(1)", // Резкие переходы
-                    //     repeat: 2, // Повторить дрожание несколько раз в цикле
-                    //     yoyo: true // Вернуться в исходное положение
-                    // }, 0); // Начать сразу
+                    // 1. Анимация дрожания экрана (применяем к body или к основному контейнеру игры)
+                    // Используем gsap.utils.random для случайных значений
+                    glitchTl.to(gameWrapper, { // Или к вашему главному игровому контейнеру
+                        duration: 0.03,
+                        x: () => gsap.utils.random(-3, 3, 1) + "px", // Случайный сдвиг по X
+                        y: () => gsap.utils.random(-3, 3, 1) + "px", // Случайный сдвиг по Y
+                        rotation: () => gsap.utils.random(-0.2, 0.2, 0.1) + "deg",
+                        ease: "steps(1)", // Резкие переходы
+                        repeat: 2, // Повторить дрожание несколько раз в цикле
+                        yoyo: true // Вернуться в исходное положение
+                    }, 0); // Начать сразу
 
                     // 2. Анимация цветных слоев
                     glitchTl.fromTo(redLayer,
@@ -421,108 +431,81 @@ const VisualEffects = {
         },
 
         'timestop': function(targets, isInitialLoad) {
-            const { body, glitchOverlay } = targets;
+            // ФИНАЛЬНАЯ ВЕРСИЯ: Цель - #effectTargetWrapper
+            const effectTarget = document.getElementById('effectTargetWrapper');
+            const { glitchOverlay } = targets;
             let textElement = null;
-            const tl = gsap.timeline(); // Главный таймлайн для управления фазами
+            const tl = gsap.timeline();
 
-            if (!body || !glitchOverlay) {
-                console.warn("Timestop effect: body or glitchOverlay missing.");
-                return () => { if(tl) tl.kill(); }; 
+            if (!effectTarget || !glitchOverlay) {
+                console.error("Timestop effect critical error: #effectTargetWrapper or #globalGlitchOverlay not found in the DOM.");
+                return () => {}; // Возвращаем пустую функцию очистки
             }
             
             // --- Начальная настройка ---
-            // Эти классы активируют ваши СУЩЕСТВУЮЩИЕ CSS-анимации для волн и стили для текста
             glitchOverlay.classList.add('active-effect-timestop'); 
-            // body.classList.add('timestop-active'); // Этот класс можно использовать для финального ЧБ фильтра, если хотите
 
-            // Создаем текст, его анимацию будет контролировать GSAP
             textElement = document.createElement('div');
-            textElement.className = 'timestop-text'; // Убедитесь, что CSS для этого есть
+            textElement.className = 'timestop-text';
             textElement.textContent = "ZA WARUDO!";
-            gsap.set(textElement, { opacity: 0, scale: 3, filter: "blur(10px)" }); // Начальное состояние для GSAP
+            gsap.set(textElement, { opacity: 0, scale: 3, filter: "blur(10px)" });
             glitchOverlay.appendChild(textElement);
-
-            // --- Определяем значения фильтров для GSAP ---
-            const negativeFilter = "sepia(60%) contrast(130%) hue-rotate(180deg) invert(90%) saturate(200%) brightness(0.85)";
-            const monochromeFilter = "grayscale(100%) contrast(115%) brightness(1.0)";
-            const normalFilter = "none"; 
-
-            // --- ФАЗЫ АНИМАЦИИ НА ТАЙМЛАЙНЕ GSAP ---
-
-            // Фаза 1: Появление текста "ZA WARUDO!" и волны (волны идут по CSS)
-            // GSAP просто ждет, пока CSS-анимации волн отработают (примерно 1.5-2с)
-            // и одновременно анимирует текст.
+            
+            // --- Управление классами через GSAP Timeline ---
+            
+            // Фаза 1: Анимация волн и текста
             tl.addLabel("phase1_start")
-              // Длительность этой "пустой" анимации должна соответствовать длительности ваших CSS-волн
-              .to(glitchOverlay, { duration: 1.8 /* Примерная длительность CSS-анимации волн */ }, "phase1_start") 
+              .to(glitchOverlay, { duration: 1.8 }, "phase1_start") 
               .to(textElement, { 
                   duration: 0.7, 
                   opacity: 1, 
                   scale: 1, 
                   filter: "blur(0px)", 
                   ease: "power2.out" 
-              }, "phase1_start+=0.4"); // Текст появляется во время волн
+              }, "phase1_start+=0.4");
 
-            // Фаза 2: Переход в "негатив"
-            tl.addLabel("start_negative", "-=1.0") // Начинаем переход в негатив, когда текст почти полностью появился
-              .to(body.style, { 
-                  duration: 0.2, 
-                  filter: negativeFilter, 
-                  ease: "none" 
-              }, "start_negative");
+            // Фаза 2: Включаем "негатив" на effectTargetWrapper
+            tl.addLabel("start_negative", "-=1.0")
+              .call(() => {
+                  effectTarget.classList.add('timestop-filter-active', 'negative');
+              }, null, "start_negative");
 
-            // Фаза 2.5: Текст "ZA WARUDO!" исчезает, пока экран в негативе
+            // Фаза 2.5: Текст исчезает
             tl.to(textElement, { 
                   duration: 0.5, 
                   opacity: 0, 
                   scale: 0.7, 
                   filter: "blur(5px)", 
                   ease: "power1.in" 
-              }, ">+=1.0"); // Исчезает через 1с после начала негатива
+              }, ">+=1.0");
 
-            // Фаза 3: Переход из "негатива" в "нормальное" состояние 
-            // (перед переходом в ЧБ, чтобы ЧБ применялся к нормальным цветам, а не к негативу)
-            // Держим негатив примерно (1.0 от появления текста) + (0.5 на исчезновение текста) + 0.5 (пауза) = ~2.0 секунды
-            tl.addLabel("end_negative", ">+=0.5") // Пауза в негативе
-              .to(body.style, {
-                  duration: 0.01,
-                  filter: normalFilter, 
-                  ease: "none"
-              }, "end_negative");
-              // Если нужны "возвращающиеся" волны, их CSS-анимацию можно было бы запустить здесь,
-              // добавив другой класс к glitchOverlay.
+            // Фаза 3: Убираем "негатив"
+            tl.addLabel("end_negative", ">+=0.5")
+              .call(() => {
+                  effectTarget.classList.remove('negative');
+              }, null, "end_negative");
 
-            // Фаза 4: Переход в "черно-белый" мир (финальное состояние, пока эффект активен)
-            tl.addLabel("start_monochrome", ">+=0.2") // Небольшая пауза после сброса негатива
-              .to(body.style, {
-                  duration: 0.5,
-                  filter: monochromeFilter,
-                  ease: "power1.inOut"
-              }, "start_monochrome");
+            // Фаза 4: Включаем "монохром"
+            tl.addLabel("start_monochrome", ">+=0.4")
+              .call(() => {
+                  effectTarget.classList.add('monochrome');
+              }, null, "start_monochrome");
 
             // Функция очистки
             return () => {
                 tl.kill(); 
                 
-                // Плавно возвращаем фильтр body к нормальному состоянию при очистке
-                gsap.to(body.style, { 
-                    duration: 0.3, 
-                    filter: normalFilter,
-                    onComplete: () => {
-                        if(body) gsap.set(body, { clearProps: "filter" }); // Убираем инлайновый filter
-                        // Удаляем классы, если они были и не управляются GSAP напрямую
-                        // if(body) body.classList.remove('timestop-active'); 
-                    }
-                });
+                // Убираем все классы с effectTargetWrapper
+                if (effectTarget) {
+                    effectTarget.classList.remove('timestop-filter-active', 'negative', 'monochrome');
+                }
 
                 if (glitchOverlay) {
                     glitchOverlay.classList.remove('active-effect-timestop'); 
                     if (textElement) textElement.remove(); 
                 }
-                console.log("Timestop (Phased GSAP) effect cleaned up.");
+                console.log("Timestop (effectTargetWrapper class method) effect cleaned up.");
             };
-        
-            
         },
         'smokinsexystyle': function(targets) {
         const { glitchOverlay } = targets;
@@ -679,82 +662,194 @@ const VisualEffects = {
             console.log("Motivation (Vergil) effect cleaned up.");
         };
     },
-    'cosmic': function(targets) {
-        const { glitchOverlay, body } = targets; // Можем немного затемнить body
-        if (!glitchOverlay || !body) return null;
-
+    'uranium_alt_1': function(targets) {
+        const { glitchOverlay } = targets;
+        if (!glitchOverlay) return null;
+        
         glitchOverlay.style.display = 'block';
-        const nebulae = [];
-        const numNebulae = gsap.utils.random(5, 10); // Количество облаков
-        const tl = gsap.timeline(); // Основной таймлайн для управления жизненным циклом туманностей
+        glitchOverlay.classList.add('active-effect-uranium', 'unstable-version');
 
-        // Сохраняем оригинальный фон body, если он не стандартный
-        // const originalBodyBg = body.style.backgroundColor;
-        // gsap.to(body, { duration: 2, backgroundColor: "#0f0c1e", ease: "power1.inOut" }); // Затемняем основной фон
-
-        for (let i = 0; i < numNebulae; i++) {
-            const nebula = document.createElement('div');
-            nebula.style.position = 'absolute';
-            nebula.style.borderRadius = '50%';
-            const size = gsap.utils.random(glitchOverlay.offsetWidth * 0.3, glitchOverlay.offsetWidth * 0.8); // Крупные
-            nebula.style.width = `${size}px`;
-            nebula.style.height = `${size * gsap.utils.random(0.6, 1)}px`;
-            
-            // Темные цвета: фиолетовый, индиго, темно-серый, с очень низкой альфой
-            const r = gsap.utils.random(20, 50);  // Темно-красные/фиолетовые компоненты
-            const g = gsap.utils.random(10, 40);
-            const b = gsap.utils.random(40, 80);  // Темно-синие/фиолетовые компоненты
-            const alpha = gsap.utils.random(0.1, 0.3); // Очень низкая прозрачность
-
-            nebula.style.background = `radial-gradient(ellipse, rgba(${r},${g},${b},${alpha}) 0%, transparent 60%)`;
-            nebula.style.filter = `blur(${gsap.utils.random(30, 60)}px)`; // Сильное размытие
-            nebula.style.mixBlendMode = 'multiply'; // Или 'darken', 'overlay' - поэкспериментируйте
-            nebula.style.opacity = 0;
-            glitchOverlay.appendChild(nebula);
-            nebulae.push(nebula);
-
-            // Начальное положение и анимация
-            gsap.set(nebula, {
-                x: gsap.utils.random(0, glitchOverlay.offsetWidth - size),
-                y: gsap.utils.random(0, glitchOverlay.offsetHeight - size * 0.7),
-                rotation: gsap.utils.random(0, 360)
-            });
-
-            const singleNebulaTl = gsap.timeline({
-                repeat: -1,
-                delay: gsap.utils.random(0, 5) // Разная задержка для каждой туманности
-            });
-
-            singleNebulaTl.to(nebula, { // Появление
-                opacity: 1,
-                duration: gsap.utils.random(5, 10),
-                ease: "power1.inOut"
-            })
-            .to(nebula, { // Движение и изменение формы/вращения
-                x: `+=${gsap.utils.random(-150, 150)}`,
-                y: `+=${gsap.utils.random(-100, 100)}`,
-                rotation: `+=${gsap.utils.random(-45, 45)}`,
-                scale: gsap.utils.random(0.8, 1.2),
-                duration: gsap.utils.random(15, 30),
-                ease: "none"
-            }, 0) // Начинается одновременно с появлением
-            .to(nebula, { // Исчезновение
-                opacity: 0,
-                duration: gsap.utils.random(5, 10),
-                ease: "power1.inOut"
-            });
-            
-            tl.add(singleNebulaTl, 0); // Добавляем в общий таймлайн, чтобы можно было убить все сразу
-        }
-
-        return () => { // Функция очистки
-            tl.kill(); // Убиваем все анимации туманностей
-            // gsap.to(body, { duration: 1, backgroundColor: originalBodyBg || "#1a1a2e" }); // Возвращаем фон body
-            nebulae.forEach(n => n.remove());
-            // Не скрываем glitchOverlay здесь
-            console.log("Cosmic (Dark Nebula) effect cleaned up.");
+        return () => {
+            if (glitchOverlay) {
+                glitchOverlay.classList.remove('active-effect-uranium', 'unstable-version');
+                glitchOverlay.style.display = 'none';
+            }
         };
     },
+
+    'witchy': function(targets) {
+        const { glitchOverlay } = targets;
+        if (!glitchOverlay) return null;
+
+        glitchOverlay.style.display = 'block';
+        glitchOverlay.classList.add('active-effect-witchy');
+        const blobs = [];
+
+        for (let i = 0; i < 20; i++) {
+            const blob = document.createElement('div');
+            blob.className = 'witchy-goo-blob';
+            const size = gsap.utils.random(50, 250);
+            gsap.set(blob, {
+                width: size,
+                height: size,
+                x: `random(0, ${window.innerWidth})`,
+                y: `random(0, ${window.innerHeight})`,
+            });
+            glitchOverlay.appendChild(blob);
+            blobs.push(blob);
+
+            gsap.to(blob, {
+                duration: gsap.utils.random(10, 20),
+                x: `random(-200, ${window.innerWidth + 200})`,
+                y: `random(-200, ${window.innerHeight + 200})`,
+                rotation: 'random(-360, 360)',
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+            });
+        }
+        
+        return () => {
+            gsap.killTweensOf(".witchy-goo-blob");
+            glitchOverlay.innerHTML = '';
+            glitchOverlay.classList.remove('active-effect-witchy');
+            glitchOverlay.style.display = 'none';
+        };
+    },
+    'blackhole': function(targets) {
+        const { glitchOverlay, body } = targets;
+        if (!glitchOverlay) return null;
+
+        glitchOverlay.classList.add('active-effect-blackhole');
+        glitchOverlay.style.display = 'block';
+        
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        const particles = [];
+
+        for (let i = 0; i < 200; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'blackhole-particle';
+            glitchOverlay.appendChild(particle);
+            
+            // Начальное положение частицы по краям экрана
+            const angle = Math.random() * Math.PI * 2;
+            const radius = Math.random() * (Math.max(centerX, centerY)) + Math.min(centerX, centerY);
+            
+            gsap.set(particle, {
+                x: centerX + Math.cos(angle) * radius,
+                y: centerY + Math.sin(angle) * radius,
+                scale: gsap.utils.random(0.5, 1.5)
+            });
+            
+            // Анимация затягивания в центр
+            gsap.to(particle, {
+                duration: gsap.utils.random(2, 5),
+                x: centerX,
+                y: centerY,
+                scale: 0,
+                opacity: 0,
+                ease: "power2.in",
+                repeat: -1,
+                delay: gsap.utils.random(0, 4)
+            });
+            particles.push(particle);
+        }
+
+        // Анимация "стягивания" самого игрового контейнера
+        const gameContainer = body.querySelector('.container-fluid');
+        if (gameContainer) {
+            gsap.to(gameContainer, {
+                duration: 15,
+                scale: 0.95,
+                filter: 'blur(1px)',
+                ease: "power1.inOut",
+                repeat: -1,
+                yoyo: true
+            });
+        }
+        
+        return () => {
+            gsap.killTweensOf(".blackhole-particle");
+            if(gameContainer) gsap.killTweensOf(gameContainer);
+            particles.forEach(p => p.remove());
+            if (gameContainer) {
+                gsap.set(gameContainer, { clearProps: "all" });
+            }
+            if (glitchOverlay) {
+                glitchOverlay.classList.remove('active-effect-blackhole');
+                glitchOverlay.style.display = 'none';
+            }
+        };
+    },
+
+    'cosmic': function(targets) {
+        const { glitchOverlay } = targets;
+        if (!glitchOverlay) return null;
+
+        glitchOverlay.classList.add('active-effect-cosmic');
+        glitchOverlay.style.display = 'block';
+        const elements = [];
+
+        // Создаем звезды
+        for (let i = 0; i < 50; i++) {
+            const star = document.createElement('div');
+            star.className = 'cosmic-star';
+            const size = gsap.utils.random(1, 3);
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.top = `${gsap.utils.random(0, 100)}%`;
+            star.style.left = `${gsap.utils.random(0, 100)}%`;
+            star.style.animationDelay = `${gsap.utils.random(0, 4)}s`;
+            glitchOverlay.appendChild(star);
+            elements.push(star);
+        }
+        
+        // Создаем туманности
+        for (let i = 0; i < 5; i++) {
+            const nebula = document.createElement('div');
+            nebula.className = 'cosmic-nebula';
+            const size = gsap.utils.random(300, 600);
+            nebula.style.width = `${size}px`;
+            nebula.style.height = `${size}px`;
+            nebula.style.top = `${gsap.utils.random(-20, 80)}%`;
+            nebula.style.left = `${gsap.utils.random(-20, 80)}%`;
+            nebula.style.background = `radial-gradient(ellipse, hsla(${gsap.utils.random(200, 260)}, 100%, 70%, 0.3) 0%, transparent 70%)`;
+            glitchOverlay.appendChild(nebula);
+            elements.push(nebula);
+
+            gsap.to(nebula, {
+                duration: gsap.utils.random(20, 40),
+                opacity: gsap.utils.random(0.2, 0.5),
+                rotation: '+=360',
+                repeat: -1,
+                yoyo: true,
+                ease: 'sine.inOut'
+            });
+        }
+
+        return () => {
+            gsap.killTweensOf(".cosmic-nebula");
+            elements.forEach(el => el.remove());
+            if (glitchOverlay) {
+                glitchOverlay.classList.remove('active-effect-cosmic');
+                glitchOverlay.style.display = 'none';
+            }
+        };
+    },
+
+    'russian': function(targets) {
+    const gameWrapper = document.getElementById('gameWrapper');
+    if (!gameWrapper) return null;
+
+    gameWrapper.classList.add('visual-effect-russian-drunk');
+
+    return () => {
+        if (gameWrapper) {
+            gameWrapper.classList.remove('visual-effect-russian-drunk');
+        }
+    };
+},
         
         // 'inversion': function(targets) { ... }
         // ... другие эффекты ...

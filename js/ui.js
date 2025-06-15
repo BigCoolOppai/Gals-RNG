@@ -476,11 +476,10 @@ const UI = (() => {
         const playerData = Game.getPlayerData();
         const nextCost = Game.getRebirthCost();
         const canAfford = playerData.currency >= nextCost;
+        // Используем тот же самый, единственно верный метод подсчета
         const uniqueCardsCount = new Set(playerData.inventory.filter(id => id !== 'garbage')).size;
         const potentialBonus = (uniqueCardsCount * PRESTIGE_LUCK_PER_CARD).toFixed(3);
 
-        // ИСПРАВЛЕНИЕ: Мы получаем текст через L.get() сразу при создании HTML.
-        // Статичные атрибуты data-i18n больше не нужны в этой секции, так как она полностью динамическая.
         rebirthSection.innerHTML = `
             <div class="text-center p-md-5">
                 <h2 class="mb-3">${L.get('ui.rebirth.title')}</h2>
@@ -499,8 +498,6 @@ const UI = (() => {
                 </div>
             </div>
         `;
-        
-        // ОШИБОЧНЫЙ ВЫЗОВ УДАЛЕН: L.applyToDOM();
         
         document.getElementById('rebirthButton')?.addEventListener('click', Game.performRebirth);
     }
@@ -798,6 +795,7 @@ const UI = (() => {
         const availableRarities = RARITIES_DATA.filter(r => 
             (r.minPrestige || 0) <= playerData.prestigeLevel
         );
+        const availableRaritiesIds = new Set(availableRarities.map(r => r.id)); // Создаем Set для быстрой проверки
         // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
         let sortedRarities = [...availableRarities];
@@ -836,16 +834,17 @@ const UI = (() => {
             nameDiv.className = 'inventory-card-name';
 
             if (isAnyVersionOpened) {
-                const displayVersion = openedVersions[openedVersions.length - 1];
-                
-                img.src = displayVersion.card.image;
-                nameDiv.textContent = L.get(displayVersion.card.nameKey);
-                cardDiv.classList.add(`border-${displayVersion.cssClass || displayVersion.id}`);
-                cardDiv.style.setProperty('--rarity-glow-color', displayVersion.glowColor);
-                
-                // Передаем в модалку только существующие версии, а не все возможные
-                const allPossibleVersions = [rarityData, ...RARITIES_DATA.filter(r => r.displayParentId === rarityData.id)];
-                cardDiv.addEventListener('click', () => showCardModal(allPossibleVersions));
+                // Находим активный скин из сохранения или берем родительский по умолчанию
+            const activeSkinId = playerData.activeSkins[rarityData.id] || rarityData.id;
+            const activeSkinData = getRarityDataById(activeSkinId) || rarityData;
+            
+            img.src = activeSkinData.card.image;
+            nameDiv.textContent = L.get(activeSkinData.card.nameKey);
+            cardDiv.classList.add(`border-${activeSkinData.cssClass || activeSkinData.id}`);
+            cardDiv.style.setProperty('--rarity-glow-color', activeSkinData.glowColor);
+            
+            const allPossibleVersions = [rarityData, ...RARITIES_DATA.filter(r => r.displayParentId === rarityData.id)];
+            cardDiv.addEventListener('click', () => showCardModal(rarityData.id, allPossibleVersions));
             } else {
                 cardDiv.classList.add('locked');
                 img.src = "img/silhouette_placeholder.png";
@@ -858,23 +857,21 @@ const UI = (() => {
             inventoryGrid.appendChild(col);
         });
 
-        // Обновляем счетчик
-        const uniqueOpenedCount = new Set(playerData.inventory.filter(id => id !== 'garbage')).size;
-        // Общее количество карт теперь зависит от уровня престижа
+        const uniqueOpenedCount = new Set(playerData.inventory.filter(id => id !== 'garbage' && availableRaritiesIds.has(id))).size;
         const totalPossibleCount = availableRarities.filter(r => r.id !== 'garbage').length;
+        
         inventoryCounterElement.textContent = `${L.get('ui.opened')}: ${uniqueOpenedCount} / ${totalPossibleCount}`;
 }
 
-    function showCardModal(cardVersions) {
+    function showCardModal(parentId, allVersions) {
         const versionSwitcher = document.getElementById('versionSwitcher');
         const visualEffectControls = document.getElementById('visualEffectControls');
         const playerData = Game.getPlayerData();
+        const activeSkinId = playerData.activeSkins[parentId] || parentId;
 
-        // Очищаем контейнеры
         versionSwitcher.innerHTML = '';
         visualEffectControls.innerHTML = '';
         
-        // Функция для отрисовки деталей выбранной версии
         const showVersionDetails = (version) => {
             modalCardImage.src = version.card.image;
             modalCardName.textContent = L.get(version.card.nameKey);
@@ -888,8 +885,7 @@ const UI = (() => {
                 modalCardChance.textContent = `${L.get('ui.baseChance')}: 1/${Math.round(1 / version.probabilityBase)}`;
             }
             
-            // Обновляем кнопку активации эффекта для текущей версии
-            visualEffectControls.innerHTML = ''; // Очищаем старую кнопку
+            visualEffectControls.innerHTML = '';
             const cardHasEffect = VisualEffects.effects.hasOwnProperty(version.id);
             if (cardHasEffect) {
                 const toggleBtn = document.createElement('button');
@@ -904,9 +900,8 @@ const UI = (() => {
                     } else {
                         Game.setActiveVisualEffect(version.id);
                     }
-                    // Перерисовываем модалку, чтобы обновить состояние кнопки
                     cardModal.hide();
-                    setTimeout(() => showCardModal(cardVersions), 300);
+                    setTimeout(() => showCardModal(parentId, allVersions), 300);
                 });
                 visualEffectControls.appendChild(toggleBtn);
             } else {
@@ -914,40 +909,40 @@ const UI = (() => {
             }
         };
 
-        // Создаем переключатель, если версий больше одной
-        if (cardVersions.length > 1) {
+        if (allVersions.length > 1) {
             const group = document.createElement('div');
-            group.className = 'btn-group';
-            group.setAttribute('role', 'group');
+            group.className = 'd-flex justify-content-center align-items-center flex-wrap gap-2';
 
-            cardVersions.forEach(version => {
+            allVersions.forEach(version => {
                 const isUnlocked = playerData.inventory.includes(version.id);
+                if (!isUnlocked) return;
 
+                const wrapper = document.createElement('div');
                 const button = document.createElement('button');
                 button.type = 'button';
-                button.className = 'btn btn-outline-light';
+                button.className = 'btn btn-sm';
                 button.textContent = L.get(version.card.nameKey);
 
-                if (isUnlocked) {
-                    button.addEventListener('click', (e) => {
-                        showVersionDetails(version);
-                        group.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-                        e.currentTarget.classList.add('active');
-                    });
-                } else {
+                if (version.id === activeSkinId) {
+                    button.classList.add('btn-light', 'active');
                     button.disabled = true;
-                    button.textContent += ` (${L.get('ui.rebirth.locked_after').replace('{level}', version.minPrestige || 1)})`;
+                } else {
+                    button.classList.add('btn-outline-light');
+                    button.addEventListener('click', () => {
+                        Game.setActiveSkin(parentId, version.id);
+                        cardModal.hide();
+                        setTimeout(() => showCardModal(parentId, allVersions), 300);
+                    });
                 }
-
-                group.appendChild(button);
+                
+                wrapper.appendChild(button);
+                group.appendChild(wrapper);
             });
             versionSwitcher.appendChild(group);
-            // Активируем первую кнопку
-            group.firstChild.classList.add('active');
         }
         
-        // Показываем первую версию по умолчанию
-        showVersionDetails(cardVersions[0]); 
+        const initialVersionToShow = getRarityDataById(activeSkinId) || allVersions[0];
+        showVersionDetails(initialVersionToShow);
         cardModal.show();
     }
         function applyVisualEffect(rarityId, isInitialLoad = false) {

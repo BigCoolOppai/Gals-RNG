@@ -28,8 +28,9 @@
     <!-- <<< КОНЕЦ НОВОГО БЛОКА SVG ФИЛЬТРОВ >>> -->
     <!-- Background Music Placeholder -->
      <audio id="backgroundMusic" loop>       
-    </audio> 
-
+    </audio>
+    <div id="effectTargetWrapper">
+    <div id="gameWrapper">
     <div class="container-fluid py-4">
         <header class="text-center mb-4">
             <h1>Gal's RNG</h1>
@@ -63,7 +64,7 @@
                     </div>
                 </div>
 
-                <div id="rollResultContainer" class="roll-result-container mb-3" style="min-height: 300px;">
+                <div id="rollResultContainer" class="roll-result-container mb-3" style="min-height: 420px;">
                     <!-- Результат ролла (карточка) будет отображаться здесь -->
                 </div>
                 <button id="rollButton" class="btn btn-primary btn-lg me-2">Roll!</button>
@@ -207,13 +208,18 @@
         <footer class="text-center mt-5 mb-3">
             <hr>
             <p class="text-muted small">
-                Gal's RNG - Version 0.1.5 "Style, QoL and More"
+                Gal's RNG - Version 0.1.5b "Fixes and Visuals"
             </p>
             <!-- Можно добавить еще что-то, например, копирайт или ссылку на вас -->
             <p class="text-muted small">&copy; 2025 BigCoolOppai</p>
         </footer>
         <!-- КОНЕЦ НОВОГО ФУТЕРА -->
+    </div>
+    </div>
 
+    <div id="globalGlitchOverlay"></div>
+    </div> 
+    
         <!-- Modal for displaying full card image -->
         <div class="modal fade" id="cardModal" tabindex="-1" aria-labelledby="cardModalLabel" aria-hidden="true">
             <div id="versionSwitcher" class="d-flex justify-content-center flex-wrap gap-2 mt-3">
@@ -237,7 +243,6 @@
                 </div>
             </div>
         </div>
-    </div>
     
 
     <!-- Bootstrap JS Bundle CDN -->
@@ -326,7 +331,6 @@
         </div>
     </div>
     <!-- END DEBUG PANEL -->
-    <div id="globalGlitchOverlay"></div>
     <!-- New Card Notification Modal -->
     <div class="modal fade" id="newCardModal" tabindex="-1" aria-labelledby="newCardModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">

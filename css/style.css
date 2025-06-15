@@ -1355,3 +1355,252 @@ body.visual-effect-timestop {
     --rarity-glow-color: #ffffff;
 }
 
+/* --- New Alternative Card Styles --- */
+
+/* Alt Common (Awakened) */
+.roll-slot.rarity-common-alt {
+    color: #333;
+    /* Эффект "божественного" свечения с помощью нескольких градиентов */
+    background: 
+        radial-gradient(ellipse at center, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 60%),
+        linear-gradient(135deg, #ffffff 0%, #e8e8e8 100%);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    border: 1px solid #dcdcdc;
+    font-weight: bold;
+    animation: gentle-pulse 4s infinite ease-in-out;
+}
+@keyframes gentle-pulse {
+    0%, 100% { box-shadow: inset 0 0 15px rgba(255,255,255,0.5); }
+    50% { box-shadow: inset 0 0 25px rgba(200,200,200,0.5); }
+}
+.inventory-card.border-common_alt_1 {
+    border-color: #f5f5f5;
+    --rarity-glow-color: #ffffff;
+}
+
+
+/* Alt Epic (Velocity) */
+.roll-slot.rarity-epic-alt {
+    color: #e3f2fd;
+    background-color: #1976d2;
+    border: 1px solid #42a5f5;
+    text-shadow: 0 0 5px #fff, 0 0 10px #82b1ff;
+    position: relative;
+    overflow: hidden;
+}
+/* Анимация "пролетающих" синих линий */
+.roll-slot.rarity-epic-alt::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(130, 177, 255, 0.5), transparent);
+    animation: speed-streak 1.5s linear infinite;
+    animation-delay: -0.5s;
+}
+@keyframes speed-streak {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+.inventory-card.border-epic_alt_1 {
+    border-color: #448aff;
+    --rarity-glow-color: #bbdefb;
+}
+
+
+/* Alt Legendary (Deranged) */
+.roll-slot.rarity-legendary-alt {
+    color: #fff;
+    /* Веселый, "конфетный" фон */
+    background: repeating-linear-gradient(
+        45deg,
+        #f06292,
+        #f06292 10px,
+        #f8bbd0 10px,
+        #f8bbd0 20px
+    );
+    border: 2px dashed #ad1457;
+    text-shadow: 2px 2px 2px rgba(0,0,0,0.4);
+    font-family: 'Comic Sans MS', cursive, sans-serif; /* Для клоунского эффекта */
+    animation: crazy-shake 0.5s infinite;
+}
+@keyframes crazy-shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-1deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  30% { transform: translate(3px, 2px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(1deg); }
+  50% { transform: translate(-1px, 2px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  70% { transform: translate(3px, 1px) rotate(-1deg); }
+  80% { transform: translate(-1px, -1px) rotate(1deg); }
+  90% { transform: translate(1px, 2px) rotate(0deg); }
+  100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+.inventory-card.border-legendary_alt_1 {
+    border-color: #ff4081;
+    --rarity-glow-color: #f8bbd0;
+}
+
+/* --- New Visual Effects Styles --- */
+
+/* --- Стили для Alt Uranium (Unstable) --- */
+
+/* --- ИСПРАВЛЕННЫЙ ЭФФЕКТ ДЛЯ АЛЬТ-УРАНОЧКИ --- */
+#globalGlitchOverlay.active-effect-uranium.unstable-version::before {
+    content: '';
+    position: fixed;
+    /* ИСПОЛЬЗУЕМ inset, чтобы привязаться к краям viewport */
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 9990;
+    opacity: 1;
+    
+    /* 
+    КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Используем inset box-shadow.
+    Это тень, которая рисуется ВНУТРИ элемента.
+    Она создаст свечение от краев экрана к центру, оставляя центр прозрачным.
+    Большое значение spread (третье значение) создает широкую, мягкую границу.
+    */
+    box-shadow: inset 0 0 100px 50px #000, /* Глубокая черная виньетка */
+                inset 0 0 60px 30px rgba(27, 94, 32, 0.8), /* Темно-зеленое свечение поверх черного */
+                inset 0 0 35px 15px rgba(104, 255, 120, 0.7); /* Яркое зеленое свечение ближе к краю */
+
+    /* Анимация пульсации и мерцания */
+    animation: uranium-vignette-pulse 2s infinite alternate ease-in-out;
+}
+
+@keyframes uranium-vignette-pulse {
+    from {
+        /* Начальное состояние: более спокойное свечение */
+        box-shadow: inset 0 0 120px 60px #000,
+                    inset 0 0 70px 35px rgba(27, 94, 32, 0.7),
+                    inset 0 0 40px 18px rgba(104, 255, 120, 0.6);
+        opacity: 0.9;
+    }
+    to {
+        /* Пиковое состояние: более интенсивное и сжатое свечение */
+        box-shadow: inset 0 0 100px 50px #000,
+                    inset 0 0 60px 30px rgba(54, 194, 63, 0.9),
+                    inset 0 0 35px 15px rgba(180, 255, 190, 0.842); /* Ядро становится ярче */
+        opacity: 1;
+    }
+}
+
+/* 2. Witchy (Jizzy) - эффект "жидкости" */
+/* SVG фильтр уже должен быть в index.html */
+#globalGlitchOverlay.active-effect-witchy {
+    /* Применяем фильтр ко всему оверлею */
+    filter: url('#witchy-goo-filter');
+    /* background-color: #d1c4e9; Светлый лавандовый фон для "капель" */
+    z-index: 9998; /* Чуть ниже модалок */
+}
+
+/* "Капли", которые будут анимироваться */
+.witchy-goo-blob {
+    position: absolute;
+    border-radius: 50%;
+    /* ИЗМЕНЕНИЕ: Цвет изменен на более "органический" полупрозрачный */
+    background: rgba(250, 245, 230, 0.7); /* Цвет слоновой кости/кремовый */
+    will-change: transform;
+    /* НОВОЕ: Тень для придания глубины */
+    box-shadow: inset 0 -10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* НОВОЕ: Псевдоэлемент для создания блика */
+.witchy-goo-blob::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 50%;
+    height: 50%;
+    border-radius: 50%;
+    /* Блик - это градиент от белого к прозрачному */
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 60%);
+    transform: rotate(-45deg);
+}
+
+
+/* 3. Blackhole - эффект затягивания */
+#globalGlitchOverlay.active-effect-blackhole {
+    /* Пустой, будет управляться GSAP */
+}
+
+/* Стили для частиц пыли, которые затягивает дыра */
+.blackhole-particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background-color: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #fff, 0 0 12px #ffab00;
+}
+
+
+/* 4. Cosmic (Star Elf) - переработка */
+/* Старые стили для .active-effect-cosmic можно удалить */
+#globalGlitchOverlay.active-effect-cosmic {
+    background: radial-gradient(ellipse at center, 
+        rgba(49, 27, 146, 0.1) 0%, 
+        rgba(13, 71, 161, 0.2) 50%, 
+        rgba(0,0,0,0.4) 100%);
+}
+
+/* Стили для звезд и туманностей */
+.cosmic-star {
+    position: absolute;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #fff, 0 0 20px #bbdefb;
+    animation: star-twinkle 4s infinite ease-in-out;
+}
+@keyframes star-twinkle {
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.cosmic-nebula {
+    position: absolute;
+    border-radius: 50%;
+    mix-blend-mode: screen;
+    filter: blur(40px);
+    opacity: 0;
+}
+
+
+/* 5. Russian (Klyukva) - пьяный эффект */
+/* Класс будет применяться к главному контейнеру игры */
+#gameWrapper.visual-effect-russian-drunk {
+    animation: drunk-sway 10s infinite ease-in-out, drunk-blur 15s infinite ease-in-out;
+    /* transition нужен для плавности применения и снятия эффекта */
+    transition: filter 0.5s ease, transform 0.5s ease;
+}
+@keyframes drunk-sway {
+    0%, 100% { transform: translateX(0) rotate(0); }
+    25% { transform: translateX(-1%) rotate(-1.5deg); }
+    75% { transform: translateX(1%) rotate(1.5deg); }
+}
+@keyframes drunk-blur {
+    0%, 100% { filter: blur(0) contrast(1); }
+    50% { filter: blur(1.5px) contrast(1.05); }
+}
+
+
+/* --- ФИНАЛЬНЫЕ СТИЛИ ДЛЯ TIMESTOP (нацелены на effectTargetWrapper) --- */
+
+/* Базовый класс для плавного перехода фильтра */
+#effectTargetWrapper.timestop-filter-active {
+    transition: filter 0.3s ease-in-out;
+}
+
+/* Состояние "негатива" */
+#effectTargetWrapper.timestop-filter-active.negative {
+    filter: sepia(60%) contrast(130%) hue-rotate(180deg) invert(90%) saturate(200%) brightness(0.85);
+}
+
+/* Финальное состояние "монохрома" */
+#effectTargetWrapper.timestop-filter-active.monochrome {
+    filter: grayscale(100%) contrast(115%) brightness(1.0);
+}

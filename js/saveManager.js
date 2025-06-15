@@ -9,6 +9,7 @@ const SaveManager = (() => {
         prestigeLuckBonus: 0.0,
         luckCoreLevel: 0,
         currency: 0, // Призматические осколки
+        activeSkins: {},
         inventory: [], // Массив ID открытых редкостей (карт)
         seenRarities: [], // Массив ID редкостей, которые игрок видел хотя бы раз
         activeBoosts: [], // { id, type, endTime, luckBonus }

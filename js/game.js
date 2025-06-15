@@ -79,18 +79,32 @@ const Game = (() => {
             isNew = true;
         }
 
-        // <<< НАЧАЛО ИЗМЕНЕНИЯ >>>
-        // Если это альт-карта, а родительская еще не открыта,
-        // добавляем родительскую в инвентарь, чтобы слот появился.
+        if (isNew) {
+        // Если это основная карта, устанавливаем для нее скин по умолчанию
+        if (!rarityData.displayParentId) {
+            playerData.activeSkins[rarityId] = rarityData.id;
+        }
+     }
+        // Если это альт-карта, а родительская еще не открыта...
         if (rarityData.displayParentId && !playerData.inventory.includes(rarityData.displayParentId)) {
             playerData.inventory.push(rarityData.displayParentId);
+            // И сразу устанавливаем для родителя скин по умолчанию
+            playerData.activeSkins[rarityData.displayParentId] = rarityData.displayParentId;
         }
-        // <<< КОНЕЦ ИЗМЕНЕНИЯ >>>
 
         if (!playerData.seenRarities.includes(rarityId)) {
             playerData.seenRarities.push(rarityId);
         }
         return isNew;
+    }
+
+    function setActiveSkin(parentId, skinId) {
+        if (playerData.inventory.includes(skinId)) {
+            playerData.activeSkins[parentId] = skinId;
+            saveGame();
+            // Обновляем UI, чтобы инвентарь перерисовался с новым скином
+            UI.updateAll(getPlayerData()); 
+        }
     }
 
     // Rebirth
@@ -653,6 +667,6 @@ const Game = (() => {
         purchaseShopItem, equipItem, unequipItem, calculateCurrentLuck, getEffectiveLuck,
         checkActiveBoosts, setActiveVisualEffect, clearActiveVisualEffect, setMusicVolume,
         unlockAllCards, setCurrency, addCardToInventory, amplifyLuckCore,
-        getLuckCoreAmplificationCost, performRebirth, getRebirthCost
+        getLuckCoreAmplificationCost, performRebirth, getRebirthCost, setActiveSkin
     };
 })();
