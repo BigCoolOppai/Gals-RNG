@@ -167,7 +167,11 @@ const VisualEffects = {
         effectId === 'cosmic' ||
         effectId === 'uranium_alt_1' || // Добавлено
         effectId === 'witchy' ||         // Добавлено
-        effectId === 'blackhole'         // Добавлено
+        effectId === 'blackhole'||      // Добавлено
+        effectId === 'berserk' ||
+        effectId === 'bee' ||
+        effectId === 'epic_alt_1' ||
+        effectId === 'legendary_alt_1'
         )) {
         targetElements.glitchOverlay.style.display = 'block';
     }
@@ -839,17 +843,193 @@ const VisualEffects = {
     },
 
     'russian': function(targets) {
-    const gameWrapper = document.getElementById('gameWrapper');
-    if (!gameWrapper) return null;
+        const gameWrapper = document.getElementById('gameWrapper');
+        if (!gameWrapper) return null;
 
-    gameWrapper.classList.add('visual-effect-russian-drunk');
+        gameWrapper.classList.add('visual-effect-russian-drunk');
 
-    return () => {
-        if (gameWrapper) {
-            gameWrapper.classList.remove('visual-effect-russian-drunk');
-        }
-    };
-},
+        return () => {
+            if (gameWrapper) {
+                gameWrapper.classList.remove('visual-effect-russian-drunk');
+            }
+        };
+    },
+
+    'berserk': function(targets) {
+            const { glitchOverlay } = targets;
+            if (!glitchOverlay) return null;
+
+            glitchOverlay.classList.add('active-effect-berserk');
+            
+            const brand = document.createElement('div');
+            brand.className = 'berserk-brand';
+            glitchOverlay.appendChild(brand);
+
+            const tl = gsap.timeline({ repeat: -1, yoyo: true });
+
+            tl.fromTo(brand, {
+                opacity: 0.7,
+                scale: 1,
+                // Начальное положение в центре
+                x: "-50%", 
+                y: "-50%"
+            }, {
+                duration: 2.5,
+                opacity: 1,
+                scale: 1.05,
+                // Анимация кровавого свечения фильтра
+                filter: "drop-shadow(0 0 15px rgba(255, 20, 20, 1)) saturate(1.8) contrast(1.3)",
+                ease: "power1.inOut"
+            })
+            // Добавляем эффект "кровотечения" - легкое дрожание и смещение
+            .to(brand, {
+                duration: 0.1,
+                x: "-51%", // Сдвиг на 1%
+                y: "-49%",
+                repeat: 3,
+                yoyo: true,
+                ease: "rough({ template: none.out, strength: 1, points: 20, taper: 'none', randomize: true, clamp: false})"
+            }, "-=0.5");
+
+            return () => {
+                tl.kill();
+                if (brand.parentNode) brand.remove();
+                if (glitchOverlay) glitchOverlay.classList.remove('active-effect-berserk');
+            };
+        },
+
+    'bee': function(targets) {
+            const { glitchOverlay } = targets;
+            if (!glitchOverlay) return null;
+
+            glitchOverlay.classList.add('active-effect-bee');
+            const bees = [];
+
+            for (let i = 0; i < 15; i++) {
+                const bee = document.createElement('div');
+                bee.className = 'bee-particle';
+                glitchOverlay.appendChild(bee);
+                bees.push(bee);
+
+                // Запускаем анимацию для каждой пчелы
+                gsap.to(bee, {
+                    duration: gsap.utils.random(3, 6),
+                    x: `random(0, ${window.innerWidth})`,
+                    y: `random(0, ${window.innerHeight})`,
+                    rotation: "random(-45, 45)",
+                    ease: "power1.inOut",
+                    repeat: -1,
+                    yoyo: true,
+                    delay: gsap.utils.random(0, 5)
+                });
+            }
+
+            return () => {
+                bees.forEach(bee => {
+                    gsap.killTweensOf(bee);
+                    if (bee.parentNode) bee.remove();
+                });
+                if (glitchOverlay) glitchOverlay.classList.remove('active-effect-bee');
+            };
+        },
+        
+        'epic_alt_1': function(targets) {
+            const { glitchOverlay } = targets;
+            if (!glitchOverlay) return null;
+
+            const spikes = [];
+            const spikeCount = 40;
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+
+            for (let i = 0; i < spikeCount; i++) {
+                const spike = document.createElement('div');
+                spike.className = 'velocity-spike';
+                glitchOverlay.appendChild(spike);
+                spikes.push(spike);
+
+                const edge = Math.floor(Math.random() * 4);
+                let startX, startY;
+
+                // 1. Определяем стартовую позицию на краю экрана
+                switch(edge) {
+                    case 0: startX = gsap.utils.random(0, w); startY = 0; break;      // Верхний край
+                    case 1: startX = w; startY = gsap.utils.random(0, h); break;      // Правый край
+                    case 2: startX = gsap.utils.random(0, w); startY = h; break;      // Нижний край
+                    case 3: startX = 0; startY = gsap.utils.random(0, h); break;      // Левый край
+                }
+                
+                // 2. Генерируем случайную ЦЕЛЕВУЮ точку в центре экрана
+                const targetX = w / 2 + gsap.utils.random(-w / 6, w / 6);
+                const targetY = h / 2 + gsap.utils.random(-h / 6, h / 6);
+
+                // 3. Вычисляем ТОЧНЫЙ угол от старта до цели
+                const angle = Math.atan2(targetY - startY, targetX - startX) * 180 / Math.PI;
+
+                // 4. Устанавливаем параметры: позицию и правильный угол
+                gsap.set(spike, {
+                    x: startX,
+                    y: startY,
+                    rotation: angle, // <-- ИСПОЛЬЗУЕМ НОВЫЙ, ТОЧНЫЙ УГОЛ
+                    width: gsap.utils.random(w / 6, w / 4),
+                    height: gsap.utils.random(2, 6)
+                });
+
+                // 5. Анимация длины шипа (остается без изменений)
+                gsap.to(spike, {
+                    scaleX: gsap.utils.random(0.1, 0.2),
+                    duration: gsap.utils.random(0.1, 0.4),
+                    ease: "power2.inOut",
+                    repeat: -1,
+                    yoyo: true,
+                    delay: gsap.utils.random(0, 0.5)
+                });
+            }
+
+            return () => {
+                spikes.forEach(spike => {
+                    gsap.killTweensOf(spike);
+                    if (spike.parentNode) spike.remove();
+                });
+            };
+        },
+
+        'legendary_alt_1': function(targets) {
+            const { glitchOverlay } = targets;
+            if (!glitchOverlay) return null;
+
+            const particles = [];
+            const colors = ["#f06292", "#f8bbd0", "#ff4081", "#ffeb3b", "#4fc3f7"];
+
+            for (let i = 0; i < 150; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'confetti-particle';
+                particle.style.backgroundColor = gsap.utils.random(colors);
+                glitchOverlay.appendChild(particle);
+                particles.push(particle);
+
+                gsap.fromTo(particle, {
+                    x: `random(0, ${window.innerWidth})`,
+                    y: -20,
+                    opacity: 1
+                }, {
+                    duration: gsap.utils.random(3, 7),
+                    y: window.innerHeight + 20,
+                    opacity: 0,
+                    rotationX: "random(0, 360)",
+                    rotationY: "random(0, 360)",
+                    ease: "power1.in",
+                    repeat: -1,
+                    delay: gsap.utils.random(0, 6)
+                });
+            }
+
+            return () => {
+                particles.forEach(p => gsap.killTweensOf(p));
+                glitchOverlay.innerHTML = ''; // Быстрый способ очистить все частицы
+            };
+        },
+
         
         // 'inversion': function(targets) { ... }
         // ... другие эффекты ...

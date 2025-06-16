@@ -51,6 +51,22 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "garbage_alt_1",
+        nameKey: "cards.garbage_alt_1.name",
+        displayParentId: "garbage",
+        probabilityBase: 1 / 1000000,
+        color: "#ff9800", // Яркий оранжевый
+        glowColor: "#2196f3", // Синее свечение для контраста
+        cssClass: "rarity-garbage-alt",
+        currencyOnDuplicate: 100000,
+        card: {
+            name: "Shining Idol", 
+            nameKey: "cards.garbage_alt_1.cardName",
+            image: "img/altGarbage.png", // Вам нужно будет создать это изображение
+            descriptionKey: "cards.garbage_alt_1.description"
+        }
+    },
+    {
         id: "error",
         nameKey: "cards.error.name",
         probabilityBase: 1/404403,
@@ -114,6 +130,22 @@ window.RARITIES_DATA = [
             nameKey: "cards.space_alt_1.cardName",
             image: "img/altSpace.png",
             descriptionKey: "cards.space_alt_1.description"
+        }
+    },
+    {
+        id: "goblin",
+        nameKey: "cards.goblin.name",
+        // Нет displayParentId и minPrestige, доступна всем с начала
+        probabilityBase: 1 / 50000,
+        color: "#388e3c", // Грязновато-зеленый
+        glowColor: "#a5d6a7", // Светло-зеленое свечение
+        cssClass: "rarity-goblin", // Используем 'goblin' для уникальности класса
+        currencyOnDuplicate: 5000,
+        card: {
+            name: "Tur'gata", 
+            nameKey: "cards.goblin.cardName",
+            image: "img/cardGoblin.png", // Вам нужно будет создать это изображение
+            descriptionKey: "cards.goblin.description"
         }
     },
     {
@@ -234,7 +266,7 @@ window.RARITIES_DATA = [
         color: "#ff4081", // Яркий розовый, как глазурь на торте
         glowColor: "#f8bbd0", // Светло-розовый
         cssClass: "rarity-legendary-alt",
-        currencyOnDuplicate: 1000,
+        currencyOnDuplicate: 360,
         card: {
             name: "Misa, the Party Clown", 
             nameKey: "cards.legendary_alt_1.cardName",
@@ -296,7 +328,7 @@ window.RARITIES_DATA = [
         color: "#448aff", // Яркий синий (Blue A200)
         glowColor: "#bbdefb", // Светло-голубой (Blue 100)
         cssClass: "rarity-epic-alt",
-        currencyOnDuplicate: 700,
+        currencyOnDuplicate: 200,
         card: {
             name: "Gael, the Blue Streak", 
             nameKey: "cards.epic_alt_1.cardName",
@@ -332,6 +364,23 @@ window.RARITIES_DATA = [
             nameKey: "cards.timestop.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardTimestop.png",
             descriptionKey: "cards.timestop.description"
+        }
+    },
+    {
+        id: "rare_alt_1",
+        nameKey: "cards.rare_alt_1.name",
+        displayParentId: "rare",
+        minPrestige: 1,
+        probabilityBase: 1 / 800, // 1/8 (оригинал) * 100 = 1/800
+        color: "#b71c1c", // Глубокий красный
+        glowColor: "#e57373", // Кроваво-красное свечение
+        cssClass: "rarity-rare-alt",
+        currencyOnDuplicate: 80,
+        card: {
+            name: "Mila, the Crimson Tear", 
+            nameKey: "cards.rare_alt_1.cardName",
+            image: "img/altRare.png", // Вам нужно будет создать это изображение
+            descriptionKey: "cards.rare_alt_1.description"
         }
     },
     {
@@ -517,6 +566,7 @@ const SHOP_DATA = {
         { id: "equip_talisman", nameKey: "shop.equipment.equip_talisman.name", descriptionKey: "shop.equipment.equip_talisman.description", cost: 300, luckBonus: 0.05, type: "equipment" },
         { id: "equip_ring", nameKey: "shop.equipment.equip_ring.name", descriptionKey: "shop.equipment.equip_ring.description", cost: 750, luckBonus: 0.1, type: "equipment" },
         { id: "equip_artifact", nameKey: "shop.equipment.equip_artifact.name", descriptionKey: "shop.equipment.equip_artifact.description", cost: 1800, luckBonus: 0.15, type: "equipment" },
+        { id: "equip_pendant", nameKey: "shop.equipment.equip_pendant.name", descriptionKey: "shop.equipment.equip_pendant.description", cost: 20000, luckBonus: 0.35, type: "equipment" },
         {
             id: "equip_golden_ticket",
             nameKey: "shop.equipment.equip_golden_ticket.name",

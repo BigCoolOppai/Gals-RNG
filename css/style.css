@@ -1604,3 +1604,136 @@ body.visual-effect-timestop {
 #effectTargetWrapper.timestop-filter-active.monochrome {
     filter: grayscale(100%) contrast(115%) brightness(1.0);
 }
+
+/* --- Стили для новых альт-версий --- */
+
+/* Alt Garbage (Shining Idol) */
+.roll-slot.rarity-garbage-alt {
+    /* Яркий, энергичный градиент, как огни сцены */
+    background: linear-gradient(135deg, #ff9800 0%, #ff5722 50%, #2196f3 100%);
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    /* Тень, чтобы текст был читаемым на ярком фоне */
+    text-shadow: 0 0 5px #000, 0 0 10px rgba(0,0,0,0.7);
+    border: 2px solid #ffc107;
+    /* Анимация переливающихся сценических огней */
+    animation: idol-stage-lights 3s infinite alternate;
+}
+
+@keyframes idol-stage-lights {
+    from {
+        box-shadow: inset 0 0 20px #ffeb3b, 0 0 15px #2196f3;
+    }
+    to {
+        box-shadow: inset 0 0 30px #4fc3f7, 0 0 25px #ff9800;
+    }
+}
+
+.inventory-card.border-garbage_alt_1 {
+    border-color: #ff9800;
+    --rarity-glow-color: #2196f3;
+}
+
+
+/* Alt Rare (Mila, the Crimson Tear) */
+.roll-slot.rarity-rare-alt {
+    /* Глубокий, тревожный кроваво-красный фон */
+    background: linear-gradient(160deg, #b71c1c 0%, #6a000a 70%, #000 100%);
+    color: #ffcdd2; /* Бледный, болезненный красноватый текст */
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-style: italic;
+    text-shadow: 0 0 8px #e57373, 0 0 3px #000;
+    border: 1px solid #7f0000;
+    /* Анимация медленной, зловещей пульсации */
+    animation: crimson-madness-pulse 4s infinite ease-in-out;
+}
+
+@keyframes crimson-madness-pulse {
+    0% {
+        box-shadow: inset 0 0 25px rgba(0,0,0,0.8);
+        letter-spacing: 0.05em;
+    }
+    50% {
+        box-shadow: inset 0 0 40px rgba(239, 83, 80, 0.4);
+        letter-spacing: 0.08em;
+    }
+    100% {
+        box-shadow: inset 0 0 25px rgba(0,0,0,0.8);
+        letter-spacing: 0.05em;
+    }
+}
+
+.inventory-card.border-rare_alt_1 {
+    border-color: #b71c1c;
+    --rarity-glow-color: #e57373;
+}
+
+/* --- Эффект для Berserk (Стаг) --- */
+#globalGlitchOverlay.active-effect-berserk {
+    /* Легкое красное свечение по всему экрану */
+    box-shadow: inset 0 0 150px 50px rgba(183, 28, 28, 0.2);
+}
+
+.berserk-brand {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 250px;
+    aspect-ratio: 1 / 1.5; /* <-- ДОБАВЬТЕ ЭТУ СТРОКУ (подстройте, если у картинки другие пропорции) */
+    height: auto; /* эту строку можно даже удалить, aspect-ratio главнее */
+    background-image: url('../img/effects/brand.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: drop-shadow(0 0 8px rgba(255, 82, 82, 0.8)) saturate(1.5) contrast(1.2);
+}
+
+/* --- Эффект для Bee (Королева Пчёл) --- */
+#globalGlitchOverlay.active-effect-bee {
+    /* Полупрозрачный фон с паттерном сот */
+    background-image:
+      radial-gradient(rgba(255, 193, 7, 0.1) 15%, transparent 16%),
+      radial-gradient(rgba(255, 193, 7, 0.1) 15%, transparent 16%);
+    background-color: rgba(255, 235, 59, 0.05);
+    background-size: 60px 60px;
+    background-position: 0 0, 30px 30px;
+    animation: bee-bg-pulse 5s infinite alternate;
+}
+@keyframes bee-bg-pulse {
+    from { opacity: 0.5; }
+    to { opacity: 0.8; }
+}
+
+.bee-particle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: #FFC107; /* Желтый */
+    border-radius: 50% 50% 20% 20%;
+    box-shadow: 0 0 5px #FFC107;
+}
+.bee-particle::after { /* Черные полоски */
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(-45deg, #000, #000 2px, transparent 2px, transparent 5px);
+}
+
+/* --- ФИНАЛЬНЫЙ, ИСПРАВЛЕННЫЙ ЭФФЕКТ для Alt Gael (Velocity) --- */
+.velocity-spike {
+    position: absolute;
+    /* КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Точка трансформации - у ОСНОВАНИЯ шипа */
+    transform-origin: 0% 50%; 
+    background-color: rgba(227, 242, 253, 0.85); /* Светло-голубой, почти белый */
+    clip-path: polygon(0 0, 100% 50%, 0 100%); /* Форма острого треугольника */
+    box-shadow: 0 0 10px rgba(187, 222, 251, 0.7);
+}
+
+/* --- Эффект для Alt Misa (Clownish) --- */
+.confetti-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+}

@@ -12,19 +12,26 @@ const UI = (() => {
     let statsTotalRollsEl, statsUniqueCardsOpenedEl, statsCurrencyFromDuplicatesEl, statsByRarityContainerEl;
     let inventorySortSelect;
 
+    const AUTOROLL_BREATHING_ROOM = 500; // ms "передышки" между роллами
+
     // Состояние UI
     let isRolling = false;
     let boostTimerInterval = null;
     let isAutorolling = false; 
-    let autorollTimer = null;   
+    let autorollTimer = null;
+    let lastRollTimestamp = 0;
     let activeSingleRollClearCallback = null;
     let activeMultiRollClearCallbacks = [];
+
+    let isTabActive = true; 
 
     let currentEffectCleanup = null; 
 
     let newCardModal, newCardModalImage, newCardModalName, newCardModalRarity;
     let newCardQueue = []; // Очередь для показа новых карт
     let isShowingNewCard = false;
+
+    let newCardDismissTimer = null; // <-- ДОБАВЬТЕ ЭТУ СТРОКУ
 
 
     function cacheDOMElements() {
@@ -178,6 +185,27 @@ const UI = (() => {
             // Перерисовываем инвентарь с новым порядком
             renderInventory(Game.getPlayerData());
         });
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // --- ВКЛАДКА СТАЛА НЕАКТИВНОЙ ---
+                isTabActive = false;
+                // Останавливаем таймер, чтобы он не тикал в фоне зря
+                clearTimeout(autorollTimer);
+                autorollTimer = null;
+                console.log('Tab became inactive. Autoroll timer paused.');
+            } else {
+                // --- ВКЛАДКА СНОВА АКТИВНА ---
+                isTabActive = true;
+                console.log('Tab became active.');
+                // Если авторолл был включен, запускаем логику "догона"
+                if (isAutorolling) {
+                    handleAfkProgress();
+                    // Таймер будет перезапущен в onRollsCompleted после первого "ручного" ролла
+                }
+                // Показываем карты из очереди
+                processNewCardQueue();
+            }
+        });
         
     }
 
@@ -278,11 +306,21 @@ const UI = (() => {
         newCardModalRarity.style.color = result.rarity.color;
         
         newCardModal.show();
+
+        // --- НАЧАЛО НОВОГО КОДА ---
+        // Запускаем таймер на 1 минуту (60000 мс) для автозакрытия
+        clearTimeout(newCardDismissTimer); // Очищаем старый таймер на всякий случай
+        newCardDismissTimer = setTimeout(() => {
+            console.log("Auto-dismissing new card modal.");
+            newCardModal.hide();
+        }, 60000); 
+        // --- КОНЕЦ НОВОГО КОДА ---
         
         // Слушатель на закрытие модалки
         const modalEl = document.getElementById('newCardModal');
         modalEl.addEventListener('hidden.bs.modal', () => {
             isShowingNewCard = false;
+            clearTimeout(newCardDismissTimer);
             processNewCardQueue(); // Проверяем, есть ли еще карты в очереди
         }, { once: true });
     }
@@ -311,20 +349,18 @@ const UI = (() => {
         autorollButton.textContent = L.get(isAutorolling ? 'ui.stopAutoroll' : 'ui.autoroll');
         autorollButton.classList.toggle('btn-success', !isAutorolling);
         autorollButton.classList.toggle('btn-danger', isAutorolling);
-        rollButton.disabled = isAutorolling;
-        multiRollButton.disabled = isAutorolling;
+        
         if (isAutorolling) {
             console.log("Autoroll STARTED");
-            performNextAutoroll();
+            rollButton.disabled = true;
+            multiRollButton.disabled = true;
+            performNextAutoroll(); // Запускаем первый ролл немедленно
         } else {
+            console.log("Autoroll STOPPED");
             clearTimeout(autorollTimer);
             autorollTimer = null;
-            if (!isRolling) { // Разблокируем, если нет активной анимации
-                const playerData = Game.getPlayerData();
-                rollButton.disabled = false;
-                multiRollButton.disabled = !playerData.purchasedUpgrades.multiRollX5;
-            }
-            console.log("Autoroll STOPPED");
+            rollButton.disabled = false;
+            multiRollButton.disabled = !Game.getPlayerData().purchasedUpgrades.multiRollX5;
         }
     }
 
@@ -361,9 +397,19 @@ const UI = (() => {
 
     function performNextAutoroll() {
         if (!isAutorolling || isRolling) return;
+
+        // Сразу останавливаем таймер. Новый будет установлен в onRollsCompleted.
+        clearInterval(autorollTimer);
+        autorollTimer = null;
+
         const playerData = Game.getPlayerData();
-        const handler = playerData.purchasedUpgrades.multiRollX5 ? handleMultiRollButtonClick : handleRollButtonClick;
-        handler(true); // true = вызвано автороллом
+        
+        // Выбираем, какой ролл делать, на основе апгрейда
+        if (playerData.purchasedUpgrades.multiRollX5) {
+            handleMultiRollButtonClick(true);
+        } else {
+            handleRollButtonClick(true);
+        }
     }
 
     // Создаем обертки для ручных вызовов
@@ -594,6 +640,7 @@ const UI = (() => {
 
     function onRollsCompleted(results, isCalledByAutoroll) {
         isRolling = false;
+        lastRollTimestamp = Date.now(); 
         if (!isAutorolling) {
             setButtonsDisabled(false, false);
             const playerData = Game.getPlayerData();
@@ -615,12 +662,11 @@ const UI = (() => {
 
         updateAll(Game.getPlayerData());
 
-        if (isAutorolling) {
-            // Проверяем, не вызвана ли модалка с новой картой. Если да, авторолл уже будет на паузе.
-            if (!isShowingNewCard) {
-                const delay = results.length > 1 ? 700 : 500;
-                autorollTimer = setTimeout(performNextAutoroll, delay);
-            }
+       if (isAutorolling && isTabActive) {
+            // Очищаем предыдущий на всякий случай
+            clearTimeout(autorollTimer);
+            // Запускаем следующий ролл после короткой "передышки"
+            autorollTimer = setTimeout(performNextAutoroll, AUTOROLL_BREATHING_ROOM);
         }
     }
     // --- Обработчики кнопок Ролла ---
@@ -1065,6 +1111,78 @@ const UI = (() => {
     }
     function toggleMultiRollButton(isPurchased) {
         if (multiRollButton) multiRollButton.classList.toggle('d-none', !isPurchased);
+    }
+
+    // Замените старую getCycleTime на эту
+    function getEstimatedCycleTime() {
+        const playerData = Game.getPlayerData();
+        const isFast = playerData.purchasedUpgrades.fastRoll;
+
+        // Эти значения должны примерно соответствовать реальной длительности анимации
+        const animationTime = isFast ? 750 : 1500; 
+
+        // Полное время цикла = время анимации + "передышка"
+        return animationTime + AUTOROLL_BREATHING_ROOM;
+    }
+
+    // Показывает красивое уведомление с итогами
+    function showAfkSummaryNotification(rolls, currency, newCards) {
+        let message = `За время вашего отсутствия выполнено ${rolls} роллов.<br>`;
+        if (currency > 0) {
+            message += `💎 Получено за дубликаты: ${currency}<br>`;
+        }
+        if (newCards > 0) {
+            message += `✨ Получено новых карт: ${newCards}!`;
+        }
+        showNotification(message, 'info', 8000); // Показываем 8 секунд
+    }
+
+    // Вычисляет и выполняет пропущенный прогресс
+    function handleAfkProgress() {
+        if (!lastRollTimestamp || lastRollTimestamp === 0) return; // Нечего догонять
+
+        const timeElapsed = Date.now() - lastRollTimestamp;
+        const playerData = Game.getPlayerData();
+        const isMulti = playerData.purchasedUpgrades.multiRollX5;
+        const timePerCycle = getEstimatedCycleTime();
+        const rollsPerCycle = isMulti ? 5 : 1;
+        
+        const cyclesToPerform = Math.floor(timeElapsed / timePerCycle);
+
+        if (cyclesToPerform <= 0) {
+            // Если времени прошло мало, просто запускаем следующий ролл
+            performNextAutoroll();
+            return;
+        }
+
+        console.log(`Catching up on ${cyclesToPerform} autoroll cycles.`);
+
+        let totalCurrencyGained = 0;
+        let newCardsCount = 0;
+
+        isRolling = true; // Блокируем новые роллы на время "догона"
+
+        for (let i = 0; i < cyclesToPerform; i++) {
+            for (let j = 0; j < rollsPerCycle; j++) {
+                const result = Game.performRoll();
+                if (result.duplicateReward > 0) {
+                    totalCurrencyGained += result.duplicateReward;
+                }
+                if (result.isNew) {
+                    newCardsCount++;
+                    newCardQueue.push(result);
+                }
+            }
+        }
+
+        isRolling = false;
+        
+        // Обновляем UI и показываем итоги
+        updateAll(Game.getPlayerData());
+        showAfkSummaryNotification(cyclesToPerform * rollsPerCycle, totalCurrencyGained, newCardsCount);
+        
+        // Запускаем следующий обычный ролл, который перезапустит таймер
+        performNextAutoroll();
     }
     // --- Публичный интерфейс ---
     return { init, updateAll, renderShop, showNotification, updateEquippedItemsDisplay, updateLuckyRollDisplay, applyVisualEffect, toggleMultiRollButton };

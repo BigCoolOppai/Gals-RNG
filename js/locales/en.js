@@ -39,6 +39,9 @@ window.locales.en = {
         epic_alt_1: { name: "Velocity", cardName: "Gael, the Blue Streak", description: "She has surpassed her limits. Now she's ready to run towards her goal with incredible speed, and nothing will stand in her way. And what is her goal? Who knows..." },
         common_alt_1: { name: "GYATT", cardName: "Rizz Eve", description: "It turns out Eve has two very weighty (and soft) arguments for not considering her so ordinary." },
         space_alt_2: { name: "Galactic", cardName: "Galaxy Weaver", description: "After creating hundreds of galaxies and communicating with more influential cosmic entities, she decided to change her image..." },
+        rare_alt_1: { name: "Awakened", cardName: "Mila, the Crimson Tear", description: "She has seen the light, but the truth she witnessed drove her mad. Now her gaze brings only pain, and her mind knows only suffering..." },
+        garbage_alt_1: { name: "Popular", cardName: "Shining Idol", description: "She went from the garbage can to the spotlight. Now she is who she always dreamed of being, thanks for not throwing me away! *smooch*" },
+        goblin: { name: "Cunning", cardName: "Tur'gata", description: "She's crept onto your porch... so what? Oh... she's luring you into a so-called 'breeding trap'. Silly goblins..." },
     },
     // Shop Items
     shop: {
@@ -52,6 +55,7 @@ window.locales.en = {
             equip_talisman: { name: "Novice's Talisman", description: "+0.05 to luck (permanent)." },
             equip_ring: { name: "Seeker's Ring", description: "+0.1 to luck (permanent)." },
             equip_artifact: { name: "Seer's Artifact", description: "+0.15 to luck (permanent)." },
+            equip_pendant: { name: "Fortuna's Pendant", description: "+0.35 to luck (permanent)." },
             equip_golden_ticket: { name: "Golden Ticket", description: "Increases shards from duplicates by 10% (rounded up)." },
             equip_hand_of_misfortune: { name: "Hand of Misfortune", description: "+0.05 luck for each consecutive Garbage, Common, or Rare. Resets on a better roll." }
         },
