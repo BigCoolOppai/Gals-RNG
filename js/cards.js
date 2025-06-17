@@ -82,6 +82,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "berserk_alt_1",
+        nameKey: "cards.berserk_alt_1.name",
+        displayParentId: "berserk",
+        minPrestige: 1,
+        probabilityBase: 1 / 300000,
+        color: "#ffb74d", // Теплый оранжевый
+        glowColor: "#ffe0b2", // Мягкий желтый, как свет от костра
+        cssClass: "rarity-berserk-alt",
+        currencyOnDuplicate: 30000,
+        card: {
+            name: "Stug, at Peace", 
+            nameKey: "cards.berserk_alt_1.cardName",
+            image: "img/altBerserk.png", // Вам нужно будет создать это изображение
+            descriptionKey: "cards.berserk_alt_1.description"
+        }
+    },
+    {
         id: "uranium_alt_1",
         nameKey: "cards.uranium_alt_1.name",
         displayParentId: "uranium",
@@ -130,6 +147,23 @@ window.RARITIES_DATA = [
             nameKey: "cards.space_alt_1.cardName",
             image: "img/altSpace.png",
             descriptionKey: "cards.space_alt_1.description"
+        }
+    },
+    {
+        id: "timestop_alt_1",
+        nameKey: "cards.timestop_alt_1.name",
+        displayParentId: "timestop",
+        minPrestige: 1,
+        probabilityBase: 1 / 102400,
+        color: "#b0bec5", // Серебряный/серый
+        glowColor: "#80deea", // Голубоватое свечение, как у Сакуи
+        cssClass: "rarity-timestop-alt",
+        currencyOnDuplicate: 10240,
+        card: {
+            name: "S.A.K.U.Y.A.", 
+            nameKey: "cards.timestop_alt_1.cardName",
+            image: "img/altTimestop.png", // Вам нужно будет создать это изображение
+            descriptionKey: "cards.timestop_alt_1.description"
         }
     },
     {

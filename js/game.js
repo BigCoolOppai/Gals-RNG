@@ -119,18 +119,28 @@ const Game = (() => {
             const uniqueCardsCount = new Set(playerData.inventory.filter(id => id !== 'garbage')).size;
             const luckBonus = uniqueCardsCount * PRESTIGE_LUCK_PER_CARD;
 
+            // Получаем чистый объект с дефолтными значениями
             const defaultData = SaveManager.getDefaultPlayerData();
             
+            // 1. Сбрасываем основные игровые показатели
             playerData.currency = 0;
             playerData.activeBoosts = [];
-            playerData.equippedItems = [];
             playerData.luckCoreLevel = 0;
             playerData.misfortuneStacks = 0;
-            playerData.purchasedUpgrades = defaultData.purchasedUpgrades;
+            
+            // 2. ПОЛНЫЙ СБРОС ЭКИПИРОВКИ И УЛУЧШЕНИЙ
+            playerData.equippedItems = defaultData.equippedItems; // Сбрасываем надетую экипировку (в пустой массив)
+            playerData.purchasedUpgrades = defaultData.purchasedUpgrades; // Сбрасываем все улучшения (fastRoll: false, и т.д.)
+            
+            // 3. ОЧИЩАЕМ ИНВЕНТАРЬ ОТ КУПЛЕННЫХ ПРЕДМЕТОВ
+            // Оставляем в инвентаре только карточки (те, что не начинаются с "purchased_")
+            playerData.inventory = playerData.inventory.filter(itemId => !itemId.startsWith("purchased_"));
 
+            // 4. Применяем бонусы престижа
             playerData.prestigeLevel++;
             playerData.prestigeLuckBonus += luckBonus;
 
+            // Сохраняем и обновляем игру
             saveGame();
             UI.showNotification(`${L.get('ui.rebirth.success')} +${luckBonus.toFixed(3)} ${L.get('ui.luck').toLowerCase()}`, 'success', 8000);
             UI.updateAll(playerData);

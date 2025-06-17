@@ -936,61 +936,36 @@ const VisualEffects = {
         'epic_alt_1': function(targets) {
             const { glitchOverlay } = targets;
             if (!glitchOverlay) return null;
+            
+            const container = document.createElement('div');
+            container.className = 'velocity-line-container';
+            glitchOverlay.appendChild(container);
 
-            const spikes = [];
-            const spikeCount = 40;
-            const w = window.innerWidth;
-            const h = window.innerHeight;
+            const lines = [];
+            
+            for (let i = 0; i < 20; i++) {
+                const line = document.createElement('div');
+                line.className = 'velocity-line';
+                container.appendChild(line);
+                lines.push(line);
 
-            for (let i = 0; i < spikeCount; i++) {
-                const spike = document.createElement('div');
-                spike.className = 'velocity-spike';
-                glitchOverlay.appendChild(spike);
-                spikes.push(spike);
-
-                const edge = Math.floor(Math.random() * 4);
-                let startX, startY;
-
-                // 1. Определяем стартовую позицию на краю экрана
-                switch(edge) {
-                    case 0: startX = gsap.utils.random(0, w); startY = 0; break;      // Верхний край
-                    case 1: startX = w; startY = gsap.utils.random(0, h); break;      // Правый край
-                    case 2: startX = gsap.utils.random(0, w); startY = h; break;      // Нижний край
-                    case 3: startX = 0; startY = gsap.utils.random(0, h); break;      // Левый край
-                }
-                
-                // 2. Генерируем случайную ЦЕЛЕВУЮ точку в центре экрана
-                const targetX = w / 2 + gsap.utils.random(-w / 6, w / 6);
-                const targetY = h / 2 + gsap.utils.random(-h / 6, h / 6);
-
-                // 3. Вычисляем ТОЧНЫЙ угол от старта до цели
-                const angle = Math.atan2(targetY - startY, targetX - startX) * 180 / Math.PI;
-
-                // 4. Устанавливаем параметры: позицию и правильный угол
-                gsap.set(spike, {
-                    x: startX,
-                    y: startY,
-                    rotation: angle, // <-- ИСПОЛЬЗУЕМ НОВЫЙ, ТОЧНЫЙ УГОЛ
-                    width: gsap.utils.random(w / 6, w / 4),
-                    height: gsap.utils.random(2, 6)
-                });
-
-                // 5. Анимация длины шипа (остается без изменений)
-                gsap.to(spike, {
-                    scaleX: gsap.utils.random(0.1, 0.2),
-                    duration: gsap.utils.random(0.1, 0.4),
-                    ease: "power2.inOut",
+                gsap.fromTo(line, {
+                    y: `random(0, ${window.innerHeight})`,
+                    x: `random(-${window.innerWidth}, -100)`,
+                    width: "random(100, 400)",
+                    opacity: "random(0.3, 0.8)"
+                }, {
+                    duration: gsap.utils.random(0.5, 1.5),
+                    x: `+=${window.innerWidth * 2}`,
+                    ease: "none", // Используем "none" для равномерной скорости, как у ветра
                     repeat: -1,
-                    yoyo: true,
-                    delay: gsap.utils.random(0, 0.5)
+                    delay: gsap.utils.random(0, 1.5)
                 });
             }
 
             return () => {
-                spikes.forEach(spike => {
-                    gsap.killTweensOf(spike);
-                    if (spike.parentNode) spike.remove();
-                });
+                lines.forEach(line => gsap.killTweensOf(line));
+                if (container.parentNode) container.remove();
             };
         },
 

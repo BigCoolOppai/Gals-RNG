@@ -42,6 +42,8 @@ window.locales.en = {
         rare_alt_1: { name: "Awakened", cardName: "Mila, the Crimson Tear", description: "She has seen the light, but the truth she witnessed drove her mad. Now her gaze brings only pain, and her mind knows only suffering..." },
         garbage_alt_1: { name: "Popular", cardName: "Shining Idol", description: "She went from the garbage can to the spotlight. Now she is who she always dreamed of being, thanks for not throwing me away! *smooch*" },
         goblin: { name: "Cunning", cardName: "Tur'gata", description: "She's crept onto your porch... so what? Oh... she's luring you into a so-called 'breeding trap'. Silly goblins..." },
+        berserk_alt_1: { name: "Peaceful", cardName: "Stug, at Peace", description: "The battles are over. The sword is planted in the ground. By the fire, she has finally found the peace she was denied for so long. Perhaps this is her true victory. She is finally happy." },
+        timestop_alt_1: { name: "Za Warudo?", cardName: "S.A.K.U.Y.A.", description: "She is the head maid at a very famous mansion. She masterfully throws knives and... it seems she can also stop time. What a coincidence." },
     },
     // Shop Items
     shop: {
@@ -139,6 +141,7 @@ window.locales.en = {
             button: "Rebirth",
             confirmation: "ARE YOU SURE?\n\nYou will lose almost all progress except for your card collection. This action is irreversible!",
             success: "Rebirth successful! Received a permanent luck bonus of:",
+            unlock_alt_hint: "After your first rebirth, you will start finding exclusive cards and alternative versions of familiar characters!",
             locked_after: "after R{level}"
         }
     },

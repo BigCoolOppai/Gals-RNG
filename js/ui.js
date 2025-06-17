@@ -530,6 +530,9 @@ const UI = (() => {
             <div class="text-center p-md-5">
                 <h2 class="mb-3">${L.get('ui.rebirth.title')}</h2>
                 <p class="lead text-muted mb-4">${L.get('ui.rebirth.description')}</p>
+                
+                <p class="text-info-emphasis">${L.get('ui.rebirth.unlock_alt_hint')}</p> 
+            
                 <div class="card bg-dark-subtle p-4 mx-auto" style="max-width: 600px;">
                     <div class="card-body">
                         <p class="fs-5">${L.get('ui.rebirth.current_cards').replace('{count}', uniqueCardsCount)}</p>
@@ -1138,51 +1141,74 @@ const UI = (() => {
     }
 
     // Вычисляет и выполняет пропущенный прогресс
+    // Замените существующую функцию handleAfkProgress
     function handleAfkProgress() {
-        if (!lastRollTimestamp || lastRollTimestamp === 0) return; // Нечего догонять
-
-        const timeElapsed = Date.now() - lastRollTimestamp;
-        const playerData = Game.getPlayerData();
-        const isMulti = playerData.purchasedUpgrades.multiRollX5;
-        const timePerCycle = getEstimatedCycleTime();
-        const rollsPerCycle = isMulti ? 5 : 1;
-        
-        const cyclesToPerform = Math.floor(timeElapsed / timePerCycle);
-
-        if (cyclesToPerform <= 0) {
-            // Если времени прошло мало, просто запускаем следующий ролл
-            performNextAutoroll();
+        if (!lastRollTimestamp || lastRollTimestamp === 0) {
+            performNextAutoroll(); // Если нечего догонять, просто делаем следующий ролл
             return;
         }
 
-        console.log(`Catching up on ${cyclesToPerform} autoroll cycles.`);
+        const timeElapsed = Date.now() - lastRollTimestamp;
+        const timePerCycle = getEstimatedCycleTime();
+        const cyclesToPerform = Math.floor(timeElapsed / timePerCycle);
 
-        let totalCurrencyGained = 0;
-        let newCardsCount = 0;
+        if (cyclesToPerform <= 0) {
+            performNextAutoroll();
+            return;
+        }
+        
+        // Вместо цикла, мы запускаем обработчик порций
+        processAfkInChunks(cyclesToPerform);
+    }
 
+    function processAfkInChunks(totalCycles) {
+        console.log(`Starting AFK catch-up for ${totalCycles} cycles in chunks.`);
         isRolling = true; // Блокируем новые роллы на время "догона"
 
-        for (let i = 0; i < cyclesToPerform; i++) {
-            for (let j = 0; j < rollsPerCycle; j++) {
-                const result = Game.performRoll();
-                if (result.duplicateReward > 0) {
-                    totalCurrencyGained += result.duplicateReward;
-                }
-                if (result.isNew) {
-                    newCardsCount++;
-                    newCardQueue.push(result);
+        let cyclesProcessed = 0;
+        let totalCurrencyGained = 0;
+        let newCardsCount = 0;
+        const rollsPerCycle = Game.getPlayerData().purchasedUpgrades.multiRollX5 ? 5 : 1;
+        const chunkSize = 50; // Обрабатываем по 50 циклов за один раз (можно настроить)
+
+        function processChunk() {
+            const cyclesInThisChunk = Math.min(chunkSize, totalCycles - cyclesProcessed);
+
+            for (let i = 0; i < cyclesInThisChunk; i++) {
+                for (let j = 0; j < rollsPerCycle; j++) {
+                    const result = Game.performRoll();
+                    if (result.duplicateReward > 0) {
+                        totalCurrencyGained += result.duplicateReward;
+                    }
+                    if (result.isNew) {
+                        newCardsCount++;
+                        newCardQueue.push(result);
+                    }
                 }
             }
-        }
 
-        isRolling = false;
+            cyclesProcessed += cyclesInThisChunk;
+
+            // Обновляем прогресс, если еще не все готово
+            if (cyclesProcessed < totalCycles) {
+                // Запрашиваем у браузера обработку следующей порции, когда он будет готов
+                requestAnimationFrame(processChunk);
+            } else {
+                // --- ВСЕ ГОТОВО ---
+                console.log("AFK catch-up finished.");
+                isRolling = false;
+                
+                // Финальное обновление UI и уведомление
+                updateAll(Game.getPlayerData());
+                showAfkSummaryNotification(totalCycles * rollsPerCycle, totalCurrencyGained, newCardsCount);
+                
+                // Запускаем следующий обычный ролл, который перезапустит таймер
+                performNextAutoroll();
+            }
+        }
         
-        // Обновляем UI и показываем итоги
-        updateAll(Game.getPlayerData());
-        showAfkSummaryNotification(cyclesToPerform * rollsPerCycle, totalCurrencyGained, newCardsCount);
-        
-        // Запускаем следующий обычный ролл, который перезапустит таймер
-        performNextAutoroll();
+        // Запускаем обработку первой порции
+        requestAnimationFrame(processChunk);
     }
     // --- Публичный интерфейс ---
     return { init, updateAll, renderShop, showNotification, updateEquippedItemsDisplay, updateLuckyRollDisplay, applyVisualEffect, toggleMultiRollButton };
