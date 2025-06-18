@@ -43,6 +43,11 @@ window.RARITIES_DATA = [
         glowColor: "#ff9e80",
         cssClass: "rarity-error-alt", // Новый класс для стиля
         currencyOnDuplicate: 404403,
+        mechanicalEffect: {
+            type: "universal_upgrade",
+            chance: 0.05 // 5% шанс
+            // Теперь здесь нет upgradeMap. Логика будет в game.js
+        },
         card: {
             name: "ERROR, Corrupted Core", 
             nameKey: "cards.error_alt_1.cardName",
@@ -67,6 +72,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "diamond",
+        nameKey: "cards.diamond.name",
+        displayParentId: "carbon",
+        // Нет minPrestige, доступна с начала для бустеров
+        probabilityBase: 1 / 501000, // отсылка на 50 тысяч атмосфер и 1000 градусов
+        color: "#B2EBF2", // Светло-голубой, как алмаз
+        glowColor: "#FFFFFF", // Чистое белое сияние
+        cssClass: "rarity-diamond",
+        currencyOnDuplicate: 50100,
+        card: {
+            name: "Dime",
+            nameKey: "cards.diamond.cardName",
+            image: "img/altDiamond.png",
+            descriptionKey: "cards.diamond.description"
+        }
+    },
+    {
         id: "error",
         nameKey: "cards.error.name",
         probabilityBase: 1/404403,
@@ -79,6 +101,21 @@ window.RARITIES_DATA = [
             nameKey: "cards.error.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardError.png",
             descriptionKey: "cards.error.description"
+        }
+    },
+    {
+        id: "gold",
+        nameKey: "cards.gold.name",
+        probabilityBase: 1 / 379000,
+        color: "#FFD700", // Золотой
+        glowColor: "#FFF9C4", // Светло-золотое свечение
+        cssClass: "rarity-gold",
+        currencyOnDuplicate: 37900,
+        card: {
+            name: "Goldy",
+            nameKey: "cards.gold.cardName",
+            image: "img/cardGold.png",
+            descriptionKey: "cards.gold.description"
         }
     },
     {
@@ -113,6 +150,21 @@ window.RARITIES_DATA = [
             nameKey: "cards.uranium_alt_1.cardName",
             image: "img/altUranium.png",
             descriptionKey: "cards.uranium_alt_1.description"
+        }
+    },
+    {
+        id: "tungsten",
+        nameKey: "cards.tungsten.name",
+        probabilityBase: 1 / 183840, // Реже Ткачихи
+        color: "#B0BEC5", // Холодный металлик
+        glowColor: "#ECEFF1", // Белое свечение
+        cssClass: "rarity-tungsten",
+        currencyOnDuplicate: 18384,
+        card: {
+            name: "Tung Stenn",
+            nameKey: "cards.tungsten.cardName",
+            image: "img/cardTungsten.png",
+            descriptionKey: "cards.tungsten.description"
         }
     },
     {
@@ -215,6 +267,21 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "neon",
+        nameKey: "cards.neon.name",
+        probabilityBase: 1 / 20180,
+        color: "#FF1744", // Яркий неоновый красный
+        glowColor: "#FF8A80", // Розовое свечение
+        cssClass: "rarity-neon",
+        currencyOnDuplicate: 2018,
+        card: {
+            name: "Neonia",
+            nameKey: "cards.neon.cardName",
+            image: "img/cardNeon.png",
+            descriptionKey: "cards.neon.description"
+        }
+    },
+    {
         id: "hybrid",
         nameKey: "cards.hybrid.name",
         probabilityBase: 1/20000, 
@@ -230,6 +297,21 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "chlorine",
+        nameKey: "cards.chlorine.name",
+        probabilityBase: 1 / 17000,
+        color: "#8BC34A", // Светло-зеленый
+        glowColor: "#FFF176", // Желтоватое свечение
+        cssClass: "rarity-chlorine",
+        currencyOnDuplicate: 1700,
+        card: {
+            name: "Chloretta",
+            nameKey: "cards.chlorine.cardName",
+            image: "img/cardChlorine.png",
+            descriptionKey: "cards.chlorine.description"
+        }
+    },
+    {
         id: "bee",
         nameKey: "cards.bee.name", 
         probabilityBase: 1/15000, 
@@ -242,6 +324,23 @@ window.RARITIES_DATA = [
             nameKey: "cards.bee.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardQueenBee.png",
             descriptionKey: "cards.bee.description"
+        }
+    },
+    {
+        id: "graphite",
+        nameKey: "cards.graphite.name",
+        displayParentId: "carbon",
+        minPrestige: 1,
+        probabilityBase: 1 / 13000, // Реже, чем уголь
+        color: "#616161", // Графитовый
+        glowColor: "#CFD8DC", // Металлическое свечение
+        cssClass: "rarity-graphite",
+        currencyOnDuplicate: 1300,
+        card: {
+            name: "Sketchy",
+            nameKey: "cards.graphite.cardName",
+            image: "img/altGraphite.png",
+            descriptionKey: "cards.graphite.description"
         }
     },
     {
@@ -316,6 +415,12 @@ window.RARITIES_DATA = [
         glowColor: "#64b5f6",
         cssClass: "rarity-motivation",
         currencyOnDuplicate: 211,
+        mechanicalEffect: {
+            type: "sword_path",
+            bonusPerRoll: 0.005,
+            maxBonus: 0.25,
+            timeoutSeconds: 10
+        },
         card: {
             name: "Alpha and Omega",
             nameKey: "cards.motivation.cardName", // <-- ДОБАВЛЕНО
@@ -401,6 +506,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "coal",
+        nameKey: "cards.coal.name",
+        displayParentId: "carbon",
+        minPrestige: 1,
+        probabilityBase: 1 / 1000, // Чуть чаще, чем углерод
+        color: "#212121", // Угольно-черный
+        glowColor: "#FF9800", // Огненное свечение
+        cssClass: "rarity-coal",
+        currencyOnDuplicate: 100,
+        card: {
+            name: "Ember",
+            nameKey: "cards.coal.cardName",
+            image: "img/altCoal.png",
+            descriptionKey: "cards.coal.description"
+        }
+    },
+    {
         id: "rare_alt_1",
         nameKey: "cards.rare_alt_1.name",
         displayParentId: "rare",
@@ -425,6 +547,11 @@ window.RARITIES_DATA = [
         glowColor: "#ffe54c",
         cssClass: "rarity-jackpot",
         currencyOnDuplicate: 77,
+        mechanicalEffect: {
+            type: "high_risk_high_reward",
+            chance: 0.01, // 1%
+            luckBonus: 100.0
+        },
         card: {
             name: "Hakaria",
             nameKey: "cards.jackpot.cardName", // <-- ДОБАВЛЕНО
@@ -540,6 +667,21 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "carbon",
+        nameKey: "cards.carbon.name",
+        probabilityBase: 1 / 12, // Как ты и просил!
+        color: "#424242", // Темно-серый
+        glowColor: "#9E9E9E", // Серое свечение
+        cssClass: "rarity-carbon",
+        currencyOnDuplicate: 12,
+        card: {
+            name: "Life-Giver",
+            nameKey: "cards.carbon.cardName",
+            image: "img/cardCarbon.png",
+            descriptionKey: "cards.carbon.description"
+        }
+    },
+    {
         id: "rare",
         nameKey: "cards.rare.name",
         probabilityBase: 1/8,
@@ -623,6 +765,22 @@ const SHOP_DATA = {
                 maxStacks: 10, // Опционально: максимальное количество стаков (например, до +0.5 удачи)
                 triggerRarities: ["garbage", "common", "rare"] // ID редкостей, которые стакают бонус
             }
+        },
+        {
+            id: "equip_greedstone",
+            nameKey: "shop.equipment.equip_greedstone.name",
+            descriptionKey: "shop.equipment.equip_greedstone.description",
+            cost: 50500,
+            type: "equipment",
+            effect: { type: "duplicate_currency_bonus_percent", value: 0.25 }
+        },
+        {
+            id: "equip_distortion_chronometer",
+            nameKey: "shop.equipment.equip_distortion_chronometer.name",
+            descriptionKey: "shop.equipment.equip_distortion_chronometer.description",
+            cost: 24000,
+            type: "equipment",
+            effect: { type: "lucky_roll_accelerator", rolls_reduced: 2 }
         }
     ],
     upgrades: [
@@ -634,7 +792,7 @@ const SHOP_DATA = {
 
 
 // Константы для игры
-const MAX_EQUIPPED_ITEMS = 3;
+
 const ROLL_ANIMATION_ITEMS_COUNT = 50;
 const BASE_LUCK = 1.0;
 

@@ -150,6 +150,15 @@
                 <!-- Settings Tab -->
                 <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
                     <h2 class="mb-3" data-i18n="ui.settings">Настройки</h2>
+                    <hr>
+                    <h4>Player ID & Support</h4>
+                    <p class="form-text">Ваш уникальный ID для получения бонусов поддержки. Отправьте его разработчику после подписки на Boosty.</p>
+                    <div class="input-group mb-3">
+                        <input type="text" id="playerIdDisplay" class="form-control" readonly>
+                        <button class="btn btn-outline-secondary" type="button" id="copyPlayerIdBtn">Копировать</button>
+                    </div>
+                    <button class="btn btn-info" id="checkSupportBtn">Проверить статус поддержки</button>
+                    <hr>
                     <h4>Язык / Language</h4>
                     <div class="btn-group" role="group" aria-label="Language switch">
                       <button type="button" class="btn btn-outline-secondary" id="lang-ru">Русский</button>
@@ -208,7 +217,7 @@
         <footer class="text-center mt-5 mb-3">
             <hr>
             <p class="text-muted small">
-                Gal's RNG - Version 0.1.5d "New Fixes and alt Versions"
+                Gal's RNG - Version 0.1.6 "Elemental Update"
             </p>
             <!-- Можно добавить еще что-то, например, копирайт или ссылку на вас -->
             <p class="text-muted small">&copy; 2025 BigCoolOppai</p>
@@ -239,6 +248,7 @@
                         <div id="visualEffectControls" class="mt-3"> <!-- Контейнер для кнопки -->
                         <button id="toggleVisualEffectButton" class="btn btn-sm"></button>
                         </div>
+                        <div id="mechanicalEffectControls" class="mt-3"></div>
                     </div>
                 </div>
             </div>

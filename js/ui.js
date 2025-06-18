@@ -76,6 +76,10 @@ const UI = (() => {
         statsCurrencyFromDuplicatesEl = document.getElementById('statsCurrencyFromDuplicates');
         statsByRarityContainerEl = document.getElementById('statsByRarityContainer');
 
+        playerIdDisplay = document.getElementById('playerIdDisplay');
+        copyPlayerIdBtn = document.getElementById('copyPlayerIdBtn');
+        checkSupportBtn = document.getElementById('checkSupportBtn');
+
         document.getElementById('resetProgressButton')?.addEventListener('click', Game.resetGame);
 
         inventorySortSelect = document.getElementById('inventorySort');
@@ -184,6 +188,20 @@ const UI = (() => {
             localStorage.setItem('inventorySortOrder', inventorySortSelect.value);
             // Перерисовываем инвентарь с новым порядком
             renderInventory(Game.getPlayerData());
+        });
+
+        copyPlayerIdBtn.addEventListener('click', () => {
+            if (playerIdDisplay.value) {
+                navigator.clipboard.writeText(playerIdDisplay.value).then(() => {
+                    showNotification(L.get('notifications.playerIdCopied'), "success");
+                }).catch(err => {
+                    showNotification(L.get('notifications.playerIdCopyError'), "danger");
+                });
+            }
+        });
+
+        checkSupportBtn.addEventListener('click', () => {
+            Game.checkForSupporterStatus();
         });
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
@@ -424,9 +442,11 @@ const UI = (() => {
     // --- Обновление общих элементов UI ---
     function updateAll(playerData) {
         if (!playerData) return;
+        if (playerIdDisplay) playerIdDisplay.value = playerData.playerId;
         updateCurrencyDisplay(playerData.currency);
         updateLuckDisplay();
         updateActiveBoostsDisplay();
+        
         renderInventory(playerData); // Обновляем инвентарь (включая счетчик)
         renderShop(); // Обновляем магазин (состояние кнопок)
         // renderSettings() удален
@@ -434,7 +454,9 @@ const UI = (() => {
         updateEquippedItemsDisplay(playerData.equippedItems);
         toggleMultiRollButton(playerData.purchasedUpgrades.multiRollX5);
         if (playerData && typeof playerData.luckyRollCounter !== 'undefined') {
-            updateLuckyRollDisplay(playerData.luckyRollCounter, playerData.luckyRollThreshold);
+            // Получаем актуальный порог. По умолчанию 11.
+            const currentThreshold = playerData.luckyRollThreshold || 11;
+            updateLuckyRollDisplay(playerData.luckyRollCounter, currentThreshold);
         }
         if (playerData && playerData.stats) { // Проверяем наличие stats
             renderStats(playerData);
@@ -915,31 +937,37 @@ const UI = (() => {
     function showCardModal(parentId, allVersions) {
         const versionSwitcher = document.getElementById('versionSwitcher');
         const visualEffectControls = document.getElementById('visualEffectControls');
+        const mechanicalEffectControls = document.getElementById('mechanicalEffectControls'); 
+
         const playerData = Game.getPlayerData();
         const activeSkinId = playerData.activeSkins[parentId] || parentId;
 
         versionSwitcher.innerHTML = '';
         visualEffectControls.innerHTML = '';
+        mechanicalEffectControls.innerHTML = '';
         
-        const showVersionDetails = (version) => {
-            modalCardImage.src = version.card.image;
-            modalCardName.textContent = L.get(version.card.nameKey);
-            modalCardRarity.textContent = `${L.get('ui.rarity')}: ${L.get(version.nameKey)}`;
-            modalCardDescription.textContent = L.get(version.card.descriptionKey);
-            modalCardRarity.style.color = version.color;
+        const showVersionDetails = (versionData) => {
+            // --- НАЧАЛО ВОССТАНОВЛЕННОГО БЛОКА ---
+            modalCardImage.src = versionData.card.image;
+            modalCardName.textContent = L.get(versionData.card.nameKey);
+            modalCardRarity.textContent = `${L.get('ui.rarity')}: ${L.get(versionData.nameKey)}`;
+            modalCardDescription.textContent = L.get(versionData.card.descriptionKey);
+            modalCardRarity.style.color = versionData.color;
 
-            if (version.probabilityBase >= 1) {
+            if (versionData.probabilityBase >= 1) {
                 modalCardChance.textContent = L.get('ui.guaranteed');
             } else {
-                modalCardChance.textContent = `${L.get('ui.baseChance')}: 1/${Math.round(1 / version.probabilityBase)}`;
+                modalCardChance.textContent = `${L.get('ui.baseChance')}: 1/${Math.round(1 / versionData.probabilityBase)}`;
             }
+            // --- КОНЕЦ ВОССТАНОВЛЕННОГО БЛОКА ---
             
+            // --- Блок визуальных эффектов (остается без изменений) ---
             visualEffectControls.innerHTML = '';
-            const cardHasEffect = VisualEffects.effects.hasOwnProperty(version.id);
+            const cardHasEffect = VisualEffects.effects.hasOwnProperty(versionData.id);
             if (cardHasEffect) {
                 const toggleBtn = document.createElement('button');
                 toggleBtn.classList.add('btn', 'btn-sm');
-                const isActive = playerData.activeVisualEffectRarityId === version.id;
+                const isActive = playerData.activeVisualEffectRarityId === versionData.id;
                 toggleBtn.textContent = L.get(isActive ? 'ui.deactivateEffect' : 'ui.activateEffect');
                 toggleBtn.classList.add(isActive ? 'btn-danger' : 'btn-success');
                 
@@ -947,7 +975,7 @@ const UI = (() => {
                     if (isActive) {
                         Game.clearActiveVisualEffect();
                     } else {
-                        Game.setActiveVisualEffect(version.id);
+                        Game.setActiveVisualEffect(versionData.id);
                     }
                     cardModal.hide();
                     setTimeout(() => showCardModal(parentId, allVersions), 300);
@@ -956,8 +984,46 @@ const UI = (() => {
             } else {
                 visualEffectControls.innerHTML = `<p class="text-muted small">${L.get('ui.noVisualEffect')}</p>`;
             }
-        };
 
+            // --- Блок механических эффектов (остается без изменений) ---
+            mechanicalEffectControls.innerHTML = '';
+            const mechEffectData = versionData.mechanicalEffect;
+            let descriptionText = '';
+            if (mechEffectData) {
+                // Ключ формируется из типа эффекта
+                descriptionText = L.get(`mechanical_effects.${mechEffectData.type}`);
+            } else {
+                descriptionText = L.get('mechanical_effects.no_effect');
+            }
+
+            let equippedIndicator = '';
+            if (playerData.activeMechanicalEffect === versionData.id) {
+                equippedIndicator = ` <span class="text-success">${L.get('mechanical_effects.equipped_label')}</span>`;
+            }
+
+            mechanicalEffectControls.innerHTML = `
+                <hr>
+                <h5>${L.get('mechanical_effects.description_title')}${equippedIndicator}</h5>
+                <p class="text-muted small">${descriptionText}</p>
+            `;
+
+            if (mechEffectData) {
+                const equipBtn = document.createElement('button');
+                equipBtn.classList.add('btn', 'btn-sm');
+                const isActive = playerData.activeMechanicalEffect === versionData.id;
+                equipBtn.textContent = L.get(isActive ? 'mechanical_effects.unequip_button' : 'mechanical_effects.equip_button');
+                equipBtn.classList.add(isActive ? 'btn-danger' : 'btn-primary');
+
+                equipBtn.addEventListener('click', () => {
+                    Game.setActiveMechanicalEffect(isActive ? null : versionData.id);
+                    cardModal.hide();
+                    setTimeout(() => showCardModal(parentId, allVersions), 300);
+                });
+                mechanicalEffectControls.appendChild(equipBtn);
+            }
+        };
+        
+        // --- Блок переключателя версий (остается без изменений) ---
         if (allVersions.length > 1) {
             const group = document.createElement('div');
             group.className = 'd-flex justify-content-center align-items-center flex-wrap gap-2';
@@ -970,6 +1036,7 @@ const UI = (() => {
                 const button = document.createElement('button');
                 button.type = 'button';
                 button.className = 'btn btn-sm';
+                // Используем имя карты для кнопки
                 button.textContent = L.get(version.card.nameKey);
 
                 if (version.id === activeSkinId) {
@@ -1016,7 +1083,7 @@ const UI = (() => {
                 if (isEquipped) {
                     buttonHtml = `<button class="btn btn-sm btn-secondary" disabled>${L.get('ui.nowEquipped')}</button>`;
                 } else if (isPurchased) {
-                    const isDisabled = type === 'equipment' && playerData.equippedItems.length >= MAX_EQUIPPED_ITEMS;
+                    const isDisabled = type === 'equipment' && playerData.equippedItems.length >= Game.getMaxEquippedItems();
                     buttonHtml = `<button class="btn btn-sm btn-outline-primary equip-btn" data-item-id="${item.id}" ${isDisabled ? `disabled title="${L.get('ui.maxEquipment')}"` : ''}>${L.get('ui.equip')}</button>`;
                 } else {
                     buttonHtml = `<button class="btn btn-sm btn-success buy-${type}-btn" data-item-id="${item.id}" ${!canAfford ? 'disabled' : ''}>${L.get('ui.buy')} <span class="badge bg-warning text-dark">${item.cost} 💎</span></button>`;
@@ -1130,14 +1197,24 @@ const UI = (() => {
 
     // Показывает красивое уведомление с итогами
     function showAfkSummaryNotification(rolls, currency, newCards) {
-        let message = `За время вашего отсутствия выполнено ${rolls} роллов.<br>`;
-        if (currency > 0) {
-            message += `💎 Получено за дубликаты: ${currency}<br>`;
+        let messageKey;
+        
+        if (currency > 0 && newCards > 0) {
+            messageKey = 'notifications.afkSummary';
+        } else if (currency > 0 && newCards === 0) {
+            messageKey = 'notifications.afkSummaryNoNewCards';
+        } else if (currency === 0 && newCards > 0) {
+            messageKey = 'notifications.afkSummaryNoCurrency';
+        } else {
+            messageKey = 'notifications.afkSummaryRollsOnly';
         }
-        if (newCards > 0) {
-            message += `✨ Получено новых карт: ${newCards}!`;
-        }
-        showNotification(message, 'info', 8000); // Показываем 8 секунд
+
+        const message = L.get(messageKey)
+            .replace('{rolls}', rolls)
+            .replace('{currency}', currency)
+            .replace('{newCards}', newCards);
+
+        showNotification(message, 'info', 8000);
     }
 
     // Вычисляет и выполняет пропущенный прогресс

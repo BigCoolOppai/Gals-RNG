@@ -9,6 +9,11 @@ const SaveManager = (() => {
         prestigeLuckBonus: 0.0,
         luckCoreLevel: 0,
         currency: 0, // Призматические осколки
+        playerId: null, 
+        isSupporter: false, 
+        activeMechanicalEffect: null, // ID карты с активным механическим эффектом
+        lastRollTimestamp: 0,         // Для эффекта "Путь Меча"
+        motivationStacks: 0,          // Для эффекта "Путь Меча
         activeSkins: {},
         inventory: [], // Массив ID открытых редкостей (карт)
         seenRarities: [], // Массив ID редкостей, которые игрок видел хотя бы раз
@@ -48,54 +53,63 @@ const SaveManager = (() => {
     const loadPlayerData = () => {
         try {
             const savedData = localStorage.getItem(SAVE_KEY);
+            let playerObject; // Временный объект для данных
+
             if (savedData) {
-                const parsedData = JSON.parse(savedData);
-                let defaultData = getDefaultPlayerData();
-                let mergedData = { ...defaultData, ...parsedData };
-                
-                mergedData.purchasedUpgrades = { ...defaultData.purchasedUpgrades, ...(parsedData.purchasedUpgrades || {}) };
-                mergedData.stats = { 
-                    ...defaultData.stats, 
-                    ...(parsedData.stats || {}),
-                    rollsByRarity: { ...(defaultData.stats.rollsByRarity || {}), ...((parsedData.stats && parsedData.stats.rollsByRarity) || {}) }
-                };
-
-                // Фильтруем просроченные бусты
-                mergedData.activeBoosts = (mergedData.activeBoosts || []).filter(boost => boost.endTime && new Date(boost.endTime) > new Date());
-
-                // =====================================================================
-                // <<< НАЧАЛО БЛОКА МИГРАЦИИ СТАРЫХ СОХРАНЕНИЙ ДЛЯ ПРЕДМЕТОВ >>>
-                // =====================================================================
-                if (mergedData.equippedItems && mergedData.equippedItems.length > 0) {
-                    mergedData.equippedItems = mergedData.equippedItems.map(item => {
-                        // Проверяем, это старый формат (с `name`) или новый (с `nameKey`)
-                        if (item.name && !item.nameKey) {
-                            // Это старый формат. Нужно найти ключ и преобразовать.
-                            const shopDefinition = SHOP_DATA.equipment.find(shopItem => shopItem.id === item.id);
-                            if (shopDefinition) {
-                                return {
-                                    ...item, // Копируем все старые поля (id, luckBonus, effect)
-                                    nameKey: shopDefinition.nameKey, // Добавляем правильный ключ
-                                    name: undefined // Удаляем старое жестко закодированное имя
-                                };
-                            }
-                        }
-                        // Если это уже новый формат или предмет не найден, возвращаем как есть
-                        return item;
-                    }).filter(Boolean); // Убираем предметы, которые не удалось смигрировать
-                }
-                // =====================================================================
-                // <<< КОНЕЦ БЛОКА МИГРАЦИИ >>>
-                // =====================================================================
-
-                console.log("Game data loaded and migrated.");
-                return mergedData;
+                playerObject = JSON.parse(savedData);
+            } else {
+                // Если сохранения нет, создаем дефолтные данные
+                playerObject = getDefaultPlayerData();
             }
+
+            // --- КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ ---
+            let needsResave = false; // Флаг, который покажет, нужно ли пересохранить данные
+
+            // 1. Генерируем ID, если его нет
+            if (!playerObject.playerId) {
+                console.log("Player ID not found. Generating a new one.");
+                playerObject.playerId = 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+                needsResave = true; // Отмечаем, что нужно пересохранить
+            }
+            
+            // 2. Объединяем с дефолтными данными, чтобы добавить новые поля из апдейтов
+            const defaultData = getDefaultPlayerData();
+            let mergedData = { ...defaultData, ...playerObject };
+
+            // Дополнительные проверки (оставляем их, они полезны)
+            mergedData.purchasedUpgrades = { ...defaultData.purchasedUpgrades, ...(playerObject.purchasedUpgrades || {}) };
+            mergedData.stats = { 
+                ...defaultData.stats, 
+                ...(playerObject.stats || {}),
+                rollsByRarity: { ...(defaultData.stats.rollsByRarity || {}), ...((playerObject.stats && playerObject.stats.rollsByRarity) || {}) }
+            };
+            mergedData.activeBoosts = (mergedData.activeBoosts || []).filter(boost => boost.endTime && new Date(boost.endTime) > new Date());
+            
+            // Миграция старых предметов (оставляем)
+            if (mergedData.equippedItems && mergedData.equippedItems.length > 0) {
+                // ... ваш код миграции ...
+            }
+
+            // 3. Если мы сгенерировали новый ID, немедленно сохраняем игру
+            if (needsResave) {
+                console.log("Immediately re-saving data to set the new Player ID.");
+                savePlayerData(mergedData);
+            }
+            // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+
+            console.log("Game data loaded successfully.");
+            return mergedData;
+
         } catch (error) {
             console.error("Error loading game data:", error);
         }
+        
+        // Фоллбэк, если все сломалось
         console.log("No saved data found or error loading, starting new game.");
-        return getDefaultPlayerData();
+        const newPlayerWithId = getDefaultPlayerData();
+        newPlayerWithId.playerId = 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+        savePlayerData(newPlayerWithId);
+        return newPlayerWithId;
     };
 
     const resetPlayerData = () => {

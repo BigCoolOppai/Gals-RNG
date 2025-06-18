@@ -1792,3 +1792,28 @@ body.visual-effect-timestop {
     border-color: #b0bec5;
     --rarity-glow-color: #80deea;
 }
+
+/* --- Элементарные Карты 0.1.6 --- */
+.roll-slot.rarity-tungsten { background: linear-gradient(145deg, #CFD8DC, #78909c); color: #263238; border: 1px solid #90A4AE; }
+.inventory-card.border-tungsten { border-color: #B0BEC5; --rarity-glow-color: #ECEFF1; }
+
+.roll-slot.rarity-gold { background: linear-gradient(145deg, #FFF176, #FFD700); color: #422B00; border: 1px solid #FBC02D; animation: jackpot-pulse-glow 1.5s infinite alternate; }
+.inventory-card.border-gold { border-color: #FFD700; --rarity-glow-color: #FFF9C4; }
+
+.roll-slot.rarity-neon { background: #111; color: #FF1744; text-shadow: 0 0 5px #FF8A80, 0 0 10px #FF1744, 0 0 15px #D50000; border: 1px solid #FF5252; }
+.inventory-card.border-neon { border-color: #FF1744; --rarity-glow-color: #FF8A80; }
+
+.roll-slot.rarity-chlorine { background: linear-gradient(45deg, #C6FF00, #8BC34A); color: #33691E; border: 1px solid #AED581; }
+.inventory-card.border-chlorine { border-color: #8BC34A; --rarity-glow-color: #FFF176; }
+
+.roll-slot.rarity-carbon { background: #424242; color: #FAFAFA; border: 1px solid #757575; }
+.inventory-card.border-carbon { border-color: #424242; --rarity-glow-color: #9E9E9E; }
+
+.roll-slot.rarity-coal { background: linear-gradient(180deg, #212121, #000); color: #FF9800; text-shadow: 0 0 8px #E65100; border: 1px solid #424242; }
+.inventory-card.border-coal { border-color: #212121; --rarity-glow-color: #FF9800; }
+
+.roll-slot.rarity-graphite { background: linear-gradient(160deg, #757575, #424242); color: #ECEFF1; border: 1px solid #9E9E9E; }
+.inventory-card.border-graphite { border-color: #616161; --rarity-glow-color: #CFD8DC; }
+
+.roll-slot.rarity-diamond { background: radial-gradient(ellipse at center, #E0F7FA 0%, #B2EBF2 100%); color: #006064; text-shadow: 0 0 10px #fff, 0 0 20px #E0F7FA; border: 1px solid #80DEEA; }
+.inventory-card.border-diamond { border-color: #B2EBF2; --rarity-glow-color: #FFFFFF; }

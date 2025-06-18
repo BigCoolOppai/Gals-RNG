@@ -31,10 +31,91 @@ const Game = (() => {
         }
     }
 
+    // const MAX_EQUIPPED_ITEMS = 3;
+    function getMaxEquippedItems() {
+        return playerData.isSupporter ? 4 : 3;
+    }
+
     function getRebirthCost() {
         const baseCost = 1000000; // Начальная стоимость первого ребёрза
         const multiplier = 3.5;   // Цена каждого следующего ребёрза будет в 3.5 раза выше
         return Math.floor(baseCost * Math.pow(multiplier, playerData.prestigeLevel));
+    }
+
+    // Функция для "маскировки" URL, чтобы его не было видно в исходном коде
+    function getSupporterSheetUrl() {
+        // Просто собираем URL из частей. Этого достаточно, чтобы "спрятать" его от случайных глаз.
+        const part1 = "https://docs.google.com/spreadsheets/d/";
+        const sheetId = "1T0nZBft0W77asIxgY5LnW17cb3Xq4l3DX7RqEYfTfsg"; // Твой ID
+        const part2 = "/gviz/tq?tqx=out:csv&sheet=supporters"; // Используем новое имя листа
+        return `${part1}${sheetId}${part2}`;
+    }
+
+
+    async function checkForSupporterStatus() {
+        if (playerData.isSupporter) {
+            UI.showNotification(L.get('notifications.supporterStatusAlreadyActive'), "info");
+            return;
+        }
+
+        console.log("Checking for supporter status...");
+        UI.showNotification(L.get('notifications.checkingSupporterStatus'), "info");
+
+        try {
+            const url = getSupporterSheetUrl(); // Получаем URL здесь
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const csvText = await response.text();
+            
+            const supporterIds = csvText.split('\n').map(id => id.replace(/"/g, '').trim()).filter(Boolean); // Добавил filter(Boolean) для удаления пустых строк
+
+            if (supporterIds.includes(playerData.playerId)) {
+                console.log("Player ID found in supporter list! Activating perks.");
+                playerData.isSupporter = true;
+                saveGame();
+                UI.showNotification(L.get('notifications.supporterPerksActivated'), "success", 8000);
+                
+                UI.updateAll(getPlayerData());
+            } else {
+                console.log("Player ID not found in supporter list.");
+                UI.showNotification(L.get('notifications.supporterStatusNotFound'), "warning");
+            }
+        } catch (error) {
+            console.error('Error fetching supporter sheet:', error);
+            UI.showNotification(L.get('notifications.supporterCheckError'), "danger");
+        }
+    }
+
+    function setActiveMechanicalEffect(effectId) {
+        // Если пытаемся экипировать уже активный эффект, снимаем его
+        if (playerData.activeMechanicalEffect === effectId) {
+            playerData.activeMechanicalEffect = null;
+        } else {
+            playerData.activeMechanicalEffect = effectId;
+        }
+        console.log(`Active mechanical effect set to: ${playerData.activeMechanicalEffect}`);
+        saveGame();
+        // Обновляем UI, чтобы отобразить изменения (например, удачу от эффекта "Путь Меча")
+        UI.updateAll(getPlayerData());
+    }
+
+    // Пересчитываем бонус от эффекта "Путь Меча"
+    function calculateMotivationBonus() {
+        const effectData = getRarityDataById('motivation')?.mechanicalEffect;
+        if (!effectData) return 0;
+
+        // Сбрасываем стаки, если прошло слишком много времени
+        const timeSinceLastRoll = Date.now() - (playerData.lastRollTimestamp || 0);
+        if (timeSinceLastRoll > effectData.timeoutSeconds * 1000) {
+            if (playerData.motivationStacks > 0) {
+                console.log("Motivation bonus reset due to inactivity.");
+            }
+            playerData.motivationStacks = 0;
+        }
+        
+        return Math.min(playerData.motivationStacks * effectData.bonusPerRoll, effectData.maxBonus);
     }
 
     // --- Валюта ---
@@ -127,6 +208,7 @@ const Game = (() => {
             playerData.activeBoosts = [];
             playerData.luckCoreLevel = 0;
             playerData.misfortuneStacks = 0;
+            playerData.activeMechanicalEffect = null;
             
             // 2. ПОЛНЫЙ СБРОС ЭКИПИРОВКИ И УЛУЧШЕНИЙ
             playerData.equippedItems = defaultData.equippedItems; // Сбрасываем надетую экипировку (в пустой массив)
@@ -180,6 +262,9 @@ const Game = (() => {
             }
         });
         currentDisplayLuck += maxBoostBonus;
+        if (playerData.activeMechanicalEffect === 'motivation') {
+            currentDisplayLuck += calculateMotivationBonus();
+        }
         
         return parseFloat(currentDisplayLuck.toFixed(2));
     }
@@ -239,26 +324,54 @@ const Game = (() => {
     
     // --- Ролл Карточек ---
     function performRoll(guaranteedRarityId = null) {
+
+        // Запоминаем время начала ролла
+        playerData.lastRollTimestamp = Date.now();
+
+        // --- Логика эффекта "Путь Меча" (Motivation) ---
+        if (playerData.activeMechanicalEffect === 'motivation') {
+            playerData.motivationStacks++; // Увеличиваем стак
+            console.log(`Motivation stack increased to: ${playerData.motivationStacks}`);
+        } else {
+            // Если другой эффект активен, сбрасываем стаки мотивации
+            playerData.motivationStacks = 0;
+        }
         // Фильтруем пул карт по уровню престижа игрока
-        const availableRarities = RARITIES_DATA.filter(r => 
-            (r.minPrestige || 0) <= playerData.prestigeLevel
-        );
+        const availableRarities = RARITIES_DATA.filter(r => {
+        // Проверка на престиж, как и раньше
+        const prestigeOk = (r.minPrestige || 0) <= playerData.prestigeLevel;
+        if (!prestigeOk) return false;
+
+        // Новая проверка для эксклюзивных карт
+        if (r.id === 'diamond' && !playerData.isSupporter) {
+            return false; // Алмаз доступен только для саппортеров
+        }
+
+        return true; // Все остальные карты доступны
+        });
         // --- НАЧАЛО БЛОКА ДЛЯ ЛАКИ РОЛЛА ---
-        let isLuckyRollActiveThisRoll = false; // Флаг, был ли этот ролл Лаки
-        let currentLuckMultiplier = 1.0; // Множитель по умолчанию
+        let isLuckyRollActiveThisRoll = false; 
+        let currentLuckMultiplier = 1.0; 
 
         // Инициализация полей Лаки Ролла в playerData
         if (playerData.luckyRollCounter === undefined) playerData.luckyRollCounter = 0;
-        if (playerData.luckyRollThreshold === undefined) playerData.luckyRollThreshold = 11;
-        if (playerData.luckyRollBonusMultiplier === undefined) playerData.luckyRollBonusMultiplier = 2;
+        
+        // Динамически определяем порог для Lucky Roll
+        let luckyRollThreshold = 11; // Базовое значение
+        const chronometer = playerData.equippedItems.find(item => item.effect?.type === "lucky_roll_accelerator");
+        if (chronometer) {
+            luckyRollThreshold -= chronometer.effect.rolls_reduced;
+        }
+        // Сохраняем актуальный порог для отображения в UI
+        playerData.luckyRollThreshold = luckyRollThreshold;
 
         playerData.luckyRollCounter++; 
 
         if (playerData.luckyRollCounter >= playerData.luckyRollThreshold) {
-            isLuckyRollActiveThisRoll = true; // Отмечаем, что этот ролл - Лаки
+            isLuckyRollActiveThisRoll = true; 
             currentLuckMultiplier = playerData.luckyRollBonusMultiplier;
             console.log(`✨ LUCKY ROLL TRIGGERED! Luck will be multiplied by ${currentLuckMultiplier}. Counter reset.`);
-            playerData.luckyRollCounter = 0; // Сбрасываем счетчик НЕМЕДЛЕННО
+            playerData.luckyRollCounter = 0; 
             if (typeof UI !== 'undefined' && UI.showNotification) {
                 UI.showNotification(L.get('notifications.luckyRollTriggered'), "success");
             }
@@ -277,6 +390,17 @@ const Game = (() => {
         const baseEffectiveLuck = getEffectiveLuck(); // Получаем базовую удачу без учета Лаки Ролла
         // Применяем множитель Лаки Ролла (currentLuckMultiplier будет 1.0, если это не Лаки Ролл)
         const finalEffectiveLuck = parseFloat((baseEffectiveLuck * currentLuckMultiplier).toFixed(2));
+
+        // --- Логика эффекта "Рискованная Ставка" (Jackpot) ---
+        if (playerData.activeMechanicalEffect === 'jackpot') {
+            const effectData = getRarityDataById('jackpot').mechanicalEffect;
+            if (Math.random() < effectData.chance) {
+                finalEffectiveLuck += effectData.luckBonus;
+                console.log(`%cJACKPOT EFFECT TRIGGERED! +${effectData.luckBonus} Luck for this roll!`, "color: gold; font-weight: bold;");
+                const message = L.get('notifications.jackpotEffectTriggered').replace('{bonus}', effectData.luckBonus);
+                UI.showNotification(message, 'warning');
+            }
+        }
         
         console.log(`Performing roll. BaseLuck: ${baseEffectiveLuck}, LuckyMultiplier: ${currentLuckMultiplier}, FinalEffectiveLuck: ${finalEffectiveLuck}`);
 
@@ -318,6 +442,29 @@ const Game = (() => {
             }
         }
     }
+        // --- Логика эффекта "Искажение Данных" (Error Alt) - УНИВЕРСАЛЬНАЯ ВЕРСИЯ ---
+        if (playerData.activeMechanicalEffect === 'error_alt_1' && !guaranteedRarityId) {
+            const effectData = getRarityDataById('error_alt_1').mechanicalEffect;
+            if (Math.random() < effectData.chance) {
+                const currentIndex = RARITIES_DATA.findIndex(r => r.id === determinedRarityId);
+                if (currentIndex > 0) {
+                    const originalId = determinedRarityId;
+                    const nextRarity = RARITIES_DATA[currentIndex - 1];
+                    
+                    const prestigeOk = (nextRarity.minPrestige || 0) <= playerData.prestigeLevel;
+                    const supporterOk = !(nextRarity.id === 'diamond' && !playerData.isSupporter);
+                    
+                    if (prestigeOk && supporterOk) {
+                        determinedRarityId = nextRarity.id;
+                        console.log(`%cCORRUPTION EFFECT TRIGGERED! Upgraded ${originalId} to ${determinedRarityId}`, "color: red;");
+                        const message = L.get('notifications.corruptionEffectTriggered')
+                            .replace('{original}', L.get(getRarityDataById(originalId).nameKey))
+                            .replace('{upgraded}', L.get(getRarityDataById(determinedRarityId).nameKey));
+                        UI.showNotification(message, 'danger');
+                    }
+                }
+            }
+        }    
         
         // Передаем determinedRarityId в processRollResult.
         // Флаг isLuckyRollActiveThisRoll можно передать, если он нужен в processRollResult для каких-то эффектов.
@@ -503,7 +650,7 @@ const Game = (() => {
                 // Добавляем в "купленные", чтобы не купить снова
                 playerData.inventory.push("purchased_"+itemId); // Отмечаем как купленное
                 // Пытаемся сразу надеть, если есть место
-                if (playerData.equippedItems.length < MAX_EQUIPPED_ITEMS) {
+                if (playerData.equippedItems.length < Game.getMaxEquippedItems()) {
                     equipItem(itemData);
                 } else {
                     alert(`${L.get(itemData.nameKey)} ${L.get('notifications.itemPurchased')}`);
@@ -587,7 +734,7 @@ const Game = (() => {
 
 // --- Экипировка ---
     function equipItem(itemData) {
-        if (playerData.equippedItems.length >= MAX_EQUIPPED_ITEMS) {
+        if (playerData.equippedItems.length >= Game.getMaxEquippedItems()) {
             UI.showNotification(L.get('ui.maxEquipment'), 'warning');
             return false;
         }
@@ -677,6 +824,8 @@ const Game = (() => {
         purchaseShopItem, equipItem, unequipItem, calculateCurrentLuck, getEffectiveLuck,
         checkActiveBoosts, setActiveVisualEffect, clearActiveVisualEffect, setMusicVolume,
         unlockAllCards, setCurrency, addCardToInventory, amplifyLuckCore,
-        getLuckCoreAmplificationCost, performRebirth, getRebirthCost, setActiveSkin
+        getLuckCoreAmplificationCost, performRebirth, getRebirthCost, setActiveSkin, checkForSupporterStatus, getMaxEquippedItems,
+        setActiveMechanicalEffect
+
     };
 })();

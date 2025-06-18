@@ -44,6 +44,15 @@ window.locales.en = {
         goblin: { name: "Cunning", cardName: "Tur'gata", description: "She's crept onto your porch... so what? Oh... she's luring you into a so-called 'breeding trap'. Silly goblins..." },
         berserk_alt_1: { name: "Peaceful", cardName: "Stug, at Peace", description: "The battles are over. The sword is planted in the ground. By the fire, she has finally found the peace she was denied for so long. Perhaps this is her true victory. She is finally happy." },
         timestop_alt_1: { name: "Za Warudo?", cardName: "S.A.K.U.Y.A.", description: "She is the head maid at a very famous mansion. She masterfully throws knives and... it seems she can also stop time. What a coincidence." },
+        tungsten: { name: "Hardened", cardName: "Tung Stenn", description: "She didn't live in the gym for nothing, look at her gorgeous, sculpted, and hard abs! Yet, she somehow remains a fragile girl." },
+        gold: { name: "Precious", cardName: "Goldy", description: "She shines brighter than the sun, attracting the eyes of both the rich and the thieves. It seems she was drawn here by the abundance of wealth in someone's pockets..." },
+        neon: { name: "Neon", cardName: "Neonia", description: "She is the soul of the night city. Bright, alluring, and a little dangerous. Don't touch, you might get an electric shock! (but not too much, she's kind)." },
+        chlorine: { name: "Caustic", cardName: "Chloretta", description: "She is one of the horrors of war. Remembered as an executioner among executioners. If only we could find her a Sodium soon..." },
+        carbon: { name: "The Giver", cardName: "Life-Giver", description: "She is the basis of all life. From her, both life and death are born. She is multifaceted and infinite in her manifestations." },
+        coal: { name: "Smoldering", cardName: "Ember", description: "The simplest form, full of hidden energy. A single spark is enough for her to ignite and warm you with her heat... or burn you to ashes. You don't want a fried sausage, do you?" },
+        graphite: { name: "The Drafter", cardName: "Sketchy", description: "She leaves a mark on everything she touches. She knows many trades, from electronics to art. But she came specifically for you." },
+        diamond: { name: "High Pressure", cardName: "Dime", description: "The perfect form, born under incredible pressure. She is pure, unbreakable, and incredibly rare. She only appears before those who are ready to pay. They say to see her is the greatest luck." },
+
     },
     // Shop Items
     shop: {
@@ -59,7 +68,9 @@ window.locales.en = {
             equip_artifact: { name: "Seer's Artifact", description: "+0.15 to luck (permanent)." },
             equip_pendant: { name: "Fortuna's Pendant", description: "+0.35 to luck (permanent)." },
             equip_golden_ticket: { name: "Golden Ticket", description: "Increases shards from duplicates by 10% (rounded up)." },
-            equip_hand_of_misfortune: { name: "Hand of Misfortune", description: "+0.05 luck for each consecutive Garbage, Common, or Rare. Resets on a better roll." }
+            equip_hand_of_misfortune: { name: "Hand of Misfortune", description: "+0.05 luck for each consecutive Garbage, Common, or Rare. Resets on a better roll." },
+            equip_greedstone: { name: "Greedstone", description: "Increases shards from duplicates by 25% (rounded up)." },
+            equip_distortion_chronometer: { name: "Distortion Chronometer", description: "Triggers Lucky Roll 2 rolls sooner (every 9th roll instead of 11th)." }
         },
         upgrades: {
             upgrade_fast_roll: { name: "Fast Roll", description: "Reduces roll animation time to ~0.75 sec." },
@@ -151,7 +162,20 @@ window.locales.en = {
         notEnoughCurrency: "Not enough Prismatic Shards!",
         itemPurchased: "purchased, but there's no space to equip it. Free up a slot.",
         alreadyPurchased: "is already purchased.",
-        upgradeAlreadyPurchased: "is already purchased."
+        upgradeAlreadyPurchased: "is already purchased.",
+        supporterStatusAlreadyActive: "Supporter status is already active!",
+        checkingSupporterStatus: "Checking supporter status...",
+        supporterPerksActivated: "Thank you for your support! Perks activated: Diamond Card and a 4th equipment slot!",
+        supporterStatusNotFound: "Supporter status not found. Please make sure you sent the correct ID.",
+        supporterCheckError: "Error checking status. Please try again later.",
+        playerIdCopied: "Player ID copied!",
+        playerIdCopyError: "Failed to copy ID.",
+        afkSummary: "While you were away, {rolls} rolls were performed.<br>💎 Shards from duplicates: {currency}<br>✨ New cards found: {newCards}!",
+        afkSummaryNoNewCards: "While you were away, {rolls} rolls were performed.<br>💎 Shards from duplicates: {currency}",
+        afkSummaryNoCurrency: "While you were away, {rolls} rolls were performed.<br>✨ New cards found: {newCards}!",
+        afkSummaryRollsOnly: "While you were away, {rolls} rolls were performed.",
+        jackpotEffectTriggered: "JACKPOT! +{bonus} LUCK!",
+        corruptionEffectTriggered: "CORRUPTION! {original} -> {upgraded}"
     },
     debug: {
         notifications: {
@@ -165,5 +189,15 @@ window.locales.en = {
             cumulative: "Cumul.",
             stack: "stack"
         }
+    },
+    mechanical_effects: {
+        description_title: "Mechanical Effect:",
+        high_risk_high_reward: "Grants a 1% chance to get +100.0 luck for a single roll. High risk, high reward!",
+        universal_upgrade: "Grants a 5% chance to upgrade the roll result by one tier.",
+        sword_path: "Each consecutive fast roll (within 10s) adds +0.005 to luck (max +0.25). Bonus resets on inactivity.",
+        no_effect: "This card has no mechanical effect.",
+        equip_button: "Equip Effect",
+        unequip_button: "Unequip Effect",
+        equipped_label: "(Equipped)"
     }
 };
