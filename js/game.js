@@ -387,20 +387,22 @@ const Game = (() => {
         }
         playerData.stats.totalRolls++;
 
-        const baseEffectiveLuck = getEffectiveLuck(); // Получаем базовую удачу без учета Лаки Ролла
+        let baseEffectiveLuck = getEffectiveLuck(); // Получаем базовую удачу без учета Лаки Ролла
         // Применяем множитель Лаки Ролла (currentLuckMultiplier будет 1.0, если это не Лаки Ролл)
-        const finalEffectiveLuck = parseFloat((baseEffectiveLuck * currentLuckMultiplier).toFixed(2));
+        let finalEffectiveLuck = parseFloat((baseEffectiveLuck * currentLuckMultiplier).toFixed(2));
 
         // --- Логика эффекта "Рискованная Ставка" (Jackpot) ---
         if (playerData.activeMechanicalEffect === 'jackpot') {
             const effectData = getRarityDataById('jackpot').mechanicalEffect;
             if (Math.random() < effectData.chance) {
-                finalEffectiveLuck += effectData.luckBonus;
+                // Не используем +=, чтобы бонус не применялся дважды, если baseEffectiveLuck изменится
+                finalEffectiveLuck = baseEffectiveLuck + effectData.luckBonus; 
                 console.log(`%cJACKPOT EFFECT TRIGGERED! +${effectData.luckBonus} Luck for this roll!`, "color: gold; font-weight: bold;");
                 const message = L.get('notifications.jackpotEffectTriggered').replace('{bonus}', effectData.luckBonus);
                 UI.showNotification(message, 'warning');
             }
         }
+        finalEffectiveLuck = parseFloat((finalEffectiveLuck * currentLuckMultiplier).toFixed(2));
         
         console.log(`Performing roll. BaseLuck: ${baseEffectiveLuck}, LuckyMultiplier: ${currentLuckMultiplier}, FinalEffectiveLuck: ${finalEffectiveLuck}`);
 
