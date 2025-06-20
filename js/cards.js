@@ -21,6 +21,7 @@ window.RARITIES_DATA = [
     {
         id: "seductress",
         nameKey: "cards.seductress.name",
+        displayParentId: "vacation",
         minPrestige: 2,
         probabilityBase: 1 / 20000000,
         color: "#4A0000", // Глубокий кроваво-черный
