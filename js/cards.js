@@ -19,6 +19,39 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "seductress",
+        nameKey: "cards.seductress.name",
+        minPrestige: 2,
+        probabilityBase: 1 / 20000000,
+        color: "#4A0000", // Глубокий кроваво-черный
+        glowColor: "#FF4D4D", // Опасное красное свечение
+        cssClass: "rarity-seductress",
+        currencyOnDuplicate: 2000000,
+        card: {
+            name: "Surie", 
+            nameKey: "cards.seductress.cardName",
+            image: "img/altVacation.png", // Убедитесь, что файл существует
+            descriptionKey: "cards.seductress.description"
+        }
+    },
+    {
+        id: "altLibrarian",
+        nameKey: "cards.altLibrarian.name",
+        displayParentId: "librarian",
+        minPrestige: 2,
+        probabilityBase: 1 / 12000000, // В 100 раз реже оригинала
+        color: "#c2185b", // Глубокий розовый, цвет страсти
+        glowColor: "#f48fb1", // Яркое, манящее свечение
+        cssClass: "rarity-alt-librarian",
+        currencyOnDuplicate: 1200000,
+        card: {
+            name: "Vicious Scholar", 
+            nameKey: "cards.altLibrarian.cardName",
+            image: "img/altLibrarian.png", // Убедитесь, что файл существует
+            descriptionKey: "cards.altLibrarian.description"
+        }
+    },
+    {
         id: "blackhole",
         nameKey: "cards.blackhole.name",
         probabilityBase: 1/9876543, 
@@ -34,25 +67,80 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "altShroom",
+        nameKey: "cards.altShroom.name",
+        displayParentId: "shroom",
+        minPrestige: 1,
+        probabilityBase: 1 / 7000000, // В 100 раз реже оригинала
+        color: "#A1887F", // Землистый, натуральный цвет
+        glowColor: "#D7CCC8", // Мягкое бежевое свечение
+        cssClass: "rarity-alt-shroom",
+        currencyOnDuplicate: 700000,
+        card: {
+            name: "Boletus", 
+            nameKey: "cards.altShroom.cardName",
+            image: "img/altShroom.png", // Убедитесь, что файл существует
+            descriptionKey: "cards.altShroom.description"
+        }
+    },
+    {
+        id: "tamer",
+        nameKey: "cards.tamer.name",
+        minPrestige: 1,
+        probabilityBase: 1 / 5000000,
+        color: "#FF7043", // Теплый, игривый оранжевый
+        glowColor: "#FFAB91", // Мягкое персиковое свечение
+        cssClass: "rarity-tamer",
+        currencyOnDuplicate: 500000,
+        card: {
+            name: "Nufka & Syaba", 
+            nameKey: "cards.tamer.cardName",
+            image: "img/cardTamer.png", // Убедитесь, что файл существует
+            descriptionKey: "cards.tamer.description"
+        }
+    },
+    {
         id: "error_alt_1",
         nameKey: "cards.error_alt_1.name",
-        displayParentId: "error", // <<< Указывает на родительскую карту
-        minPrestige: 1,           // <<< Требуемый уровень престижа
-        probabilityBase: 1/4040403,   // <<< Редкость
+        displayParentId: "error",
+        minPrestige: 1,
+        probabilityBase: 1/4040403,
         color: "#ff6d00",
         glowColor: "#ff9e80",
-        cssClass: "rarity-error-alt", // Новый класс для стиля
+        cssClass: "rarity-error-alt",
         currencyOnDuplicate: 404403,
+        // --- НОВАЯ, УСИЛЕННАЯ МЕХАНИКА ---
         mechanicalEffect: {
             type: "universal_upgrade",
-            chance: 0.05 // 5% шанс
-            // Теперь здесь нет upgradeMap. Логика будет в game.js
+            // Шанс на базовое улучшение (+1) стал выше
+            chance: 0.20, // 20%
+            // Шансы на многоуровневое улучшение. Проверяются от лучшего к худшему.
+            multiUpgradeTiers: [
+                { tiers: 3, chance: 0.005 }, // 0.5% шанс на +3
+                { tiers: 2, chance: 0.015 }  // 1.5% шанс на +2
+            ]
         },
         card: {
             name: "ERROR, Corrupted Core", 
             nameKey: "cards.error_alt_1.cardName",
-            image: "img/altError.png", // Вам нужно будет создать это изображение
+            image: "img/altError.png",
             descriptionKey: "cards.error_alt_1.description"
+        }
+    },
+    {
+        id: "vacation",
+        nameKey: "cards.vacation.name",
+        minPrestige: 1,
+        probabilityBase: 1 / 1500000,
+        color: "#EF5350", // Яркий курортный красный
+        glowColor: "#FFCDD2", // Теплый розовый оттенок заката
+        cssClass: "rarity-vacation",
+        currencyOnDuplicate: 150000,
+        card: {
+            name: "Zia", 
+            nameKey: "cards.vacation.cardName",
+            image: "img/cardVacation.png", // Убедитесь, что файл существует
+            descriptionKey: "cards.vacation.description"
         }
     },
     {
@@ -96,9 +184,14 @@ window.RARITIES_DATA = [
         glowColor: "#ff6e40",
         cssClass: "rarity-error",
         currencyOnDuplicate: 40404,
+        // --- ДОБАВЛЕНА МЕХАНИКА ОТ АЛЬТЕРНАТИВНОЙ ВЕРСИИ ---
+        mechanicalEffect: {
+            type: "universal_upgrade",
+            chance: 0.10 // 10% шанс
+        },
         card: {
             name: "ER-RR_R_DATA",
-            nameKey: "cards.error.cardName", // <-- ДОБАВЛЕНО
+            nameKey: "cards.error.cardName",
             image: "img/cardError.png",
             descriptionKey: "cards.error.description"
         }
@@ -185,6 +278,22 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "librarian",
+        nameKey: "cards.librarian.name",
+        minPrestige: 1,
+        probabilityBase: 1 / 120000,
+        color: "#607D8B", // Строгий сине-серый
+        glowColor: "#B0BEC5", // Мягкое свечение
+        cssClass: "rarity-librarian",
+        currencyOnDuplicate: 12000,
+        card: {
+            name: "Libra", 
+            nameKey: "cards.librarian.cardName",
+            image: "img/cardLibrarian.png", // Убедитесь, что файл существует
+            descriptionKey: "cards.librarian.description"
+        }
+    },
+    {
         id: "space_alt_1",
         nameKey: "cards.space_alt_1.name",
         displayParentId: "space",
@@ -216,6 +325,38 @@ window.RARITIES_DATA = [
             nameKey: "cards.timestop_alt_1.cardName",
             image: "img/altTimestop.png", // Вам нужно будет создать это изображение
             descriptionKey: "cards.timestop_alt_1.description"
+        }
+    },
+    {
+        id: "shroom",
+        nameKey: "cards.shroom.name",
+        probabilityBase: 1 / 70000,
+        color: "#B71C1C", // Агрессивный красный мухомора
+        glowColor: "#FFCDD2", // Розовое свечение
+        cssClass: "rarity-shroom",
+        currencyOnDuplicate: 7000,
+        card: {
+            name: "Amanita", 
+            nameKey: "cards.shroom.cardName",
+            image: "img/cardShroom.png", // Убедитесь, что файл существует
+            descriptionKey: "cards.shroom.description"
+        }
+    },
+    {
+        id: "altDevil",
+        nameKey: "cards.altDevil.name",
+        displayParentId: "devil",
+        minPrestige: 1,
+        probabilityBase: 1 / 66666, // В 100 раз реже оригинала
+        color: "#d1c4e9", // Бледный, покорный лавандовый
+        glowColor: "#b39ddb", // Мягкое фиолетовое свечение
+        cssClass: "rarity-alt-devil",
+        currencyOnDuplicate: 6666,
+        card: {
+            name: "The Controlled", 
+            nameKey: "cards.altDevil.cardName",
+            image: "img/altDevil.png", // Убедитесь, что файл существует
+            descriptionKey: "cards.altDevil.description"
         }
     },
     {
@@ -549,7 +690,8 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 77,
         mechanicalEffect: {
             type: "high_risk_high_reward",
-            chance: 0.01, // 1%
+            rollCost: 5,
+            chance: 0.005, // 0.5%
             luckBonus: 100.0
         },
         card: {

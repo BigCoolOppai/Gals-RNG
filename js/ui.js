@@ -697,6 +697,20 @@ const UI = (() => {
     // --- Обработчики кнопок Ролла ---
     function handleRollButtonClick(isCalledByAutoroll = false) {
         if (isRolling) return;
+        setButtonsDisabled(true, isCalledByAutoroll);
+        
+        const rollResult = Game.performRoll(); 
+        
+        // Если ролл был заблокирован (не хватило денег), то просто разблокируем кнопки и выйдем
+        if (!rollResult) {
+            setButtonsDisabled(false, isCalledByAutoroll);
+            // Восстанавливаем состояние кнопки мульти-ролла
+            const playerData = Game.getPlayerData();
+            if (playerData) {
+                toggleMultiRollButton(playerData.purchasedUpgrades.multiRollX5);
+            }
+            return;
+        }
         isRolling = true;
         setButtonsDisabled(true, isCalledByAutoroll);
         
@@ -705,8 +719,7 @@ const UI = (() => {
         
         rollAnimationContainer.querySelector('.single-roll-slot-wrapper').classList.remove('d-none');
         multiRollSlotsContainer.classList.add('d-none');
-
-        const rollResult = Game.performRoll(); 
+ 
         activeSingleRollClearCallback = startRollAnimation(rollSlot, rollResult.rarity, () => {
             activeSingleRollClearCallback = null; 
             displayRollResult(rollResult);
@@ -717,9 +730,34 @@ const UI = (() => {
     // Замените вашу существующую handleMultiRollButtonClick на эту:
      function handleMultiRollButtonClick(isCalledByAutoroll = false) {
         if (isRolling) return;
-        isRolling = true;
         setButtonsDisabled(true, isCalledByAutoroll);
 
+        const numRolls = 5;
+        const allRollResults = [];
+
+        // <<< НАЧАЛО БЛОКА ИЗМЕНЕНИЙ >>>
+        for (let i = 0; i < numRolls; i++) {
+            const rollResult = Game.performRoll();
+            // Если ролл заблокирован, прекращаем серию мульти-роллов
+            if (!rollResult) {
+                console.log(`Multi-roll stopped at attempt ${i+1} due to insufficient funds.`);
+                break; // Выходим из цикла
+            }
+            allRollResults.push(rollResult);
+        }
+
+        // Если не удалось сделать НИ ОДНОГО ролла, просто разблокируем UI и выходим
+        if (allRollResults.length === 0) {
+            setButtonsDisabled(false, isCalledByAutoroll);
+            const playerData = Game.getPlayerData();
+            if (playerData) {
+                toggleMultiRollButton(playerData.purchasedUpgrades.multiRollX5);
+            }
+            return;
+        }
+        // <<< КОНЕЦ БЛОКА ИЗМЕНЕНИЙ >>>
+
+        isRolling = true;
         rollResultContainer.innerHTML = '';
         activeMultiRollClearCallbacks.forEach(cb => cb());
         activeMultiRollClearCallbacks = [];
@@ -728,11 +766,10 @@ const UI = (() => {
         multiRollSlotsContainer.innerHTML = '';
         rollAnimationContainer.querySelector('.single-roll-slot-wrapper').classList.add('d-none');
         
-        const numRolls = 5;
         let completedAnimations = 0;
-        const allRollResults = [];
 
-        for (let i = 0; i < numRolls; i++) {
+        // Анимируем только те роллы, которые УДАЛОСЬ совершить
+        for (const result of allRollResults) {
             const slotWrapper = document.createElement('div');
             slotWrapper.className = 'multi-roll-slot-wrapper';
             const slot = document.createElement('div');
@@ -740,12 +777,9 @@ const UI = (() => {
             slotWrapper.appendChild(slot);
             multiRollSlotsContainer.appendChild(slotWrapper);
 
-            const rollResult = Game.performRoll();
-            allRollResults.push(rollResult);
-
-            const clearCb = startRollAnimation(slot, rollResult.rarity, () => {
+            const clearCb = startRollAnimation(slot, result.rarity, () => {
                 completedAnimations++;
-                if (completedAnimations === numRolls) {
+                if (completedAnimations === allRollResults.length) {
                     onRollsCompleted(allRollResults, isCalledByAutoroll);
                 }
             });

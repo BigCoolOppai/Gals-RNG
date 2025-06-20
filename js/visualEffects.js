@@ -434,81 +434,101 @@ const VisualEffects = {
             };
         },
 
-        'timestop': function(targets, isInitialLoad) {
-            // ФИНАЛЬНАЯ ВЕРСИЯ: Цель - #effectTargetWrapper
-            const effectTarget = document.getElementById('effectTargetWrapper');
+        'timestop': function(targets) {
+            // --- ЭТАП 0: ПОДГОТОВКА (без изменений) ---
             const { glitchOverlay } = targets;
-            let textElement = null;
+            const gameWrapper = document.getElementById('gameWrapper');
+            if (!glitchOverlay || !gameWrapper) return () => {};
+            
+            const zaWarudoText = document.createElement('div');
+            zaWarudoText.textContent = 'ZA WARUDO!';
+            Object.assign(zaWarudoText.style, {
+                position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                fontFamily: "'Impact', 'Arial Black', sans-serif", fontSize: 'clamp(60px, 10vw, 150px)',
+                color: 'rgba(255, 235, 59, 0.9)', zIndex: '10000', opacity: '0', pointerEvents: 'none',
+                textShadow: '3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 0 0 25px rgba(0,0,0,0.7)',
+            });
+            glitchOverlay.appendChild(zaWarudoText);
+
+            const pixiApp = new PIXI.Application({
+                width: window.innerWidth, height: window.innerHeight, backgroundAlpha: 0,
+                resizeTo: window, autoDensity: true, resolution: window.devicePixelRatio || 1,
+            });
+            glitchOverlay.appendChild(pixiApp.view);
+            glitchOverlay.style.display = 'block';
+            glitchOverlay.style.zIndex = '9998';
+
+            const fragmentShader = `
+                precision mediump float; uniform float u_time; uniform vec2 u_resolution;
+                void main() {
+                    vec2 uv = gl_FragCoord.xy / u_resolution.xy; vec2 center = vec2(0.5, 0.5); float dist = distance(uv, center);
+                    float waveFront = u_time * 0.7; float waveWidth = 0.04; float edgeSoftness = 0.005;
+                    float ring = smoothstep(waveFront - waveWidth - edgeSoftness, waveFront - waveWidth, dist) - smoothstep(waveFront, waveFront + edgeSoftness, dist);
+                    if (ring > 0.0) {
+                        vec3 c1=vec3(1,.9,.3), c2=vec3(.5,.7,1); vec2 tc=normalize(center-uv); float sa=.008*ring;
+                        float g1d=distance(uv+tc*sa,center), g1i=smoothstep(waveFront-waveWidth,waveFront,g1d)-smoothstep(waveFront,waveFront+edgeSoftness,g1d);
+                        float g2d=distance(uv-tc*sa,center), g2i=smoothstep(waveFront-waveWidth,waveFront,g2d)-smoothstep(waveFront,waveFront+edgeSoftness,g2d);
+                        gl_FragColor = vec4((c1*g1i)+(c2*g2i), ring*0.7);
+                    } else { discard; }
+                }
+            `;
+            const distortionFilter = new PIXI.Filter(null, fragmentShader, { u_time: 0.0, u_resolution: [pixiApp.screen.width, pixiApp.screen.height] });
+            const fullscreenQuad = new PIXI.Container();
+            fullscreenQuad.filterArea = pixiApp.screen;
+            fullscreenQuad.filters = [distortionFilter];
+            pixiApp.stage.addChild(fullscreenQuad);
+
+            // --- ЭТАП 2: ФИНАЛЬНАЯ ПЛАВНАЯ АНИМАЦИЯ ---
             const tl = gsap.timeline();
+            const uniforms = distortionFilter.uniforms;
 
-            if (!effectTarget || !glitchOverlay) {
-                console.error("Timestop effect critical error: #effectTargetWrapper or #globalGlitchOverlay not found in the DOM.");
-                return () => {}; // Возвращаем пустую функцию очистки
-            }
-            
-            // --- Начальная настройка ---
-            glitchOverlay.classList.add('active-effect-timestop'); 
+            tl.addLabel("expand")
+              .to(uniforms, { u_time: 3.0, duration: 2.8, ease: "power2.inOut" }, "expand")
+              // Анимация текста
+              .fromTo(zaWarudoText, { opacity: 0, scale: 1.5 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'power2.out' }, "expand+=0.2")
+              .to(zaWarudoText, { opacity: 0, scale: 0.8, duration: 0.7, ease: 'power2.in' }, ">+=0.8")
+              // ПЛАВНО ПЕРЕХОДИМ В СОСТОЯНИЕ "ИНВЕРСИИ"
+              .to(gameWrapper, {
+                  '--invert': 1,
+                  '--hue-rotate': '180deg',
+                  '--saturate': 0.8,
+                  '--contrast': 1.1,
+                  duration: 2.8,
+                  ease: 'power2.inOut'
+              }, "expand");
 
-            textElement = document.createElement('div');
-            textElement.className = 'timestop-text';
-            textElement.textContent = "ZA WARUDO!";
-            gsap.set(textElement, { opacity: 0, scale: 3, filter: "blur(10px)" });
-            glitchOverlay.appendChild(textElement);
-            
-            // --- Управление классами через GSAP Timeline ---
-            
-            // Фаза 1: Анимация волн и текста
-            tl.addLabel("phase1_start")
-              .to(glitchOverlay, { duration: 1.8 }, "phase1_start") 
-              .to(textElement, { 
-                  duration: 0.7, 
-                  opacity: 1, 
-                  scale: 1, 
-                  filter: "blur(0px)", 
-                  ease: "power2.out" 
-              }, "phase1_start+=0.4");
+            tl.addLabel("contract", ">-1.2")
+              .to(uniforms, { u_time: -0.2, duration: 1.2, ease: "power3.in" }, "contract")
+              // ПЛАВНО ПЕРЕХОДИМ В МОНОХРОМНОЕ СОСТОЯНИЕ
+              .to(gameWrapper, {
+                  '--invert': 0, // Возвращаем инверсию к 0
+                  '--hue-rotate': '0deg', // Возвращаем цвет на место
+                  '--saturate': 1, // Возвращаем нормальную насыщенность
+                  '--grayscale': 1, // ПЛАВНО ПОВЫШАЕМ до 1
+                  '--brightness': 0.9,
+                  '--contrast': 1.1,
+                  duration: 2.0,
+                  ease: 'sine.inOut'
+              }, "contract");
 
-            // Фаза 2: Включаем "негатив" на effectTargetWrapper
-            tl.addLabel("start_negative", "-=1.0")
-              .call(() => {
-                  effectTarget.classList.add('timestop-filter-active', 'negative');
-              }, null, "start_negative");
-
-            // Фаза 2.5: Текст исчезает
-            tl.to(textElement, { 
-                  duration: 0.5, 
-                  opacity: 0, 
-                  scale: 0.7, 
-                  filter: "blur(5px)", 
-                  ease: "power1.in" 
-              }, ">+=1.0");
-
-            // Фаза 3: Убираем "негатив"
-            tl.addLabel("end_negative", ">+=0.5")
-              .call(() => {
-                  effectTarget.classList.remove('negative');
-              }, null, "end_negative");
-
-            // Фаза 4: Включаем "монохром"
-            tl.addLabel("start_monochrome", ">+=0.4")
-              .call(() => {
-                  effectTarget.classList.add('monochrome');
-              }, null, "start_monochrome");
-
-            // Функция очистки
+            // --- ЭТАП 3: ОЧИСТКА ---
             return () => {
-                tl.kill(); 
+                console.log("SMOOTH (CSS Variables) TIMESTOP effect cleaned up.");
+                tl.kill();
                 
-                // Убираем все классы с effectTargetWrapper
-                if (effectTarget) {
-                    effectTarget.classList.remove('timestop-filter-active', 'negative', 'monochrome');
-                }
-
-                if (glitchOverlay) {
-                    glitchOverlay.classList.remove('active-effect-timestop'); 
-                    if (textElement) textElement.remove(); 
-                }
-                console.log("Timestop (effectTargetWrapper class method) effect cleaned up.");
+                // Плавно возвращаем все значения к дефолтным
+                gsap.to(gameWrapper, {
+                    '--grayscale': 0,
+                    '--brightness': 1,
+                    duration: 0.8,
+                    onComplete: () => {
+                        // Важно! Очищаем инлайновые стили, которые создает GSAP, чтобы не было конфликтов
+                        gameWrapper.style.cssText = gameWrapper.style.cssText.replace(/--\w+:\s*[^;]+;/g, '');
+                    }
+                });
+                
+                if (zaWarudoText) zaWarudoText.remove();
+                if (pixiApp) pixiApp.destroy(true, { children: true, texture: true, baseTexture: true });
             };
         },
         'smokinsexystyle': function(targets) {

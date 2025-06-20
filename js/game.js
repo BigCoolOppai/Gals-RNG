@@ -324,155 +324,173 @@ const Game = (() => {
     
     // --- Ролл Карточек ---
     function performRoll(guaranteedRarityId = null) {
-
-        // Запоминаем время начала ролла
+        if (playerData.activeMechanicalEffect === 'jackpot') {
+            const effectData = getRarityDataById('jackpot').mechanicalEffect;
+            if (effectData && effectData.rollCost > 0) {
+                // Пытаемся списать валюту. Если не получается - блокируем ролл.
+                if (!spendCurrency(effectData.rollCost)) {
+                    console.warn(`Roll blocked: Not enough currency for Jackpot effect. Need: ${effectData.rollCost}`);
+                    // Возвращаем null, чтобы UI понял, что ролл не состоялся.
+                    return null; 
+                }
+            }
+        }
+        
         playerData.lastRollTimestamp = Date.now();
-
-        // --- Логика эффекта "Путь Меча" (Motivation) ---
         if (playerData.activeMechanicalEffect === 'motivation') {
-            playerData.motivationStacks++; // Увеличиваем стак
+            playerData.motivationStacks++;
             console.log(`Motivation stack increased to: ${playerData.motivationStacks}`);
         } else {
-            // Если другой эффект активен, сбрасываем стаки мотивации
             playerData.motivationStacks = 0;
         }
-        // Фильтруем пул карт по уровню престижа игрока
+
         const availableRarities = RARITIES_DATA.filter(r => {
-        // Проверка на престиж, как и раньше
-        const prestigeOk = (r.minPrestige || 0) <= playerData.prestigeLevel;
-        if (!prestigeOk) return false;
-
-        // Новая проверка для эксклюзивных карт
-        if (r.id === 'diamond' && !playerData.isSupporter) {
-            return false; // Алмаз доступен только для саппортеров
-        }
-
-        return true; // Все остальные карты доступны
+            const prestigeOk = (r.minPrestige || 0) <= playerData.prestigeLevel;
+            if (!prestigeOk) return false;
+            if (r.id === 'diamond' && !playerData.isSupporter) {
+                return false;
+            }
+            return true;
         });
-        // --- НАЧАЛО БЛОКА ДЛЯ ЛАКИ РОЛЛА ---
-        let isLuckyRollActiveThisRoll = false; 
-        let currentLuckMultiplier = 1.0; 
 
-        // Инициализация полей Лаки Ролла в playerData
+        let isLuckyRollActiveThisRoll = false;
+        let currentLuckMultiplier = 1.0;
         if (playerData.luckyRollCounter === undefined) playerData.luckyRollCounter = 0;
-        
-        // Динамически определяем порог для Lucky Roll
-        let luckyRollThreshold = 11; // Базовое значение
+
+        let luckyRollThreshold = 11;
         const chronometer = playerData.equippedItems.find(item => item.effect?.type === "lucky_roll_accelerator");
         if (chronometer) {
             luckyRollThreshold -= chronometer.effect.rolls_reduced;
         }
-        // Сохраняем актуальный порог для отображения в UI
         playerData.luckyRollThreshold = luckyRollThreshold;
-
-        playerData.luckyRollCounter++; 
+        playerData.luckyRollCounter++;
 
         if (playerData.luckyRollCounter >= playerData.luckyRollThreshold) {
-            isLuckyRollActiveThisRoll = true; 
+            isLuckyRollActiveThisRoll = true;
             currentLuckMultiplier = playerData.luckyRollBonusMultiplier;
             console.log(`✨ LUCKY ROLL TRIGGERED! Luck will be multiplied by ${currentLuckMultiplier}. Counter reset.`);
-            playerData.luckyRollCounter = 0; 
+            playerData.luckyRollCounter = 0;
             if (typeof UI !== 'undefined' && UI.showNotification) {
                 UI.showNotification(L.get('notifications.luckyRollTriggered'), "success");
             }
         }
-        // --- КОНЕЦ БЛОКА ДЛЯ ЛАКИ РОЛЛА ---
 
-        // Обновляем UI для счетчика Lucky Roll СРАЗУ ПОСЛЕ обновления счетчика
         if (typeof UI !== 'undefined' && UI.updateLuckyRollDisplay) {
             UI.updateLuckyRollDisplay(playerData.luckyRollCounter, playerData.luckyRollThreshold);
         }
-        if (!playerData.stats) { // На всякий случай, если stats не инициализирован (хотя saveManager должен это делать)
+        if (!playerData.stats) {
             playerData.stats = SaveManager.getDefaultPlayerData().stats;
         }
         playerData.stats.totalRolls++;
 
-        let baseEffectiveLuck = getEffectiveLuck(); // Получаем базовую удачу без учета Лаки Ролла
-        // Применяем множитель Лаки Ролла (currentLuckMultiplier будет 1.0, если это не Лаки Ролл)
+        let baseEffectiveLuck = getEffectiveLuck();
         let finalEffectiveLuck = parseFloat((baseEffectiveLuck * currentLuckMultiplier).toFixed(2));
 
-        // --- Логика эффекта "Рискованная Ставка" (Jackpot) ---
         if (playerData.activeMechanicalEffect === 'jackpot') {
             const effectData = getRarityDataById('jackpot').mechanicalEffect;
             if (Math.random() < effectData.chance) {
-                // Не используем +=, чтобы бонус не применялся дважды, если baseEffectiveLuck изменится
-                finalEffectiveLuck = baseEffectiveLuck + effectData.luckBonus; 
+                finalEffectiveLuck = baseEffectiveLuck + effectData.luckBonus;
                 console.log(`%cJACKPOT EFFECT TRIGGERED! +${effectData.luckBonus} Luck for this roll!`, "color: gold; font-weight: bold;");
                 const message = L.get('notifications.jackpotEffectTriggered').replace('{bonus}', effectData.luckBonus);
                 UI.showNotification(message, 'warning');
             }
         }
         finalEffectiveLuck = parseFloat((finalEffectiveLuck * currentLuckMultiplier).toFixed(2));
-        
         console.log(`Performing roll. BaseLuck: ${baseEffectiveLuck}, LuckyMultiplier: ${currentLuckMultiplier}, FinalEffectiveLuck: ${finalEffectiveLuck}`);
 
-        // let remainingProbability = 1.0; // Как вы и указали, не используется активно
         let determinedRarityId = null;
 
         if (guaranteedRarityId && getRarityDataById(guaranteedRarityId)) {
-        determinedRarityId = guaranteedRarityId;
-        console.log(`Performing GUARANTEED roll for: ${guaranteedRarityId}`);
+            determinedRarityId = guaranteedRarityId;
+            console.log(`Performing GUARANTEED roll for: ${guaranteedRarityId}`);
         } else {
-
-        for (const rarity of availableRarities) {
-            if (rarity.id === 'garbage') continue;
-
-            let P_base = rarity.probabilityBase;
-            let odds = P_base / (1 - P_base);
-            if (1 - P_base <= 0) {
-                odds = Number.MAX_SAFE_INTEGER;
+            for (const rarity of availableRarities) {
+                if (rarity.id === 'garbage') continue;
+                let P_base = rarity.probabilityBase;
+                let odds = P_base / (1 - P_base);
+                if (1 - P_base <= 0) {
+                    odds = Number.MAX_SAFE_INTEGER;
+                }
+                let modifiedOdds = odds * finalEffectiveLuck;
+                let effectiveProbabilityForTier = modifiedOdds / (1 + modifiedOdds);
+                const randomRoll = Math.random();
+                if (randomRoll < effectiveProbabilityForTier) {
+                    determinedRarityId = rarity.id;
+                    break;
+                }
             }
-            let modifiedOdds = odds * finalEffectiveLuck; // Используем finalEffectiveLuck
-            let effectiveProbabilityForTier = modifiedOdds / (1 + modifiedOdds);
-                
-            const randomRoll = Math.random();
-
-            if (randomRoll < effectiveProbabilityForTier) {
-                determinedRarityId = rarity.id;
-                break; // Выходим из цикла, как только редкость определена
-            }
-        }
-
-        // Если после цикла ничего не определено, выпадает "мусор"
-        if (!determinedRarityId) {
-            const garbageRarity = RARITIES_DATA.find(r => r.id === 'garbage');
-            if (garbageRarity) {
-                determinedRarityId = garbageRarity.id;
-            } else {
-                console.error("Fallback 'garbage' rarity not found!");
-                determinedRarityId = RARITIES_DATA[RARITIES_DATA.length - 1].id;
+            if (!determinedRarityId) {
+                determinedRarityId = 'garbage';
             }
         }
-    }
-        // --- Логика эффекта "Искажение Данных" (Error Alt) - УНИВЕРСАЛЬНАЯ ВЕРСИЯ ---
-        if (playerData.activeMechanicalEffect === 'error_alt_1' && !guaranteedRarityId) {
-            const effectData = getRarityDataById('error_alt_1').mechanicalEffect;
-            if (Math.random() < effectData.chance) {
+
+        // <<< НАЧАЛО БЛОКА ИЗМЕНЕНИЙ: НОВАЯ ЛОГИКА ДЛЯ ЭФФЕКТА "ERROR" >>>
+        // Теперь эффект срабатывает не от активной карты, а от ВЫПАВШЕЙ карты.
+        // Это более правильный и масштабируемый подход.
+        const rolledRarityData = getRarityDataById(determinedRarityId);
+
+        if (rolledRarityData.mechanicalEffect?.type === 'universal_upgrade' && !guaranteedRarityId) {
+            const effectData = rolledRarityData.mechanicalEffect;
+            let upgradeSucceeded = false;
+            let tiersUpgraded = 0;
+
+            // 1. Сначала проверяем многоуровневые улучшения (если они есть)
+            if (effectData.multiUpgradeTiers && Array.isArray(effectData.multiUpgradeTiers)) {
+                for (const multi of effectData.multiUpgradeTiers) {
+                    if (Math.random() < multi.chance) {
+                        tiersUpgraded = multi.tiers;
+                        upgradeSucceeded = true;
+                        break; // Выходим из цикла, т.к. самое мощное улучшение сработало
+                    }
+                }
+            }
+            
+            // 2. Если многоуровневое улучшение не сработало, проверяем базовое
+            if (!upgradeSucceeded && Math.random() < effectData.chance) {
+                tiersUpgraded = 1;
+                upgradeSucceeded = true;
+            }
+
+            // 3. Если любое улучшение сработало, применяем его
+            if (upgradeSucceeded) {
                 const currentIndex = RARITIES_DATA.findIndex(r => r.id === determinedRarityId);
-                if (currentIndex > 0) {
+                const newIndex = currentIndex - tiersUpgraded; // Улучшение = движение вверх по массиву (к меньшим индексам)
+
+                // Проверяем, что новая редкость существует и доступна игроку
+                if (newIndex >= 0) {
                     const originalId = determinedRarityId;
-                    const nextRarity = RARITIES_DATA[currentIndex - 1];
+                    const nextRarity = RARITIES_DATA[newIndex];
                     
                     const prestigeOk = (nextRarity.minPrestige || 0) <= playerData.prestigeLevel;
                     const supporterOk = !(nextRarity.id === 'diamond' && !playerData.isSupporter);
-                    
+
                     if (prestigeOk && supporterOk) {
                         determinedRarityId = nextRarity.id;
-                        console.log(`%cCORRUPTION EFFECT TRIGGERED! Upgraded ${originalId} to ${determinedRarityId}`, "color: red;");
-                        const message = L.get('notifications.corruptionEffectTriggered')
-                            .replace('{original}', L.get(getRarityDataById(originalId).nameKey))
-                            .replace('{upgraded}', L.get(getRarityDataById(determinedRarityId).nameKey));
+                        const originalName = L.get(getRarityDataById(originalId).nameKey);
+                        const upgradedName = L.get(nextRarity.nameKey);
+
+                        console.log(`%cCORRUPTION EFFECT TRIGGERED! Upgraded ${originalId} to ${determinedRarityId} (+${tiersUpgraded} tiers)`, "color: red;");
+                        
+                        let message;
+                        if (tiersUpgraded > 1) {
+                            message = L.get('notifications.corruptionEffectTriggeredMulti')
+                                .replace('{original}', originalName)
+                                .replace('{upgraded}', upgradedName)
+                                .replace('{tiers}', tiersUpgraded);
+                        } else {
+                            message = L.get('notifications.corruptionEffectTriggered')
+                                .replace('{original}', originalName)
+                                .replace('{upgraded}', upgradedName);
+                        }
                         UI.showNotification(message, 'danger');
                     }
                 }
             }
-        }    
-        
-        // Передаем determinedRarityId в processRollResult.
-        // Флаг isLuckyRollActiveThisRoll можно передать, если он нужен в processRollResult для каких-то эффектов.
-        // Для текущих двух артефактов он не нужен в processRollResult.
-        return processRollResult(determinedRarityId /*, isLuckyRollActiveThisRoll */); 
-}
+        }
+        // <<< КОНЕЦ БЛОКА ИЗМЕНЕНИЙ >>>
+
+        return processRollResult(determinedRarityId);
+    }
     
     function processRollResult(rarityId) { // Убрали wasLuckyRoll, т.к. не используется здесь
         const rarityData = getRarityDataById(rarityId);

@@ -52,6 +52,14 @@ window.locales.en = {
         coal: { name: "Smoldering", cardName: "Ember", description: "The simplest form, full of hidden energy. A single spark is enough for her to ignite and warm you with her heat... or burn you to ashes. You don't want a fried sausage, do you?" },
         graphite: { name: "The Drafter", cardName: "Sketchy", description: "She leaves a mark on everything she touches. She knows many trades, from electronics to art. But she came specifically for you." },
         diamond: { name: "High Pressure", cardName: "Dime", description: "The perfect form, born under incredible pressure. She is pure, unbreakable, and incredibly rare. She only appears before those who are ready to pay. They say to see her is the greatest luck." },
+        seductress: { name: "Seductress", cardName: "Surie", description: "The tan is flawless, the smile is dangerous. She doesn't rest, she hunts. And if her gaze falls on you, it means the choice has been made." },
+        tamer: { name: "Tamer", cardName: "Nufka & Syaba", description: "These two mischievous girls are sisters, and though they have different fathers, they are very close. Because of this, they often spend time together. Nufka is a little fox, and Syaba is a dark elf witch. They have a lot of fun together." },
+        vacation: { name: "Vacation", cardName: "Zia", description: "The sun is warm, the cocktail is melting, and her gaze is an invitation to adventure. She knows that rest is not an excuse to lose her grip." },
+        altDevil: { name: "The Controlled", cardName: "Demon Under Control", description: "It seems someone managed to put a collar on her. Now the demon of control has become a toy herself. And, it looks like, she's all... messy." },
+        librarian: { name: "Erudite", cardName: "Libra", description: "Silence, order, and dusty tomes are her element. She strictly enforces discipline, but behind her stern glasses lies a curious gaze. No noise in the library!" },
+        altLibrarian: { name: "Curious", cardName: "Depraved Libra", description: "She has read too many forbidden books. Now she isn't interested in some mere letters, and the blindfold only sharpens her other senses~." },
+        shroom: { name: "Fungal", cardName: "Amanita", description: "Cute, but deadly poisonous. One wrong step in her forest could be your last. You shouldn't trust her cute appearance. And also, deer love her." },
+        altShroom: { name: "Umami", cardName: "Boletus", description: "Natural and generous, she is the soul of the forest. They say her spores can give life to entire groves. Or to another 'mushroom'... " }
 
     },
     // Shop Items
@@ -175,7 +183,8 @@ window.locales.en = {
         afkSummaryNoCurrency: "While you were away, {rolls} rolls were performed.<br>✨ New cards found: {newCards}!",
         afkSummaryRollsOnly: "While you were away, {rolls} rolls were performed.",
         jackpotEffectTriggered: "JACKPOT! +{bonus} LUCK!",
-        corruptionEffectTriggered: "CORRUPTION! {original} -> {upgraded}"
+        corruptionEffectTriggered: "CORRUPTION! {original} -> {upgraded}",
+        corruptionEffectTriggeredMulti: "CRITICAL CORRUPTION! {original} -> {upgraded} (+{tiers} TIERS!)"
     },
     debug: {
         notifications: {
@@ -192,8 +201,8 @@ window.locales.en = {
     },
     mechanical_effects: {
         description_title: "Mechanical Effect:",
-        high_risk_high_reward: "Grants a 1% chance to get +100.0 luck for a single roll. High risk, high reward!",
-        universal_upgrade: "Grants a 5% chance to upgrade the roll result by one tier.",
+        high_risk_high_reward: "Each roll with this effect costs 5 💎. Grants a 0.5% chance to get +100.0 luck for a single roll. High risk, high reward!",
+        universal_upgrade: "Grants a 10% chance to upgrade the roll result by one tier. Or even more with ALt-tErn..",
         sword_path: "Each consecutive fast roll (within 10s) adds +0.005 to luck (max +0.25). Bonus resets on inactivity.",
         no_effect: "This card has no mechanical effect.",
         equip_button: "Equip Effect",

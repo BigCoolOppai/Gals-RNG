@@ -173,6 +173,28 @@ h1, h2, h3, h4, h5, h6 {
     --rarity-glow-color: #b0ff57; /* Светло-зеленый для свечения рамки */
 }
 
+#gameWrapper {
+  /* Задаем значения по умолчанию (нет фильтра) */
+  --invert: 0;
+  --grayscale: 0;
+  --hue-rotate: 0deg;
+  --saturate: 1;
+  --contrast: 1;
+  --brightness: 1;
+
+  /* Применяем фильтры, используя наши переменные */
+  filter: 
+    invert(var(--invert))
+    grayscale(var(--grayscale))
+    hue-rotate(var(--hue-rotate))
+    saturate(var(--saturate))
+    contrast(var(--contrast))
+    brightness(var(--brightness));
+  
+  /* Плавный переход при снятии эффекта */
+  transition: filter 0.5s ease-out; 
+}
+
 
 /* Стили для ERROR */
 .roll-slot.rarity-error {
@@ -683,117 +705,6 @@ body.visual-effect-uranium::before {
     }
 }
 
-/* --- Эффект для Timestop (Дио) --- */
-
-/* Класс, который будет добавляться к body */
-body.visual-effect-timestop {
-    /* Анимация инверсии/смены палитры */
-    animation: timestop-palette-shift 0.3s forwards, /* Быстрый переход в палитру */
-               timestop-subtle-pulse 8s infinite alternate ease-in-out 0.3s; /* Легкая пульсация после */
-}
-
-/* Анимация основной цветовой палитры Timestop */
-@keyframes timestop-palette-shift {
-    0% {
-        filter: grayscale(0%) sepia(0%) hue-rotate(0deg) invert(0%);
-    }
-    100% {
-        filter: sepia(60%) contrast(110%) hue-rotate(-20deg) invert(85%) saturate(150%) brightness(0.9);
-        /* Экспериментируйте с этими значениями! 
-           Цель - получить характерную "негативную" или желто-фиолетовую палитру.
-           Invert(85%) даст сильную инверсию. Hue-rotate может сдвинуть цвета.
-        */
-    }
-}
-
-/* Легкая пульсация или изменение оттенка во время действия эффекта */
-@keyframes timestop-subtle-pulse {
-    0% {
-        filter: sepia(60%) contrast(110%) hue-rotate(-20deg) invert(85%) saturate(150%) brightness(0.9);
-    }
-    50% {
-        filter: sepia(70%) contrast(115%) hue-rotate(-25deg) invert(85%) saturate(160%) brightness(0.95);
-    }
-    100% {
-        filter: sepia(60%) contrast(110%) hue-rotate(-20deg) invert(85%) saturate(150%) brightness(0.9);
-    }
-}
-
-
-/* Стили для оверлея, на котором будут искажения */
-#globalGlitchOverlay.active-effect-timestop {
-    display: block;
-    background: transparent; /* Оверлей сам по себе прозрачный */
-    /* z-index уже установлен для #globalGlitchOverlay */
-}
-
-/* Создаем "волны" или "линзы" искажения через псевдоэлементы оверлея */
-#globalGlitchOverlay.active-effect-timestop::before,
-#globalGlitchOverlay.active-effect-timestop::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    border-radius: 50%; /* Круглые волны */
-    opacity: 0;
-    pointer-events: none;
-}
-
-/* Первая волна искажения */
-#globalGlitchOverlay.active-effect-timestop::before {
-    width: 10px;
-    height: 10px;
-    border: 3px solid rgba(255, 235, 59, 0.4); /* Полупрозрачный желтый, цвет Дио */
-    /* box-shadow: 0 0 15px 5px rgba(255, 235, 59, 0.3); */
-    animation: timestop-ripple 2.5s 2 ease-out;
-    animation-delay: 0s; /* Первая волна сразу */
-}
-
-/* Вторая волна искажения, с задержкой и другими параметрами */
-#globalGlitchOverlay.active-effect-timestop::after {
-    width: 10px;
-    height: 10px;
-    border: 2px dashed rgba(156, 39, 176, 0.3); /* Полупрозрачный фиолетовый, другой цвет Дио */
-    /* box-shadow: 0 0 10px 3px rgba(156, 39, 176, 0.2); */
-    animation: timestop-ripple 2.5s 2 ease-out;
-    animation-delay: 0.7s; /* Вторая волна с задержкой */
-}
-
-@keyframes timestop-ripple {
-    0% {
-        transform: translate(-50%, -50%) scale(0);
-        opacity: 0.7;
-    }
-    80% {
-        opacity: 0.1;
-    }
-    100% {
-        transform: translate(-50%, -50%) scale(150); /* Волна расходится очень широко */
-        opacity: 0;
-    }
-}
-
-/* Опционально: Текст "ZA WARUDO" на оверлее */
-#globalGlitchOverlay.active-effect-timestop .timestop-text { /* Будем создавать этот элемент JS */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 5vw; /* Размер зависит от ширины экрана */
-    font-family: 'Impact', 'Arial Black', sans-serif;
-    color: rgba(255, 235, 59, 0.7); /* Золотой */
-    text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 0 15px rgba(0,0,0,0.5);
-    opacity: 0;
-    animation: za-warudo-text-appear 3s forwards ease-out;
-    animation-delay: 0.1s; /* Появляется после смены палитры */
-}
-
-@keyframes za-warudo-text-appear {
-    0% { opacity: 0; transform: translate(-50%, -50%) scale(3); filter: blur(10px); }
-    30% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0px); }
-    80% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0px); }
-    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); filter: blur(5px); }
-}
 
 /* --- Стили для COSMIC (Темная) редкости в ролле --- */
 .roll-slot.rarity-cosmic {
@@ -1588,22 +1499,7 @@ body.visual-effect-timestop {
 }
 
 
-/* --- ФИНАЛЬНЫЕ СТИЛИ ДЛЯ TIMESTOP (нацелены на effectTargetWrapper) --- */
 
-/* Базовый класс для плавного перехода фильтра */
-#effectTargetWrapper.timestop-filter-active {
-    transition: filter 0.3s ease-in-out;
-}
-
-/* Состояние "негатива" */
-#effectTargetWrapper.timestop-filter-active.negative {
-    filter: sepia(60%) contrast(130%) hue-rotate(180deg) invert(90%) saturate(200%) brightness(0.85);
-}
-
-/* Финальное состояние "монохрома" */
-#effectTargetWrapper.timestop-filter-active.monochrome {
-    filter: grayscale(100%) contrast(115%) brightness(1.0);
-}
 
 /* --- Стили для новых альт-версий --- */
 
@@ -1817,3 +1713,80 @@ body.visual-effect-timestop {
 
 .roll-slot.rarity-diamond { background: radial-gradient(ellipse at center, #E0F7FA 0%, #B2EBF2 100%); color: #006064; text-shadow: 0 0 10px #fff, 0 0 20px #E0F7FA; border: 1px solid #80DEEA; }
 .inventory-card.border-diamond { border-color: #B2EBF2; --rarity-glow-color: #FFFFFF; }
+
+/* Seductress (Совращающая) */
+.roll-slot.rarity-seductress {
+    background: linear-gradient(160deg, #4A0000 0%, #111 80%);
+    color: #FFCDD2; /* Бледный розовый текст */
+    font-family: 'Playfair Display SC', serif;
+    text-shadow: 0 0 8px #E53935, 0 0 3px #000;
+    border: 1px solid #880E4F;
+}
+
+/* Tamer (Укрощающая) */
+.roll-slot.rarity-tamer {
+    background: linear-gradient(135deg, #FF7043 0%, #7E57C2 100%); /* От оранжевого к фиолетовому */
+    color: #FFF3E0; /* Теплый кремовый цвет текста */
+    font-family: 'Quicksand', sans-serif;
+    font-weight: bold;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    border: 1px solid #FFAB91;
+}
+
+/* Vacation (Отпуск) */
+.roll-slot.rarity-vacation {
+    background: linear-gradient(45deg, #EF5350, #FFCA28); /* От красного к солнечно-желтому */
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.5);
+}
+
+/* Alt Devil (Законтроленная) */
+.roll-slot.rarity-alt-devil {
+    background: linear-gradient(145deg, #d1c4e9, #9fa8da); /* Бледный, покорный градиент */
+    color: #37284A; /* Темный, приглушенный текст */
+    font-style: italic;
+    border: 1px solid #7986cb;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
+}
+
+/* Librarian (Эрудированная) */
+.roll-slot.rarity-librarian {
+    background: linear-gradient(160deg, #78909c, #546e7a);
+    color: #ECEFF1; /* Цвет старой бумаги */
+    font-family: 'Georgia', serif;
+    border: 1px solid #90A4AE;
+}
+
+/* Alt Librarian (Любопытная) */
+.roll-slot.rarity-alt-librarian {
+    background: linear-gradient(135deg, #c2185b, #880e4f);
+    color: #f8bbd1;
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    text-shadow: 0 0 8px #f06292;
+    border: 1px solid #ad1457;
+}
+
+/* Shroom (Грибная) */
+.roll-slot.rarity-shroom {
+    background: #B71C1C;
+    background-image: 
+        radial-gradient(circle at 10px 10px, rgba(255,255,255,0.8) 5%, transparent 6%),
+        radial-gradient(circle at 40px 30px, rgba(255,255,255,0.7) 4%, transparent 5%);
+    background-size: 50px 50px; /* Размер паттерна с точками */
+    color: #fff;
+    text-shadow: 1px 1px 3px #000;
+    border: 1px solid #E53935;
+}
+
+/* Alt Shroom (Умами) */
+.roll-slot.rarity-alt-shroom {
+    background: linear-gradient(145deg, #A1887F, #6D4C41);
+    color: #EFEBE9;
+    font-family: 'Quicksand', sans-serif;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 1px solid #8D6E63;
+}
