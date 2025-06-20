@@ -327,15 +327,13 @@ const Game = (() => {
         if (playerData.activeMechanicalEffect === 'jackpot') {
             const effectData = getRarityDataById('jackpot').mechanicalEffect;
             if (effectData && effectData.rollCost > 0) {
-                // Пытаемся списать валюту. Если не получается - блокируем ролл.
                 if (!spendCurrency(effectData.rollCost)) {
                     console.warn(`Roll blocked: Not enough currency for Jackpot effect. Need: ${effectData.rollCost}`);
-                    // Возвращаем null, чтобы UI понял, что ролл не состоялся.
-                    return null; 
+                    return null;
                 }
             }
         }
-        
+
         playerData.lastRollTimestamp = Date.now();
         if (playerData.activeMechanicalEffect === 'motivation') {
             playerData.motivationStacks++;
@@ -356,7 +354,6 @@ const Game = (() => {
         let isLuckyRollActiveThisRoll = false;
         let currentLuckMultiplier = 1.0;
         if (playerData.luckyRollCounter === undefined) playerData.luckyRollCounter = 0;
-
         let luckyRollThreshold = 11;
         const chronometer = playerData.equippedItems.find(item => item.effect?.type === "lucky_roll_accelerator");
         if (chronometer) {
@@ -408,13 +405,10 @@ const Game = (() => {
                 if (rarity.id === 'garbage') continue;
                 let P_base = rarity.probabilityBase;
                 let odds = P_base / (1 - P_base);
-                if (1 - P_base <= 0) {
-                    odds = Number.MAX_SAFE_INTEGER;
-                }
+                if (1 - P_base <= 0) { odds = Number.MAX_SAFE_INTEGER; }
                 let modifiedOdds = odds * finalEffectiveLuck;
                 let effectiveProbabilityForTier = modifiedOdds / (1 + modifiedOdds);
-                const randomRoll = Math.random();
-                if (randomRoll < effectiveProbabilityForTier) {
+                if (Math.random() < effectiveProbabilityForTier) {
                     determinedRarityId = rarity.id;
                     break;
                 }
@@ -423,71 +417,66 @@ const Game = (() => {
                 determinedRarityId = 'garbage';
             }
         }
+        
+        // <<< НАЧАЛО БЛОКА КЛЮЧЕВОГО ИСПРАВЛЕНИЯ >>>
+        // Получаем ID активного эффекта, если он есть
+        const activeEffectId = playerData.activeMechanicalEffect;
 
-        // <<< НАЧАЛО БЛОКА ИЗМЕНЕНИЙ: НОВАЯ ЛОГИКА ДЛЯ ЭФФЕКТА "ERROR" >>>
-        // Теперь эффект срабатывает не от активной карты, а от ВЫПАВШЕЙ карты.
-        // Это более правильный и масштабируемый подход.
-        const rolledRarityData = getRarityDataById(determinedRarityId);
+        // Проверяем, является ли активный эффект "универсальным улучшением"
+        if (activeEffectId && !guaranteedRarityId) {
+            const activeEffectCardData = getRarityDataById(activeEffectId);
 
-        if (rolledRarityData.mechanicalEffect?.type === 'universal_upgrade' && !guaranteedRarityId) {
-            const effectData = rolledRarityData.mechanicalEffect;
-            let upgradeSucceeded = false;
-            let tiersUpgraded = 0;
+            if (activeEffectCardData && activeEffectCardData.mechanicalEffect?.type === 'universal_upgrade') {
+                const effectData = activeEffectCardData.mechanicalEffect;
+                let upgradeSucceeded = false;
+                let tiersUpgraded = 0;
 
-            // 1. Сначала проверяем многоуровневые улучшения (если они есть)
-            if (effectData.multiUpgradeTiers && Array.isArray(effectData.multiUpgradeTiers)) {
-                for (const multi of effectData.multiUpgradeTiers) {
-                    if (Math.random() < multi.chance) {
-                        tiersUpgraded = multi.tiers;
-                        upgradeSucceeded = true;
-                        break; // Выходим из цикла, т.к. самое мощное улучшение сработало
+                // 1. Сначала проверяем многоуровневые улучшения (если они есть)
+                if (effectData.multiUpgradeTiers && Array.isArray(effectData.multiUpgradeTiers)) {
+                    for (const multi of effectData.multiUpgradeTiers) {
+                        if (Math.random() < multi.chance) {
+                            tiersUpgraded = multi.tiers;
+                            upgradeSucceeded = true;
+                            break;
+                        }
                     }
                 }
-            }
-            
-            // 2. Если многоуровневое улучшение не сработало, проверяем базовое
-            if (!upgradeSucceeded && Math.random() < effectData.chance) {
-                tiersUpgraded = 1;
-                upgradeSucceeded = true;
-            }
+                
+                // 2. Если многоуровневое улучшение не сработало, проверяем базовое
+                if (!upgradeSucceeded && Math.random() < effectData.chance) {
+                    tiersUpgraded = 1;
+                    upgradeSucceeded = true;
+                }
 
-            // 3. Если любое улучшение сработало, применяем его
-            if (upgradeSucceeded) {
-                const currentIndex = RARITIES_DATA.findIndex(r => r.id === determinedRarityId);
-                const newIndex = currentIndex - tiersUpgraded; // Улучшение = движение вверх по массиву (к меньшим индексам)
+                // 3. Если любое улучшение сработало, применяем его
+                if (upgradeSucceeded) {
+                    const currentIndex = RARITIES_DATA.findIndex(r => r.id === determinedRarityId);
+                    const newIndex = currentIndex - tiersUpgraded;
 
-                // Проверяем, что новая редкость существует и доступна игроку
-                if (newIndex >= 0) {
-                    const originalId = determinedRarityId;
-                    const nextRarity = RARITIES_DATA[newIndex];
-                    
-                    const prestigeOk = (nextRarity.minPrestige || 0) <= playerData.prestigeLevel;
-                    const supporterOk = !(nextRarity.id === 'diamond' && !playerData.isSupporter);
+                    if (newIndex >= 0) {
+                        const originalId = determinedRarityId;
+                        const nextRarity = RARITIES_DATA[newIndex];
+                        const prestigeOk = (nextRarity.minPrestige || 0) <= playerData.prestigeLevel;
+                        const supporterOk = !(nextRarity.id === 'diamond' && !playerData.isSupporter);
 
-                    if (prestigeOk && supporterOk) {
-                        determinedRarityId = nextRarity.id;
-                        const originalName = L.get(getRarityDataById(originalId).nameKey);
-                        const upgradedName = L.get(nextRarity.nameKey);
+                        if (prestigeOk && supporterOk) {
+                            determinedRarityId = nextRarity.id;
+                            const originalName = L.get(getRarityDataById(originalId).nameKey);
+                            const upgradedName = L.get(nextRarity.nameKey);
 
-                        console.log(`%cCORRUPTION EFFECT TRIGGERED! Upgraded ${originalId} to ${determinedRarityId} (+${tiersUpgraded} tiers)`, "color: red;");
-                        
-                        let message;
-                        if (tiersUpgraded > 1) {
-                            message = L.get('notifications.corruptionEffectTriggeredMulti')
-                                .replace('{original}', originalName)
-                                .replace('{upgraded}', upgradedName)
-                                .replace('{tiers}', tiersUpgraded);
-                        } else {
-                            message = L.get('notifications.corruptionEffectTriggered')
-                                .replace('{original}', originalName)
-                                .replace('{upgraded}', upgradedName);
+                            console.log(`%cCORRUPTION EFFECT TRIGGERED! Upgraded ${originalId} to ${determinedRarityId} (+${tiersUpgraded} tiers)`, "color: red;");
+                            
+                            let message = tiersUpgraded > 1 ?
+                                L.get('notifications.corruptionEffectTriggeredMulti').replace('{original}', originalName).replace('{upgraded}', upgradedName).replace('{tiers}', tiersUpgraded) :
+                                L.get('notifications.corruptionEffectTriggered').replace('{original}', originalName).replace('{upgraded}', upgradedName);
+                            
+                            UI.showNotification(message, 'danger');
                         }
-                        UI.showNotification(message, 'danger');
                     }
                 }
             }
         }
-        // <<< КОНЕЦ БЛОКА ИЗМЕНЕНИЙ >>>
+        // <<< КОНЕЦ БЛОКА КЛЮЧЕВОГО ИСПРАВЛЕНИЯ >>>
 
         return processRollResult(determinedRarityId);
     }
