@@ -9,6 +9,8 @@ const SaveManager = (() => {
         prestigeLuckBonus: 0.0,
         luckCoreLevel: 0,
         currency: 0, // Призматические осколки
+        notificationsEnabled: true,
+        specialContentEnabled: true,
         playerId: null, 
         isSupporter: false, 
         activeMechanicalEffect: null, // ID карты с активным механическим эффектом
@@ -127,6 +129,45 @@ const SaveManager = (() => {
         savePlayerData,
         loadPlayerData,
         resetPlayerData,
-        getDefaultPlayerData // Экспортируем, если понадобится где-то еще
+        getDefaultPlayerData, // Экспортируем, если понадобится где-то еще
+         exportSave: function() {
+            try {
+                const dataStr = localStorage.getItem(SAVE_KEY);
+                const dataBlob = new Blob([dataStr], { type: "application/json" });
+                const url = URL.createObjectURL(dataBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `gals-rng-save-${Date.now()}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                return true;
+            } catch (error) {
+                console.error("Error exporting save:", error);
+                return false;
+            }
+        },
+        importSave: function(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const importedData = JSON.parse(event.target.result);
+                        // Простая валидация: проверяем наличие ключевого поля, например, 'playerId'
+                        if (importedData && importedData.playerId) {
+                            localStorage.setItem(SAVE_KEY, event.target.result);
+                            resolve(true);
+                        } else {
+                            reject(new Error("Invalid save file format."));
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = (error) => reject(error);
+                reader.readAsText(file);
+            });
+        }
     };
 })();

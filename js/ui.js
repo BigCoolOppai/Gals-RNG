@@ -48,6 +48,13 @@ const UI = (() => {
         rollResultContainer = document.getElementById('rollResultContainer');
         autorollButton = document.getElementById('autorollButton');
 
+        notificationsToggle = document.getElementById('notificationsToggle');
+
+        specialContentToggle = document.getElementById('specialContentToggle');
+
+        exportSaveButton = document.getElementById('exportSaveButton');
+        importSaveInput = document.getElementById('importSaveInput');
+
         inventoryGrid = document.getElementById('inventoryGrid');
         inventoryCounterElement = document.getElementById('inventoryCounter'); // Кэшируем счетчик
 
@@ -224,6 +231,50 @@ const UI = (() => {
                 processNewCardQueue();
             }
         });
+        notificationsToggle.addEventListener('change', (event) => {
+            Game.getPlayerData().notificationsEnabled = event.target.checked;
+            Game.saveGame();
+        });
+        if (exportSaveButton) {
+            exportSaveButton.addEventListener('click', () => {
+                if (SaveManager.exportSave()) {
+                    showNotification(L.get('notifications.exportSuccess'), 'success');
+                } else {
+                    showNotification(L.get('notifications.exportError'), 'danger');
+                }
+            });
+        }
+
+        if (importSaveInput) {
+            importSaveInput.addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                if (confirm(L.get('notifications.importConfirm'))) {
+                    try {
+                        await SaveManager.importSave(file);
+                        showNotification(L.get('notifications.importSuccess'), 'success');
+                        // Перезагружаем страницу через 1.5 секунды, чтобы применить импортированные данные
+                        setTimeout(() => window.location.reload(), 1500);
+                    } catch (error) {
+                        console.error("Import failed:", error);
+                        showNotification(L.get('notifications.importError') + ` (${error.message})`, 'danger', 6000);
+                    }
+                }
+                // Сбрасываем значение input, чтобы можно было загрузить тот же файл снова
+                event.target.value = '';
+            });
+        }
+
+        if (specialContentToggle) {
+            specialContentToggle.addEventListener('change', (event) => {
+                const playerData = Game.getPlayerData();
+                playerData.specialContentEnabled = event.target.checked;
+                Game.saveGame();
+                // Показываем уведомление о необходимости перезагрузки
+                showNotification(L.get('notifications.settingsRefresh'), 'info');
+            });
+        }
         
     }
 
@@ -461,6 +512,12 @@ const UI = (() => {
         if (playerData && playerData.stats) { // Проверяем наличие stats
             renderStats(playerData);
         }
+        if (notificationsToggle) {
+            notificationsToggle.checked = playerData.notificationsEnabled;
+        }
+        if (specialContentToggle) {
+            specialContentToggle.checked = playerData.specialContentEnabled;
+        }
     }
 
     function updateCurrencyDisplay(currency) {
@@ -488,6 +545,10 @@ const UI = (() => {
 
     // Универсальная функция для отображения уведомлений
     function showNotification(message, type = 'info', duration = 4000) {
+        const playerData = Game.getPlayerData();
+        if (!playerData.notificationsEnabled) {
+            return; // Если уведомления отключены, ничего не делаем
+        }
         let container = document.getElementById('notificationsContainer'); 
         if (!container) {
             container = document.createElement('div');
@@ -574,14 +635,18 @@ const UI = (() => {
     }
     
     // --- Анимация Ролла (быстрая смена на одном месте) ---
-    function startRollAnimation(slotElement, targetRarity, onCompleteCallback) {
+    function startRollAnimation(slotElement, targetRarity, onCompleteCallback, meta = {}) { // <<< ДОБАВЛЕН АРГУМЕНТ META
         let animationTimeouts = [];
-        const playerData = Game.getPlayerData(); // Получаем данные игрока для проверки Fast Roll
+        const playerData = Game.getPlayerData();
         const isFastRollActive = playerData.purchasedUpgrades.fastRoll;
 
         const clearMyTimeouts = () => {
             animationTimeouts.forEach(clearTimeout);
             animationTimeouts = [];
+            if (slotElement.parentNode) {
+                const indicator = slotElement.parentNode.querySelector('.slot-upgrade-indicator');
+                if (indicator) indicator.remove();
+            }
             slotElement.dataset.animationActive = 'false';
         };
 
@@ -591,11 +656,10 @@ const UI = (() => {
         slotElement.clearPreviousAnimation = clearMyTimeouts;
         slotElement.dataset.animationActive = 'true';
 
-        // Настройки длительности анимации в зависимости от Fast Roll
-        let baseTickDuration = isFastRollActive ? 15 : 30;    // ms
-        let minTickDuration = isFastRollActive ? 100 : 250;   // ms, самая медленная скорость перед остановкой
-        let accelerationTicks = isFastRollActive ? 8 : 20;  // Количество быстрых тиков
-        let decelerationTicks = isFastRollActive ? 6 : 15;  // Количество тиков замедления
+        let baseTickDuration = isFastRollActive ? 15 : 30;
+        let minTickDuration = isFastRollActive ? 100 : 250;
+        let accelerationTicks = isFastRollActive ? 8 : 20;
+        let decelerationTicks = isFastRollActive ? 6 : 15;
 
         let currentTick = 0;
         let currentTickDuration = baseTickDuration;
@@ -617,6 +681,7 @@ const UI = (() => {
                 }
                 currentTickDuration = baseTickDuration + (minTickDuration - baseTickDuration) * decelerationProgress;
             } else {
+                // --- АНИМАЦИЯ ЗАВЕРШЕНА ---
                 rarityToShow = targetRarity;
                 if (rarityToShow.id === 'error') {
                     slotElement.dataset.text = rarityToShow.name;
@@ -626,6 +691,25 @@ const UI = (() => {
                 slotElement.textContent = rarityToShow.name;
                 slotElement.classList.add(rarityToShow.cssClass);
                 slotElement.classList.add('landed');
+
+                // <<< КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ ЗДЕСЬ: РИСУЕМ СТРЕЛОЧКУ НАД СЛОТОМ >>>
+                if (meta.wasUpgraded && meta.originalRarityId) {
+                    const originalRarityData = getRarityDataById(meta.originalRarityId, playerData);
+                    if (originalRarityData) {
+                        const indicator = document.createElement('div');
+                        indicator.className = 'slot-upgrade-indicator';
+                        indicator.innerHTML = `<span>${L.get(originalRarityData.nameKey)}</span> <span class="arrow">→</span>`;
+                        // Вставляем индикатор ПЕРЕД слотом, внутри его обертки
+                        slotElement.parentNode.insertBefore(indicator, slotElement);
+                    }
+                }
+                if (meta.jackpotTriggered) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'slot-upgrade-indicator jackpot-indicator'; // Добавляем доп. класс для стилизации
+                    indicator.innerHTML = `🍀 JACKPOT! 🍀`;
+                    slotElement.parentNode.insertBefore(indicator, slotElement);
+                }
+                
                 console.log(`--- Roll Animation End (Flash) --- (Landed: ${targetRarity.name})`);
                 slotElement.dataset.animationActive = 'false';
                 slotElement.clearPreviousAnimation = null;
@@ -633,11 +717,10 @@ const UI = (() => {
                 return;
             }
 
-            
             if (rarityToShow.id === 'error') {
                 slotElement.dataset.text = rarityToShow.name;
             } else {
-                delete slotElement.dataset.text; // Удаляем, если это не ERROR, чтобы псевдоэлементы не показывали старый текст
+                delete slotElement.dataset.text;
             }
             slotElement.textContent = rarityToShow.name;
             slotElement.classList.add(rarityToShow.cssClass);
@@ -735,18 +818,15 @@ const UI = (() => {
         const numRolls = 5;
         const allRollResults = [];
 
-        // <<< НАЧАЛО БЛОКА ИЗМЕНЕНИЙ >>>
         for (let i = 0; i < numRolls; i++) {
             const rollResult = Game.performRoll();
-            // Если ролл заблокирован, прекращаем серию мульти-роллов
             if (!rollResult) {
-                console.log(`Multi-roll stopped at attempt ${i+1} due to insufficient funds.`);
-                break; // Выходим из цикла
+                console.log(`Multi-roll stopped at attempt ${i + 1} due to insufficient funds.`);
+                break;
             }
             allRollResults.push(rollResult);
         }
 
-        // Если не удалось сделать НИ ОДНОГО ролла, просто разблокируем UI и выходим
         if (allRollResults.length === 0) {
             setButtonsDisabled(false, isCalledByAutoroll);
             const playerData = Game.getPlayerData();
@@ -755,7 +835,6 @@ const UI = (() => {
             }
             return;
         }
-        // <<< КОНЕЦ БЛОКА ИЗМЕНЕНИЙ >>>
 
         isRolling = true;
         rollResultContainer.innerHTML = '';
@@ -768,7 +847,8 @@ const UI = (() => {
         
         let completedAnimations = 0;
 
-        // Анимируем только те роллы, которые УДАЛОСЬ совершить
+        // <<< КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ ЗДЕСЬ >>>
+        // Теперь мы перебираем `allRollResults`, которые содержат `meta` данные
         for (const result of allRollResults) {
             const slotWrapper = document.createElement('div');
             slotWrapper.className = 'multi-roll-slot-wrapper';
@@ -777,12 +857,14 @@ const UI = (() => {
             slotWrapper.appendChild(slot);
             multiRollSlotsContainer.appendChild(slotWrapper);
 
+            // Передаем `meta` данные в startRollAnimation
             const clearCb = startRollAnimation(slot, result.rarity, () => {
                 completedAnimations++;
                 if (completedAnimations === allRollResults.length) {
                     onRollsCompleted(allRollResults, isCalledByAutoroll);
                 }
-            });
+            }, result.meta); // <<< ПЕРЕДАЕМ META ДАННЫЕ СЮДА
+
             activeMultiRollClearCallbacks.push(clearCb);
         }
     }
@@ -845,6 +927,26 @@ const UI = (() => {
         cardWrapper.appendChild(cardElement);
         rollResultContainer.appendChild(cardWrapper);
         rollResultContainer.appendChild(nameElement);
+        if (rollResult.meta?.wasUpgraded && rollResult.meta?.originalRarityId) {
+            const originalRarityData = getRarityDataById(rollResult.meta.originalRarityId, playerData);
+            if (originalRarityData) {
+                const upgradeIndicator = document.createElement('div');
+                upgradeIndicator.className = 'upgrade-indicator';
+                upgradeIndicator.innerHTML = `
+                    <span class="badge" style="background-color:${originalRarityData.color}">${L.get(originalRarityData.nameKey)}</span>
+                    <span class="arrow">→</span>
+                    <span class="badge" style="background-color:${rollResult.rarity.color}">${rollResult.rarity.name}</span>
+                `;
+                rollResultContainer.appendChild(upgradeIndicator);
+            }
+        }
+
+        if (rollResult.meta?.jackpotTriggered) {
+            const jackpotIndicator = document.createElement('div');
+            jackpotIndicator.className = 'upgrade-indicator text-warning';
+            jackpotIndicator.innerHTML = `🍀 JACKPOT! 🍀`;
+            rollResultContainer.appendChild(jackpotIndicator);
+        }
         if (rollResult.duplicateReward > 0) {
             const rewardText = document.createElement('p');
             rewardText.className = 'duplicate-reward-text';
@@ -941,7 +1043,7 @@ const UI = (() => {
             if (isAnyVersionOpened) {
                 // Находим активный скин из сохранения или берем родительский по умолчанию
             const activeSkinId = playerData.activeSkins[rarityData.id] || rarityData.id;
-            const activeSkinData = getRarityDataById(activeSkinId) || rarityData;
+            const activeSkinData = getRarityDataById(activeSkinId, playerData) || getRarityDataById(rarityData.id, playerData);
             
             img.src = activeSkinData.card.image;
             nameDiv.textContent = L.get(activeSkinData.card.nameKey);
@@ -1091,7 +1193,7 @@ const UI = (() => {
             versionSwitcher.appendChild(group);
         }
         
-        const initialVersionToShow = getRarityDataById(activeSkinId) || allVersions[0];
+        const initialVersionToShow = getRarityDataById(activeSkinId, playerData) || allVersions[0];
         showVersionDetails(initialVersionToShow);
         cardModal.show();
     }

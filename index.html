@@ -168,12 +168,36 @@
                     <h4 data-i18n="ui.dataManagement">Управление данными:</h4>
                     <button id="resetProgressButton" class="btn btn-danger" data-i18n="ui.resetProgress">Сбросить прогресс</button>
                     <p class="form-text mt-1" data-i18n="ui.resetWarning">Внимание! Это действие удалит все ваши данные и не может быть отменено.</p>
+                    
+                    <hr>
+                    <h4 data-i18n="ui.data.title">Экспорт / Импорт</h4>
+                    <p class="form-text" data-i18n="ui.data.description">Сохраните свой прогресс в файл или загрузите его на другом устройстве. Импорт перезапишет текущий прогресс!</p>
+                    <div class="d-flex gap-2">
+                        <button id="exportSaveButton" class="btn btn-success" data-i18n="ui.data.export">Экспорт</button>
+                        <label class="btn btn-warning">
+                            <span data-i18n="ui.data.import">Импорт</span>
+                            <input type="file" id="importSaveInput" class="d-none" accept=".json,.txt">
+                        </label>
+                    </div>
                     <hr>
                     <h4 data-i18n="ui.musicVolume">Громкость музыки:</h4>
                     <div class="d-flex align-items-center">
                         <input type="range" class="form-range me-2" id="musicVolumeSlider" min="0" max="1" step="0.01" value="0">
                         <span id="musicVolumeLabel">0%</span>
                     </div>
+                    <hr>
+                    <h4 data-i18n="ui.notifications.title">Уведомления</h4>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="notificationsToggle" checked>
+                        <label class="form-check-label" for="notificationsToggle" data-i18n="ui.notifications.enable">Включить уведомления</label>
+                    </div>
+                    <hr>
+                    <h4 data-i18n="ui.specialContent.title">Особый контент</h4>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="specialContentToggle" checked>
+                        <label class="form-check-label" for="specialContentToggle" data-i18n="ui.specialContent.enable">Показывать контент с особыми фетишами</label>
+                    </div>
+                    <p class="form-text mt-1" data-i18n="ui.specialContent.description">Отключите, чтобы заменить некоторый контент (например, футанари) на более стандартные версии. Изменения вступят в силу после перезагрузки страницы.</p>
                 </div>
                 <div class="tab-pane fade" id="stats" role="tabpanel" aria-labelledby="stats-tab">
                 <h2 class="mb-3"  data-i18n="ui.playerStats">Статистика Игрока</h2>
@@ -217,7 +241,7 @@
         <footer class="text-center mt-5 mb-3">
             <hr>
             <p class="text-muted small">
-                Gal's RNG - Version 0.1.6b "Supporter Unique Cards"
+                Gal's RNG - Version 0.1.6c "QoL and Saves"
             </p>
             <!-- Можно добавить еще что-то, например, копирайт или ссылку на вас -->
             <p class="text-muted small">&copy; 2025 BigCoolOppai</p>

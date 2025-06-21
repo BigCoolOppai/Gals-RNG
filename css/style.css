@@ -1790,3 +1790,77 @@ body.visual-effect-uranium::before {
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
     border: 1px solid #8D6E63;
 }
+
+.upgrade-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 1.1em;
+    font-family: 'Orbitron', sans-serif;
+    animation: text-fade-in 0.5s 0.6s ease-out forwards;
+    opacity: 0;
+}
+.upgrade-indicator .arrow {
+    font-weight: bold;
+}
+.multi-roll-slot-wrapper {
+    position: relative; /* Необходимо для позиционирования индикатора */
+    display: flex;
+    flex-direction: column; /* Располагаем индикатор и слот друг под другом */
+    justify-content: center;
+    align-items: center;
+}
+
+.slot-upgrade-indicator {
+    /* position: absolute; */ /* Убрал абсолютное, чтобы он сдвигал слот вниз */
+    /* top: -20px; */ /* Больше не нужно */
+    width: 100%;
+    text-align: center;
+    color: #ffc107; /* Яркий желтый/золотой */
+    font-size: 0.8em;
+    font-weight: bold;
+    text-shadow: 1px 1px 1px #000;
+    margin-bottom: 2px; /* Небольшой отступ от слота */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.slot-upgrade-indicator .arrow {
+    color: #fff;
+    margin: 0 4px;
+}
+.slot-upgrade-indicator.jackpot-indicator {
+    color: #ffd700; /* Яркий золотой цвет */
+    text-shadow: 0 0 5px #ffab00, 1px 1px 1px #000;
+    animation: jackpot-pulse-glow 1s infinite alternate; /* Добавим пульсацию от другого эффекта */
+}
+
+/* Rias (Алая) */
+.roll-slot.rarity-rias {
+    background: linear-gradient(145deg, #d32f2f 0%, #7f0000 100%);
+    color: #ffcdd2;
+    font-family: 'Playfair Display SC', serif;
+    font-weight: bold;
+    text-shadow: 0 0 8px #ef5350, 1px 1px 2px #000;
+    border: 1px solid #c62828;
+}
+
+/* Amy (Нежная) */
+.roll-slot.rarity-amy {
+    background: linear-gradient(135deg, #9575CD, #673AB7);
+    color: #EDE7F6;
+    font-family: 'Quicksand', sans-serif;
+    border: 1px solid #7E57C2;
+}
+
+/* Raven (Страстная) */
+.roll-slot.rarity-raven {
+    background: linear-gradient(160deg, #4527A0, #1A237E);
+    color: #D1C4E9;
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    text-shadow: 0 0 10px #B39DDB;
+    border: 1px solid #512DA8;
+}

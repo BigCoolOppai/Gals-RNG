@@ -103,7 +103,7 @@ const Game = (() => {
 
     // Пересчитываем бонус от эффекта "Путь Меча"
     function calculateMotivationBonus() {
-        const effectData = getRarityDataById('motivation')?.mechanicalEffect;
+        const effectData = getRarityDataById('motivation', playerData)?.mechanicalEffect;
         if (!effectData) return 0;
 
         // Сбрасываем стаки, если прошло слишком много времени
@@ -325,7 +325,7 @@ const Game = (() => {
     // --- Ролл Карточек ---
     function performRoll(guaranteedRarityId = null) {
         if (playerData.activeMechanicalEffect === 'jackpot') {
-            const effectData = getRarityDataById('jackpot').mechanicalEffect;
+            const effectData = getRarityDataById('jackpot', playerData).mechanicalEffect;
             if (effectData && effectData.rollCost > 0) {
                 if (!spendCurrency(effectData.rollCost)) {
                     console.warn(`Roll blocked: Not enough currency for Jackpot effect. Need: ${effectData.rollCost}`);
@@ -381,23 +381,34 @@ const Game = (() => {
         playerData.stats.totalRolls++;
 
         let baseEffectiveLuck = getEffectiveLuck();
-        let finalEffectiveLuck = parseFloat((baseEffectiveLuck * currentLuckMultiplier).toFixed(2));
-
+        
+        // <<< ИСПРАВЛЕНИЕ 1: ЛОГИКА ДЖЕКПОТА ПЕРЕНЕСЕНА ВЫШЕ >>>
+        // Мы должны определить, сработал ли джекпот, ДО вычисления итоговой удачи.
+        let jackpotTriggeredThisRoll = false;
         if (playerData.activeMechanicalEffect === 'jackpot') {
-            const effectData = getRarityDataById('jackpot').mechanicalEffect;
+            const effectData = getRarityDataById('jackpot', playerData).mechanicalEffect;
             if (Math.random() < effectData.chance) {
-                finalEffectiveLuck = baseEffectiveLuck + effectData.luckBonus;
-                console.log(`%cJACKPOT EFFECT TRIGGERED! +${effectData.luckBonus} Luck for this roll!`, "color: gold; font-weight: bold;");
-                const message = L.get('notifications.jackpotEffectTriggered').replace('{bonus}', effectData.luckBonus);
-                UI.showNotification(message, 'warning');
+                jackpotTriggeredThisRoll = true; // Устанавливаем флаг
             }
         }
-        finalEffectiveLuck = parseFloat((finalEffectiveLuck * currentLuckMultiplier).toFixed(2));
-        console.log(`Performing roll. BaseLuck: ${baseEffectiveLuck}, LuckyMultiplier: ${currentLuckMultiplier}, FinalEffectiveLuck: ${finalEffectiveLuck}`);
+
+        let finalEffectiveLuck = baseEffectiveLuck;
+        if (jackpotTriggeredThisRoll) {
+            const effectData = getRarityDataById('jackpot', playerData).mechanicalEffect;
+            finalEffectiveLuck += effectData.luckBonus;
+            console.log(`%cJACKPOT EFFECT TRIGGERED! +${effectData.luckBonus} Luck for this roll!`, "color: gold; font-weight: bold;");
+            const message = L.get('notifications.jackpotEffectTriggered').replace('{bonus}', effectData.luckBonus);
+            UI.showNotification(message, 'warning');
+        }
+        
+        finalEffectiveLuck *= currentLuckMultiplier;
+        finalEffectiveLuck = parseFloat(finalEffectiveLuck.toFixed(2));
+        
+        console.log(`Performing roll. BaseLuck: ${baseEffectiveLuck}, LuckyMultiplier: ${currentLuckMultiplier}, Jackpot: ${jackpotTriggeredThisRoll}, FinalEffectiveLuck: ${finalEffectiveLuck}`);
 
         let determinedRarityId = null;
 
-        if (guaranteedRarityId && getRarityDataById(guaranteedRarityId)) {
+        if (guaranteedRarityId && getRarityDataById(guaranteedRarityId, playerData)) {
             determinedRarityId = guaranteedRarityId;
             console.log(`Performing GUARANTEED roll for: ${guaranteedRarityId}`);
         } else {
@@ -418,20 +429,24 @@ const Game = (() => {
             }
         }
         
-        // <<< НАЧАЛО БЛОКА КЛЮЧЕВОГО ИСПРАВЛЕНИЯ >>>
-        // Получаем ID активного эффекта, если он есть
         const activeEffectId = playerData.activeMechanicalEffect;
 
-        // Проверяем, является ли активный эффект "универсальным улучшением"
+        // <<< ИСПРАВЛЕНИЕ 2: ИНИЦИАЛИЗАЦИЯ META-ОБЪЕКТА >>>
+        // Создаем объект `meta` СРАЗУ. Он будет хранить все доп. данные о ролле.
+        const rollMeta = {
+            wasUpgraded: false,
+            originalRarityId: determinedRarityId,
+            jackpotTriggered: jackpotTriggeredThisRoll
+        };
+
         if (activeEffectId && !guaranteedRarityId) {
-            const activeEffectCardData = getRarityDataById(activeEffectId);
+            const activeEffectCardData = getRarityDataById(activeEffectId, playerData);
 
             if (activeEffectCardData && activeEffectCardData.mechanicalEffect?.type === 'universal_upgrade') {
                 const effectData = activeEffectCardData.mechanicalEffect;
-                let upgradeSucceeded = false;
                 let tiersUpgraded = 0;
+                let upgradeSucceeded = false;
 
-                // 1. Сначала проверяем многоуровневые улучшения (если они есть)
                 if (effectData.multiUpgradeTiers && Array.isArray(effectData.multiUpgradeTiers)) {
                     for (const multi of effectData.multiUpgradeTiers) {
                         if (Math.random() < multi.chance) {
@@ -442,29 +457,28 @@ const Game = (() => {
                     }
                 }
                 
-                // 2. Если многоуровневое улучшение не сработало, проверяем базовое
                 if (!upgradeSucceeded && Math.random() < effectData.chance) {
                     tiersUpgraded = 1;
                     upgradeSucceeded = true;
                 }
 
-                // 3. Если любое улучшение сработало, применяем его
                 if (upgradeSucceeded) {
                     const currentIndex = RARITIES_DATA.findIndex(r => r.id === determinedRarityId);
                     const newIndex = currentIndex - tiersUpgraded;
 
                     if (newIndex >= 0) {
-                        const originalId = determinedRarityId;
                         const nextRarity = RARITIES_DATA[newIndex];
                         const prestigeOk = (nextRarity.minPrestige || 0) <= playerData.prestigeLevel;
                         const supporterOk = !(nextRarity.id === 'diamond' && !playerData.isSupporter);
 
                         if (prestigeOk && supporterOk) {
                             determinedRarityId = nextRarity.id;
-                            const originalName = L.get(getRarityDataById(originalId).nameKey);
+                            rollMeta.wasUpgraded = true; // Обновляем мета-данные
+                            
+                            const originalName = L.get(getRarityDataById(rollMeta.originalRarityId, playerData).nameKey);
                             const upgradedName = L.get(nextRarity.nameKey);
 
-                            console.log(`%cCORRUPTION EFFECT TRIGGERED! Upgraded ${originalId} to ${determinedRarityId} (+${tiersUpgraded} tiers)`, "color: red;");
+                            console.log(`%cCORRUPTION EFFECT TRIGGERED! Upgraded ${rollMeta.originalRarityId} to ${determinedRarityId} (+${tiersUpgraded} tiers)`, "color: red;");
                             
                             let message = tiersUpgraded > 1 ?
                                 L.get('notifications.corruptionEffectTriggeredMulti').replace('{original}', originalName).replace('{upgraded}', upgradedName).replace('{tiers}', tiersUpgraded) :
@@ -476,13 +490,13 @@ const Game = (() => {
                 }
             }
         }
-        // <<< КОНЕЦ БЛОКА КЛЮЧЕВОГО ИСПРАВЛЕНИЯ >>>
-
-        return processRollResult(determinedRarityId);
+        
+        // <<< ИСПРАВЛЕНИЕ 3: ПЕРЕДАЧА ЕДИНОГО META-ОБЪЕКТА >>>
+        return processRollResult(determinedRarityId, rollMeta);
     }
     
-    function processRollResult(rarityId) { // Убрали wasLuckyRoll, т.к. не используется здесь
-        const rarityData = getRarityDataById(rarityId);
+    function processRollResult(rarityId, meta = {}) { // Убрали wasLuckyRoll, т.к. не используется здесь
+        const rarityData = getRarityDataById(rarityId, playerData);
         if (!rarityData) {
             console.error(`Rarity data not found for ID: ${rarityId}`);
             // Возвращаем объект ошибки, чтобы UI мог это обработать или показать что-то дефолтное
@@ -570,7 +584,8 @@ const Game = (() => {
                 cssClass: rarityData.cssClass 
             },
             isNew,
-            duplicateReward: finalDuplicateReward // Передаем итоговую награду в UI
+            duplicateReward: finalDuplicateReward, // Передаем итоговую награду в UI
+            meta: meta 
         };
     }
 

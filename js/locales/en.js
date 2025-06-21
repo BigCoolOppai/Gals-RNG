@@ -59,7 +59,11 @@ window.locales.en = {
         librarian: { name: "Erudite", cardName: "Libra", description: "Silence, order, and dusty tomes are her element. She strictly enforces discipline, but behind her stern glasses lies a curious gaze. No noise in the library!" },
         altLibrarian: { name: "Curious", cardName: "Depraved Libra", description: "She has read too many forbidden books. Now she isn't interested in some mere letters, and the blindfold only sharpens her other senses~." },
         shroom: { name: "Fungal", cardName: "Amanita", description: "Cute, but deadly poisonous. One wrong step in her forest could be your last. You shouldn't trust her cute appearance. And also, deer love her." },
-        altShroom: { name: "Umami", cardName: "Boletus", description: "Natural and generous, she is the soul of the forest. They say her spores can give life to entire groves. Or to another 'mushroom'... " }
+        altShroom: { name: "Umami", cardName: "Boletus", description: "Natural and generous, she is the soul of the forest. They say her spores can give life to entire groves. Or to another 'mushroom'... " },
+        rias: { name: "Crimson", cardName: "The Crimson-Haired Duchess", description: "The heir of a noble house, known for their crimson hair and... demonic power. She seeks loyal servants, but be warned: her kindness can be as deceptive as her beauty." },
+        amy: { name: "Gentle", cardName: "Amy", description: "Amy came here from a distant land. Apparently, the journey was long and arduous, so she decided to rest a little~" },
+        raven: { name: "Passionate", cardName: "Raven", description: "She is Amy, who decided to rest in a more... adult way. What she's wearing now is not enough for her, so, perhaps you'll join?" },
+        hybrid_safe: { name: "Gyaru", cardName: "Alex", description: "Alex is a sweet, yet sassy gyaru. She loves bright clothes and is always the center of attention." },
 
     },
     // Shop Items
@@ -162,7 +166,15 @@ window.locales.en = {
             success: "Rebirth successful! Received a permanent luck bonus of:",
             unlock_alt_hint: "After your first rebirth, you will start finding exclusive cards and alternative versions of familiar characters!",
             locked_after: "after R{level}"
-        }
+        },
+        notifications: { title: "Notifications", enable: "Enable notifications" },
+        data: { 
+            title: "Export / Import",
+            description: "Save your progress to a file or load it on another device. Importing will overwrite your current progress!",
+            export: "Export",
+            import: "Import"
+        },
+        specialContent: { title: "Special Content", enable: "Enable", description: "Enables specific content, like futanari." }
     },
     // Notifications
     notifications: {
@@ -184,7 +196,13 @@ window.locales.en = {
         afkSummaryRollsOnly: "While you were away, {rolls} rolls were performed.",
         jackpotEffectTriggered: "JACKPOT! +{bonus} LUCK!",
         corruptionEffectTriggered: "CORRUPTION! {original} -> {upgraded}",
-        corruptionEffectTriggeredMulti: "CRITICAL CORRUPTION! {original} -> {upgraded} (+{tiers} TIERS!)"
+        corruptionEffectTriggeredMulti: "CRITICAL CORRUPTION! {original} -> {upgraded} (+{tiers} TIERS!)",
+        exportSuccess: "Save exported successfully!",
+        exportError: "Error exporting save.",
+        importConfirm: "WARNING!\nImporting a save will overwrite your current progress. This action is irreversible.\n\nContinue?",
+        importSuccess: "Save imported successfully! Reloading...",
+        importError: "Error importing save:",
+        settingsRefresh: "Settings will be applied after reloading the page."
     },
     debug: {
         notifications: {

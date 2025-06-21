@@ -101,6 +101,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "raven",
+        nameKey: "cards.raven.name",
+        displayParentId: "amy",
+        minPrestige: 1, // Доступна после 1 реборна
+        probabilityBase: 1 / 4600000, // В 10 раз реже оригинала
+        color: "#311B92", // Темный индиго
+        glowColor: "#9575CD", // Глубокое фиолетовое свечение
+        cssClass: "rarity-raven",
+        currencyOnDuplicate: 360,
+        card: {
+            name: "Raven", 
+            nameKey: "cards.raven.cardName",
+            image: "img/altAmy.png",
+            descriptionKey: "cards.raven.description"
+        }
+    },
+    {
         id: "error_alt_1",
         nameKey: "cards.error_alt_1.name",
         displayParentId: "error",
@@ -175,6 +192,21 @@ window.RARITIES_DATA = [
             nameKey: "cards.diamond.cardName",
             image: "img/altDiamond.png",
             descriptionKey: "cards.diamond.description"
+        }
+    },
+    {
+        id: "amy",
+        nameKey: "cards.amy.name",
+        probabilityBase: 1 / 465000,
+        color: "#673AB7", // Глубокий фиолетовый
+        glowColor: "#B39DDB", // Лавандовое свечение
+        cssClass: "rarity-amy",
+        currencyOnDuplicate: 46500,
+        card: {
+            name: "Amy", 
+            nameKey: "cards.amy.cardName",
+            image: "img/cardAmy.png",
+            descriptionKey: "cards.amy.description"
         }
     },
     {
@@ -329,6 +361,21 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "rias",
+        nameKey: "cards.rias.name",
+        probabilityBase: 1 / 96000, // Реже мифической, но чаще Unbound
+        color: "#d32f2f", // Глубокий малиновый
+        glowColor: "#ffcdd2", // Розовое свечение
+        cssClass: "rarity-rias",
+        currencyOnDuplicate: 9600,
+        card: {
+            name: "Crimson Duchess", 
+            nameKey: "cards.rias.cardName",
+            image: "img/cardCrimson.png",
+            descriptionKey: "cards.rias.description"
+        }
+    },
+    {
         id: "shroom",
         nameKey: "cards.shroom.name",
         probabilityBase: 1 / 70000,
@@ -431,6 +478,16 @@ window.RARITIES_DATA = [
         glowColor: "#64ffda", // Teal A400
         cssClass: "rarity-hybrid",
         currencyOnDuplicate: 2000,
+        tags: ["futanari"], // Помечаем карту тегом для фильтрации
+        safeVersion: {
+            nameKey: "cards.hybrid_safe.name",
+            card: {
+                name: "Alex (Vanilla)",
+                nameKey: "cards.hybrid_safe.cardName",
+                image: "img/cardHybrid_safe.png", // Путь к "безопасному" изображению
+                descriptionKey: "cards.hybrid_safe.description"
+            }
+        },
         card: {
             name: "Alex", 
             nameKey: "cards.hybrid.cardName",
@@ -934,12 +991,36 @@ const SHOP_DATA = {
 
 
 
+
+
 // Константы для игры
 
 const ROLL_ANIMATION_ITEMS_COUNT = 50;
 const BASE_LUCK = 1.0;
 
-// Функция для получения данных о редкости по ID
-function getRarityDataById(id) {
-    return RARITIES_DATA.find(r => r.id === id);
+/**
+ * Получает данные о редкости, УЧИТЫВАЯ ПЕРЕДАННЫЕ НАСТРОЙКИ ИГРОКА.
+ * @param {string} id - ID редкости.
+ * @param {object} [playerData=null] - ОБЪЕКТ с данными игрока.
+ * @returns {object|null} - Объект с данными о редкости или null, если не найдена.
+ */
+function getRarityDataById(id, playerData = null) { // <<< ДОБАВЛЕН АРГУМЕНТ
+    const originalData = RARITIES_DATA.find(r => r.id === id);
+    if (!originalData) return null;
+
+    // Определяем, включен ли спец. контент. Если playerData не переданы, считаем, что включен.
+    const specialContentEnabled = playerData ? playerData.specialContentEnabled : true;
+    
+    // Если особый контент включен ИЛИ у карты нет безопасной версии, возвращаем оригинал
+    if (specialContentEnabled || !originalData.safeVersion) {
+        return originalData;
+    }
+
+    // Если особый контент ОТКЛЮЧЕН и есть безопасная версия, "собираем" её
+    const safeData = {
+        ...originalData,
+        ...originalData.safeVersion
+    };
+
+    return safeData;
 }
