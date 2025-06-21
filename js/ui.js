@@ -643,9 +643,10 @@ const UI = (() => {
         const clearMyTimeouts = () => {
             animationTimeouts.forEach(clearTimeout);
             animationTimeouts = [];
-            if (slotElement.parentNode) {
-                const indicator = slotElement.parentNode.querySelector('.slot-upgrade-indicator');
-                if (indicator) indicator.remove();
+            const parentWrapper = slotElement.parentNode;
+            if (parentWrapper) {
+                const indicators = parentWrapper.querySelectorAll('.slot-upgrade-indicator');
+                indicators.forEach(indicator => indicator.remove());
             }
             slotElement.dataset.animationActive = 'false';
         };
@@ -691,23 +692,27 @@ const UI = (() => {
                 slotElement.textContent = rarityToShow.name;
                 slotElement.classList.add(rarityToShow.cssClass);
                 slotElement.classList.add('landed');
+                
+                const isMultiRoll = slotElement.closest('#multiRollSlotsContainer');
+                if (isMultiRoll) {
+                    // Индикатор для "Искажения"
+                    if (meta.wasUpgraded && meta.originalRarityId) {
+                        const originalRarityData = getRarityDataById(meta.originalRarityId, playerData);
+                        if (originalRarityData) {
+                            const indicator = document.createElement('div');
+                            indicator.className = 'slot-upgrade-indicator';
+                            indicator.innerHTML = `<span>${L.get(originalRarityData.nameKey)}</span> <span class="arrow">→</span>`;
+                            slotElement.parentNode.insertBefore(indicator, slotElement);
+                        }
+                    }
 
-                // <<< КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ ЗДЕСЬ: РИСУЕМ СТРЕЛОЧКУ НАД СЛОТОМ >>>
-                if (meta.wasUpgraded && meta.originalRarityId) {
-                    const originalRarityData = getRarityDataById(meta.originalRarityId, playerData);
-                    if (originalRarityData) {
+                    // Индикатор для "Джекпота"
+                    if (meta.jackpotTriggered) {
                         const indicator = document.createElement('div');
-                        indicator.className = 'slot-upgrade-indicator';
-                        indicator.innerHTML = `<span>${L.get(originalRarityData.nameKey)}</span> <span class="arrow">→</span>`;
-                        // Вставляем индикатор ПЕРЕД слотом, внутри его обертки
+                        indicator.className = 'slot-upgrade-indicator jackpot-indicator';
+                        indicator.innerHTML = `🍀 JACKPOT! 🍀`;
                         slotElement.parentNode.insertBefore(indicator, slotElement);
                     }
-                }
-                if (meta.jackpotTriggered) {
-                    const indicator = document.createElement('div');
-                    indicator.className = 'slot-upgrade-indicator jackpot-indicator'; // Добавляем доп. класс для стилизации
-                    indicator.innerHTML = `🍀 JACKPOT! 🍀`;
-                    slotElement.parentNode.insertBefore(indicator, slotElement);
                 }
                 
                 console.log(`--- Roll Animation End (Flash) --- (Landed: ${targetRarity.name})`);
@@ -757,11 +762,16 @@ const UI = (() => {
             }
         }
 
-        if (results.length > 1) {
+        // <<< КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ >>>
+        if (results.length === 1) {
+            // Если это был одиночный ролл, вызываем displayRollResult
+            displayRollResult(results[0]);
+        } else if (results.length > 1) {
+            // Если это был мульти-ролл, вызываем сводку
             displayMultiRollSummary(results);
         }
+        // <<< КОНЕЦ ИСПРАВЛЕНИЯ >>>
         
-        // ИСПРАВЛЕНИЕ: Используем правильное имя переменной - 'results'
         results.forEach(result => {
             if (result.isNew) {
                 showNewCard(result);
@@ -770,44 +780,53 @@ const UI = (() => {
 
         updateAll(Game.getPlayerData());
 
-       if (isAutorolling && isTabActive) {
-            // Очищаем предыдущий на всякий случай
+    if (isAutorolling && isTabActive) {
             clearTimeout(autorollTimer);
-            // Запускаем следующий ролл после короткой "передышки"
             autorollTimer = setTimeout(performNextAutoroll, AUTOROLL_BREATHING_ROOM);
         }
     }
+
     // --- Обработчики кнопок Ролла ---
     function handleRollButtonClick(isCalledByAutoroll = false) {
         if (isRolling) return;
+        
         setButtonsDisabled(true, isCalledByAutoroll);
         
         const rollResult = Game.performRoll(); 
         
-        // Если ролл был заблокирован (не хватило денег), то просто разблокируем кнопки и выйдем
         if (!rollResult) {
             setButtonsDisabled(false, isCalledByAutoroll);
-            // Восстанавливаем состояние кнопки мульти-ролла
             const playerData = Game.getPlayerData();
             if (playerData) {
                 toggleMultiRollButton(playerData.purchasedUpgrades.multiRollX5);
             }
             return;
         }
+
         isRolling = true;
-        setButtonsDisabled(true, isCalledByAutoroll);
         
         rollResultContainer.innerHTML = '';
-        activeSingleRollClearCallback?.();
+        // <<< КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: МЫ ДОЛЖНЫ ОЧИЩАТЬ СТАРУЮ СТРЕЛОЧКУ ИМЕННО ЗДЕСЬ >>>
+        // Находим контейнер одиночного слота и удаляем из него все старые индикаторы
+        const singleSlotWrapper = rollAnimationContainer.querySelector('.single-roll-slot-wrapper');
+        if (singleSlotWrapper) {
+            const indicators = singleSlotWrapper.querySelectorAll('.slot-upgrade-indicator');
+            indicators.forEach(indicator => indicator.remove());
+        }
+        // <<< КОНЕЦ ИСПРАВЛЕНИЯ >>>
+
+        if (activeSingleRollClearCallback) {
+            activeSingleRollClearCallback();
+        }
         
         rollAnimationContainer.querySelector('.single-roll-slot-wrapper').classList.remove('d-none');
         multiRollSlotsContainer.classList.add('d-none');
- 
+        
+        // ВАЖНО: Мы больше не передаем meta данные в startRollAnimation для одиночного ролла
         activeSingleRollClearCallback = startRollAnimation(rollSlot, rollResult.rarity, () => {
             activeSingleRollClearCallback = null; 
-            displayRollResult(rollResult);
             onRollsCompleted([rollResult], isCalledByAutoroll);
-        });
+        }); // meta-аргумент убран
     }
 
     // Замените вашу существующую handleMultiRollButtonClick на эту:
@@ -920,14 +939,18 @@ const UI = (() => {
         const nameElement = document.createElement('h3');
         nameElement.className = 'received-card-name';
         
-        // ИСПРАВЛЕНИЕ 1: Используем rollResult.card.name, который уже переведен в game.js
         nameElement.textContent = `${L.get('ui.youGot')}: ${rollResult.card.name}!`; 
         
         if (rollResult.isNew) nameElement.innerHTML += ` <span class="badge bg-warning">${L.get('ui.isNew')}</span>`;
         cardWrapper.appendChild(cardElement);
         rollResultContainer.appendChild(cardWrapper);
         rollResultContainer.appendChild(nameElement);
+
+        // <<< КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: ПОЛУЧАЕМ PLAYERDATA ПЕРЕД ИСПОЛЬЗОВАНИЕМ >>>
+        const playerData = Game.getPlayerData();
+
         if (rollResult.meta?.wasUpgraded && rollResult.meta?.originalRarityId) {
+            // Используем getRarityDataById с передачей playerData
             const originalRarityData = getRarityDataById(rollResult.meta.originalRarityId, playerData);
             if (originalRarityData) {
                 const upgradeIndicator = document.createElement('div');
@@ -940,13 +963,14 @@ const UI = (() => {
                 rollResultContainer.appendChild(upgradeIndicator);
             }
         }
-
+        
         if (rollResult.meta?.jackpotTriggered) {
             const jackpotIndicator = document.createElement('div');
             jackpotIndicator.className = 'upgrade-indicator text-warning';
             jackpotIndicator.innerHTML = `🍀 JACKPOT! 🍀`;
             rollResultContainer.appendChild(jackpotIndicator);
         }
+
         if (rollResult.duplicateReward > 0) {
             const rewardText = document.createElement('p');
             rewardText.className = 'duplicate-reward-text';
