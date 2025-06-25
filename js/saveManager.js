@@ -14,6 +14,7 @@ const SaveManager = (() => {
         playerId: null, 
         isSupporter: false, 
         activeMechanicalEffect: null, // ID карты с активным механическим эффектом
+        activePassives: {}, // { familyId: activeCardId, ... }
         lastRollTimestamp: 0,         // Для эффекта "Путь Меча"
         motivationStacks: 0,          // Для эффекта "Путь Меча
         activeSkins: {},
@@ -32,11 +33,18 @@ const SaveManager = (() => {
         activeVisualEffectRarityId: null, // <<--- ДОБАВИТЬ: ID редкости карты с активным визуальным эффектом
         musicVolume: 0, // По умолчанию громкость 0
         stats: { // <--- НОВЫЙ ОБЪЕКТ СТАТИСТИКИ
-        totalRolls: 0,
-        // currencySpentOnRolls: 0, // Пока не нужно, если роллы бесплатные
-        currencyFromDuplicates: 0,
-        rollsByRarity: {} // Объект: { rarityId1: count1, rarityId2: count2, ... }
+            totalRolls: 0,
+            // currencySpentOnRolls: 0, // Пока не нужно, если роллы бесплатные
+            currencyFromDuplicates: 0,
+            rollsByRarity: {} // Объект: { rarityId1: count1, rarityId2: count2, ... }
         },
+        // --- НАЧАЛО НОВЫХ ПОЛЕЙ ДЛЯ АЧИВОК ---
+        completedAchievements: [], // Массив ID выполненных достижений
+        unlockedThemes: ['default'], // Массив ID разблокированных тем
+        activeTheme: 'default', // ID активной темы
+        lastRollsHistory: [], // Для отслеживания страйков
+        duplicateCounts: {},
+        // --- КОНЕЦ НОВЫХ ПОЛЕЙ ---
         lastPlayed: new Date().toISOString()
         
     });
@@ -116,9 +124,12 @@ const SaveManager = (() => {
 
     const resetPlayerData = () => {
         try {
-            localStorage.removeItem(SAVE_KEY);
-            console.log("Game data reset.");
-            return getDefaultPlayerData(); // Возвращаем дефолтные данные для немедленного использования
+            const oldPlayerId = loadPlayerData().playerId; // Сохраняем ID перед сбросом
+            const defaultData = getDefaultPlayerData();
+            defaultData.playerId = oldPlayerId; // Восстанавливаем ID
+            savePlayerData(defaultData); // Сохраняем новые данные с старым ID
+            console.log("Game data reset, player ID preserved.");
+            return defaultData;
         } catch (error) {
             console.error("Error resetting game data:", error);
         }

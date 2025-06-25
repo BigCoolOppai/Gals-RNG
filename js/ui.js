@@ -1,18 +1,18 @@
-// js/ui.js
-
 const UI = (() => {
     // --- DOM Элементы ---
     let currencyDisplay, luckDisplay, activeBoostsDisplay;
     let rollButton, multiRollButton, autorollButton;
     let rollAnimationContainer, rollSlot, multiRollSlotsContainer, rollResultContainer;
-    let inventoryGrid, inventoryCounterElement; // Добавлен inventoryCounterElement
+    let inventoryGrid, inventoryCounterElement; 
     let boostShop, equipmentShop, upgradesShop, equippedItemsDisplay;
-    // skipAnimationSettings удален
     let cardModal, modalCardImage, modalCardName, modalCardRarity, modalCardDescription;
     let statsTotalRollsEl, statsUniqueCardsOpenedEl, statsCurrencyFromDuplicatesEl, statsByRarityContainerEl;
     let inventorySortSelect;
+    let eventBanner; // Новый элемент для баннера эвента
+    let achievementsContainer; // Новый элемент для вкладки достижений
+    let htmlRoot; // Корневой элемент для смены тем
 
-    const AUTOROLL_BREATHING_ROOM = 500; // ms "передышки" между роллами
+    const AUTOROLL_BREATHING_ROOM = 500;
 
     // Состояние UI
     let isRolling = false;
@@ -21,17 +21,14 @@ const UI = (() => {
     let autorollTimer = null;
     let lastRollTimestamp = 0;
     let activeSingleRollClearCallback = null;
-    let activeMultiRollClearCallbacks = [];
+    let activeMultiRollCallbacks = [];
 
     let isTabActive = true; 
 
-    let currentEffectCleanup = null; 
-
     let newCardModal, newCardModalImage, newCardModalName, newCardModalRarity;
-    let newCardQueue = []; // Очередь для показа новых карт
+    let newCardQueue = [];
     let isShowingNewCard = false;
-
-    let newCardDismissTimer = null; // <-- ДОБАВЬТЕ ЭТУ СТРОКУ
+    let newCardDismissTimer = null;
 
 
     function cacheDOMElements() {
@@ -49,21 +46,19 @@ const UI = (() => {
         autorollButton = document.getElementById('autorollButton');
 
         notificationsToggle = document.getElementById('notificationsToggle');
-
         specialContentToggle = document.getElementById('specialContentToggle');
+        statsTotalRebirthsEl = document.getElementById('statsTotalRebirths');
 
         exportSaveButton = document.getElementById('exportSaveButton');
         importSaveInput = document.getElementById('importSaveInput');
 
         inventoryGrid = document.getElementById('inventoryGrid');
-        inventoryCounterElement = document.getElementById('inventoryCounter'); // Кэшируем счетчик
+        inventoryCounterElement = document.getElementById('inventoryCounter'); 
 
         boostShop = document.getElementById('boostShop');
         equipmentShop = document.getElementById('equipmentShop');
         upgradesShop = document.getElementById('upgradesShop');
         equippedItemsDisplay = document.getElementById('equippedItemsDisplay');
-
-        // skipAnimationSettings удален
 
         cardModal = new bootstrap.Modal(document.getElementById('cardModal'));
         modalCardImage = document.getElementById('modalCardImage');
@@ -71,9 +66,7 @@ const UI = (() => {
         modalCardRarity = document.getElementById('modalCardRarity');
         modalCardChance = document.getElementById('modalCardChance');
         modalCardDescription = document.getElementById('modalCardDescription');
-        toggleVisualEffectButton = document.getElementById('toggleVisualEffectButton'); // Это не нужно, если кнопка создается динамически
-        visualEffectControlsContainer = document.getElementById('visualEffectControls'); // Если бы он был всегда
-
+        
         musicVolumeSlider = document.getElementById('musicVolumeSlider');
         musicVolumeLabel = document.getElementById('musicVolumeLabel');
         backgroundMusicElement = document.getElementById('backgroundMusic');
@@ -88,81 +81,53 @@ const UI = (() => {
         checkSupportBtn = document.getElementById('checkSupportBtn');
 
         document.getElementById('resetProgressButton')?.addEventListener('click', Game.resetGame);
-
         inventorySortSelect = document.getElementById('inventorySort');
 
         newCardModal = new bootstrap.Modal(document.getElementById('newCardModal'));
         newCardModalImage = document.getElementById('newCardModalImage');
         newCardModalName = document.getElementById('newCardModalName');
         newCardModalRarity = document.getElementById('newCardModalRarity');
+        
+        // Новые элементы
+        eventBanner = document.getElementById('eventBanner');
+        achievementsContainer = document.getElementById('achievements');
+        htmlRoot = document.getElementById('htmlRoot');
     }
-
     // --- Инициализация UI ---
     // js/ui.js
 
     function init() {
         cacheDOMElements();
         setupEventListeners();
-        renderShop(); // renderShop обычно сам получает данные из Game.getPlayerData()
         const initialPlayerData = Game.getPlayerData(); 
         updateAll(initialPlayerData); 
-
-        // 3. Проверяем активные бусты (может обновить UI через свои внутренние вызовы)
         Game.checkActiveBoosts(); 
 
-        // 4. Часть кода, которая обновляет специфичные элементы UI при инициализации,
-        //    используя уже полученные 'initialPlayerData'.
-        //    Lucky Roll display УЖЕ должен обновляться внутри updateAll.
-        //    Если нет, то:
-        // if (initialPlayerData && typeof initialPlayerData.luckyRollCounter !== 'undefined') {
-        //     updateLuckyRollDisplay(initialPlayerData.luckyRollCounter, initialPlayerData.luckyRollThreshold);
-        // }
-        //    Но лучше, чтобы updateAll был единственным источником правды для таких обновлений.
-
-        // Установка громкости
         if (musicVolumeSlider && backgroundMusicElement) {
-            // Убедимся, что initialPlayerData и musicVolume существуют
             if (initialPlayerData && typeof initialPlayerData.musicVolume === 'number') {
                 musicVolumeSlider.value = initialPlayerData.musicVolume;
                 backgroundMusicElement.volume = initialPlayerData.musicVolume;
                 if (musicVolumeLabel) musicVolumeLabel.textContent = `${Math.round(initialPlayerData.musicVolume * 100)}%`;
             } else {
-                // Устанавливаем дефолтное значение, если в playerData нет musicVolume
-                musicVolumeSlider.value = 0; // или ваше дефолтное значение
+                musicVolumeSlider.value = 0;
                 backgroundMusicElement.volume = 0;
                 if (musicVolumeLabel) musicVolumeLabel.textContent = `0%`;
-                console.warn("UI.init: initialPlayerData.musicVolume is undefined, defaulting to 0.");
             }
         }
 
-        // Применение начального визуального эффекта
-        // Убедимся, что initialPlayerData существует
         const initialEffectId = initialPlayerData ? initialPlayerData.activeVisualEffectRarityId : null;
         applyVisualEffect(initialEffectId, true); 
 
-        // Логика начальной загрузки музыки
-        if (backgroundMusicElement) {
-            const musicForInitialEffect = initialEffectId ? VisualEffects.effectMusicMap[initialEffectId] : null;
-            const targetInitialTrack = musicForInitialEffect || VisualEffects.defaultMusicTrack;
+        const musicForInitialEffect = initialEffectId ? VisualEffects.effectMusicMap[initialEffectId] : null;
+        const targetInitialTrack = musicForInitialEffect || VisualEffects.defaultMusicTrack;
 
-            if (!backgroundMusicElement.currentSrc || !backgroundMusicElement.currentSrc.endsWith(targetInitialTrack)) {
-                backgroundMusicElement.src = targetInitialTrack;
-                backgroundMusicElement.load();
-                console.log("UI.init: Initial music source explicitly set to:", targetInitialTrack);
-            }
-            // Повторный вызов applyVisualEffect здесь, если он отвечает за запуск музыки, 
-            // может быть избыточен, если VisualEffects.apply уже это сделал при первом вызове.
-            // UI.applyVisualEffect(initialEffectId, true); // Этот вызов уже был выше.
-
-            // Логика автоплея/паузы при громкости > 0 была у вас корректной (не трогаем)
-            // if (initialPlayerData && initialPlayerData.musicVolume > 0) { ... }
+        if (backgroundMusicElement && (!backgroundMusicElement.currentSrc || !backgroundMusicElement.currentSrc.endsWith(targetInitialTrack))) {
+            backgroundMusicElement.src = targetInitialTrack;
+            backgroundMusicElement.load();
         }
+        
+        applyTheme(initialPlayerData.activeTheme); // Применяем сохраненную тему
 
-        // Строка, которая вызывала ошибку, больше не нужна,
-        // так как renderStats вызывается из updateAll:
-        // if (playerDataForInit && playerDataForInit.stats) { 
-        //     renderStats(playerDataForInit);
-        // }
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
     }
@@ -172,28 +137,31 @@ const UI = (() => {
         multiRollButton.addEventListener('click', handleManualMultiRoll);
         autorollButton.addEventListener('click', toggleAutoroll);
         musicVolumeSlider.addEventListener('input', handleVolumeChange);
-        // Добавляем обработчики для кнопок языка
         document.getElementById('lang-ru')?.addEventListener('click', () => L.setLanguage('ru'));
         document.getElementById('lang-en')?.addEventListener('click', () => L.setLanguage('en'));
-        // Подсвечиваем активный язык
+        
         const currentLang = L.getCurrentLanguage();
         document.getElementById(`lang-${currentLang}`)?.classList.add('active');
-        // НОВЫЙ КОД: Обновление статистики при активации вкладки
+
         const statsTabButton = document.getElementById('stats-tab');
         if (statsTabButton) {
-            statsTabButton.addEventListener('shown.bs.tab', function (event) {
-                // 'shown.bs.tab' - это событие Bootstrap, которое срабатывает ПОСЛЕ того, как вкладка стала активной
-                console.log("Stats tab shown, updating stats..."); // Для дебага
-                const currentPlayerData = Game.getPlayerData(); // Получаем самые свежие данные
+            statsTabButton.addEventListener('shown.bs.tab', function () {
+                const currentPlayerData = Game.getPlayerData();
                 if (currentPlayerData && currentPlayerData.stats) {
-                    renderStats(currentPlayerData); // Перерисовываем статистику
+                    renderStats(currentPlayerData);
                 }
             });
         }
+        // Listener для вкладки достижений
+        const achievementsTabButton = document.getElementById('achievements-tab');
+        if(achievementsTabButton) {
+            achievementsTabButton.addEventListener('shown.bs.tab', function () {
+                renderAchievements();
+            });
+        }
+
         inventorySortSelect.addEventListener('change', () => {
-            // Сохраняем выбор пользователя
             localStorage.setItem('inventorySortOrder', inventorySortSelect.value);
-            // Перерисовываем инвентарь с новым порядком
             renderInventory(Game.getPlayerData());
         });
 
@@ -201,7 +169,7 @@ const UI = (() => {
             if (playerIdDisplay.value) {
                 navigator.clipboard.writeText(playerIdDisplay.value).then(() => {
                     showNotification(L.get('notifications.playerIdCopied'), "success");
-                }).catch(err => {
+                }).catch(() => {
                     showNotification(L.get('notifications.playerIdCopyError'), "danger");
                 });
             }
@@ -210,31 +178,25 @@ const UI = (() => {
         checkSupportBtn.addEventListener('click', () => {
             Game.checkForSupporterStatus();
         });
+        
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                // --- ВКЛАДКА СТАЛА НЕАКТИВНОЙ ---
-                isTabActive = false;
-                // Останавливаем таймер, чтобы он не тикал в фоне зря
-                clearTimeout(autorollTimer);
-                autorollTimer = null;
-                console.log('Tab became inactive. Autoroll timer paused.');
-            } else {
-                // --- ВКЛАДКА СНОВА АКТИВНА ---
-                isTabActive = true;
-                console.log('Tab became active.');
-                // Если авторолл был включен, запускаем логику "догона"
+            isTabActive = !document.hidden;
+            if (isTabActive) {
                 if (isAutorolling) {
                     handleAfkProgress();
-                    // Таймер будет перезапущен в onRollsCompleted после первого "ручного" ролла
                 }
-                // Показываем карты из очереди
                 processNewCardQueue();
+            } else {
+                clearTimeout(autorollTimer);
+                autorollTimer = null;
             }
         });
+
         notificationsToggle.addEventListener('change', (event) => {
             Game.getPlayerData().notificationsEnabled = event.target.checked;
             Game.saveGame();
         });
+
         if (exportSaveButton) {
             exportSaveButton.addEventListener('click', () => {
                 if (SaveManager.exportSave()) {
@@ -254,14 +216,11 @@ const UI = (() => {
                     try {
                         await SaveManager.importSave(file);
                         showNotification(L.get('notifications.importSuccess'), 'success');
-                        // Перезагружаем страницу через 1.5 секунды, чтобы применить импортированные данные
                         setTimeout(() => window.location.reload(), 1500);
                     } catch (error) {
-                        console.error("Import failed:", error);
-                        showNotification(L.get('notifications.importError') + ` (${error.message})`, 'danger', 6000);
+                        showNotification(`${L.get('notifications.importError')} (${error.message})`, 'danger', 6000);
                     }
                 }
-                // Сбрасываем значение input, чтобы можно было загрузить тот же файл снова
                 event.target.value = '';
             });
         }
@@ -271,12 +230,11 @@ const UI = (() => {
                 const playerData = Game.getPlayerData();
                 playerData.specialContentEnabled = event.target.checked;
                 Game.saveGame();
-                // Показываем уведомление о необходимости перезагрузки
                 showNotification(L.get('notifications.settingsRefresh'), 'info');
             });
         }
-        
     }
+
 
     function getTextColorForBg(hexColor) {
         if (!hexColor || hexColor.length < 7) return '#FFFFFF'; // Фоллбэк на белый
@@ -311,6 +269,9 @@ const UI = (() => {
         }
         if (statsCurrencyFromDuplicatesEl) {
             statsCurrencyFromDuplicatesEl.textContent = stats.currencyFromDuplicates || 0;
+        }
+        if (statsTotalRebirthsEl) {
+            statsTotalRebirthsEl.textContent = playerData.prestigeLevel || 0;
         }
 
         if (statsByRarityContainerEl) {
@@ -497,19 +458,18 @@ const UI = (() => {
         updateCurrencyDisplay(playerData.currency);
         updateLuckDisplay();
         updateActiveBoostsDisplay();
-        
-        renderInventory(playerData); // Обновляем инвентарь (включая счетчик)
-        renderShop(); // Обновляем магазин (состояние кнопок)
-        // renderSettings() удален
+        renderEventBanner();
+        renderInventory(playerData);
+        renderShop();
         renderRebirthSection();
         updateEquippedItemsDisplay(playerData.equippedItems);
         toggleMultiRollButton(playerData.purchasedUpgrades.multiRollX5);
-        if (playerData && typeof playerData.luckyRollCounter !== 'undefined') {
-            // Получаем актуальный порог. По умолчанию 11.
+
+        if (typeof playerData.luckyRollCounter !== 'undefined') {
             const currentThreshold = playerData.luckyRollThreshold || 11;
             updateLuckyRollDisplay(playerData.luckyRollCounter, currentThreshold);
         }
-        if (playerData && playerData.stats) { // Проверяем наличие stats
+        if (playerData.stats) {
             renderStats(playerData);
         }
         if (notificationsToggle) {
@@ -518,6 +478,99 @@ const UI = (() => {
         if (specialContentToggle) {
             specialContentToggle.checked = playerData.specialContentEnabled;
         }
+    }
+
+    function renderEventBanner() {
+        if (!eventBanner) return;
+        const activeEvent = Game.getActiveEvent();
+        if (activeEvent) {
+            const endDate = new Date(activeEvent.endDate);
+            const now = new Date();
+            const timeLeft = endDate - now;
+            
+            let timerHtml = '';
+            if (timeLeft > 0) {
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                timerHtml = `<small class="d-block">${L.get('events.timeLeft')}: ${days}д ${hours}ч</small>`;
+            }
+
+            eventBanner.innerHTML = `
+                <div class="alert alert-info" role="alert">
+                    <h5 class="alert-heading">🎉 ${L.get(activeEvent.nameKey)}</h5>
+                    <p>${L.get(activeEvent.descriptionKey)}</p>
+                    ${timerHtml}
+                </div>
+            `;
+            eventBanner.style.display = 'block';
+        } else {
+            eventBanner.innerHTML = '';
+            eventBanner.style.display = 'none';
+        }
+    }
+
+    function renderAchievements() {
+        if (!achievementsContainer) return;
+        const playerData = Game.getPlayerData();
+        
+        // Рендеринг достижений
+        let achievementsHtml = `<h3 data-i18n="ui.achievements.title">${L.get('ui.achievements.title')}</h3><div class="list-group mb-4">`;
+        for (const achId in ACHIEVEMENTS_DATA) {
+            const achData = ACHIEVEMENTS_DATA[achId];
+            const isCompleted = playerData.completedAchievements.includes(achId);
+            achievementsHtml += `
+                <div class="list-group-item ${isCompleted ? 'bg-success-subtle' : 'bg-dark-subtle'}">
+                    <strong>${L.get(achData.nameKey)}</strong>
+                    <small class="d-block text-muted">${L.get(achData.descriptionKey)}</small>
+                </div>
+            `;
+        }
+        achievementsHtml += `</div>`;
+
+        // Рендеринг коллекций
+        let collectionsHtml = `<h3 data-i18n="ui.achievements.collectionsTitle">${L.get('ui.achievements.collectionsTitle')}</h3><div class="list-group mb-4">`;
+        for (const colId in COLLECTIONS_DATA) {
+            const colData = COLLECTIONS_DATA[colId];
+            const isCompleted = playerData.completedAchievements.includes(colId);
+            const collectedCount = colData.cardIds.filter(id => playerData.inventory.includes(id)).length;
+            
+            collectionsHtml += `
+                <div class="list-group-item ${isCompleted ? 'bg-success-subtle' : 'bg-dark-subtle'}">
+                    <strong>${L.get(colData.nameKey)} (${collectedCount}/${colData.cardIds.length})</strong>
+                    <small class="d-block text-muted">${L.get(colData.descriptionKey)}</small>
+                    <small class="d-block text-info-emphasis mt-1">${L.get('ui.achievements.reward')}: ${L.get(colData.reward.nameKey)}</small>
+                </div>
+            `;
+        }
+        collectionsHtml += `</div>`;
+
+        // Рендеринг тем оформления
+        let themesHtml = `<h3 data-i18n="ui.achievements.themesTitle">${L.get('ui.achievements.themesTitle')}</h3><div class="btn-group" role="group">`;
+        playerData.unlockedThemes.forEach(themeId => {
+            const isActive = playerData.activeTheme === themeId;
+            themesHtml += `
+                <button type="button" class="btn ${isActive ? 'btn-primary' : 'btn-outline-secondary'} theme-switcher-btn" data-theme-id="${themeId}">
+                    ${L.get(`ui.themes.${themeId}`)}
+                </button>
+            `;
+        });
+        themesHtml += `</div>`;
+        
+        achievementsContainer.innerHTML = achievementsHtml + collectionsHtml + themesHtml;
+
+        // Добавляем обработчики на кнопки смены тем
+        achievementsContainer.querySelectorAll('.theme-switcher-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                Game.setActiveTheme(e.currentTarget.dataset.themeId);
+                renderAchievements(); // Перерисовываем, чтобы обновить активную кнопку
+            });
+        });
+    }
+
+    function applyTheme(themeId) {
+        if (!htmlRoot) return;
+        htmlRoot.className = ''; // Сбрасываем все классы тем
+        htmlRoot.classList.add(themeId || 'default');
     }
 
     function updateCurrencyDisplay(currency) {
@@ -603,9 +656,8 @@ const UI = (() => {
         if (!rebirthSection) return;
 
         const playerData = Game.getPlayerData();
-        const nextCost = Game.getRebirthCost();
+        const nextCost = Game.getRebirthCost(); // Уже со скидкой
         const canAfford = playerData.currency >= nextCost;
-        // Используем тот же самый, единственно верный метод подсчета
         const uniqueCardsCount = new Set(playerData.inventory.filter(id => id !== 'garbage')).size;
         const potentialBonus = (uniqueCardsCount * PRESTIGE_LUCK_PER_CARD).toFixed(3);
 
@@ -762,15 +814,12 @@ const UI = (() => {
             }
         }
 
-        // <<< КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ >>>
         if (results.length === 1) {
-            // Если это был одиночный ролл, вызываем displayRollResult
             displayRollResult(results[0]);
         } else if (results.length > 1) {
-            // Если это был мульти-ролл, вызываем сводку
+            Game.processMultiRollResult(results); // Проверяем ачивки для мульти-ролла
             displayMultiRollSummary(results);
         }
-        // <<< КОНЕЦ ИСПРАВЛЕНИЯ >>>
         
         results.forEach(result => {
             if (result.isNew) {
@@ -780,7 +829,7 @@ const UI = (() => {
 
         updateAll(Game.getPlayerData());
 
-    if (isAutorolling && isTabActive) {
+        if (isAutorolling && isTabActive) {
             clearTimeout(autorollTimer);
             autorollTimer = setTimeout(performNextAutoroll, AUTOROLL_BREATHING_ROOM);
         }
@@ -857,8 +906,10 @@ const UI = (() => {
 
         isRolling = true;
         rollResultContainer.innerHTML = '';
-        activeMultiRollClearCallbacks.forEach(cb => cb());
-        activeMultiRollClearCallbacks = [];
+        
+        // Очищаем коллбэки, используя правильное имя переменной
+        activeMultiRollCallbacks.forEach(cb => cb());
+        activeMultiRollCallbacks = [];
 
         multiRollSlotsContainer.classList.remove('d-none');
         multiRollSlotsContainer.innerHTML = '';
@@ -866,8 +917,6 @@ const UI = (() => {
         
         let completedAnimations = 0;
 
-        // <<< КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ ЗДЕСЬ >>>
-        // Теперь мы перебираем `allRollResults`, которые содержат `meta` данные
         for (const result of allRollResults) {
             const slotWrapper = document.createElement('div');
             slotWrapper.className = 'multi-roll-slot-wrapper';
@@ -876,15 +925,15 @@ const UI = (() => {
             slotWrapper.appendChild(slot);
             multiRollSlotsContainer.appendChild(slotWrapper);
 
-            // Передаем `meta` данные в startRollAnimation
             const clearCb = startRollAnimation(slot, result.rarity, () => {
                 completedAnimations++;
                 if (completedAnimations === allRollResults.length) {
                     onRollsCompleted(allRollResults, isCalledByAutoroll);
                 }
-            }, result.meta); // <<< ПЕРЕДАЕМ META ДАННЫЕ СЮДА
+            }, result.meta);
 
-            activeMultiRollClearCallbacks.push(clearCb);
+            // Добавляем в массив, используя ПРАВИЛЬНОЕ имя переменной
+            activeMultiRollCallbacks.push(clearCb);
         }
     }
 
@@ -1088,8 +1137,14 @@ const UI = (() => {
             inventoryGrid.appendChild(col);
         });
 
-        const uniqueOpenedCount = new Set(playerData.inventory.filter(id => id !== 'garbage' && availableRaritiesIds.has(id))).size;
-        const totalPossibleCount = availableRarities.filter(r => r.id !== 'garbage').length;
+        // 1. Фильтруем availableRarities еще раз, чтобы убрать эксклюзивы для неподписчиков
+        const viewableRarities = availableRarities.filter(r => {
+            return !(r.id === 'diamond' && !playerData.isSupporter);
+        });
+
+        // 2. Считаем счетчики на основе отфильтрованного списка viewableRarities
+        const uniqueOpenedCount = new Set(playerData.inventory.filter(id => id !== 'garbage' && viewableRarities.some(r => r.id === id))).size;
+        const totalPossibleCount = viewableRarities.filter(r => r.id !== 'garbage').length;
         
         inventoryCounterElement.textContent = `${L.get('ui.opened')}: ${uniqueOpenedCount} / ${totalPossibleCount}`;
 }
@@ -1107,7 +1162,6 @@ const UI = (() => {
         mechanicalEffectControls.innerHTML = '';
         
         const showVersionDetails = (versionData) => {
-            // --- НАЧАЛО ВОССТАНОВЛЕННОГО БЛОКА ---
             modalCardImage.src = versionData.card.image;
             modalCardName.textContent = L.get(versionData.card.nameKey);
             modalCardRarity.textContent = `${L.get('ui.rarity')}: ${L.get(versionData.nameKey)}`;
@@ -1119,9 +1173,8 @@ const UI = (() => {
             } else {
                 modalCardChance.textContent = `${L.get('ui.baseChance')}: 1/${Math.round(1 / versionData.probabilityBase)}`;
             }
-            // --- КОНЕЦ ВОССТАНОВЛЕННОГО БЛОКА ---
             
-            // --- Блок визуальных эффектов (остается без изменений) ---
+            // Блок визуальных эффектов
             visualEffectControls.innerHTML = '';
             const cardHasEffect = VisualEffects.effects.hasOwnProperty(versionData.id);
             if (cardHasEffect) {
@@ -1145,26 +1198,35 @@ const UI = (() => {
                 visualEffectControls.innerHTML = `<p class="text-muted small">${L.get('ui.noVisualEffect')}</p>`;
             }
 
-            // --- Блок механических эффектов (остается без изменений) ---
-            mechanicalEffectControls.innerHTML = '';
+            // Блок механических и пассивных эффектов
+            mechanicalEffectControls.innerHTML = ''; // Очищаем контейнер перед заполнением
+            
+            // Механический эффект
             const mechEffectData = versionData.mechanicalEffect;
-            let descriptionText = '';
+            let mechDescriptionText = '';
             if (mechEffectData) {
-                // Ключ формируется из типа эффекта
-                descriptionText = L.get(`mechanical_effects.${mechEffectData.type}`);
+                mechDescriptionText = L.get(`mechanical_effects.${mechEffectData.type}`);
+                if (mechEffectData.type === 'duplicate_collector') {
+                    const currentDuplicates = Game.getPlayerData().duplicateCounts?.[versionData.id] || 0;
+                    const currentBonus = currentDuplicates * (mechEffectData.luckBonusPerDuplicate || 0);
+                    mechDescriptionText += ` (${L.get('ui.currentBonus')}: +${currentBonus.toFixed(2)})`;
+                }
+                
             } else {
-                descriptionText = L.get('mechanical_effects.no_effect');
+                mechDescriptionText = L.get('mechanical_effects.no_effect');
             }
 
-            let equippedIndicator = '';
+            
+
+            let mechEquippedIndicator = '';
             if (playerData.activeMechanicalEffect === versionData.id) {
-                equippedIndicator = ` <span class="text-success">${L.get('mechanical_effects.equipped_label')}</span>`;
+                mechEquippedIndicator = ` <span class="text-success">${L.get('mechanical_effects.equipped_label')}</span>`;
             }
 
             mechanicalEffectControls.innerHTML = `
                 <hr>
-                <h5>${L.get('mechanical_effects.description_title')}${equippedIndicator}</h5>
-                <p class="text-muted small">${descriptionText}</p>
+                <h5>${L.get('mechanical_effects.description_title')}${mechEquippedIndicator}</h5>
+                <p class="text-muted small">${mechDescriptionText}</p>
             `;
 
             if (mechEffectData) {
@@ -1181,9 +1243,28 @@ const UI = (() => {
                 });
                 mechanicalEffectControls.appendChild(equipBtn);
             }
+
+            // Пассивный эффект
+            const passiveEffectData = versionData.passiveEffect;
+            if (passiveEffectData) {
+                const isPassiveActive = playerData.activePassives && Object.values(playerData.activePassives).includes(versionData.id);
+                
+                let passiveActiveIndicator = '';
+                if (isPassiveActive) {
+                    passiveActiveIndicator = ` <span class="text-success">${L.get('passive_effects.active_label')}</span>`;
+                }
+
+                const passiveHtml = `
+                    <hr>
+                    <h5>${L.get('passive_effects.description_title')}${passiveActiveIndicator}</h5>
+                    <p class="text-muted small">${L.get(`passive_effects.${passiveEffectData.type}`)}</p>
+                `;
+                mechanicalEffectControls.innerHTML += passiveHtml;
+            }
         };
         
-        // --- Блок переключателя версий (остается без изменений) ---
+        // --- НАЧАЛО ВОССТАНОВЛЕННОГО БЛОКА ---
+        // Блок переключателя версий
         if (allVersions.length > 1) {
             const group = document.createElement('div');
             group.className = 'd-flex justify-content-center align-items-center flex-wrap gap-2';
@@ -1196,7 +1277,6 @@ const UI = (() => {
                 const button = document.createElement('button');
                 button.type = 'button';
                 button.className = 'btn btn-sm';
-                // Используем имя карты для кнопки
                 button.textContent = L.get(version.card.nameKey);
 
                 if (version.id === activeSkinId) {
@@ -1216,6 +1296,7 @@ const UI = (() => {
             });
             versionSwitcher.appendChild(group);
         }
+        // --- КОНЕЦ ВОССТАНОВЛЕННОГО БЛОКА ---
         
         const initialVersionToShow = getRarityDataById(activeSkinId, playerData) || allVersions[0];
         showVersionDetails(initialVersionToShow);
@@ -1232,13 +1313,16 @@ const UI = (() => {
     function renderShop() {
         if (!boostShop || !equipmentShop || !upgradesShop) return;
         const playerData = Game.getPlayerData();
-        
-        // Функция для рендера бустов, экипировки и улучшений (остается без изменений)
+    
         const renderSection = (container, data, type) => {
             container.innerHTML = data.map(item => {
                 const isPurchased = (type === 'equipment' && playerData.inventory.includes("purchased_" + item.id)) || (type === 'upgrade' && playerData.purchasedUpgrades[item.targetProperty]);
                 const isEquipped = type === 'equipment' && playerData.equippedItems.find(e => e.id === item.id);
-                const canAfford = playerData.currency >= item.cost;
+                
+                const finalCost = Game.getDiscountedCost(item.cost);
+                const canAfford = playerData.currency >= finalCost;
+                const hasDiscount = finalCost < item.cost;
+    
                 let buttonHtml;
                 if (isEquipped) {
                     buttonHtml = `<button class="btn btn-sm btn-secondary" disabled>${L.get('ui.nowEquipped')}</button>`;
@@ -1246,7 +1330,10 @@ const UI = (() => {
                     const isDisabled = type === 'equipment' && playerData.equippedItems.length >= Game.getMaxEquippedItems();
                     buttonHtml = `<button class="btn btn-sm btn-outline-primary equip-btn" data-item-id="${item.id}" ${isDisabled ? `disabled title="${L.get('ui.maxEquipment')}"` : ''}>${L.get('ui.equip')}</button>`;
                 } else {
-                    buttonHtml = `<button class="btn btn-sm btn-success buy-${type}-btn" data-item-id="${item.id}" ${!canAfford ? 'disabled' : ''}>${L.get('ui.buy')} <span class="badge bg-warning text-dark">${item.cost} 💎</span></button>`;
+                    const costHtml = hasDiscount 
+                        ? `<small><s class="text-muted">${item.cost}</s></small> ${finalCost}`
+                        : item.cost;
+                    buttonHtml = `<button class="btn btn-sm btn-success buy-${type}-btn" data-item-id="${item.id}" ${!canAfford ? 'disabled' : ''}>${L.get('ui.buy')} <span class="badge bg-warning text-dark">${costHtml} 💎</span></button>`;
                 }
                 return `
                 <div class="list-group-item shop-item d-flex justify-content-between align-items-center ${isPurchased ? 'purchased' : ''} ${isEquipped ? 'equipped' : ''}">
@@ -1255,30 +1342,37 @@ const UI = (() => {
                 </div>`;
             }).join('');
         };
-        
+    
         renderSection(boostShop, SHOP_DATA.boosts, 'boost');
         renderSection(equipmentShop, SHOP_DATA.equipment, 'equipment');
         renderSection(upgradesShop, SHOP_DATA.upgrades, 'upgrade');
-
-        // --- НАЧАЛО БЛОКА, КОТОРЫЙ МЫ ИСПРАВЛЯЕМ ---
+    
+        const equipmentHeader = document.querySelector('#equipmentShop').previousElementSibling; 
+        if (equipmentHeader) {
+            const maxItems = Game.getMaxEquippedItems();
+            equipmentHeader.textContent = `${L.get('ui.equipmentPermanent').replace('3', maxItems)}`;
+        }
+    
         const luckCoreSection = document.getElementById('luckCoreSection');
         if (luckCoreSection) {
-            const currentBonus = ((Game.getPlayerData().luckCoreLevel || 0) * 0.01).toFixed(2);
+            const coreLevel = playerData.luckCoreLevel || 0;
+            const currentTotalBonus = Game.calculateLuckFromCore(coreLevel);
+            const nextLevelBonus = Game.calculateLuckFromCore(coreLevel + 1) - currentTotalBonus;
+    
             const nextCost = Game.getLuckCoreAmplificationCost();
-            const canAfford = Game.getPlayerData().currency >= nextCost;
-
-            // ИСПРАВЛЕНИЕ: Теперь все тексты здесь ГАРАНТИРОВАННО берутся через L.get()
+            const canAfford = playerData.currency >= nextCost;
+    
             luckCoreSection.innerHTML = `
                 <hr>
                 <h4>${L.get('shop.luck_core.title')}</h4>
                 <div class="list-group">
                     <div class="list-group-item shop-item d-flex justify-content-between align-items-center">
                         <div>
-                            <strong>${L.get('shop.luck_core.current_bonus')}</strong>: <span class="text-success">+${currentBonus}</span>
+                            <strong>${L.get('shop.luck_core.current_bonus')}</strong>: <span class="text-success">+${currentTotalBonus.toFixed(3)}</span>
                             <small class="d-block text-muted">${L.get('shop.luck_core.description')}</small>
                         </div>
                         <button id="amplifyLuckCoreBtn" class="btn btn-lg btn-warning" ${!canAfford ? 'disabled' : ''}>
-                        <span>${L.get('shop.luck_core.amplify')}</span> (+0.01)
+                        <span>${L.get('shop.luck_core.amplify')}</span> (+${nextLevelBonus.toFixed(3)})
                         <br>
                         <span class="badge bg-dark">${nextCost.toLocaleString()} 💎</span>
                         </button>
@@ -1290,10 +1384,10 @@ const UI = (() => {
                 Game.amplifyLuckCore();
             });
         }
-        // --- КОНЕЦ ИСПРАВЛЕННОГО БЛОКА ---
-
+    
         addShopEventListeners();
     }
+
     function addShopEventListeners() {
         document.querySelectorAll('.buy-boost-btn, .buy-equipment-btn, .buy-upgrade-btn, .equip-btn').forEach(btn => {
             btn.addEventListener('click', e => {
@@ -1448,5 +1542,5 @@ const UI = (() => {
         requestAnimationFrame(processChunk);
     }
     // --- Публичный интерфейс ---
-    return { init, updateAll, renderShop, showNotification, updateEquippedItemsDisplay, updateLuckyRollDisplay, applyVisualEffect, toggleMultiRollButton };
+    return { init, updateAll, renderShop, showNotification, updateEquippedItemsDisplay, updateLuckyRollDisplay, applyVisualEffect, toggleMultiRollButton, applyTheme };
 })();

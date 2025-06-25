@@ -171,7 +171,10 @@ const VisualEffects = {
         effectId === 'berserk' ||
         effectId === 'bee' ||
         effectId === 'epic_alt_1' ||
-        effectId === 'legendary_alt_1'
+        effectId === 'legendary_alt_1' ||
+        effectId === 'alastor' ||
+        effectId === 'neon' ||
+        effectId === 'chlorine'
         )) {
         targetElements.glitchOverlay.style.display = 'block';
     }
@@ -1024,8 +1027,29 @@ const VisualEffects = {
                 glitchOverlay.innerHTML = ''; // Быстрый способ очистить все частицы
             };
         },
+        'neon': function(targets) {
+            const { glitchOverlay } = targets;
+            if (!glitchOverlay) return null;
+            
+            const container = document.createElement('div');
+            container.className = 'neon-border-container';
+            
+            const sides = ['top', 'right', 'bottom', 'left'];
+            sides.forEach(side => {
+                const tube = document.createElement('div');
+                tube.className = `neon-tube neon-tube-${side}`;
+                container.appendChild(tube);
+            });
 
-        
+            glitchOverlay.appendChild(container);
+            glitchOverlay.classList.add('active-effect-neon');
+
+            return () => {
+                if(container.parentNode) container.remove();
+                if(glitchOverlay) glitchOverlay.classList.remove('active-effect-neon');
+            };
+        },
+
         // 'inversion': function(targets) { ... }
         // ... другие эффекты ...
     }

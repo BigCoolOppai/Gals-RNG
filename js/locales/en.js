@@ -64,7 +64,18 @@ window.locales.en = {
         amy: { name: "Gentle", cardName: "Amy", description: "Amy came here from a distant land. Apparently, the journey was long and arduous, so she decided to rest a little~" },
         raven: { name: "Passionate", cardName: "Raven", description: "She is Amy, who decided to rest in a more... adult way. What she's wearing now is not enough for her, so, perhaps you'll join?" },
         hybrid_safe: { name: "Gyaru", cardName: "Alex", description: "Alex is a sweet, yet sassy gyaru. She loves bright clothes and is always the center of attention." },
-
+        time_eternal: { name: "Eternal", cardName: "Ananke Chrona", description: "She was here before the beginning and will remain after the end. For her, time is but sand slipping through her fingers, and universes are fleeting sparks." },
+        shy_princess: { name: "Light Princess", cardName: "Sofia", description: "The complete opposite of her sister. She prefers cozy hoodies and video games, hiding from the world behind a golden crown and white hair. But perhaps she is the true ruler?" },
+        dark_princess: { name: "Dark Princess", cardName: "Roxie", description: "The heir to the dark throne with clear gyaru features. She doesn't hide her desires or her power, clad in latex and a crown of obsidian. They say submitting to her is the ultimate pleasure." },
+        alastor: { name: "Stayed Gone", cardName: "Radio Demoness", description: "Salutations! Good to be back on the air. Yes, I know it's been a while, since someone with style treated Hell to a broadcast, sinners, rejoice! (By the way, she adores Amanita, as a true deer should)." },
+        maternal: { name: "Maternal", cardName: "Tutoriel", description: "Her care is as warming as a hearth fire, and her butterscotch pie can heal any wound. Besides, it seems she's trying to raise your 'Determination' right now... Is it working?" },
+        metalhead: { name: "Heavy", cardName: "Kori Bennington", description: "She came here to rock! Her guitar riffs shake the earth, and her stage makeup inspires awe. Are you ready for the heaviest concert of your life?" },
+        moon: { name: "Lunar", cardName: "Selena", description: "Cold, distant, and alluring. She silently gazes upon the world from above, holding ancient secrets. Her light beckons lost travelers, promising peace... and satisfaction." },
+        mechanic: { name: "The Fixer", cardName: "Jena", description: "Wrenches, the smell of engine oil, and big... talents. She can fix anything, from an old engine to a broken heart. The main thing is not to be afraid to get a little dirty." },
+        doctor: { name: "The Healer", cardName: "Tina", description: "She has a cure for all ailments, especially loneliness. One shot of her love, and you'll forget all your troubles. Happy Valentine's Day!" },
+        silken: { name: "Silken", cardName: "Hana Akano", description: "Her movements are as smooth as the dance of sakura petals, and her gaze behind the fan hides more than it tells. She is the embodiment of Eastern mystery and refined beauty." },
+        ensnared: { name: "Ensnared", cardName: "Elf in a Trap", description: "Even centuries of experience couldn't save her from the simplest of traps. Now she waits for some hapless hero to free her... or take advantage of the situation." },
+        guide: { name: "The Guide", cardName: "Mysterious Elf", description: "She has seen empires rise and fall, but her magic is still as potent as ever. She will guide you on any path, but the price for her services may be higher than you expect." },
     },
     // Shop Items
     shop: {
@@ -152,8 +163,8 @@ window.locales.en = {
             name_asc: "Name (A-Z)"
         },
         newCardNotification: {
-        title: "✨ NEW CARD! ✨",
-        closeBtn: "Awesome!"
+            title: "✨ NEW CARD! ✨",
+            closeBtn: "Awesome!"
         },
         rebirth: {
             title: "Rebirth",
@@ -174,7 +185,19 @@ window.locales.en = {
             export: "Export",
             import: "Import"
         },
-        specialContent: { title: "Special Content", enable: "Enable", description: "Enables specific content, like futanari." }
+        specialContent: { title: "Special Content", enable: "Enable", description: "Enables specific content, like futanari." },
+        totalRebirths: "Total Rebirths:",
+        achievements: {
+            tabTitle: "Achievements",
+            title: "Achievements",
+            collectionsTitle: "Collections",
+            themesTitle: "UI Themes",
+            reward: "Reward"
+        },
+        themes: {
+            'default': 'Default',
+            'theme-classic': 'Classic'
+        }
     },
     // Notifications
     notifications: {
@@ -185,6 +208,8 @@ window.locales.en = {
         upgradeAlreadyPurchased: "is already purchased.",
         supporterStatusAlreadyActive: "Supporter status is already active!",
         checkingSupporterStatus: "Checking supporter status...",
+        supporterStatusConfirmed: "Supporter status confirmed. Thank you!",
+        supporterStatusExpired: "Supporter status has expired. Perks have been deactivated.",
         supporterPerksActivated: "Thank you for your support! Perks activated: Diamond Card and a 4th equipment slot!",
         supporterStatusNotFound: "Supporter status not found. Please make sure you sent the correct ID.",
         supporterCheckError: "Error checking status. Please try again later.",
@@ -202,7 +227,10 @@ window.locales.en = {
         importConfirm: "WARNING!\nImporting a save will overwrite your current progress. This action is irreversible.\n\nContinue?",
         importSuccess: "Save imported successfully! Reloading...",
         importError: "Error importing save:",
-        settingsRefresh: "Settings will be applied after reloading the page."
+        settingsRefresh: "Settings will be applied after reloading the page.",
+        itemUnequippedDueToSlotLoss: "The 4th equipment slot bonus has expired. Item '{itemName}' has been unequipped.",
+        achievementUnlocked: "Achievement Unlocked",
+        reward: "Reward"
     },
     debug: {
         notifications: {
@@ -222,9 +250,38 @@ window.locales.en = {
         high_risk_high_reward: "Each roll with this effect costs 5 💎. Grants a 0.5% chance to get +100.0 luck for a single roll. High risk, high reward!",
         universal_upgrade: "Grants a 10% chance to upgrade the roll result by one tier. Or even more with ALt-tErn..",
         sword_path: "Each consecutive fast roll (within 10s) adds +0.005 to luck (max +0.25). Bonus resets on inactivity.",
+        duplicate_collector: "Each duplicate of this card permanently increases your luck by 0.01.", // <<< ADDED
+        quality_guarantor: "While this effect is active, 'Junk' rarity cards cannot be rolled. You get a 'Common' card instead.", // <<< ADDED
+        boost_catalyst: "Increases the effectiveness of temporary luck boosts from the shop by 25%.",
         no_effect: "This card has no mechanical effect.",
         equip_button: "Equip Effect",
         unequip_button: "Unequip Effect",
         equipped_label: "(Equipped)"
+    },
+    passive_effects: {
+        description_title: "Passive Effect:",
+        active_label: "(Active)",
+        duplicate_currency_bonus_percent: "Increases shards from duplicates by 15%. Stacks with equipment.",
+        global_purchase_discount: "Reduces the cost of all purchases (items, upgrades, core, rebirth) by 10%."
+    },
+    events: {
+        timeLeft: "Time left",
+        march_of_artists: {
+            name: "March of the Artists",
+            description: "Attention, the creators have taken the stage! The chance of rolling cards related to art and style is significantly increased."
+        }
+    },
+    achievements: {
+        roll_1000: { name: "Novice Player", description: "Perform 1,000 rolls." },
+        roll_10000: { name: "Avid Collector", description: "Perform 10,000 rolls." },
+        open_all_mythic: { name: "Mythic Master", description: "Unlock all Mythic rarity cards." },
+        five_rares_in_multi: { name: "Blue Fever", description: "Get 5 Rare cards in a single multi-roll." }
+    },
+    collections: {
+        classic_set: {
+            name: "Classic Set",
+            description: "Collect the first 5 cards of the base rarities.",
+            rewardName: "'Classic' Theme"
+        }
     }
 };

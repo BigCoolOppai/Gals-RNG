@@ -1,6 +1,20 @@
-// js/cards.js
-
 window.RARITIES_DATA = [
+    {
+        id: "time_eternal",
+        nameKey: "cards.time_eternal.name",
+        minPrestige: 2,
+        probabilityBase: 1 / 307246060,
+        color: "#212121", // Черный
+        glowColor: "#FFD700", // Золотой
+        cssClass: "rarity-time-eternal",
+        currencyOnDuplicate: 30724606,
+        card: {
+            name: "Ananke Chrona", 
+            nameKey: "cards.time_eternal.cardName",
+            image: "img/cardTime.png",
+            descriptionKey: "cards.time_eternal.description"
+        }
+    },
     {
         id: "blackhole_alt_1",
         nameKey: "cards.blackhole_alt_1.name",
@@ -60,6 +74,10 @@ window.RARITIES_DATA = [
         glowColor: "#ffca28",
         cssClass: "rarity-blackhole",
         currencyOnDuplicate: 987654,
+        mechanicalEffect: { // <<< ДОБАВЛЕНО
+            type: "duplicate_collector",
+            luckBonusPerDuplicate: 0.03
+        },
         card: {
             name: "FY-3741 alpha", 
             nameKey: "cards.blackhole.cardName", // <-- ДОБАВЛЕНО
@@ -82,6 +100,23 @@ window.RARITIES_DATA = [
             nameKey: "cards.altShroom.cardName",
             image: "img/altShroom.png", // Убедитесь, что файл существует
             descriptionKey: "cards.altShroom.description"
+        }
+    },
+    {
+        id: "ensnared",
+        nameKey: "cards.ensnared.name",
+        displayParentId: "guide",
+        minPrestige: 1,
+        probabilityBase: 1 / 6010000, // Редкость как у оригинала, но требует реборна
+        color: "#795548", // Коричневый, цвет сундука
+        glowColor: "#A1887F",
+        cssClass: "rarity-ensnared",
+        currencyOnDuplicate: 60100,
+        card: {
+            name: "Elf in a Trap", 
+            nameKey: "cards.ensnared.cardName",
+            image: "img/altFrieren.png",
+            descriptionKey: "cards.ensnared.description"
         }
     },
     {
@@ -146,6 +181,55 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "shy_princess",
+        nameKey: "cards.shy_princess.name",
+        displayParentId: "dark_princess",
+        minPrestige: 3, // +1 к оригиналу
+        probabilityBase: 1 / 2000001,
+        color: "#D1C4E9", // Светло-фиолетовый
+        glowColor: "#B39DDB",
+        cssClass: "rarity-shy-princess",
+        currencyOnDuplicate: 200000,
+        card: {
+            name: "Sofia", 
+            nameKey: "cards.shy_princess.cardName",
+            image: "img/altDarkPrincess.png",
+            descriptionKey: "cards.shy_princess.description"
+        }
+    },
+     {
+        id: "dark_princess",
+        nameKey: "cards.dark_princess.name",
+        minPrestige: 2,
+        probabilityBase: 1 / 2000000,
+        color: "#F06292", // Темно-розовый
+        glowColor: "#F48FB1",
+        cssClass: "rarity-dark-princess",
+        currencyOnDuplicate: 200000,
+        card: {
+            name: "Roxie", 
+            nameKey: "cards.dark_princess.cardName",
+            image: "img/cardDarkPrincess.png",
+            descriptionKey: "cards.dark_princess.description"
+        }
+    },
+    {
+        id: "maternal",
+        nameKey: "cards.maternal.name",
+        minPrestige: 1,
+        probabilityBase: 1 / 1592015,
+        color: "#6A1B9A", // Королевский фиолетовый
+        glowColor: "#CE93D8",
+        cssClass: "rarity-maternal",
+        currencyOnDuplicate: 159201,
+        card: {
+            name: "Tutoriel", 
+            nameKey: "cards.maternal.cardName",
+            image: "img/cardGoat.png",
+            descriptionKey: "cards.maternal.description"
+        }
+    },
+    {
         id: "vacation",
         nameKey: "cards.vacation.name",
         minPrestige: 1,
@@ -159,6 +243,22 @@ window.RARITIES_DATA = [
             nameKey: "cards.vacation.cardName",
             image: "img/cardVacation.png", // Убедитесь, что файл существует
             descriptionKey: "cards.vacation.description"
+        }
+    },
+    {
+        id: "alastor",
+        nameKey: "cards.alastor.name",
+        minPrestige: 1,
+        probabilityBase: 1 / 1300000,
+        color: "#c62828", // Демонический красный
+        glowColor: "#ef5350",
+        cssClass: "rarity-alastor",
+        currencyOnDuplicate: 130000,
+        card: {
+            name: "Radio Demoness", 
+            nameKey: "cards.alastor.cardName",
+            image: "img/cardRadio.png",
+            descriptionKey: "cards.alastor.description"
         }
     },
     {
@@ -178,6 +278,21 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "guide",
+        nameKey: "cards.guide.name",
+        probabilityBase: 1 / 601000, // Изменено, чтобы быть реже
+        color: "#B0BEC5", // Холодный, как её характер
+        glowColor: "#E0E0E0",
+        cssClass: "rarity-guide",
+        currencyOnDuplicate: 6010,
+        card: {
+            name: "Mysterious Elf", 
+            nameKey: "cards.guide.cardName",
+            image: "img/cardFrieren.png",
+            descriptionKey: "cards.guide.description"
+        }
+    },
+    {
         id: "diamond",
         nameKey: "cards.diamond.name",
         displayParentId: "carbon",
@@ -187,6 +302,10 @@ window.RARITIES_DATA = [
         glowColor: "#FFFFFF", // Чистое белое сияние
         cssClass: "rarity-diamond",
         currencyOnDuplicate: 50100,
+        passiveEffect: {
+            type: "global_purchase_discount",
+            value: 0.10
+        },
         card: {
             name: "Dime",
             nameKey: "cards.diamond.cardName",
@@ -210,6 +329,21 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "metalhead",
+        nameKey: "cards.metalhead.name",
+        probabilityBase: 1 / 450000,
+        color: "#616161", // Металлический серый
+        glowColor: "#E0E0E0",
+        cssClass: "rarity-metalhead",
+        currencyOnDuplicate: 45000,
+        card: {
+            name: "Kori Bennington", 
+            nameKey: "cards.metalhead.cardName",
+            image: "img/cardMetal.png",
+            descriptionKey: "cards.metalhead.description"
+        }
+    },
+    {
         id: "error",
         nameKey: "cards.error.name",
         probabilityBase: 1/404403,
@@ -230,6 +364,21 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "moon",
+        nameKey: "cards.moon.name",
+        probabilityBase: 1 / 384000,
+        color: "#90A4AE", // Лунный серебристый
+        glowColor: "#ECEFF1",
+        cssClass: "rarity-moon",
+        currencyOnDuplicate: 38400,
+        card: {
+            name: "Selena", 
+            nameKey: "cards.moon.cardName",
+            image: "img/cardMoon.png",
+            descriptionKey: "cards.moon.description"
+        }
+    },
+    {
         id: "gold",
         nameKey: "cards.gold.name",
         probabilityBase: 1 / 379000,
@@ -237,6 +386,10 @@ window.RARITIES_DATA = [
         glowColor: "#FFF9C4", // Светло-золотое свечение
         cssClass: "rarity-gold",
         currencyOnDuplicate: 37900,
+        passiveEffect: {
+            type: "duplicate_currency_bonus_percent",
+            value: 0.15
+        },
         card: {
             name: "Goldy",
             nameKey: "cards.gold.cardName",
@@ -262,6 +415,22 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "mechanic",
+        nameKey: "cards.mechanic.name",
+        minPrestige: 2,
+        probabilityBase: 1 / 270000,
+        color: "#4CAF50", // Зеленый, как неоновые пряди
+        glowColor: "#A5D6A7",
+        cssClass: "rarity-mechanic",
+        currencyOnDuplicate: 27000,
+        card: {
+            name: "Jena", 
+            nameKey: "cards.mechanic.cardName",
+            image: "img/cardMechanic.png",
+            descriptionKey: "cards.mechanic.description"
+        }
+    },
+    {
         id: "uranium_alt_1",
         nameKey: "cards.uranium_alt_1.name",
         displayParentId: "uranium",
@@ -276,6 +445,21 @@ window.RARITIES_DATA = [
             nameKey: "cards.uranium_alt_1.cardName",
             image: "img/altUranium.png",
             descriptionKey: "cards.uranium_alt_1.description"
+        }
+    },
+    {
+        id: "doctor",
+        nameKey: "cards.doctor.name",
+        probabilityBase: 1 / 192800,
+        color: "#F48FB1", // Розовый
+        glowColor: "#F8BBD0",
+        cssClass: "rarity-doctor",
+        currencyOnDuplicate: 19280,
+        card: {
+            name: "Tina", 
+            nameKey: "cards.doctor.cardName",
+            image: "img/cardDoctor.png",
+            descriptionKey: "cards.doctor.description"
         }
     },
     {
@@ -303,6 +487,10 @@ window.RARITIES_DATA = [
         glowColor: "#ffffff", // Белый
         cssClass: "rarity-space-alt",
         currencyOnDuplicate: 1424,
+        mechanicalEffect: { // <<< ДОБАВЛЕНО
+            type: "boost_catalyst",
+            multiplier: 1.25
+        },
         card: {
             name: "Reality Weaver", 
             nameKey: "cards.space_alt_2.cardName",
@@ -373,6 +561,21 @@ window.RARITIES_DATA = [
             nameKey: "cards.rias.cardName",
             image: "img/cardCrimson.png",
             descriptionKey: "cards.rias.description"
+        }
+    },
+    {
+        id: "silken",
+        nameKey: "cards.silken.name",
+        probabilityBase: 1 / 80000,
+        color: "#C2185B", // Алый/Малиновый
+        glowColor: "#F48FB1",
+        cssClass: "rarity-silken",
+        currencyOnDuplicate: 8000,
+        card: {
+            name: "Hana Akano", 
+            nameKey: "cards.silken.cardName",
+            image: "img/cardAsian.jpg",
+            descriptionKey: "cards.silken.description"
         }
     },
     {
@@ -582,6 +785,9 @@ window.RARITIES_DATA = [
         glowColor: "#ffffff", // Чисто белое свечение
         cssClass: "rarity-platinum",
         currencyOnDuplicate: 781,
+        mechanicalEffect: { // <<< ДОБАВЛЕНО
+            type: "quality_guarantor"   
+        },
         card: {
             name: "Platina", 
             nameKey: "cards.platinum.cardName",

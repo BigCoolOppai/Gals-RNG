@@ -7,6 +7,28 @@ const Game = (() => {
     function init() {
         playerData = SaveManager.loadPlayerData();
         console.log("Game initialized with player data:", playerData);
+        updateActivePassives(); // Обновляем пассивки при загрузке
+        const maxItems = getMaxEquippedItems();
+        if (playerData.equippedItems.length > maxItems) {
+            console.warn(`Player has ${playerData.equippedItems.length} items but only ${maxItems} slots. Unequipping last item.`);
+            // Снимаем последний надетый предмет
+            const itemToUnequip = playerData.equippedItems.pop();
+            // Возвращаем его в "купленные", если его там нет (на всякий случай)
+            const purchasedItemId = "purchased_" + itemToUnequip.id;
+            if (!playerData.inventory.includes(purchasedItemId)) {
+                playerData.inventory.push(purchasedItemId);
+            }
+            // Показываем уведомление игроку
+            if(typeof UI !== 'undefined' && UI.showNotification) {
+                const itemName = L.get(itemToUnequip.nameKey) || itemToUnequip.id;
+                const message = L.get('notifications.itemUnequippedDueToSlotLoss').replace('{itemName}', itemName);
+                UI.showNotification(message, 'warning', 8000);
+            }
+            saveGame();
+        }
+        if (playerData.isSupporter) { // Проверяем только если игрок СЧИТАЕТСЯ саппортером
+            checkForSupporterStatus();
+        }
         checkActiveBoosts(); // Запускаем проверку бустов при инициализации
         // UI.updateAll() будет вызван из основного скрипта после Game.init() и UI.init()
     }
@@ -37,10 +59,52 @@ const Game = (() => {
     }
 
     function getRebirthCost() {
-        const baseCost = 1000000; // Начальная стоимость первого ребёрза
-        const multiplier = 3.5;   // Цена каждого следующего ребёрза будет в 3.5 раза выше
-        return Math.floor(baseCost * Math.pow(multiplier, playerData.prestigeLevel));
+        const baseCost = 1000000;
+        const multiplier = 3.5;
+        const originalCost = Math.floor(baseCost * Math.pow(multiplier, playerData.prestigeLevel));
+        return getDiscountedCost(originalCost);
     }
+
+    // --- НОВЫЙ БЛОК: Пассивные эффекты ---
+
+    function updateActivePassives() {
+        const newActivePassives = {};
+        // Перебираем все редкости от самой редкой к самой частой
+        RARITIES_DATA.forEach(rarity => {
+            // Пропускаем, если карты нет в инвентаре или у нее нет пассивки
+            if (!playerData.inventory.includes(rarity.id) || !rarity.passiveEffect) {
+                return;
+            }
+            const familyId = rarity.displayParentId || rarity.id;
+            // Если для этого семейства карт пассивка еще не назначена, назначаем
+            // Так как мы идем от редких к частым, первая найденная будет самой редкой
+            if (!newActivePassives[familyId]) {
+                newActivePassives[familyId] = rarity.id;
+            }
+        });
+        playerData.activePassives = newActivePassives;
+        console.log("Active passives updated:", playerData.activePassives);
+    }
+    
+    function getPassiveBonusValue(bonusType) {
+        let totalValue = 0;
+        if (!playerData.activePassives) return 0;
+    
+        // Перебираем ID активных пассивных карт
+        for (const cardId of Object.values(playerData.activePassives)) {
+            const rarityData = getRarityDataById(cardId);
+            if (rarityData && rarityData.passiveEffect && rarityData.passiveEffect.type === bonusType) {
+                totalValue += rarityData.passiveEffect.value;
+            }
+        }
+        return totalValue;
+    }
+
+    function getDiscountedCost(originalCost) {
+        const discount = getPassiveBonusValue('global_purchase_discount');
+        return Math.ceil(originalCost * (1 - discount));
+    }
+
 
     // Функция для "маскировки" URL, чтобы его не было видно в исходном коде
     function getSupporterSheetUrl() {
@@ -53,35 +117,72 @@ const Game = (() => {
 
 
     async function checkForSupporterStatus() {
-        if (playerData.isSupporter) {
-            UI.showNotification(L.get('notifications.supporterStatusAlreadyActive'), "info");
-            return;
-        }
-
         console.log("Checking for supporter status...");
         UI.showNotification(L.get('notifications.checkingSupporterStatus'), "info");
 
         try {
-            const url = getSupporterSheetUrl(); // Получаем URL здесь
+            const url = getSupporterSheetUrl();
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             const csvText = await response.text();
             
-            const supporterIds = csvText.split('\n').map(id => id.replace(/"/g, '').trim()).filter(Boolean); // Добавил filter(Boolean) для удаления пустых строк
+            const supporterIds = new Set(csvText.split('\n').map(id => id.replace(/"/g, '').trim()).filter(Boolean));
+            const isCurrentlySupporterInSheet = supporterIds.has(playerData.playerId);
+            const wasSupporterInGame = playerData.isSupporter;
 
-            if (supporterIds.includes(playerData.playerId)) {
-                console.log("Player ID found in supporter list! Activating perks.");
+            // --- НОВАЯ, УМНАЯ ЛОГИКА ---
+
+            // Сценарий 1: Игрок ЕСТЬ в таблице, но НЕ БЫЛ в игре (новая подписка)
+            if (isCurrentlySupporterInSheet && !wasSupporterInGame) {
+                console.log("New supporter detected! Activating perks.");
                 playerData.isSupporter = true;
-                saveGame();
                 UI.showNotification(L.get('notifications.supporterPerksActivated'), "success", 8000);
-                
+                saveGame();
                 UI.updateAll(getPlayerData());
-            } else {
+                return;
+            }
+
+            // Сценарий 2: Игрок ЕСТЬ в таблице и УЖЕ БЫЛ в игре (продление/просто проверка)
+            if (isCurrentlySupporterInSheet && wasSupporterInGame) {
+                console.log("Supporter status confirmed. No changes needed.");
+                UI.showNotification(L.get('notifications.supporterStatusConfirmed'), "success");
+                // Ничего не меняем, просто подтверждаем статус
+                return;
+            }
+
+            // Сценарий 3: Игрока НЕТ в таблице, но он БЫЛ в игре (подписка закончилась)
+            if (!isCurrentlySupporterInSheet && wasSupporterInGame) {
+                console.log("Supporter status has expired. Deactivating perks.");
+                playerData.isSupporter = false;
+                
+                // Запускаем логику проверки и снятия лишнего предмета
+                const maxItems = getMaxEquippedItems(); // Теперь вернет 3
+                if (playerData.equippedItems.length > maxItems) {
+                    const itemToUnequip = playerData.equippedItems.pop();
+                    const purchasedItemId = "purchased_" + itemToUnequip.id;
+                    if (!playerData.inventory.includes(purchasedItemId)) {
+                        playerData.inventory.push(purchasedItemId);
+                    }
+                    const itemName = L.get(itemToUnequip.nameKey) || itemToUnequip.id;
+                    const message = L.get('notifications.itemUnequippedDueToSlotLoss').replace('{itemName}', itemName);
+                    UI.showNotification(message, 'warning', 8000);
+                }
+                
+                UI.showNotification(L.get('notifications.supporterStatusExpired'), "warning", 8000);
+                saveGame();
+                UI.updateAll(getPlayerData());
+                return;
+            }
+
+            // Сценарий 4: Игрока НЕТ в таблице и НЕ БЫЛО в игре (обычный игрок)
+            if (!isCurrentlySupporterInSheet && !wasSupporterInGame) {
                 console.log("Player ID not found in supporter list.");
                 UI.showNotification(L.get('notifications.supporterStatusNotFound'), "warning");
+                return;
             }
+
         } catch (error) {
             console.error('Error fetching supporter sheet:', error);
             UI.showNotification(L.get('notifications.supporterCheckError'), "danger");
@@ -176,6 +277,9 @@ const Game = (() => {
         if (!playerData.seenRarities.includes(rarityId)) {
             playerData.seenRarities.push(rarityId);
         }
+        
+        // После добавления новой карты нужно пересчитать активные пассивки
+        updateActivePassives();
         return isNew;
     }
 
@@ -217,8 +321,11 @@ const Game = (() => {
             // 3. ОЧИЩАЕМ ИНВЕНТАРЬ ОТ КУПЛЕННЫХ ПРЕДМЕТОВ
             // Оставляем в инвентаре только карточки (те, что не начинаются с "purchased_")
             playerData.inventory = playerData.inventory.filter(itemId => !itemId.startsWith("purchased_"));
+            
+            // 4. Пересчитываем пассивки на основе оставшихся (открытых) карт
+            updateActivePassives();
 
-            // 4. Применяем бонусы престижа
+            // 5. Применяем бонусы престижа
             playerData.prestigeLevel++;
             playerData.prestigeLuckBonus += luckBonus;
 
@@ -231,28 +338,30 @@ const Game = (() => {
 
     // --- Удача ---
     function calculateCurrentLuck() {
-        const luckFromCore = (playerData.luckCoreLevel || 0) * 0.01;
+        const luckFromCore = calculateLuckFromCore(playerData.luckCoreLevel || 0);
         let currentDisplayLuck = BASE_LUCK + luckFromCore + (playerData.prestigeLuckBonus || 0);
         
-        // ИСПРАВЛЕНИЕ: Объявление переменной вынесено сюда, в начало функции.
+        // <<< НАЧАЛО ИЗМЕНЕНИЙ: БОНУС ОТ ДУБЛИКАТОВ >>>
+        const collectorBonus = (playerData.duplicateCounts?.blackhole || 0) * 0.01;
+        currentDisplayLuck += collectorBonus;
+        // <<< КОНЕЦ ИЗМЕНЕНИЙ >>>
+
         let misfortuneBonus = 0;
 
         playerData.equippedItems.forEach(item => {
             if (item.luckBonus) {
                 currentDisplayLuck += item.luckBonus;
             }
-            if (item.effect && item.effect.type === "cumulative_luck_on_low_rolls") {
+            if (item.effect?.type === "cumulative_luck_on_low_rolls") {
                 const currentStacks = playerData.misfortuneStacks || 0;
                 let bonusFromStacks = currentStacks * item.effect.bonusPerStack;
                 if (item.effect.maxStacks) {
                     bonusFromStacks = Math.min(bonusFromStacks, item.effect.maxStacks * item.effect.bonusPerStack);
                 }
-                // Присваиваем значение, а не переобъявляем
                 misfortuneBonus = bonusFromStacks; 
             }
         });
 
-        // Теперь переменная misfortuneBonus здесь видна
         currentDisplayLuck += misfortuneBonus;
         
         let maxBoostBonus = 0;
@@ -261,12 +370,22 @@ const Game = (() => {
                 maxBoostBonus = boost.luckBonus;
             }
         });
+        
+        // <<< НАЧАЛО ИЗМЕНЕНИЙ: ЭФФЕКТ КАТАЛИЗАТОРА >>>
+        if (playerData.activeMechanicalEffect === 'space_alt_2') {
+            const effectData = getRarityDataById('space_alt_2')?.mechanicalEffect;
+            if (effectData) {
+                maxBoostBonus *= effectData.multiplier;
+            }
+        }
+        // <<< КОНЕЦ ИЗМЕНЕНИЙ >>>
         currentDisplayLuck += maxBoostBonus;
+        
         if (playerData.activeMechanicalEffect === 'motivation') {
             currentDisplayLuck += calculateMotivationBonus();
         }
         
-        return parseFloat(currentDisplayLuck.toFixed(2));
+        return parseFloat(currentDisplayLuck.toFixed(3));
     }
 
     function getEffectiveLuck() {
@@ -301,11 +420,49 @@ const Game = (() => {
         return parseFloat(effectiveLuck.toFixed(2)); // Возвращаем базовую эффективную удачу
     }
 
+    /**
+     * Новая функция для расчета ОБЩЕГО бонуса удачи от Ядра.
+     * Она учитывает тиры прокачки.
+     * @param {number} coreLevel - Текущий уровень Ядра Удачи.
+     * @returns {number} - Суммарный бонус удачи.
+     */
+    function calculateLuckFromCore(coreLevel) {
+        if (!coreLevel || coreLevel <= 0) {
+            return 0.0;
+        }
+
+        let totalLuckBonus = 0;
+        const tierSize = 10; // Каждый тир - 10 уровней
+        const baseBonus = 0.01; // Начальный бонус за уровень
+        const bonusIncrement = 0.005; // Насколько бонус увеличивается с каждым тиром
+
+        let levelsRemaining = coreLevel;
+        let currentTier = 0;
+
+        while (levelsRemaining > 0) {
+            const levelsInThisTier = Math.min(levelsRemaining, tierSize);
+            const bonusPerLevelInThisTier = baseBonus + (currentTier * bonusIncrement);
+            
+            totalLuckBonus += levelsInThisTier * bonusPerLevelInThisTier;
+            
+            levelsRemaining -= levelsInThisTier;
+            currentTier++;
+        }
+
+        return totalLuckBonus;
+    }
+
     // Новая функция для расчета стоимости
     function getLuckCoreAmplificationCost() {
-        const baseCost = 7500; // Начальная стоимость
-        const multiplier = 1.15; // Множитель (15% за уровень)
-        return Math.floor(baseCost * Math.pow(multiplier, playerData.luckCoreLevel));
+        const coreLevel = playerData.luckCoreLevel || 0;
+        const baseCost = 6500; // <<--- ИЗМЕНЕНИЕ СТОИМОСТИ
+        const tier = Math.floor(coreLevel / 10); // 0-9 -> тир 0, 10-19 -> тир 1, и т.д.
+        
+        // Множитель стоимости растет с каждым тиром
+        const costMultiplier = 1.15 + (tier * 0.05); 
+        
+        const originalCost = Math.floor(baseCost * Math.pow(costMultiplier, coreLevel));
+        return getDiscountedCost(originalCost);
     }
 
     // Новая функция для покупки улучшения
@@ -313,7 +470,8 @@ const Game = (() => {
         const cost = getLuckCoreAmplificationCost();
         if (spendCurrency(cost)) {
             playerData.luckCoreLevel++;
-            console.log(`Luck Core amplified to level ${playerData.luckCoreLevel}. New permanent bonus: +${(playerData.luckCoreLevel * 0.01).toFixed(2)}`);
+            const newTotalBonus = calculateLuckFromCore(playerData.luckCoreLevel);
+            console.log(`Luck Core amplified to level ${playerData.luckCoreLevel}. New permanent bonus: +${newTotalBonus.toFixed(3)}`);
             saveGame();
             // Обновляем UI, чтобы показать новый бонус и новую цену
             if (typeof UI !== 'undefined') {
@@ -382,13 +540,11 @@ const Game = (() => {
 
         let baseEffectiveLuck = getEffectiveLuck();
         
-        // <<< ИСПРАВЛЕНИЕ 1: ЛОГИКА ДЖЕКПОТА ПЕРЕНЕСЕНА ВЫШЕ >>>
-        // Мы должны определить, сработал ли джекпот, ДО вычисления итоговой удачи.
         let jackpotTriggeredThisRoll = false;
         if (playerData.activeMechanicalEffect === 'jackpot') {
             const effectData = getRarityDataById('jackpot', playerData).mechanicalEffect;
             if (Math.random() < effectData.chance) {
-                jackpotTriggeredThisRoll = true; // Устанавливаем флаг
+                jackpotTriggeredThisRoll = true; 
             }
         }
 
@@ -404,6 +560,11 @@ const Game = (() => {
         finalEffectiveLuck *= currentLuckMultiplier;
         finalEffectiveLuck = parseFloat(finalEffectiveLuck.toFixed(2));
         
+        // --- НОВЫЙ БЛОК: УЧЕТ ЭВЕНТОВ ---
+        const activeEvent = getActiveEvent();
+        let eventMultiplier = 1;
+        // --- КОНЕЦ БЛОКА ---
+
         console.log(`Performing roll. BaseLuck: ${baseEffectiveLuck}, LuckyMultiplier: ${currentLuckMultiplier}, Jackpot: ${jackpotTriggeredThisRoll}, FinalEffectiveLuck: ${finalEffectiveLuck}`);
 
         let determinedRarityId = null;
@@ -414,10 +575,17 @@ const Game = (() => {
         } else {
             for (const rarity of availableRarities) {
                 if (rarity.id === 'garbage') continue;
+
+                // Применяем эвент-множитель
+                eventMultiplier = 1;
+                if (activeEvent && activeEvent.effect.type === 'boost_specific_cards' && activeEvent.effect.cardIds.includes(rarity.id)) {
+                    eventMultiplier = activeEvent.effect.multiplier;
+                }
+
                 let P_base = rarity.probabilityBase;
                 let odds = P_base / (1 - P_base);
                 if (1 - P_base <= 0) { odds = Number.MAX_SAFE_INTEGER; }
-                let modifiedOdds = odds * finalEffectiveLuck;
+                let modifiedOdds = odds * finalEffectiveLuck * eventMultiplier;
                 let effectiveProbabilityForTier = modifiedOdds / (1 + modifiedOdds);
                 if (Math.random() < effectiveProbabilityForTier) {
                     determinedRarityId = rarity.id;
@@ -428,11 +596,13 @@ const Game = (() => {
                 determinedRarityId = 'garbage';
             }
         }
+        if (playerData.activeMechanicalEffect === 'platinum' && determinedRarityId === 'garbage') {
+            console.log("Quality Guarantor activated! Upgrading 'Garbage' to 'Common'.");
+            determinedRarityId = 'common';
+        }
         
         const activeEffectId = playerData.activeMechanicalEffect;
 
-        // <<< ИСПРАВЛЕНИЕ 2: ИНИЦИАЛИЗАЦИЯ META-ОБЪЕКТА >>>
-        // Создаем объект `meta` СРАЗУ. Он будет хранить все доп. данные о ролле.
         const rollMeta = {
             wasUpgraded: false,
             originalRarityId: determinedRarityId,
@@ -473,7 +643,10 @@ const Game = (() => {
 
                         if (prestigeOk && supporterOk) {
                             determinedRarityId = nextRarity.id;
-                            rollMeta.wasUpgraded = true; // Обновляем мета-данные
+                            if (!playerData.inventory.includes(determinedRarityId)) {
+                                rollMeta.isNewViaUpgrade = true; 
+                            }
+                            rollMeta.wasUpgraded = true;
                             
                             const originalName = L.get(getRarityDataById(rollMeta.originalRarityId, playerData).nameKey);
                             const upgradedName = L.get(nextRarity.nameKey);
@@ -491,90 +664,103 @@ const Game = (() => {
             }
         }
         
-        // <<< ИСПРАВЛЕНИЕ 3: ПЕРЕДАЧА ЕДИНОГО META-ОБЪЕКТА >>>
+        // Добавляем ID в историю роллов
+        if (!playerData.lastRollsHistory) playerData.lastRollsHistory = [];
+        playerData.lastRollsHistory.push(determinedRarityId);
+        if (playerData.lastRollsHistory.length > 10) { // Храним только 10 последних
+            playerData.lastRollsHistory.shift();
+        }
+        
         return processRollResult(determinedRarityId, rollMeta);
     }
     
-    function processRollResult(rarityId, meta = {}) { // Убрали wasLuckyRoll, т.к. не используется здесь
+    function processRollResult(rarityId, meta = {}) {
         const rarityData = getRarityDataById(rarityId, playerData);
         if (!rarityData) {
             console.error(`Rarity data not found for ID: ${rarityId}`);
-            // Возвращаем объект ошибки, чтобы UI мог это обработать или показать что-то дефолтное
             return {
                 card: { name: "Ошибка Карты", image: "", description: "Данные о карте не найдены." },
                 rarity: { id: "error_rarity", name: "Неизвестно", color: "#fff", glowColor: "#fff", cssClass: "" },
                 isNew: false,
-                duplicateReward: 0
+                duplicateReward: 0,
+                meta: {}
             };
         }
+        
+        const isNew = meta.isNewViaUpgrade || !playerData.inventory.includes(rarityId);
+        addCardToInventory(rarityId);
 
-        const isNew = addCardToInventory(rarityId); // addCardToInventory остается без изменений
         let baseDuplicateReward = 0;
 
         if (!isNew) {
             baseDuplicateReward = rarityData.currencyOnDuplicate || 0;
+            if (rarityId === 'blackhole') {
+                if (!playerData.duplicateCounts) playerData.duplicateCounts = {};
+                if (!playerData.duplicateCounts.blackhole) playerData.duplicateCounts.blackhole = 0;
+                playerData.duplicateCounts.blackhole++;
+                console.log(`Blackhole duplicate count is now: ${playerData.duplicateCounts.blackhole}`);
+            }
         }
 
-        // Применяем бонус "Золотого Билета"
         let finalDuplicateReward = baseDuplicateReward;
-        const goldenTicketEquipped = playerData.equippedItems.find(item => item.effect && item.effect.type === "duplicate_currency_bonus_percent");
         
-        if (goldenTicketEquipped && baseDuplicateReward > 0) {
-            finalDuplicateReward += Math.ceil(baseDuplicateReward * goldenTicketEquipped.effect.value);
-            console.log(`Golden Ticket Bonus: Original: ${baseDuplicateReward}, New: ${finalDuplicateReward}`);
+        let totalBonusPercent = 0;
+        playerData.equippedItems.forEach(item => {
+            if (item.effect?.type === "duplicate_currency_bonus_percent") {
+                totalBonusPercent += item.effect.value;
+            }
+        });
+        totalBonusPercent += getPassiveBonusValue('duplicate_currency_bonus_percent');
+
+        if (totalBonusPercent > 0 && baseDuplicateReward > 0) {
+            const bonusAmount = Math.ceil(baseDuplicateReward * totalBonusPercent);
+            finalDuplicateReward += bonusAmount;
+            console.log(`Greed Bonus: Original: ${baseDuplicateReward}, Bonus: +${bonusAmount} (${(totalBonusPercent*100).toFixed(0)}%), New: ${finalDuplicateReward}`);
         }
         
-
         if (finalDuplicateReward > 0) {
             addCurrency(finalDuplicateReward);
-            // Обновляем статистику по валюте за дубликаты
             playerData.stats.currencyFromDuplicates += finalDuplicateReward; 
         }
         
-        // Обновляем статистику по выпавшим редкостям
-        if (!playerData.stats.rollsByRarity) playerData.stats.rollsByRarity = {}; // Инициализация, если нужно
+        if (!playerData.stats.rollsByRarity) playerData.stats.rollsByRarity = {};
         if (!playerData.stats.rollsByRarity[rarityData.id]) {
             playerData.stats.rollsByRarity[rarityData.id] = 0;
         }
         playerData.stats.rollsByRarity[rarityData.id]++;
         
-        // Логика для "Длани Неудачника"
-        if (playerData.misfortuneStacks === undefined) playerData.misfortuneStacks = 0; // Инициализация, если нет
+        if (playerData.misfortuneStacks === undefined) playerData.misfortuneStacks = 0;
         
         const handOfMisfortuneItem = playerData.equippedItems.find(item => item.effect && item.effect.type === "cumulative_luck_on_low_rolls");
 
-        if (handOfMisfortuneItem) { // Если Длань Неудачника надета
+        if (handOfMisfortuneItem) {
             const handEffectData = handOfMisfortuneItem.effect;
             if (handEffectData.triggerRarities.includes(rarityId)) {
-                // Выпала одна из "неудачных" редкостей, увеличиваем стаки
                 playerData.misfortuneStacks++;
                 if (handEffectData.maxStacks && playerData.misfortuneStacks > handEffectData.maxStacks) {
-                    playerData.misfortuneStacks = handEffectData.maxStacks; // Не превышаем максимум
+                    playerData.misfortuneStacks = handEffectData.maxStacks;
                 }
                 console.log(`Hand of Misfortune: Stacked to ${playerData.misfortuneStacks} on ${rarityData.name}. Bonus luck: +${(playerData.misfortuneStacks * handEffectData.bonusPerStack).toFixed(2)}`);
             } else {
-                // Выпала "хорошая" редкость, сбрасываем стаки
                 if (playerData.misfortuneStacks > 0) {
                     console.log(`Hand of Misfortune: Stacks reset from ${playerData.misfortuneStacks} due to ${rarityData.name}`);
                 }
                 playerData.misfortuneStacks = 0;
             }
-            // Опционально: Обновляем отображение удачи, т.к. она могла измениться из-за стаков
             if (typeof UI !== 'undefined' && UI.updateLuckDisplay) {
                 UI.updateLuckDisplay();
             }
-            // Опционально: Обновляем отображение стаков, если вы его реализовали
-            // if (typeof UI !== 'undefined' && UI.updateMisfortuneStacksDisplay) {
-            //    UI.updateMisfortuneStacksDisplay(playerData.misfortuneStacks);
-            // }
         }
         
-        saveGame(); // saveGame остается без изменений
+        // После каждого ролла проверяем ачивки
+        checkAchievementsAndCollections();
+        
+        saveGame();
 
         return {
             card:{
-                 ...rarityData.card,
-                 name: L.get(rarityData.card.nameKey) // Возвращаем переведенное имя карты
+                ...rarityData.card,
+                name: L.get(rarityData.card.nameKey)
                 },
             rarity: { 
                 id: rarityData.id, 
@@ -584,28 +770,32 @@ const Game = (() => {
                 cssClass: rarityData.cssClass 
             },
             isNew,
-            duplicateReward: finalDuplicateReward, // Передаем итоговую награду в UI
+            duplicateReward: finalDuplicateReward,
             meta: meta 
         };
     }
+    
+    function processMultiRollResult(results) {
+        // Проверяем ачивку на 5 rare карт в мультиролле
+        const isFiveRares = results.every(res => res.rarity.id === 'rare');
+        if (isFiveRares && !playerData.completedAchievements.includes('five_rares_in_multi')) {
+            grantAchievement('five_rares_in_multi');
+        }
+        
+        // ... остальная логика обработки мультиролла (которая уже есть в UI)
+    }
 
-    // Добавить эту функцию в модуль Game
     function unlockAllCards() {
         const allCardIds = RARITIES_DATA.map(r => r.id);
-        
-        // Используем Set, чтобы избежать дубликатов, если что-то уже открыто
         const newInventory = [...new Set([...playerData.inventory, ...allCardIds])];
         playerData.inventory = newInventory;
-        
-        // Также помечаем все редкости как "виденные"
         const newSeenRarities = [...new Set([...playerData.seenRarities, ...allCardIds])];
         playerData.seenRarities = newSeenRarities;
-
+        updateActivePassives();
+        checkAchievementsAndCollections(); // Проверяем ачивки после открытия всех карт
         console.log("All cards unlocked!");
-
-        // Обновляем весь UI, чтобы показать изменения в инвентаре и т.д.
         if (typeof UI !== 'undefined') {
-            UI.updateAll(getPlayerData()); // updateAll перерисует все что нужно
+            UI.updateAll(getPlayerData()); 
         }
         saveGame();
     }
@@ -614,7 +804,6 @@ const Game = (() => {
         const value = parseInt(amount, 10);
         if (isNaN(value) || value < 0) return;
         playerData.currency = value;
-        // ИСПРАВЛЕНИЕ: Используем updateAll
         if (typeof UI !== 'undefined') {
             UI.updateAll(getPlayerData());
         }
@@ -644,36 +833,23 @@ const Game = (() => {
             return false;
         }
 
-        // Проверка на уже купленные неперепокупаемые предметы
-        if (itemType === 'equipment' && playerData.equippedItems.find(e => e.id === itemId)) {
-            console.log("Equipment already owned (and equipped) or in inventory if not equippable multiple times - logic depends on game design.");
-            // Если экипировка одноразовая, то тут можно проверять playerData.inventory или спец. массив купленной экипировки
-            // В нашем случае, экипировка уникальна и покупается один раз.
-            // Если игрок "продал" или "снял" ее, он не должен покупать заново.
-            // Поэтому, если она есть в playerData.purchasedEquipment (если бы такой массив был), то не даем купить.
-            // Пока считаем, что раз купленная экипировка всегда доступна для надевания.
-            // Проверку на "уже куплено" добавим.
-            if (playerData.inventory.includes("purchased_"+itemId)) { // Используем префикс для купленной экипировки
-                 console.log("Equipment item already purchased:", itemData.name);
-                 alert(`${L.get(itemData.nameKey)} ${L.get('notifications.itemPurchased')}`);
-                 return false;
-            }
+        if (itemType === 'equipment' && playerData.inventory.includes("purchased_"+itemId)) {
+             alert(`${L.get(itemData.nameKey)} ${L.get('notifications.itemPurchased')}`);
+             return false;
         }
         if (itemType === 'upgrade' && playerData.purchasedUpgrades[itemData.targetProperty]) {
-            console.log("Upgrade already purchased:", itemData.name);
             alert(`${L.get(itemData.nameKey)} ${L.get('notifications.upgradeAlreadyPurchased')}`);
             return false;
         }
 
+        const finalCost = getDiscountedCost(itemData.cost);
 
-        if (spendCurrency(itemData.cost)) {
-            console.log(`Purchased ${itemType}: ${itemData.name}`);
+        if (spendCurrency(finalCost)) {
+            console.log(`Purchased ${itemType}: ${itemData.nameKey} for ${finalCost} (original: ${itemData.cost})`);
             if (itemType === 'boost') {
                 activateBoost(itemData);
             } else if (itemType === 'equipment') {
-                // Добавляем в "купленные", чтобы не купить снова
-                playerData.inventory.push("purchased_"+itemId); // Отмечаем как купленное
-                // Пытаемся сразу надеть, если есть место
+                playerData.inventory.push("purchased_"+itemId);
                 if (playerData.equippedItems.length < Game.getMaxEquippedItems()) {
                     equipItem(itemData);
                 } else {
@@ -697,16 +873,13 @@ const Game = (() => {
     // --- Бусты ---
     function activateBoost(boostData) {
         const now = Date.now();
-        // Ищем существующий буст с таким же ID
         const existingBoost = playerData.activeBoosts.find(b => b.id === boostData.id);
 
         if (existingBoost) {
-            // Если нашли, продлеваем его
             const remainingTime = Math.max(0, existingBoost.endTime - now);
             existingBoost.endTime = now + remainingTime + (boostData.durationSeconds * 1000);
             console.log(`Boost '${L.get(boostData.nameKey)}' duration extended. New end time: ${new Date(existingBoost.endTime).toLocaleTimeString()}`);
         } else {
-            // Если не нашли, добавляем как новый
             const newBoost = {
                 id: boostData.id,
                 type: boostData.type,
@@ -718,13 +891,12 @@ const Game = (() => {
             console.log(`Boost activated: ${L.get(boostData.nameKey)}. Ends at: ${new Date(newBoost.endTime).toLocaleTimeString()}`);
         }
         
-        // Запускаем/перезапускаем таймер проверки
         checkActiveBoosts();
     }
 
     let boostCheckInterval = null;
     function checkActiveBoosts() {
-        if (boostCheckInterval) clearInterval(boostCheckInterval); // Очищаем предыдущий интервал
+        if (boostCheckInterval) clearInterval(boostCheckInterval);
 
         boostCheckInterval = setInterval(() => {
             let boostsChanged = false;
@@ -741,22 +913,18 @@ const Game = (() => {
             if (boostsChanged) {
                 if (typeof UI !== 'undefined' && UI.updateActiveBoostsDisplay) UI.updateActiveBoostsDisplay();
                 if (typeof UI !== 'undefined' && UI.updateLuckDisplay) UI.updateLuckDisplay();
-                saveGame(); // Сохраняем, если буст истек
+                saveGame();
             }
             if (playerData.activeBoosts.length === 0) {
                 clearInterval(boostCheckInterval);
                 boostCheckInterval = null;
             }
-        }, 1000); // Проверять каждую секунду
-        if (typeof UI !== 'undefined' && UI.updateActiveBoostsDisplay) UI.updateActiveBoostsDisplay(); // Обновить сразу
+        }, 1000);
+        if (typeof UI !== 'undefined' && UI.updateActiveBoostsDisplay) UI.updateActiveBoostsDisplay();
     }
 
 
     // --- Экипировка ---
-    // js/game.js
-// Внутри модуля Game
-
-// --- Экипировка ---
     function equipItem(itemData) {
         if (playerData.equippedItems.length >= Game.getMaxEquippedItems()) {
             UI.showNotification(L.get('ui.maxEquipment'), 'warning');
@@ -766,17 +934,15 @@ const Game = (() => {
             return false;
         }
 
-        // ИСПРАВЛЕНИЕ: Сохраняем КЛЮЧ (nameKey), а не переведенное имя (name)
         const equipToSave = {
             id: itemData.id,
-            nameKey: itemData.nameKey, // <--- ГЛАВНОЕ ИЗМЕНЕНИЕ
+            nameKey: itemData.nameKey,
             luckBonus: itemData.luckBonus,
             effect: itemData.effect ? JSON.parse(JSON.stringify(itemData.effect)) : undefined 
         };
 
         playerData.equippedItems.push(equipToSave);
         saveGame();
-        // Обновляем UI после сохранения
         if (typeof UI !== 'undefined') {
             UI.updateAll(getPlayerData());
         }
@@ -793,13 +959,11 @@ const Game = (() => {
         return false;
     }
 
-        function setActiveVisualEffect(rarityId) {
-        if (playerData.activeVisualEffectRarityId === rarityId && rarityId !== null) { // Добавил проверку на null, чтобы можно было "пере-очистить"
-            console.log(`Game: Visual effect ${rarityId} is already active.`);
+    function setActiveVisualEffect(rarityId) {
+        if (playerData.activeVisualEffectRarityId === rarityId && rarityId !== null) {
             return;
         }
         if (playerData.activeVisualEffectRarityId === null && rarityId === null) {
-            console.log(`Game: No visual effect active, and trying to clear (no-op).`);
             return;
         }
 
@@ -807,9 +971,8 @@ const Game = (() => {
         playerData.activeVisualEffectRarityId = rarityId;
         saveGame();
         
-        // ВЫЗЫВАЕМ UI для применения эффекта
         if (typeof UI !== 'undefined' && UI.applyVisualEffect) {
-            UI.applyVisualEffect(playerData.activeVisualEffectRarityId); // Передаем текущее (новое) состояние
+            UI.applyVisualEffect(playerData.activeVisualEffectRarityId);
         } else {
             console.warn("Game.setActiveVisualEffect: UI.applyVisualEffect is not available.");
         }
@@ -817,7 +980,6 @@ const Game = (() => {
 
     function clearActiveVisualEffect() {
         if (playerData.activeVisualEffectRarityId === null) {
-            console.log("Game: No visual effect active to clear.");
             return;
         }
 
@@ -826,9 +988,8 @@ const Game = (() => {
         playerData.activeVisualEffectRarityId = null;
         saveGame();
 
-        // ВЫЗЫВАЕМ UI для применения эффекта (в данном случае, для очистки)
         if (typeof UI !== 'undefined' && UI.applyVisualEffect) {
-            UI.applyVisualEffect(null); // Передаем null для очистки
+            UI.applyVisualEffect(null);
         } else {
             console.warn("Game.clearActiveVisualEffect: UI.applyVisualEffect is not available.");
         }
@@ -836,20 +997,75 @@ const Game = (() => {
         
     
     // --- Настройки ---
-    function setSkipAnimationForDuplicate(rarityId, skip) {
-        playerData.settings.skipAnimationForDuplicate[rarityId] = skip;
-        saveGame();
+    function setActiveTheme(themeId) {
+        if (playerData.unlockedThemes.includes(themeId)) {
+            playerData.activeTheme = themeId;
+            saveGame();
+            if (typeof UI !== 'undefined') {
+                UI.applyTheme(themeId);
+            }
+        }
+    }
+    
+    // --- Эвенты, Ачивки, Коллекции ---
+    function getActiveEvent() {
+        const now = new Date();
+        return EVENTS_DATA.find(event => now < new Date(event.endDate));
+    }
+    
+    function checkAchievementsAndCollections() {
+        // Проверка обычных достижений
+        for (const achId in ACHIEVEMENTS_DATA) {
+            if (!playerData.completedAchievements.includes(achId)) {
+                if (ACHIEVEMENTS_DATA[achId].condition(playerData)) {
+                    grantAchievement(achId);
+                }
+            }
+        }
+        // Проверка коллекций
+        for (const colId in COLLECTIONS_DATA) {
+            if (!playerData.completedAchievements.includes(colId)) {
+                const collection = COLLECTIONS_DATA[colId];
+                const hasAllCards = collection.cardIds.every(cardId => playerData.inventory.includes(cardId));
+                if (hasAllCards) {
+                    grantAchievement(colId, true); // true, т.к. это коллекция
+                }
+            }
+        }
+    }
+
+    function grantAchievement(achId, isCollection = false) {
+        const data = isCollection ? COLLECTIONS_DATA[achId] : ACHIEVEMENTS_DATA[achId];
+        if (!data) return;
+
+        playerData.completedAchievements.push(achId);
+        const reward = data.reward;
+        
+        let rewardText = "";
+        if (reward.type === 'currency') {
+            addCurrency(reward.amount);
+            rewardText = `💎 ${reward.amount}`;
+        } else if (reward.type === 'ui_theme') {
+            if (!playerData.unlockedThemes.includes(reward.themeId)) {
+                playerData.unlockedThemes.push(reward.themeId);
+            }
+            rewardText = L.get(reward.nameKey);
+        }
+        
+        const achievementName = L.get(data.nameKey);
+        const notificationMessage = `${L.get('notifications.achievementUnlocked')}: <strong>${achievementName}</strong>! ${L.get('notifications.reward')}: ${rewardText}`;
+        UI.showNotification(notificationMessage, 'success', 8000);
+        console.log(`Achievement unlocked: ${achId}`);
     }
 
 
     // Публичный интерфейс модуля
     return {
-        init, getPlayerData, saveGame, resetGame, addCurrency, spendCurrency, performRoll,
+        init, getPlayerData, saveGame, resetGame, addCurrency, spendCurrency, performRoll, processMultiRollResult,
         purchaseShopItem, equipItem, unequipItem, calculateCurrentLuck, getEffectiveLuck,
         checkActiveBoosts, setActiveVisualEffect, clearActiveVisualEffect, setMusicVolume,
         unlockAllCards, setCurrency, addCardToInventory, amplifyLuckCore,
         getLuckCoreAmplificationCost, performRebirth, getRebirthCost, setActiveSkin, checkForSupporterStatus, getMaxEquippedItems,
-        setActiveMechanicalEffect
-
+        setActiveMechanicalEffect, calculateLuckFromCore, getDiscountedCost, getActiveEvent, setActiveTheme
     };
 })();

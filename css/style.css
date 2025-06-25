@@ -1864,3 +1864,328 @@ body.visual-effect-uranium::before {
     text-shadow: 0 0 10px #B39DDB;
     border: 1px solid #512DA8;
 }
+
+/* --- Стили для карт из "Плана" (Версия 2.0) --- */
+
+/* Вечная (Ананке Хрона) */
+.roll-slot.rarity-time-eternal {
+    background: #000;
+    color: #FFD700;
+    border: 1px solid #444;
+    text-shadow: 0 0 10px #FFD700, 0 0 5px #FFD700;
+    font-family: 'Cinzel Decorative', cursive;
+    position: relative;
+    overflow: hidden;
+}
+.roll-slot.rarity-time-eternal::before {
+    content: '';
+    position: absolute;
+    width: 200%; height: 200%;
+    top: -50%; left: -50%;
+    background-image:
+        radial-gradient(circle, rgba(255, 215, 0, 0.2) 1px, transparent 1px),
+        radial-gradient(circle, rgba(158, 158, 158, 0.1) 1px, transparent 1px);
+    background-size: 30px 30px, 45px 45px;
+    animation: eternal-spin 60s linear infinite;
+}
+@keyframes eternal-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* Светлая Принцесса (София) */
+.roll-slot.rarity-shy-princess {
+    background: linear-gradient(145deg, #F3E5F5, #D1C4E9);
+    color: #6A1B9A;
+    border: 1px solid #B39DDB;
+    text-shadow: 0 0 5px rgba(255,255,255,0.7);
+}
+
+/* Тёмная Принцесса (Рокси) */
+.roll-slot.rarity-dark-princess {
+    background: linear-gradient(135deg, #1a1a1a 0%, #311b92 100%);
+    color: #F8BBD0;
+    font-family: 'Orbitron', sans-serif;
+    border: 1px solid #F48FB1;
+    text-shadow: 0 0 8px #F06292;
+}
+
+/* Отсутствовавшая (Аластор) */
+.roll-slot.rarity-alastor {
+    background: #500000;
+    color: #ffcdd2;
+    border: 1px solid #c62828;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Playfair Display SC', serif;
+}
+.roll-slot.rarity-alastor::after {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: repeating-radial-gradient(circle, rgba(255,0,0,0.2) 0, transparent 5px, transparent 40px);
+    animation: radio-pulse 3s linear infinite;
+}
+@keyframes radio-pulse { from { transform: scale(0); opacity: 1; } to { transform: scale(1.5); opacity: 0; } }
+
+/* Материнская (Туториэль) */
+.roll-slot.rarity-maternal {
+    background: linear-gradient(145deg, #BF360C, #F57C00);
+    color: #FFF3E0;
+    border: 1px solid #FFAB91;
+    font-family: 'Georgia', serif;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+}
+
+/* Хэви (Кори Беннингтон) */
+.roll-slot.rarity-metalhead {
+    background: #111;
+    color: #fff;
+    border: 2px solid #fff;
+    border-image: linear-gradient(45deg, #fff, #9e9e9e, #fff) 1;
+    font-family: 'Impact', sans-serif;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px #fff;
+}
+
+/* Лунная (Селена) */
+.roll-slot.rarity-moon {
+    background: linear-gradient(180deg, #000, #263238, #546E7A);
+    color: #ECEFF1;
+    border: 1px solid #90A4AE;
+    text-shadow: 0 0 15px #fff, 0 0 5px #fff;
+}
+
+/* Чинящая (Женя) */
+.roll-slot.rarity-mechanic {
+    background: #333;
+    background-image: 
+        repeating-linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222), 
+        repeating-linear-gradient(-45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222);
+    background-size: 30px 30px;
+    color: #4CAF50;
+    text-shadow: 0 0 8px #81C784, 0 0 3px #000;
+    border: 1px solid #4CAF50;
+}
+
+/* Излечивающая (Тина) */
+.roll-slot.rarity-doctor {
+    background: #FCE4EC;
+    color: #D81B60;
+    border: 1px solid #F48FB1;
+    position: relative;
+    font-weight: bold;
+}
+.roll-slot.rarity-doctor::before {
+    content: '❤';
+    position: absolute;
+    top: 5px; left: 10px;
+    font-size: 0.8em;
+    opacity: 0.3;
+}
+.roll-slot.rarity-doctor::after {
+    content: '❤';
+    position: absolute;
+    bottom: 5px; right: 10px;
+    font-size: 0.8em;
+    opacity: 0.3;
+}
+
+/* Шёлковая (Хана Акано) */
+.roll-slot.rarity-silken {
+    background: #C2185B;
+    color: #fff;
+    border: 1px solid #F48FB1;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M22 83c10-21 34-31 51-24 16 6 23 25 14 41-10 18-32 23-48 15s-23-26-17-42z" fill="rgba(255,255,255,0.03)"/></svg>');
+    background-size: 60px;
+}
+
+/* Пленённая (Эльфийка в ловушке) */
+.roll-slot.rarity-ensnared {
+    background: #4E342E;
+    color: #BCAAA4;
+    border: 2px solid #A1887F;
+    font-style: italic;
+    background-image:
+      linear-gradient(rgba(0, 0, 0, .3), rgba(0, 0, 0, .3)),
+      linear-gradient(90deg, #6D4C41 1px, transparent 1px),
+      linear-gradient(#6D4C41 1px, transparent 1px);
+    background-size: 100% 100%, 20px 20px, 20px 20px;
+}
+
+/* Провожающая (Таинственная эльфийка) */
+.roll-slot.rarity-guide {
+    background: #CFD8DC;
+    color: #263238;
+    border: 1px solid #B0BEC5;
+    font-family: 'Times New Roman', serif;
+}
+
+/* --- Стили для системы тем --- */
+
+/* --- НАЧАЛО: НОВАЯ ТЕМА 'КЛАССИКА' (АЛАЯ/ГОТИЧЕСКАЯ) --- */
+html.theme-classic {
+    --theme-bg: #2a1a1d; /* Очень темный, десатурированный бордовый */
+    --theme-container-bg: #3a2a2d; /* Чуть светлее для контейнеров */
+    --theme-text: #e0d8d8; /* Теплый, не чисто белый текст */
+    --theme-accent: #b71c1c; /* Насыщенный алый для акцентов (как у "Русской" редкости) */
+    --theme-accent-hover: #d32f2f; /* Ярче при наведении */
+    --theme-border: #4a2a2d; /* Темная граница */
+}
+
+/* Применяем основные цвета */
+.theme-classic body {
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
+}
+
+/* Узор на фоне с помощью псевдоэлемента */
+.theme-classic body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    /* Встроенный SVG с орнаментом. Цвет очень тусклый, чтобы не мешать. */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><path d="M50,0 C20,20 20,80 50,100 C80,80 80,20 50,0 M0,50 C20,20 80,20 100,50 C80,80 20,80 0,50" fill="none" stroke="rgba(183, 28, 44, 0.05)" stroke-width="2"/></svg>');
+    background-size: 200px 200px;
+    opacity: 0.5;
+    z-index: -1; /* Помещаем под всем контентом */
+    pointer-events: none;
+}
+
+.theme-classic h1, .theme-classic h2, .theme-classic h3, .theme-classic h4, .theme-classic h5, .theme-classic h6 {
+    color: var(--theme-text);
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+.theme-classic .text-muted {
+    color: #9e8a8e !important;
+}
+
+/* Кнопки */
+.theme-classic .btn-primary {
+    background-color: var(--theme-accent);
+    border-color: #8e0000;
+    box-shadow: 0 0 8px var(--theme-accent), inset 0 0 5px rgba(255,255,255,0.2);
+}
+.theme-classic .btn-primary:hover {
+    background-color: var(--theme-accent-hover);
+    border-color: var(--theme-accent);
+}
+
+/* Вкладки */
+.theme-classic .nav-tabs {
+    border-bottom-color: var(--theme-border);
+}
+.theme-classic .nav-tabs .nav-link {
+    color: #b0a0a4;
+    border-bottom-color: var(--theme-border);
+}
+.theme-classic .nav-tabs .nav-link.active {
+    color: var(--theme-text);
+    background-color: var(--theme-container-bg);
+    border-color: var(--theme-border) var(--theme-border) var(--theme-container-bg);
+    box-shadow: none;
+}
+
+/* Контент вкладок и списки */
+.theme-classic .tab-content {
+    background-color: var(--theme-container-bg);
+    border-color: var(--theme-border);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+}
+.theme-classic .list-group-item {
+    background-color: #4a3a3d;
+    border-color: var(--theme-border);
+}
+.theme-classic .list-group-item strong {
+    color: var(--theme-text);
+}
+
+/* Карточки в инвентаре */
+.theme-classic .inventory-card {
+    background-color: var(--theme-container-bg);
+    border-color: var(--theme-border);
+}
+.theme-classic .inventory-card.locked {
+    background-color: var(--theme-bg);
+    border-color: var(--theme-border);
+}
+.theme-classic .inventory-card.locked .inventory-card-name {
+    color: #9e8a8e;
+}
+.theme-classic .inventory-card:hover {
+    box-shadow: 0 8px 16px rgba(0,0,0,0.5), 0 0 15px var(--rarity-glow-color, #777);
+}
+
+/* Анимация ролла */
+.theme-classic .roll-animation-container {
+    background-color: #1a0a0d;
+    border-color: var(--theme-border);
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.7);
+}
+.theme-classic .roll-slot {
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+}
+
+/* Специальные контейнеры */
+.theme-classic .card.bg-dark-subtle {
+    background-color: var(--theme-container-bg) !important;
+}
+
+/* Совместимость со старыми темами Bootstrap, если где-то остались */
+.theme-classic {
+    color-scheme: dark;
+}
+.theme-classic .btn-close-white {
+    filter: none;
+}
+/* --- КОНЕЦ: НОВАЯ ТЕМА 'КЛАССИКА' (АЛАЯ/ГОТИЧЕСКАЯ) --- */
+
+/* Глобальный эффект RGB-ленты */
+#globalGlitchOverlay.active-effect-neon .neon-border-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+.neon-tube {
+    position: absolute;
+    background-color: #fff; /* Основа для свечения */
+    box-shadow:
+        0 0 5px #fff,
+        0 0 10px #fff,
+        0 0 20px #ff00ff, /* Цвет свечения будет меняться анимацией */
+        0 0 30px #ff00ff,
+        0 0 40px #ff00ff;
+    animation: neon-rgb-hue-rotate 5s linear infinite;
+}
+.neon-tube-top { top: 0; left: 0; width: 100%; height: 4px; }
+.neon-tube-right { top: 0; right: 0; width: 4px; height: 100%; }
+.neon-tube-bottom { bottom: 0; left: 0; width: 100%; height: 4px; }
+.neon-tube-left { top: 0; left: 0; width: 4px; height: 100%; }
+
+@keyframes neon-rgb-hue-rotate {
+    to {
+        filter: hue-rotate(360deg);
+    }
+}
+
+/* Глобальный эффект цепей */
+#globalGlitchOverlay.active-effect-devil {
+    box-shadow: inset 0 0 200px 80px rgba(100, 0, 0, 0.25);
+}
+.devil-chain-container {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    overflow: visible; /* Чтобы цепи не обрезались краями SVG */
+}
+.devil-chain-link {
+    fill: none;
+    stroke: #333; /* Темный металлический цвет */
+    stroke-width: 4;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 3px rgba(255, 100, 100, 0.5));
+}

@@ -23,6 +23,11 @@
                 <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
                 <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
             </filter>
+            <filter id="chlorine-gas-filter">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="goo" />
+                <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+            </filter>
         </defs>
     </svg>
     <!-- <<< КОНЕЦ НОВОГО БЛОКА SVG ФИЛЬТРОВ >>> -->
@@ -34,6 +39,11 @@
     <div class="container-fluid py-4">
         <header class="text-center mb-4">
             <h1>Gal's RNG</h1>
+            <!-- <<< НАЧАЛО НОВОГО БЛОКА ЭВЕНТОВ >>> -->
+            <div id="eventBanner" class="mt-3">
+                <!-- Баннер активного эвента будет здесь -->
+            </div>
+            <!-- <<< КОНЕЦ НОВОГО БЛОКА ЭВЕНТОВ >>> -->
             <div class="player-stats d-flex justify-content-center align-items-center gap-3 mt-3">
                 <div>
                     <span class="currency-icon">💎</span>
@@ -78,6 +88,11 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventory" type="button" role="tab" aria-controls="inventory" aria-selected="true" data-i18n="ui.inventory">Инвентарь</button>
                 </li>
+                <!-- <<< НАЧАЛО НОВОГО БЛОКА ДОСТИЖЕНИЙ >>> -->
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="achievements-tab" data-bs-toggle="tab" data-bs-target="#achievements" type="button" role="tab" aria-controls="achievements" aria-selected="false" data-i18n="ui.achievements.tabTitle">Достижения</button>
+                </li>
+                 <!-- <<< КОНЕЦ НОВОГО БЛОКА >>> -->
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="shop-tab" data-bs-toggle="tab" data-bs-target="#shop" type="button" role="tab" aria-controls="shop" aria-selected="false" data-i18n="ui.shop">Магазин</button>
                 </li>
@@ -115,6 +130,13 @@
                         <!-- Карточки инвентаря будут отображаться здесь -->
                     </div>
                 </div>
+
+                 <!-- <<< НАЧАЛО НОВОГО БЛОКА: ВКЛАДКА ДОСТИЖЕНИЙ >>> -->
+                <div class="tab-pane fade" id="achievements" role="tabpanel" aria-labelledby="achievements-tab">
+                    <!-- Контент будет генерироваться JS -->
+                </div>
+                <!-- <<< КОНЕЦ НОВОГО БЛОКА >>> -->
+
 
                 <!-- Shop Tab -->
                 <div class="tab-pane fade" id="shop" role="tabpanel" aria-labelledby="shop-tab">
@@ -221,6 +243,10 @@
                                 <span data-i18n="ui.currencyFromDuplicates">Получено осколков за дубликаты:</span>
                                 <span id="statsCurrencyFromDuplicates" class="badge bg-primary rounded-pill">0</span>
                             </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span data-i18n="ui.totalRebirths">Всего перерождений:</span>
+                                <span id="statsTotalRebirths" class="badge bg-danger rounded-pill">0</span>
+                            </li>
                         </ul>
                     </div>
                     <div class="col-md-6 mb-3"> <!-- Добавил mb-3 -->
@@ -241,10 +267,10 @@
         <footer class="text-center mt-5 mb-3">
             <hr>
             <p class="text-muted small">
-                Gal's RNG - Version 0.1.6c "QoL and Saves"
+                Gal's RNG - Version 0.2.0 "New Mechanics"
             </p>
             <!-- Можно добавить еще что-то, например, копирайт или ссылку на вас -->
-            <p class="text-muted small">&copy; 2025 BigCoolOppai</p>
+            <p class="text-muted small">© 2025 BigCoolOppai</p>
         </footer>
         <!-- КОНЕЦ НОВОГО ФУТЕРА -->
     </div>
@@ -300,11 +326,13 @@
     <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.x/dist/pixi.min.js"></script>
     <!-- Game Scripts -->
     <script src="js/cards.js"></script>
+    <script src="js/events.js"></script> <!-- <<< НОВЫЙ ФАЙЛ -->
+    <script src="js/achievements.js"></script> <!-- <<< НОВЫЙ ФАЙЛ -->
     <script src="js/saveManager.js"></script>
     <script src="js/localization.js"></script>
 
     <script src="js/game.js"></script>
-    <script src="js/visualEffects.js"></script> <!-- <<--- НОВЫЙ ФАЙЛ -->
+    <script src="js/visualEffects.js"></script> 
     <script src="js/ui.js"></script>
     <script src="js/debug.js"></script>
     <script>
