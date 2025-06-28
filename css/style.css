@@ -2189,3 +2189,127 @@ html.theme-classic {
     stroke-linecap: round;
     filter: drop-shadow(0 0 3px rgba(255, 100, 100, 0.5));
 }
+
+/* Гал (Создательница) */
+.roll-slot.rarity-gal {
+    background: #000;
+    color: #f0f0f0;
+    border: 2px solid #fff;
+    text-shadow: 0 0 10px #fff, 0 0 20px #ccc;
+    font-family: 'Cinzel Decorative', cursive;
+    font-weight: bold;
+}
+.inventory-card.border-gal {
+    border-color: #000000;
+    --rarity-glow-color: #f0f0f0;
+}
+
+/* Натрий (Кристальная) */
+.roll-slot.rarity-sodium {
+    background: linear-gradient(145deg, #f8f8ff, #e8e6f5);
+    color: #4A148C;
+    border: 1px solid #d1c4e9;
+    text-shadow: 0 0 8px rgba(255,255,255,0.8);
+}
+.inventory-card.border-sodium {
+    border-color: #f8f8ff;
+    --rarity-glow-color: #d1c4e9;
+}
+
+/* Обсидиан (Остывшая) */
+.roll-slot.rarity-obsidian {
+    background: #212121;
+    color: #FFCDD2;
+    border: 1px solid #424242;
+    text-shadow: 0 0 8px #E53935;
+}
+.inventory-card.border-obsidian {
+    border-color: #212121;
+    --rarity-glow-color: #E53935;
+}
+
+/* Лава (Расплавленная) */
+.roll-slot.rarity-lava {
+    background: linear-gradient(160deg, #F57C00, #D84315);
+    color: #FFF3E0;
+    border: 1px solid #E64A19;
+    text-shadow: 0 0 10px #FFCC80, 1px 1px 2px #000;
+    animation: fire-pulse 2.5s infinite ease-in-out;
+}
+.inventory-card.border-lava {
+    border-color: #E64A19;
+    --rarity-glow-color: #FFCC80;
+}
+
+/* Гоблин Альт (Удовлетворённая) */
+.roll-slot.rarity-goblin-alt {
+    background: linear-gradient(135deg, #8BC34A, #558B2F);
+    color: #F1F8E9;
+    border: 1px solid #9CCC65;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+.inventory-card.border-goblin_alt_1 {
+    border-color: #9CCC65;
+    --rarity-glow-color: #C5E1A5;
+}
+
+/* Соль (Солёная) */
+.roll-slot.rarity-salt {
+    background: #FAFAFA;
+    color: #616161;
+    border: 2px solid #E0E0E0;
+    font-weight: bold;
+}
+.inventory-card.border-salt {
+    border-color: #FFFFFF;
+    --rarity-glow-color: #B0BEC5;
+}
+
+html.theme-salt {
+    --theme-bg: #e9ecef; /* Очень светлый серый фон */
+    --theme-container-bg: #f8f9fa; /* Почти белый для контейнеров */
+    --theme-text: #495057; /* Темно-серый текст */
+    --theme-accent: #6c757d; /* Приглушенный акцентный цвет */
+    --theme-accent-hover: #5a6268;
+    --theme-border: #dee2e6;
+    color-scheme: light; /* Важно, чтобы браузер использовал светлые контролы */
+}
+
+.theme-salt body {
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
+}
+.theme-salt h1, .theme-salt h2, .theme-salt h3, .theme-salt h4, .theme-salt h5, .theme-salt h6 {
+    color: #212529; /* Почти черный для заголовков */
+}
+.theme-salt .text-muted { color: #868e96 !important; }
+.theme-salt .btn-primary { background-color: var(--theme-accent); border-color: var(--theme-accent); box-shadow: none; }
+.theme-salt .btn-primary:hover { background-color: var(--theme-accent-hover); border-color: var(--theme-accent-hover); }
+.theme-salt .btn-close-white { filter: invert(1) grayscale(100%) brightness(0%); }
+.theme-salt .nav-tabs .nav-link { color: var(--theme-text); border-bottom-color: var(--theme-border); }
+.theme-salt .nav-tabs .nav-link.active { color: #000; background-color: var(--theme-container-bg); border-color: var(--theme-border) var(--theme-border) var(--theme-container-bg); }
+.theme-salt .tab-content { background-color: var(--theme-container-bg); border-color: var(--theme-border); }
+.theme-salt .list-group-item { background-color: #fff; border-color: var(--theme-border); }
+.theme-salt .inventory-card, .theme-salt .roll-animation-container { background-color: #e9ecef; border-color: var(--theme-border); }
+
+/* --- Тема 'Престиж' (Черно-золотая) --- */
+html.theme-prestige {
+    --theme-bg: #121212; /* Глубокий черный */
+    --theme-container-bg: #1d1d1d;
+    --theme-text: #e0e0e0;
+    --theme-accent: #ffd700; /* Золотой */
+    --theme-accent-hover: #ffec8b;
+    --theme-border: #424242;
+    color-scheme: dark;
+}
+
+.theme-prestige body { background-color: var(--theme-bg); color: var(--theme-text); }
+.theme-prestige h1, .theme-prestige h2, .theme-prestige h3, .theme-prestige h4 { color: var(--theme-accent); text-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+.theme-prestige .text-muted { color: #757575 !important; }
+.theme-prestige .btn-primary { background-color: transparent; border-color: var(--theme-accent); color: var(--theme-accent); box-shadow: 0 0 5px var(--theme-accent); }
+.theme-prestige .btn-primary:hover { background-color: var(--theme-accent); border-color: var(--theme-accent); color: #000; box-shadow: 0 0 10px var(--theme-accent); }
+.theme-prestige .nav-tabs { border-bottom-color: var(--theme-border); }
+.theme-prestige .nav-tabs .nav-link { color: #9e9e9e; border-bottom-color: var(--theme-border); }
+.theme-prestige .nav-tabs .nav-link.active { color: var(--theme-accent); background-color: var(--theme-container-bg); border-color: var(--theme-border) var(--theme-border) var(--theme-container-bg); }
+.theme-prestige .tab-content, .theme-prestige .list-group-item { background-color: var(--theme-container-bg); border-color: var(--theme-border); }
+.theme-prestige .inventory-card.border-gold, .theme-prestige .inventory-card.border-legendary { box-shadow: 0 0 15px var(--rarity-glow-color); }

@@ -34,7 +34,75 @@ const ACHIEVEMENTS_DATA = {
         // Здесь condition можно оставить пустым или вернуть false
         condition: () => false, 
         reward: { type: 'currency', amount: 5000 }
-    }
+    },
+    'unlock_salt_card': {
+        nameKey: 'achievements.unlock_salt_card.name',
+        descriptionKey: 'achievements.unlock_salt_card.description',
+        // Условие: в инвентаре есть и Натрий, и Хлор
+        condition: (playerData) => 
+            playerData.inventory.includes('sodium') && playerData.inventory.includes('chlorine'),
+        // У этого достижения нет прямой награды, оно просто флаг
+        reward: null 
+    },
+    'get_salt_card': { 
+        nameKey: 'achievements.get_salt_card.name',
+        descriptionKey: 'achievements.get_salt_card.description',
+        condition: (playerData) => playerData.inventory.includes('salt'),
+        reward: { 
+            type: 'ui_theme', 
+            themeId: 'theme-salt',
+            nameKey: 'achievements.get_salt_card.rewardName'
+        }
+    },
+    'reach_prestige_6': {
+        nameKey: 'achievements.reach_prestige_6.name',
+        descriptionKey: 'achievements.reach_prestige_6.description',
+        condition: (playerData) => playerData.prestigeLevel >= 6,
+        reward: {
+            type: 'ui_theme',
+            themeId: 'theme-prestige',
+            nameKey: 'achievements.reach_prestige_6.rewardName'
+        }
+    },
+    'roll_1000000': {
+        nameKey: 'achievements.roll_1000000.name',
+        descriptionKey: 'achievements.roll_1000000.description',
+        condition: (playerData) => playerData.stats.totalRolls >= 1000000,
+        reward: { type: 'currency', amount: 1000000 }
+    },
+    'roll_1000000000': {
+        nameKey: 'achievements.roll_1000000000.name',
+        descriptionKey: 'achievements.roll_1000000000.description',
+        condition: (playerData) => playerData.stats.totalRolls >= 1000000000,
+        reward: { type: 'currency', amount: 100000000 }
+    },
+    'use_fates_thread': {
+        nameKey: 'achievements.use_fates_thread.name',
+        descriptionKey: 'achievements.use_fates_thread.description',
+        // Это достижение будет выдаваться по событию, а не по условию
+        condition: () => false, 
+        reward: { type: 'currency', amount: 125000 } // Награда соразмерна стоимости предмета
+    },
+    'empower_core_with_stone': {
+        nameKey: 'achievements.empower_core_with_stone.name',
+        descriptionKey: 'achievements.empower_core_with_stone.description',
+        // Это достижение также будет выдаваться по событию
+        condition: () => false,
+        reward: { type: 'currency', amount: 150000 } // Награда соразмерна редкости и сложности
+    },
+    'first_mega_rare': {
+        nameKey: 'achievements.first_mega_rare.name',
+        descriptionKey: 'achievements.first_mega_rare.description',
+        condition: (playerData) => {
+            // Находим все карты, которые реже 1/999999
+            const megaRareIds = RARITIES_DATA
+                .filter(r => r.probabilityBase < 1/999999)
+                .map(r => r.id);
+            // Проверяем, есть ли хоть одна из них в инвентаре
+            return megaRareIds.some(id => playerData.inventory.includes(id));
+        },
+        reward: { type: 'currency', amount: 500000 }
+    },
 };
 
 const COLLECTIONS_DATA = {

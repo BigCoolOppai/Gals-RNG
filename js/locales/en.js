@@ -76,6 +76,36 @@ window.locales.en = {
         silken: { name: "Silken", cardName: "Hana Akano", description: "Her movements are as smooth as the dance of sakura petals, and her gaze behind the fan hides more than it tells. She is the embodiment of Eastern mystery and refined beauty." },
         ensnared: { name: "Ensnared", cardName: "Elf in a Trap", description: "Even centuries of experience couldn't save her from the simplest of traps. Now she waits for some hapless hero to free her... or take advantage of the situation." },
         guide: { name: "The Guide", cardName: "Mysterious Elf", description: "She has seen empires rise and fall, but her magic is still as potent as ever. She will guide you on any path, but the price for her services may be higher than you expect." },
+        gal: { 
+            name: "The Origin", 
+            cardName: "Gal", 
+            description: "She is watching you. Always. She knows your every roll. Perhaps one day she'll decide to fully reveal herself... if you prove your loyalty. (this is her first appearance, she's a bit shy :3)" 
+        },
+        sodium: { 
+            name: "The Reactive", 
+            cardName: "Sodia", 
+            description: "An incredibly frantic girl. Just a single drop of moisture and she erupts into fire and explosions that leave no witnesses. Someone should find her a Chloretta, and fast..." 
+        },
+        obsidian: { 
+            name: "The Cooled", 
+            cardName: "Obsi", 
+            description: "The lava's fury has subsided, leaving behind smooth, cool skin. Although she's no longer as scorching, a sharp sense of danger remains with her. Be careful." 
+        },
+        lava: { 
+            name: "The Molten", 
+            cardName: "Magmalina", 
+            description: "Hot, fluid, and dangerous. One wrong move near her, and you risk becoming part of the landscape. But she's so hot..." 
+        },
+        goblin_alt_1: { 
+            name: "The Satisfied", 
+            cardName: "Pleased Tur'gata", 
+            description: "It seems someone was cleverer than the goblin. The trap worked, but not quite as she planned. Now she looks very... pleased." 
+        },
+        salt: { 
+            name: "The Salty", 
+            cardName: "NaCl",
+            description: "The result of a volatile ̶n̶i̶g̶h̶t̶ chemical reaction. NaCl took the best from both and became a pleasant addition to everyone's life. And she's beautiful, too :)" 
+        },
     },
     // Shop Items
     shop: {
@@ -93,11 +123,17 @@ window.locales.en = {
             equip_golden_ticket: { name: "Golden Ticket", description: "Increases shards from duplicates by 10% (rounded up)." },
             equip_hand_of_misfortune: { name: "Hand of Misfortune", description: "+0.05 luck for each consecutive Garbage, Common, or Rare. Resets on a better roll." },
             equip_greedstone: { name: "Greedstone", description: "Increases shards from duplicates by 25% (rounded up)." },
-            equip_distortion_chronometer: { name: "Distortion Chronometer", description: "Triggers Lucky Roll 2 rolls sooner (every 9th roll instead of 11th)." }
+            equip_distortion_chronometer: { name: "Distortion Chronometer", description: "Triggers Lucky Roll 2 rolls sooner (every 9th roll instead of 11th)." },
+            equip_abyssal_hand: { name: "Abyssal Hand", description: "An enhanced version of the Hand of Misfortune. Increases luck for each of the 12 most common cards in a row." },
+            equip_fates_thread: { name: "Fate's Thread", description: "When you Rebirth with this item equipped, you will preserve one random item from equipped." },
+            equip_alchemists_stone: { name: "Alchemist's Stone", description: "Grants a very small chance to transmute shards from 'bottom-feeder' duplicates into a Luck Core Fragment." },
         },
         upgrades: {
             upgrade_fast_roll: { name: "Fast Roll", description: "Reduces roll animation time to ~0.75 sec." },
-            upgrade_multi_roll_x5: { name: "Multi-Roll x5", description: "Unlocks the ability to perform 5 rolls at once." }
+            upgrade_multi_roll_x5: { name: "Multi-Roll x5", description: "Unlocks the ability to perform 5 rolls at once." },
+            upgrade_multi_roll_x10: { name: "Multi-Roll x10", description: "Unlocks the ability to perform 10 rolls at once, replacing x5." },
+            upgrade_empowered_lucky_roll: { name: "Empowered Lucky Roll", description: "Increases the luck multiplier from a Lucky Roll from x2 to x2.5." },
+            upgrade_probability_analyzer: { name: "Probability Analyzer", description: "Displays your effective chance of obtaining a card, accounting for your current luck." },
         },
         luck_core: {
         title: "Luck Core Amplification",
@@ -196,8 +232,12 @@ window.locales.en = {
         },
         themes: {
             'default': 'Default',
-            'theme-classic': 'Classic'
-        }
+            'theme-classic': 'Classic',
+            'theme-salt': 'Salt',
+            'theme-prestige': 'Prestige',
+        },
+        luckCoreFragments: "Core Fragments:",
+        effectiveChance: "Effective Chance (with your luck):",  
     },
     // Notifications
     notifications: {
@@ -230,7 +270,9 @@ window.locales.en = {
         settingsRefresh: "Settings will be applied after reloading the page.",
         itemUnequippedDueToSlotLoss: "The 4th equipment slot bonus has expired. Item '{itemName}' has been unequipped.",
         achievementUnlocked: "Achievement Unlocked",
-        reward: "Reward"
+        reward: "Reward",
+        luckCoreFragmentFound: "Found a Luck Core Fragment! ({current}/{needed})",
+        luckCoreAmplifiedByFragments: "Luck Core amplified using Fragments!",
     },
     debug: {
         notifications: {
@@ -269,13 +311,32 @@ window.locales.en = {
         march_of_artists: {
             name: "March of the Artists",
             description: "Attention, the creators have taken the stage! The chance of rolling cards related to art and style is significantly increased."
+        },
+        crystal_fever: {
+            name: "Crystal Fever",
+            description: "Shard rewards from duplicate cards are increased by x1.5!"
+        },
+        black_clover: {
+            name: "Black Clover",
+            description: "Time to test your fortune! Your Luck is doubled for the duration of this event."
         }
     },
     achievements: {
         roll_1000: { name: "Novice Player", description: "Perform 1,000 rolls." },
         roll_10000: { name: "Avid Collector", description: "Perform 10,000 rolls." },
         open_all_mythic: { name: "Mythic Master", description: "Unlock all Mythic rarity cards." },
-        five_rares_in_multi: { name: "Blue Fever", description: "Get 5 Rare cards in a single multi-roll." }
+        five_rares_in_multi: { name: "Blue Fever", description: "Get 5 Rare cards in a single multi-roll." },
+        unlock_salt_card: { 
+            name: "Poison + Explosion = Yummy", 
+            description: "Obtain the elemental cards that need each other to unlock a new card for the roll pool." 
+        },
+        get_salt_card: { name: "Salt of the Earth", description: "Obtain the 'Salt' card.", rewardName: "'Salt' Theme" },
+        reach_prestige_6: { name: "Major League", description: "Reach Prestige level 6.", rewardName: "'Prestige' Theme" },
+        roll_1000000: { name: "Marathon Runner", description: "Perform 1,000,000 rolls." },
+        roll_1000000000: { name: "Living Legend", description: "Perform 1,000,000,000 rolls. We admire your dedication." },
+        use_fates_thread: { name: "Ariadne's Thread", description: "Successfully preserve an item on Rebirth using 'Fate's Thread'." },
+        empower_core_with_stone: { name: "Apprentice Alchemist", description: "Amplify the Luck Core using the 'Alchemist's Stone' once." },
+        first_mega_rare: { name: "Beyond Luck", description: "Obtain your first card with a drop chance rarer than 1 in a million." },
     },
     collections: {
         classic_set: {

@@ -455,6 +455,7 @@ const UI = (() => {
     function updateAll(playerData) {
         if (!playerData) return;
         if (playerIdDisplay) playerIdDisplay.value = playerData.playerId;
+        updateMultiRollButtonText(playerData);
         updateCurrencyDisplay(playerData.currency);
         updateLuckDisplay();
         updateActiveBoostsDisplay();
@@ -650,6 +651,18 @@ const UI = (() => {
         }
     }
 
+    function updateMultiRollButtonText(playerData) {
+        if (!multiRollButton) return;
+
+        if (playerData.purchasedUpgrades.multiRollX10) {
+            multiRollButton.textContent = "Multi-Roll x10";
+        } else if (playerData.purchasedUpgrades.multiRollX5) {
+            multiRollButton.textContent = "Multi-Roll x5";
+        }
+        // Если ни один апгрейд не куплен, кнопка и так будет скрыта,
+        // так что менять текст не нужно.
+    }
+
     //rebirh
     function renderRebirthSection() {
         const rebirthSection = document.getElementById('rebirth');
@@ -659,7 +672,18 @@ const UI = (() => {
         const nextCost = Game.getRebirthCost(); // Уже со скидкой
         const canAfford = playerData.currency >= nextCost;
         const uniqueCardsCount = new Set(playerData.inventory.filter(id => id !== 'garbage')).size;
-        const potentialBonus = (uniqueCardsCount * PRESTIGE_LUCK_PER_CARD).toFixed(3);
+        // 1. Рассчитываем текущий бонус игрока
+        const currentBonus = Game.calculateRebirthBonus(playerData);
+
+        // 2. Создаем "виртуального" игрока с (уровень + 1), чтобы рассчитать будущий бонус
+        const futurePlayerData = {
+            ...playerData,
+            prestigeLevel: playerData.prestigeLevel + 1
+        };
+        const futureBonus = Game.calculateRebirthBonus(futurePlayerData);
+
+        // 3. Потенциальный бонус - это разница между тем, что будет, и тем, что есть
+        const potentialBonus = (futureBonus - currentBonus).toFixed(3);
 
         rebirthSection.innerHTML = `
             <div class="text-center p-md-5">
@@ -881,9 +905,10 @@ const UI = (() => {
     // Замените вашу существующую handleMultiRollButtonClick на эту:
      function handleMultiRollButtonClick(isCalledByAutoroll = false) {
         if (isRolling) return;
+        const playerData = Game.getPlayerData();
         setButtonsDisabled(true, isCalledByAutoroll);
 
-        const numRolls = 5;
+        const numRolls = playerData.purchasedUpgrades.multiRollX10 ? 10 : 5;
         const allRollResults = [];
 
         for (let i = 0; i < numRolls; i++) {
@@ -1173,7 +1198,29 @@ const UI = (() => {
             } else {
                 modalCardChance.textContent = `${L.get('ui.baseChance')}: 1/${Math.round(1 / versionData.probabilityBase)}`;
             }
-            
+
+            const probabilityAnalyzerEl = document.getElementById('modalCardEffectiveChance');
+            if (probabilityAnalyzerEl) probabilityAnalyzerEl.remove(); // Удаляем старое, если есть
+
+            if (playerData.purchasedUpgrades.probabilityAnalyzer) {
+                // Логика расчета эффективной вероятности (упрощенная, для примера)
+                const luck = Game.calculateCurrentLuck();
+                const pBase = versionData.probabilityBase;
+                const odds = pBase / (1 - pBase);
+                const modifiedOdds = odds * luck;
+                const effectiveP = modifiedOdds / (1 + modifiedOdds);
+                
+                const effectiveChanceText = (effectiveP > 0) ? `1 / ${Math.round(1 / effectiveP).toLocaleString()}` : '≈ 0';
+
+                const effectiveChanceEl = document.createElement('p');
+                effectiveChanceEl.id = 'modalCardEffectiveChance';
+                effectiveChanceEl.className = 'text-info small mb-1';
+                effectiveChanceEl.innerHTML = `Эффективный шанс (с вашей удачей): <strong_class="text-white">${effectiveChanceText}</strong>`;
+                
+                // Вставляем после базового шанса
+                modalCardChance.insertAdjacentElement('afterend', effectiveChanceEl);
+            }
+
             // Блок визуальных эффектов
             visualEffectControls.innerHTML = '';
             const cardHasEffect = VisualEffects.effects.hasOwnProperty(versionData.id);
@@ -1371,6 +1418,7 @@ const UI = (() => {
                             <strong>${L.get('shop.luck_core.current_bonus')}</strong>: <span class="text-success">+${currentTotalBonus.toFixed(3)}</span>
                             <small class="d-block text-muted">${L.get('shop.luck_core.description')}</small>
                         </div>
+                        <div id="luckCoreFragmentsDisplay" class="mt-2 small text-warning-emphasis"></div>
                         <button id="amplifyLuckCoreBtn" class="btn btn-lg btn-warning" ${!canAfford ? 'disabled' : ''}>
                         <span>${L.get('shop.luck_core.amplify')}</span> (+${nextLevelBonus.toFixed(3)})
                         <br>
@@ -1379,6 +1427,16 @@ const UI = (() => {
                     </div>
                 </div>
             `;
+
+            const fragmentsDisplay = document.getElementById('luckCoreFragmentsDisplay');
+            if (fragmentsDisplay && playerData.luckCoreFragments > 0) {
+                const stoneData = SHOP_DATA.equipment.find(i => i.id === 'equip_alchemists_stone');
+                if(stoneData) {
+                    // Используем L.get() для текста
+                    fragmentsDisplay.textContent = `${L.get('ui.luckCoreFragments')} ${playerData.luckCoreFragments} / ${stoneData.effect.fragmentsNeeded}`;
+                }
+            }
+
             
             document.getElementById('amplifyLuckCoreBtn')?.addEventListener('click', () => {
                 Game.amplifyLuckCore();
@@ -1493,24 +1551,45 @@ const UI = (() => {
     }
 
     function processAfkInChunks(totalCycles) {
+        const playerData = Game.getPlayerData(); // Нам понадобятся данные игрока
         console.log(`Starting AFK catch-up for ${totalCycles} cycles in chunks.`);
         isRolling = true; // Блокируем новые роллы на время "догона"
 
         let cyclesProcessed = 0;
         let totalCurrencyGained = 0;
         let newCardsCount = 0;
-        const rollsPerCycle = Game.getPlayerData().purchasedUpgrades.multiRollX5 ? 5 : 1;
+        const rollsPerCycle = playerData.purchasedUpgrades.multiRollX10 ? 10 : 
+                            playerData.purchasedUpgrades.multiRollX5 ? 5 : 1;
         const chunkSize = 50; // Обрабатываем по 50 циклов за один раз (можно настроить)
 
         function processChunk() {
             const cyclesInThisChunk = Math.min(chunkSize, totalCycles - cyclesProcessed);
+            const alchemistStone = playerData.equippedItems.find(item => item.id === 'equip_alchemists_stone');
 
             for (let i = 0; i < cyclesInThisChunk; i++) {
                 for (let j = 0; j < rollsPerCycle; j++) {
                     const result = Game.performRoll();
-                    if (result.duplicateReward > 0) {
+                    let fragmentGenerated = false; // Локальный флаг для этого ролла
+
+                    // --- НАЧАЛО НОВОЙ ЛОГИКИ АЛХИМИКА ДЛЯ AFK ---
+                    if (alchemistStone && alchemistStone.effect.triggerRarities.includes(result.rarity.id) && result.duplicateReward > 0) {
+                        if (Math.random() < alchemistStone.effect.chance) {
+                            playerData.luckCoreFragments = (playerData.luckCoreFragments || 0) + 1;
+                            fragmentGenerated = true;
+                            
+                            if (playerData.luckCoreFragments >= alchemistStone.effect.fragmentsNeeded) {
+                                Game.amplifyLuckCore(); // Вызываем усиление
+                                playerData.luckCoreFragments = 0; 
+                            }
+                        }
+                    }
+                    // --- КОНЕЦ НОВОЙ ЛОГИКИ ---
+
+                    // Добавляем валюту, только если осколок НЕ был сгенерирован
+                    if (!fragmentGenerated && result.duplicateReward > 0) {
                         totalCurrencyGained += result.duplicateReward;
                     }
+
                     if (result.isNew) {
                         newCardsCount++;
                         newCardQueue.push(result);

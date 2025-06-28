@@ -1,6 +1,21 @@
 // js/game.js
-const PRESTIGE_LUCK_PER_CARD = 0.015;
+const PRESTIGE_BONUSES = [
+    // Уровень 1
+    { base: 0.10, perCard: 0.010 },
+    // Уровень 2
+    { base: 0.25, perCard: 0.012 },
+    // Уровень 3
+    { base: 0.45, perCard: 0.015 },
+    // Уровень 4
+    { base: 0.70, perCard: 0.018 },
+    // Уровень 5
+    { base: 0.90, perCard: 0.022 },
+    // Уровень 6
+    { base: 1.20, perCard: 0.025 }
+    // Сюда можно добавлять новые уровни в будущем
+];
 const Game = (() => {
+    const BASE_LUCK = 1.0;
     let playerData = {}; // Здесь будут храниться все данные игрока
 
     // --- Инициализация ---
@@ -299,10 +314,25 @@ const Game = (() => {
             UI.showNotification(L.get('notifications.notEnoughForRebirth'), 'danger');
             return;
         }
+        const thread = playerData.equippedItems.find(item => item.id === 'equip_fates_thread');
+        let preservedItem = null;
+
+        if (thread) {
+            // Собираем все надетые предметы, КРОМЕ самой Нити Судьбы
+            const otherItems = playerData.equippedItems.filter(item => item.id !== 'equip_fates_thread');
+            if (otherItems.length > 0) {
+                // Выбираем случайный предмет для сохранения
+                preservedItem = otherItems[Math.floor(Math.random() * otherItems.length)];
+                console.log(`Fate's Thread will preserve: ${preservedItem.id}`);
+                UI.showNotification(`Нить Судьбы сохранит: ${L.get(preservedItem.nameKey)}`, 'info');
+            }
+            if (!playerData.completedAchievements.includes('use_fates_thread')) {
+                grantAchievement('use_fates_thread');
+            }
+        }
 
         if (confirm(L.get('ui.rebirth.confirmation'))) {
-            const uniqueCardsCount = new Set(playerData.inventory.filter(id => id !== 'garbage')).size;
-            const luckBonus = uniqueCardsCount * PRESTIGE_LUCK_PER_CARD;
+            const oldBonus = calculateRebirthBonus(playerData);
 
             // Получаем чистый объект с дефолтными значениями
             const defaultData = SaveManager.getDefaultPlayerData();
@@ -321,25 +351,58 @@ const Game = (() => {
             // 3. ОЧИЩАЕМ ИНВЕНТАРЬ ОТ КУПЛЕННЫХ ПРЕДМЕТОВ
             // Оставляем в инвентаре только карточки (те, что не начинаются с "purchased_")
             playerData.inventory = playerData.inventory.filter(itemId => !itemId.startsWith("purchased_"));
+
+            if (preservedItem) {
+                playerData.inventory.push("purchased_" + preservedItem.id);
+                playerData.equippedItems.push(preservedItem);
+                console.log(`Preserved item ${preservedItem.id} restored to inventory and equipped.`);
+            }
             
             // 4. Пересчитываем пассивки на основе оставшихся (открытых) карт
             updateActivePassives();
 
             // 5. Применяем бонусы престижа
             playerData.prestigeLevel++;
-            playerData.prestigeLuckBonus += luckBonus;
+            const newBonus = calculateRebirthBonus(playerData);
+            const bonusGain = newBonus - oldBonus;
 
             // Сохраняем и обновляем игру
             saveGame();
-            UI.showNotification(`${L.get('ui.rebirth.success')} +${luckBonus.toFixed(3)} ${L.get('ui.luck').toLowerCase()}`, 'success', 8000);
+            UI.showNotification(`${L.get('ui.rebirth.success')} +${bonusGain.toFixed(3)} ${L.get('ui.luck').toLowerCase()}`, 'success', 8000);
             UI.updateAll(playerData);
         }
+    }
+
+    /**
+     * Динамически рассчитывает бонус удачи от перерождений.
+     * @param {object} pData - Объект данных игрока.
+     * @returns {number} - Рассчитанный бонус к удаче.
+     */
+    function calculateRebirthBonus(pData) {
+        const level = pData.prestigeLevel;
+        if (level === 0) return 0.0;
+
+        // Считаем только реальные коллекционные карты, исключая мусор и купленные предметы
+        const uniqueCardsCount = new Set(
+            pData.inventory.filter(id => id !== 'garbage' && !id.startsWith("purchased_"))
+        ).size;
+
+        // Находим правильный тир бонусов из таблицы. 
+        // Если уровень игрока выше, чем записей в таблице, используем последнюю доступную.
+        const tierIndex = Math.min(level - 1, PRESTIGE_BONUSES.length - 1);
+        const tier = PRESTIGE_BONUSES[tierIndex];
+
+        const baseBonus = tier.base;
+        const perCardBonus = uniqueCardsCount * tier.perCard;
+        
+        return baseBonus + perCardBonus;
     }
 
     // --- Удача ---
     function calculateCurrentLuck() {
         const luckFromCore = calculateLuckFromCore(playerData.luckCoreLevel || 0);
-        let currentDisplayLuck = BASE_LUCK + luckFromCore + (playerData.prestigeLuckBonus || 0);
+        const rebirthBonus = calculateRebirthBonus(playerData);
+        let currentDisplayLuck = BASE_LUCK + luckFromCore + rebirthBonus;
         
         // <<< НАЧАЛО ИЗМЕНЕНИЙ: БОНУС ОТ ДУБЛИКАТОВ >>>
         const collectorBonus = (playerData.duplicateCounts?.blackhole || 0) * 0.01;
@@ -459,7 +522,7 @@ const Game = (() => {
         const tier = Math.floor(coreLevel / 10); // 0-9 -> тир 0, 10-19 -> тир 1, и т.д.
         
         // Множитель стоимости растет с каждым тиром
-        const costMultiplier = 1.15 + (tier * 0.05); 
+        const costMultiplier = 1.15 + (tier * 0.02); 
         
         const originalCost = Math.floor(baseCost * Math.pow(costMultiplier, coreLevel));
         return getDiscountedCost(originalCost);
@@ -503,6 +566,12 @@ const Game = (() => {
         const availableRarities = RARITIES_DATA.filter(r => {
             const prestigeOk = (r.minPrestige || 0) <= playerData.prestigeLevel;
             if (!prestigeOk) return false;
+            if (r.id === 'salt') {
+                // Карта доступна только если достижение 'unlock_salt_card' выполнено
+                if (!playerData.completedAchievements.includes('unlock_salt_card')) {
+                    return false; // Если достижения нет, карту из пула убираем
+                }
+            }
             if (r.id === 'diamond' && !playerData.isSupporter) {
                 return false;
             }
@@ -521,8 +590,9 @@ const Game = (() => {
         playerData.luckyRollCounter++;
 
         if (playerData.luckyRollCounter >= playerData.luckyRollThreshold) {
+            const baseMultiplier = playerData.purchasedUpgrades.empoweredLuckyRoll ? 2.5 : 2.0;
+            currentLuckMultiplier = baseMultiplier;
             isLuckyRollActiveThisRoll = true;
-            currentLuckMultiplier = playerData.luckyRollBonusMultiplier;
             console.log(`✨ LUCKY ROLL TRIGGERED! Luck will be multiplied by ${currentLuckMultiplier}. Counter reset.`);
             playerData.luckyRollCounter = 0;
             if (typeof UI !== 'undefined' && UI.showNotification) {
@@ -559,13 +629,21 @@ const Game = (() => {
         
         finalEffectiveLuck *= currentLuckMultiplier;
         finalEffectiveLuck = parseFloat(finalEffectiveLuck.toFixed(2));
+
+        const activeLuckEvent = getActiveEvent();
+        let eventLuckMultiplier = 1;
+        if (activeLuckEvent && activeLuckEvent.effect.type === 'global_luck_multiplier') {
+            eventLuckMultiplier = activeLuckEvent.effect.multiplier;
+            finalEffectiveLuck *= eventLuckMultiplier;
+        }
+
         
         // --- НОВЫЙ БЛОК: УЧЕТ ЭВЕНТОВ ---
         const activeEvent = getActiveEvent();
         let eventMultiplier = 1;
         // --- КОНЕЦ БЛОКА ---
 
-        console.log(`Performing roll. BaseLuck: ${baseEffectiveLuck}, LuckyMultiplier: ${currentLuckMultiplier}, Jackpot: ${jackpotTriggeredThisRoll}, FinalEffectiveLuck: ${finalEffectiveLuck}`);
+        console.log(`Performing roll. BaseLuck: ${baseEffectiveLuck}, LuckyMultiplier: ${currentLuckMultiplier}, EventLuckMultiplier: ${eventLuckMultiplier}, Jackpot: ${jackpotTriggeredThisRoll}, FinalEffectiveLuck: ${finalEffectiveLuck}`);
 
         let determinedRarityId = null;
 
@@ -703,6 +781,29 @@ const Game = (() => {
         }
 
         let finalDuplicateReward = baseDuplicateReward;
+        let fragmentGenerated = false;
+        const alchemistStone = playerData.equippedItems.find(item => item.id === 'equip_alchemists_stone');
+        if (alchemistStone && alchemistStone.effect.triggerRarities.includes(rarityId) && baseDuplicateReward > 0) {
+            if (Math.random() < alchemistStone.effect.chance) {
+                playerData.luckCoreFragments = (playerData.luckCoreFragments || 0) + 1;
+                fragmentGenerated = true; 
+                
+                // Используем L.get() и замену плейсхолдеров
+                const notificationText = L.get('notifications.luckCoreFragmentFound')
+                    .replace('{current}', playerData.luckCoreFragments)
+                    .replace('{needed}', alchemistStone.effect.fragmentsNeeded);
+                UI.showNotification(notificationText, 'warning');
+                
+                if (playerData.luckCoreFragments >= alchemistStone.effect.fragmentsNeeded) {
+                    UI.showNotification(L.get('notifications.luckCoreAmplifiedByFragments'), 'success', 6000);
+                    if (!playerData.completedAchievements.includes('empower_core_with_stone')) {
+                        grantAchievement('empower_core_with_stone');
+                    }
+                    amplifyLuckCore(); 
+                    playerData.luckCoreFragments = 0; 
+                }
+            }
+        }
         
         let totalBonusPercent = 0;
         playerData.equippedItems.forEach(item => {
@@ -717,12 +818,20 @@ const Game = (() => {
             finalDuplicateReward += bonusAmount;
             console.log(`Greed Bonus: Original: ${baseDuplicateReward}, Bonus: +${bonusAmount} (${(totalBonusPercent*100).toFixed(0)}%), New: ${finalDuplicateReward}`);
         }
-        
-        if (finalDuplicateReward > 0) {
-            addCurrency(finalDuplicateReward);
-            playerData.stats.currencyFromDuplicates += finalDuplicateReward; 
+        const activeEvent = getActiveEvent();
+        if (activeEvent && activeEvent.effect.type === 'duplicate_currency_multiplier' && finalDuplicateReward > 0) {
+            const multiplier = activeEvent.effect.multiplier;
+            const eventBonus = Math.ceil(finalDuplicateReward * multiplier) - finalDuplicateReward;
+            finalDuplicateReward += eventBonus;
+            console.log(`Event Bonus: Original: ${finalDuplicateReward - eventBonus}, Multiplier: x${multiplier}, New: ${finalDuplicateReward}`);
         }
         
+        if (!fragmentGenerated) {
+            if (finalDuplicateReward > 0) {
+                addCurrency(finalDuplicateReward);
+                playerData.stats.currencyFromDuplicates += finalDuplicateReward; 
+            }
+        }
         if (!playerData.stats.rollsByRarity) playerData.stats.rollsByRarity = {};
         if (!playerData.stats.rollsByRarity[rarityData.id]) {
             playerData.stats.rollsByRarity[rarityData.id] = 0;
@@ -865,6 +974,9 @@ const Game = (() => {
                 }
             }
             saveGame();
+            if (typeof UI !== 'undefined' && UI.updateAll) {
+                UI.updateAll(playerData);
+            }
             return true;
         }
         return false;
@@ -1042,18 +1154,29 @@ const Game = (() => {
         const reward = data.reward;
         
         let rewardText = "";
-        if (reward.type === 'currency') {
-            addCurrency(reward.amount);
-            rewardText = `💎 ${reward.amount}`;
-        } else if (reward.type === 'ui_theme') {
-            if (!playerData.unlockedThemes.includes(reward.themeId)) {
-                playerData.unlockedThemes.push(reward.themeId);
+        
+        // <<< НАЧАЛО ИСПРАВЛЕНИЯ: ДОБАВЛЯЕМ ПРОВЕРКУ >>>
+        // Обрабатываем награду, только если она существует (не null)
+        if (reward) { 
+            if (reward.type === 'currency') {
+                addCurrency(reward.amount);
+                rewardText = `💎 ${reward.amount}`;
+            } else if (reward.type === 'ui_theme') {
+                if (!playerData.unlockedThemes.includes(reward.themeId)) {
+                    playerData.unlockedThemes.push(reward.themeId);
+                }
+                rewardText = L.get(reward.nameKey);
             }
-            rewardText = L.get(reward.nameKey);
+        }
+        // <<< КОНЕЦ ИСПРАВЛЕНИЯ >>>
+
+        const achievementName = L.get(data.nameKey);
+        // Изменяем сообщение, чтобы оно не показывало "Награда:", если награды нет
+        let notificationMessage = `${L.get('notifications.achievementUnlocked')}: <strong>${achievementName}</strong>!`;
+        if (rewardText) {
+            notificationMessage += ` ${L.get('notifications.reward')}: ${rewardText}`;
         }
         
-        const achievementName = L.get(data.nameKey);
-        const notificationMessage = `${L.get('notifications.achievementUnlocked')}: <strong>${achievementName}</strong>! ${L.get('notifications.reward')}: ${rewardText}`;
         UI.showNotification(notificationMessage, 'success', 8000);
         console.log(`Achievement unlocked: ${achId}`);
     }
@@ -1066,6 +1189,6 @@ const Game = (() => {
         checkActiveBoosts, setActiveVisualEffect, clearActiveVisualEffect, setMusicVolume,
         unlockAllCards, setCurrency, addCardToInventory, amplifyLuckCore,
         getLuckCoreAmplificationCost, performRebirth, getRebirthCost, setActiveSkin, checkForSupporterStatus, getMaxEquippedItems,
-        setActiveMechanicalEffect, calculateLuckFromCore, getDiscountedCost, getActiveEvent, setActiveTheme
+        setActiveMechanicalEffect, calculateLuckFromCore, getDiscountedCost, getActiveEvent, setActiveTheme, calculateRebirthBonus
     };
 })();

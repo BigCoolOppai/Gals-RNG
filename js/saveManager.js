@@ -6,7 +6,6 @@ const SaveManager = (() => {
     const getDefaultPlayerData = () => ({
         version: "0.1.5", // Версия для возможной миграции данных в будущем
         prestigeLevel: 0,
-        prestigeLuckBonus: 0.0,
         luckCoreLevel: 0,
         currency: 0, // Призматические осколки
         notificationsEnabled: true,
@@ -24,7 +23,10 @@ const SaveManager = (() => {
         equippedItems: [], // { id, name, luckBonus } - сохраняем копии, чтобы не зависеть от изменений в SHOP_DATA
         purchasedUpgrades: {
             fastRoll: false,
-            multiRollX5: false
+            multiRollX5: false,
+            multiRollX10: false,
+            empoweredLuckyRoll: false,
+            probabilityAnalyzer: false
         },
         luckyRollCounter: 0,        
         luckyRollThreshold: 11,     

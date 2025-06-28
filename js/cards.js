@@ -1,5 +1,21 @@
 window.RARITIES_DATA = [
     {
+        id: "gal",
+        nameKey: "cards.gal.name",
+        minPrestige: 6, // Требует 6-го перерождения
+        probabilityBase: 1 / 1000000000, // Невероятно редкая
+        color: "#000000",
+        glowColor: "#f0f0f0", // Черно-белый контраст
+        cssClass: "rarity-gal",
+        currencyOnDuplicate: 100000000,
+        card: {
+            name: "Gal, the Creator", 
+            nameKey: "cards.gal.cardName",
+            image: "img/cardGal.png",
+            descriptionKey: "cards.gal.description"
+        }
+    },
+    {
         id: "time_eternal",
         nameKey: "cards.time_eternal.name",
         minPrestige: 2,
@@ -86,6 +102,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "obsidian",
+        nameKey: "cards.obsidian.name",
+        displayParentId: "lava",
+        minPrestige: 1, // Доступна после 1 реборна
+        probabilityBase: 1 / 7500000, // 1/75000 * 100
+        color: "#212121", // Угольно-черный
+        glowColor: "#E53935", // Красное свечение от лавы
+        cssClass: "rarity-obsidian",
+        currencyOnDuplicate: 750000,
+        card: {
+            name: "Obsidiana", 
+            nameKey: "cards.obsidian.cardName",
+            image: "img/altLava.png",
+            descriptionKey: "cards.obsidian.description"
+        }
+    },
+    {
         id: "altShroom",
         nameKey: "cards.altShroom.name",
         displayParentId: "shroom",
@@ -117,6 +150,23 @@ window.RARITIES_DATA = [
             nameKey: "cards.ensnared.cardName",
             image: "img/altFrieren.png",
             descriptionKey: "cards.ensnared.description"
+        }
+    },
+    {
+        id: "goblin_alt_1",
+        nameKey: "cards.goblin_alt_1.name",
+        displayParentId: "goblin",
+        minPrestige: 1,
+        probabilityBase: 1 / 5000020, // 1/50000 * 100
+        color: "#9CCC65", // Более светлый, "довольный" зеленый
+        glowColor: "#C5E1A5",
+        cssClass: "rarity-goblin-alt",
+        currencyOnDuplicate: 500000,
+        card: {
+            name: "Satisfied Tur'gata", 
+            nameKey: "cards.goblin_alt_1.cardName",
+            image: "img/altGoblin.png",
+            descriptionKey: "cards.goblin_alt_1.description"
         }
     },
     {
@@ -181,6 +231,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "salt",
+        nameKey: "cards.salt.name",
+        // Шанс выпадения после разблокировки
+        probabilityBase: 1 / 3584427, 
+        color: "#FFFFFF", // Чисто-белый
+        glowColor: "#B0BEC5", // Легкое серое свечение
+        cssClass: "rarity-salt",
+        currencyOnDuplicate: 5500,
+        // isUnlockable: true, // Можно добавить флаг для будущего отображения в UI
+        card: {
+            name: "NaCl-chan", 
+            nameKey: "cards.salt.cardName",
+            image: "img/cardSalt.png",
+            descriptionKey: "cards.salt.description"
+        }
+    },
+    {
         id: "shy_princess",
         nameKey: "cards.shy_princess.name",
         displayParentId: "dark_princess",
@@ -197,7 +264,7 @@ window.RARITIES_DATA = [
             descriptionKey: "cards.shy_princess.description"
         }
     },
-     {
+    {
         id: "dark_princess",
         nameKey: "cards.dark_princess.name",
         minPrestige: 2,
@@ -227,6 +294,22 @@ window.RARITIES_DATA = [
             nameKey: "cards.maternal.cardName",
             image: "img/cardGoat.png",
             descriptionKey: "cards.maternal.description"
+        }
+    },
+    {
+        id: "sodium",
+        nameKey: "cards.sodium.name",
+        // minPrestige можно не ставить, чтобы она была доступна, но редка
+        probabilityBase: 1 / 1551122,
+        color: "#f8f8ff", // Призрачный белый
+        glowColor: "#d1c4e9", // Лавандовое свечение
+        cssClass: "rarity-sodium",
+        currencyOnDuplicate: 155000,
+        card: {
+            name: "Natria", 
+            nameKey: "cards.sodium.cardName",
+            image: "img/cardSodium.png",
+            descriptionKey: "cards.sodium.description"
         }
     },
     {
@@ -576,6 +659,21 @@ window.RARITIES_DATA = [
             nameKey: "cards.silken.cardName",
             image: "img/cardAsian.jpg",
             descriptionKey: "cards.silken.description"
+        }
+    },
+    {
+        id: "lava",
+        nameKey: "cards.lava.name",
+        probabilityBase: 1 / 75000,
+        color: "#E64A19", // Глубокий оранжевый
+        glowColor: "#FFCC80", // Светло-оранжевое свечение
+        cssClass: "rarity-lava",
+        currencyOnDuplicate: 7500,
+        card: {
+            name: "Magmalina", 
+            nameKey: "cards.lava.cardName",
+            image: "img/cardLava.png",
+            descriptionKey: "cards.lava.description"
         }
     },
     {
@@ -1136,6 +1234,7 @@ window.RARITIES_DATA = [
 
 // Важно: Массив RARITIES_DATA должен быть отсортирован от САМОЙ РЕДКОЙ к САМОЙ ЧАСТОЙ/ФОЛЛБЭК.
 // Логика ролла будет это учитывать.
+const bottomFeederRarities = RARITIES_DATA.slice(-12).map(r => r.id);
 
 const SHOP_DATA = {
     boosts: [
@@ -1187,11 +1286,71 @@ const SHOP_DATA = {
             cost: 24000,
             type: "equipment",
             effect: { type: "lucky_roll_accelerator", rolls_reduced: 2 }
+        },
+        {
+            id: "equip_abyssal_hand", // "Донная длань"
+            nameKey: "shop.equipment.equip_abyssal_hand.name",
+            descriptionKey: "shop.equipment.equip_abyssal_hand.description",
+            cost: 25000,
+            type: "equipment",
+            effect: { 
+                type: "cumulative_luck_on_low_rolls", 
+                bonusPerStack: 0.05, 
+                maxStacks: 15,
+                triggerRarities: bottomFeederRarities 
+            }
+        },
+        {
+            id: "equip_fates_thread", // "Нить Судьбы"
+            nameKey: "shop.equipment.equip_fates_thread.name",
+            descriptionKey: "shop.equipment.equip_fates_thread.description",
+            cost: 1250000,
+            type: "equipment",
+            effect: { 
+                type: "preserve_item_on_rebirth" 
+            }
+        },
+        {
+            id: "equip_alchemists_stone", // "Камень Алхимика"
+            nameKey: "shop.equipment.equip_alchemists_stone.name",
+            descriptionKey: "shop.equipment.equip_alchemists_stone.description",
+            cost: 15000000, // Ваша цена
+            type: "equipment",
+            effect: { 
+                type: "core_fragment_chance",
+                chance: 0.001, // Ваш шанс (0.1%)
+                triggerRarities: bottomFeederRarities,
+                fragmentsNeeded: 10 // Сколько осколков нужно для 1 уровня
+            }
         }
     ],
     upgrades: [
         { id: "upgrade_fast_roll", nameKey: "shop.upgrades.upgrade_fast_roll.name", descriptionKey: "shop.upgrades.upgrade_fast_roll.description", cost: 1000, type: "permanent_upgrade", targetProperty: "fastRoll" },
         { id: "upgrade_multi_roll_x5", nameKey: "shop.upgrades.upgrade_multi_roll_x5.name", descriptionKey: "shop.upgrades.upgrade_multi_roll_x5.description", cost: 7500, type: "permanent_upgrade", targetProperty: "multiRollX5" },
+        { 
+            id: "upgrade_multi_roll_x10", 
+            nameKey: "shop.upgrades.upgrade_multi_roll_x10.name", 
+            descriptionKey: "shop.upgrades.upgrade_multi_roll_x10.description", 
+            cost: 50000000, 
+            type: "permanent_upgrade", 
+            targetProperty: "multiRollX10" 
+        },
+        { 
+            id: "upgrade_empowered_lucky_roll", 
+            nameKey: "shop.upgrades.upgrade_empowered_lucky_roll.name", 
+            descriptionKey: "shop.upgrades.upgrade_empowered_lucky_roll.description", 
+            cost: 120000, 
+            type: "permanent_upgrade", 
+            targetProperty: "empoweredLuckyRoll" 
+        },
+        { 
+            id: "upgrade_probability_analyzer", 
+            nameKey: "shop.upgrades.upgrade_probability_analyzer.name", 
+            descriptionKey: "shop.upgrades.upgrade_probability_analyzer.description", 
+            cost: 100000, // Ваша цена
+            type: "permanent_upgrade", 
+            targetProperty: "probabilityAnalyzer" 
+        }
     ]
 };
 
@@ -1202,7 +1361,7 @@ const SHOP_DATA = {
 // Константы для игры
 
 const ROLL_ANIMATION_ITEMS_COUNT = 50;
-const BASE_LUCK = 1.0;
+
 
 /**
  * Получает данные о редкости, УЧИТЫВАЯ ПЕРЕДАННЫЕ НАСТРОЙКИ ИГРОКА.
