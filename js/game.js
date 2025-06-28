@@ -529,17 +529,22 @@ const Game = (() => {
     }
 
     // Новая функция для покупки улучшения
-    function amplifyLuckCore() {
+    function amplifyLuckCore(isFree = false) {
         const cost = getLuckCoreAmplificationCost();
-        if (spendCurrency(cost)) {
-            playerData.luckCoreLevel++;
-            const newTotalBonus = calculateLuckFromCore(playerData.luckCoreLevel);
-            console.log(`Luck Core amplified to level ${playerData.luckCoreLevel}. New permanent bonus: +${newTotalBonus.toFixed(3)}`);
-            saveGame();
-            // Обновляем UI, чтобы показать новый бонус и новую цену
-            if (typeof UI !== 'undefined') {
-                UI.updateAll(getPlayerData());
-            }
+
+        // Проверяем валюту, только если это НЕ бесплатное усиление
+        if (!isFree && !spendCurrency(cost)) {
+            return; // Если это платное усиление и денег нет, выходим
+        }
+        
+        // Если это бесплатное усиление или денег хватило, выполняем основную логику
+        playerData.luckCoreLevel++;
+        const newTotalBonus = calculateLuckFromCore(playerData.luckCoreLevel);
+        console.log(`Luck Core amplified to level ${playerData.luckCoreLevel}. New permanent bonus: +${newTotalBonus.toFixed(3)}`);
+        saveGame();
+        // Обновляем UI, чтобы показать новый бонус и новую цену
+        if (typeof UI !== 'undefined') {
+            UI.updateAll(getPlayerData());
         }
     }
     
@@ -799,7 +804,7 @@ const Game = (() => {
                     if (!playerData.completedAchievements.includes('empower_core_with_stone')) {
                         grantAchievement('empower_core_with_stone');
                     }
-                    amplifyLuckCore(); 
+                    amplifyLuckCore(true); 
                     playerData.luckCoreFragments = 0; 
                 }
             }
