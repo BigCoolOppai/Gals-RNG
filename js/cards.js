@@ -423,7 +423,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Hana Akano (Omakase)", 
             nameKey: "cards.silken_alt_sushi.cardName",
-            image: "img/altSilkenSushi.png",
+            image: "img/altAsian.png",
             descriptionKey: "cards.silken_alt_sushi.description"
         }
     },
