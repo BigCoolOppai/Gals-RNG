@@ -19,6 +19,8 @@ const SaveManager = (() => {
         activeSkins: {},
         inventory: [], // Массив ID открытых редкостей (карт)
         seenRarities: [], // Массив ID редкостей, которые игрок видел хотя бы раз
+        unseenCardIds: [],
+        seenAchievements: [],
         activeBoosts: [], // { id, type, endTime, luckBonus }
         equippedItems: [], // { id, name, luckBonus } - сохраняем копии, чтобы не зависеть от изменений в SHOP_DATA
         purchasedUpgrades: {

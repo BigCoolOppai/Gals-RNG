@@ -2313,3 +2313,82 @@ html.theme-prestige {
 .theme-prestige .nav-tabs .nav-link.active { color: var(--theme-accent); background-color: var(--theme-container-bg); border-color: var(--theme-border) var(--theme-border) var(--theme-container-bg); }
 .theme-prestige .tab-content, .theme-prestige .list-group-item { background-color: var(--theme-container-bg); border-color: var(--theme-border); }
 .theme-prestige .inventory-card.border-gold, .theme-prestige .inventory-card.border-legendary { box-shadow: 0 0 15px var(--rarity-glow-color); }
+
+/* Aizen */
+.roll-slot.rarity-aizen { background: linear-gradient(145deg, #4A148C, #311B92); color: #E0E0E0; border: 1px solid #7E57C2; }
+.inventory-card.border-aizen { border-color: #4A148C; --rarity-glow-color: #D1C4E9; }
+
+/* Aizen Traitor */
+.roll-slot.rarity-aizen-traitor { background: linear-gradient(145deg, #ECEFF1, #B0BEC5); color: #212121; border: 1px solid #CFD8DC; text-shadow: 0 0 10px #80DEEA; }
+.inventory-card.border-aizen-traitor { border-color: #FFFFFF; --rarity-glow-color: #80DEEA; }
+
+/* Russian USSR */
+.roll-slot.rarity-russian-ussr { background: #CC0000; color: #FFD700; border: 1px solid #FFD700; text-shadow: 1px 1px 2px #000; font-family: 'Impact', sans-serif; }
+.inventory-card.border-russian_alt_ussr { border-color: #CC0000; --rarity-glow-color: #FFD700; }
+
+/* SSS DT */
+.roll-slot.rarity-sss-dt { background: linear-gradient(160deg, #6A1B9A, #4A148C); color: #F48FB1; border: 1px solid #AB47BC; text-shadow: 0 0 8px #FF80AB; }
+.inventory-card.border-sss_dt { border-color: #7B1FA2; --rarity-glow-color: #FF4081; }
+
+/* Silken Sushi */
+.roll-slot.rarity-silken-sushi { background: linear-gradient(135deg, #FFCDD2, #E57373); color: #212121; border: 1px solid #EF9A9A; }
+.inventory-card.border-silken_alt_sushi { border-color: #E57373; --rarity-glow-color: #FFF9C4; }
+
+/* Russian USA */
+.roll-slot.rarity-russian-usa { background: linear-gradient(135deg, #B22234, #3C3B6E); color: #FFFFFF; border: 1px solid #FFF; text-shadow: 0 0 5px #fff; }
+.inventory-card.border-russian_alt_usa { border-color: #3C3B6E; --rarity-glow-color: #B22234; }
+
+/* Индикатор новой карты в инвентаре */
+.inventory-card.new-card::after {
+    content: '!';
+    position: absolute;
+    top: 8px;   /* <-- Сдвигаем чуть выше */
+    right: 8px; /* <-- Сдвигаем чуть правее */
+    width: 24px;
+    height: 24px;
+    background-color: #dc3545; /* <-- ИЗМЕНЯЕМ НА КРАСНЫЙ */
+    color: #ffffff;           /* <-- ИЗМЕНЯЕМ НА БЕЛЫЙ */
+    border-radius: 50%;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    box-shadow: 0 0 10px #dc3545; /* <-- Добавляем красную тень */
+    animation: new-card-pulse 1.5s infinite;
+    z-index: 5; /* <-- Добавляем z-index на всякий случай */
+}
+
+@keyframes new-card-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 10px #ffc107; }
+    50% { transform: scale(1.1); box-shadow: 0 0 15px #ffc107; }
+    100% { transform: scale(1); box-shadow: 0 0 10px #ffc107; }
+}
+
+/* Индикатор новой версии в модальном окне */
+.version-switcher-btn.new-version {
+    position: relative;
+    overflow: visible;
+}
+.version-switcher-btn.new-version::after,
+.nav-tabs .nav-link.new-version::after { /* <-- ДОБАВИЛИ СЕЛЕКТОР ДЛЯ ВКЛАДОК */
+    content: '!';
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 16px;
+    height: 16px;
+    background-color: #dc3545; /* <-- ИЗМЕНИЛИ ЦВЕТ НА КРАСНЫЙ */
+    color: #fff; /* <-- ИЗМЕНИЛИ ЦВЕТ ТЕКСТА НА БЕЛЫЙ */
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    z-index: 10; /* <-- Увеличили z-index */
+    box-shadow: 0 0 8px #dc3545; /* <-- Добавили тень */
+    animation: new-card-pulse 1.5s infinite; /* <-- Добавили пульсацию */
+}

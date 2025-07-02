@@ -273,6 +273,10 @@ const Game = (() => {
         let isNew = false;
         if (!playerData.inventory.includes(rarityId)) {
             playerData.inventory.push(rarityId);
+            
+            if (!playerData.unseenCardIds.includes(rarityId)) {
+            playerData.unseenCardIds.push(rarityId);
+            }
             isNew = true;
         }
 

@@ -203,6 +203,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "aizen_traitor",
+        nameKey: "cards.aizen_traitor.name",
+        displayParentId: "aizen",
+        minPrestige: 3,
+        probabilityBase: 1 / 4200000, // В 3 раза реже
+        color: "#FFFFFF", // Чистый, холодный белый
+        glowColor: "#80DEEA", // Бирюзовое свечение, как у эспады
+        cssClass: "rarity-aizen-traitor",
+        currencyOnDuplicate: 420000,
+        card: {
+            name: "Traitor Aizen", 
+            nameKey: "cards.aizen_traitor.cardName",
+            image: "img/altCaptain.png",
+            descriptionKey: "cards.aizen_traitor.description"
+        }
+    },
+    {
         id: "error_alt_1",
         nameKey: "cards.error_alt_1.name",
         displayParentId: "error",
@@ -281,6 +298,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "russian_alt_ussr",
+        nameKey: "cards.russian_alt_ussr.name",
+        displayParentId: "russian",
+        minPrestige: 2,
+        probabilityBase: 1 / 1991000, // Отсылка к году распада
+        color: "#CC0000", // Насыщенный красный
+        glowColor: "#FFD700", // Золотой, как на флаге
+        cssClass: "rarity-russian-ussr",
+        currencyOnDuplicate: 199100,
+        card: {
+            name: "Comrade Medvedeva", 
+            nameKey: "cards.russian_alt_ussr.cardName",
+            image: "img/alt2Russian.png",
+            descriptionKey: "cards.russian_alt_ussr.description"
+        }
+    },
+    {
         id: "maternal",
         nameKey: "cards.maternal.name",
         minPrestige: 1,
@@ -329,6 +363,22 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "aizen",
+        nameKey: "cards.aizen.name",
+        minPrestige: 2,
+        probabilityBase: 1 / 1400000,
+        color: "#4A148C", // Глубокий, авторитетный фиолетовый
+        glowColor: "#D1C4E9",
+        cssClass: "rarity-aizen",
+        currencyOnDuplicate: 140000,
+        card: {
+            name: "Captain Aizen", 
+            nameKey: "cards.aizen.cardName",
+            image: "img/cardCaptain.png",
+            descriptionKey: "cards.aizen.description"
+        }
+    },
+    {
         id: "alastor",
         nameKey: "cards.alastor.name",
         minPrestige: 1,
@@ -358,6 +408,23 @@ window.RARITIES_DATA = [
             nameKey: "cards.garbage_alt_1.cardName",
             image: "img/altGarbage.png", // Вам нужно будет создать это изображение
             descriptionKey: "cards.garbage_alt_1.description"
+        }
+    },
+    {
+        id: "silken_alt_sushi",
+        nameKey: "cards.silken_alt_sushi.name",
+        displayParentId: "silken",
+        minPrestige: 1,
+        probabilityBase: 1 / 800000, // В 10 раз реже оригинала
+        color: "#E57373", // Цвет тунца
+        glowColor: "#FFF9C4", // Цвет риса/тамаго
+        cssClass: "rarity-silken-sushi",
+        currencyOnDuplicate: 80000,
+        card: {
+            name: "Hana Akano (Omakase)", 
+            nameKey: "cards.silken_alt_sushi.cardName",
+            image: "img/altSilkenSushi.png",
+            descriptionKey: "cards.silken_alt_sushi.description"
         }
     },
     {
@@ -531,6 +598,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "sss_dt",
+        nameKey: "cards.sss_dt.name",
+        displayParentId: "smokinsexystyle",
+        minPrestige: 2,
+        probabilityBase: 1 / 199900, // В 100 раз реже оригинала
+        color: "#7B1FA2", // Демонический фиолетовый
+        glowColor: "#FF4081", // Ярко-розовое свечение
+        cssClass: "rarity-sss-dt",
+        currencyOnDuplicate: 19990,
+        card: {
+            name: "Devil Trigger", 
+            nameKey: "cards.sss_dt.cardName",
+            image: "img/altSmokinSexyStyle.png",
+            descriptionKey: "cards.sss_dt.description"
+        }
+    },
+    {
         id: "doctor",
         nameKey: "cards.doctor.name",
         probabilityBase: 1 / 192800,
@@ -558,6 +642,23 @@ window.RARITIES_DATA = [
             nameKey: "cards.tungsten.cardName",
             image: "img/cardTungsten.png",
             descriptionKey: "cards.tungsten.description"
+        }
+    },
+    {
+        id: "russian_alt_usa",
+        nameKey: "cards.russian_alt_usa.name",
+        displayParentId: "russian",
+        minPrestige: 1,
+        probabilityBase: 1 / 177600, // Отсылка к году независимости
+        color: "#3C3B6E", // Темно-синий
+        glowColor: "#B22234", // Красный
+        cssClass: "rarity-russian-usa",
+        currencyOnDuplicate: 17760,
+        card: {
+            name: "Miss Klyukva Liberty", 
+            nameKey: "cards.russian_alt_usa.cardName",
+            image: "img/altRussian.png",
+            descriptionKey: "cards.russian_alt_usa.description"
         }
     },
     {

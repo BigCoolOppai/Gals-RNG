@@ -513,14 +513,20 @@ const UI = (() => {
     function renderAchievements() {
         if (!achievementsContainer) return;
         const playerData = Game.getPlayerData();
+        const achievementsTabButton = document.getElementById('achievements-tab');
+        let hasNewAchievement = false;
         
         // Рендеринг достижений
         let achievementsHtml = `<h3 data-i18n="ui.achievements.title">${L.get('ui.achievements.title')}</h3><div class="list-group mb-4">`;
         for (const achId in ACHIEVEMENTS_DATA) {
             const achData = ACHIEVEMENTS_DATA[achId];
             const isCompleted = playerData.completedAchievements.includes(achId);
+            const isSeen = playerData.seenAchievements.includes(achId);
+            if (isCompleted && !isSeen) {
+                hasNewAchievement = true;
+            }
             achievementsHtml += `
-                <div class="list-group-item ${isCompleted ? 'bg-success-subtle' : 'bg-dark-subtle'}">
+                <div class="list-group-item ${isCompleted ? 'bg-success-subtle' : 'bg-dark-subtle'}  ${isCompleted && !isSeen ? 'new-version' : ''}">
                     <strong>${L.get(achData.nameKey)}</strong>
                     <small class="d-block text-muted">${L.get(achData.descriptionKey)}</small>
                 </div>
@@ -566,6 +572,17 @@ const UI = (() => {
                 renderAchievements(); // Перерисовываем, чтобы обновить активную кнопку
             });
         });
+        if (achievementsTabButton) {
+            achievementsTabButton.classList.toggle('new-version', hasNewAchievement);
+        }
+
+        // Помечаем все видимые выполненные ачивки как "просмотренные"
+        playerData.completedAchievements.forEach(achId => {
+            if (!playerData.seenAchievements.includes(achId)) {
+                playerData.seenAchievements.push(achId);
+            }
+        });
+        Game.saveGame();
     }
 
     function applyTheme(themeId) {
@@ -1127,11 +1144,15 @@ const UI = (() => {
             const allCardVersions = [rarityData, ...availableRarities.filter(r => r.displayParentId === rarityData.id)];
             const openedVersions = allCardVersions.filter(v => playerData.inventory.includes(v.id));
             const isAnyVersionOpened = openedVersions.length > 0;
+            const hasUnseenVersion = allCardVersions.some(v => playerData.unseenCardIds.includes(v.id));
 
             const col = document.createElement('div');
             col.className = 'col';
             const cardDiv = document.createElement('div');
             cardDiv.className = 'inventory-card';
+            if (hasUnseenVersion) {
+                cardDiv.classList.add('new-card');
+            }
             cardDiv.dataset.rarityId = rarityData.id;
             const img = document.createElement('img');
             img.className = 'inventory-card-image';
@@ -1170,6 +1191,13 @@ const UI = (() => {
         // 2. Считаем счетчики на основе отфильтрованного списка viewableRarities
         const uniqueOpenedCount = new Set(playerData.inventory.filter(id => id !== 'garbage' && viewableRarities.some(r => r.id === id))).size;
         const totalPossibleCount = viewableRarities.filter(r => r.id !== 'garbage').length;
+        const inventoryTabButton = document.getElementById('inventory-tab');
+
+        if (inventoryTabButton) {
+            // Если в массиве непросмотренных есть хоть одна карта, добавляем класс
+            const hasAnyUnseen = playerData.unseenCardIds && playerData.unseenCardIds.length > 0;
+            inventoryTabButton.classList.toggle('new-version', hasAnyUnseen);
+        }
         
         inventoryCounterElement.textContent = `${L.get('ui.opened')}: ${uniqueOpenedCount} / ${totalPossibleCount}`;
 }
@@ -1180,6 +1208,9 @@ const UI = (() => {
         const mechanicalEffectControls = document.getElementById('mechanicalEffectControls'); 
 
         const playerData = Game.getPlayerData();
+        const versionIds = allVersions.map(v => v.id);
+        let needsSave = false;
+        
         const activeSkinId = playerData.activeSkins[parentId] || parentId;
 
         versionSwitcher.innerHTML = '';
@@ -1322,6 +1353,9 @@ const UI = (() => {
 
                 const wrapper = document.createElement('div');
                 const button = document.createElement('button');
+                if (playerData.unseenCardIds.includes(version.id)) {
+                    button.classList.add('new-version');
+                }
                 button.type = 'button';
                 button.className = 'btn btn-sm';
                 button.textContent = L.get(version.card.nameKey);
@@ -1348,6 +1382,20 @@ const UI = (() => {
         const initialVersionToShow = getRarityDataById(activeSkinId, playerData) || allVersions[0];
         showVersionDetails(initialVersionToShow);
         cardModal.show();
+        // Удаляем все версии этой карты из списка непросмотренных
+        playerData.unseenCardIds = playerData.unseenCardIds.filter(unseenId => {
+            if (versionIds.includes(unseenId)) {
+                needsSave = true;
+                return false; // Удаляем
+            }
+            return true; // Оставляем
+        });
+
+        if (needsSave) {
+            Game.saveGame();
+            // Перерисовываем инвентарь в фоне, чтобы убрать восклицательные знаки
+            renderInventory(playerData); 
+        }
     }
         function applyVisualEffect(rarityId, isInitialLoad = false) {
         const targets = { body: document.body, glitchOverlay: document.getElementById('globalGlitchOverlay'), audioPlayer: backgroundMusicElement };

@@ -106,6 +106,36 @@ window.locales.en = {
             cardName: "NaCl",
             description: "The result of a volatile ̶n̶i̶g̶h̶t̶ chemical reaction. NaCl took the best from both and became a pleasant addition to everyone's life. And she's beautiful, too :)" 
         },
+        aizen: { 
+            name: "Captain", 
+            cardName: "Captain Airi", 
+            description: "Captain Airi is a woman you can rely on. She is kind, but reasonably strict and fair. Many would give their lives for her." 
+        },
+        aizen_traitor: { 
+            name: "Traitor", 
+            cardName: "Airi Sōsuke", 
+            description: "As it turns out, Airi is not who she pretended to be. She is not a kind captain, but a calculating and cruel strategist. And she will do anything to bring her plan to fruition. 'No one stands on the top of the world. Not you, not I, not even the gods...'" 
+        },
+        russian_alt_ussr: { 
+            name: "Comrade", 
+            cardName: "Comrade Medvedeva", 
+            description: "For the Motherland! For the Party! For the UNION! Medvedeva used to be a powerful woman who gave her all for the good of the party. But I'd love to see what's under her 'Iron Curtain'~" 
+        },
+        sss_dt: { 
+            name: "S.S.S. DT", 
+            cardName: "Red Devil", 
+            description: "The power that flowed through her veins has been unleashed. No more jokes, only pure, primal, devilish might. Jackpot!" 
+        },
+        silken_alt_sushi: { 
+            name: "Omakase", 
+            cardName: "Hana Akano (Omakase)", 
+            description: "Tonight, the chef offers a special dish. The freshest and most tender ingredients are laid out right on her. 'Itadakimasu!'" 
+        },
+        russian_alt_usa: { 
+            name: "Free", 
+            cardName: "Cola Liberty", 
+            description: "She has no idea what vodka or a kilometer is. But she has burgers and an eagle (that farms aura). She talks about freedom, democracy, and the right to bear large... guns." 
+        },
     },
     // Shop Items
     shop: {
