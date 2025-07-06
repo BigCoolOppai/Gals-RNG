@@ -66,6 +66,38 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "gojo",
+        nameKey: "cards.gojo.name",
+        minPrestige: 3, // Доступна после 2 ребёрнов
+        probabilityBase: 1 / 15000000, // Невероятно сильный персонаж = очень редкая карта
+        color: "#01579B", // Глубокий синий, цвет ее глаз и техник
+        glowColor: "#81D4FA", // Яркое голубое свечение, как "Бесконечность"
+        cssClass: "rarity-gojo",
+        currencyOnDuplicate: 1500000,
+        card: {
+            name: "Satsuki Gojo", 
+            nameKey: "cards.gojo.cardName",
+            image: "img/cardGojo.png", // Убедитесь, что файл существует
+            descriptionKey: "cards.gojo.description"
+        }
+    },
+    {
+        id: "kefla",
+        nameKey: "cards.kefla.name",
+        minPrestige: 2, // Доступна после 2 ребёрнов
+        probabilityBase: 1 / 13000000, // Очень редкая, как и подобает LSSJ фьюжну
+        color: "#4CAF50", // Насыщенный зеленый цвет ауры LSSJ
+        glowColor: "#B9F6CA", // Ярко-зеленое свечение
+        cssClass: "rarity-kefla",
+        currencyOnDuplicate: 1500000,
+        card: {
+            name: "Kefla", 
+            nameKey: "cards.kefla.cardName",
+            image: "img/cardKefla.png", // Убедитесь, что файл существует
+            descriptionKey: "cards.kefla.description"
+        }
+    },
+    {
         id: "altLibrarian",
         nameKey: "cards.altLibrarian.name",
         displayParentId: "librarian",
@@ -80,6 +112,22 @@ window.RARITIES_DATA = [
             nameKey: "cards.altLibrarian.cardName",
             image: "img/altLibrarian.png", // Убедитесь, что файл существует
             descriptionKey: "cards.altLibrarian.description"
+        }
+    },
+    {
+        id: "dionysia",
+        nameKey: "cards.dionysia.name",
+        minPrestige: 4,
+        probabilityBase: 1 / 11000000, // Между Легендарной и Мифической
+        color: "#6A1B9A", // Цвет вина и винограда
+        glowColor: "#9CCC65", // Цвет виноградных лоз
+        cssClass: "rarity-dionysia",
+        currencyOnDuplicate: 1100000,
+         card: {
+            name: "Dionysia", 
+            nameKey: "cards.dionysia.cardName",
+            image: "img/cardDionysis.png", // Убедитесь, что файл существует
+            descriptionKey: "cards.dionysia.description"
         }
     },
     {
@@ -265,6 +313,40 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "alt_witchy",
+        nameKey: "cards.alt_witchy.name",
+        displayParentId: "witchy",
+        minPrestige: 2, // Наставница доступна позже
+        probabilityBase: 1 / 2500000, // В 100 раз реже оригинала
+        color: "#4A148C", // Королевский фиолетовый
+        glowColor: "#E1BEE7", // Светло-лавандовое мистическое свечение
+        cssClass: "rarity-alt-witchy",
+        currencyOnDuplicate: 250000,
+        card: {
+            name: "Arch-Cummoner", 
+            nameKey: "cards.alt_witchy.cardName",
+            image: "img/altWitchy.png", // Убедитесь, что файл существует
+            descriptionKey: "cards.alt_witchy.description"
+        }
+    },
+    {
+        id: "alt_maternal",
+        nameKey: "cards.alt_maternal.name",
+        displayParentId: "maternal",
+        minPrestige: 2, // Позже оригинала
+        probabilityBase: 1 / 2100000, // Реже оригинала
+        color: "#FFFDE7", // Кремовый, молочный цвет
+        glowColor: "#FFFFFF", // Чистое белое свечение
+        cssClass: "rarity-alt-maternal",
+        currencyOnDuplicate: 210000,
+        card: {
+            name: "The Wet Nurse", 
+            nameKey: "cards.alt_maternal.cardName",
+            image: "img/altGoat.png", // Убедитесь, что файл существует
+            descriptionKey: "cards.alt_maternal.description"
+        }
+    },
+    {
         id: "shy_princess",
         nameKey: "cards.shy_princess.name",
         displayParentId: "dark_princess",
@@ -425,6 +507,23 @@ window.RARITIES_DATA = [
             nameKey: "cards.silken_alt_sushi.cardName",
             image: "img/altAsian.png",
             descriptionKey: "cards.silken_alt_sushi.description"
+        }
+    },
+    {
+        id: "alt_mythic",
+        nameKey: "cards.alt_mythic.name",
+        displayParentId: "mythic",
+        minPrestige: 1,
+        probabilityBase: 1 / 64000, // в 1000 раз реже оригинала
+        color: "#B71C1C", // Кроваво-красный
+        glowColor: "#FF8A80", // Алое свечение
+        cssClass: "rarity-alt-mythic",
+        currencyOnDuplicate: 6400,
+        card: {
+            name: "Girlycard", 
+            nameKey: "cards.alt_mythic.cardName",
+            image: "img/altMythic.png", // Убедитесь, что файл существует
+            descriptionKey: "cards.alt_mythic.description"
         }
     },
     {
@@ -913,6 +1012,22 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "naruko",
+        nameKey: "cards.naruko.name",
+        minPrestige: 1,
+        probabilityBase: 1 / 15500,
+        color: "#FF9800", // Фирменный оранжевый
+        glowColor: "#FFCC80", // Теплое свечение
+        cssClass: "rarity-naruko",
+        currencyOnDuplicate: 1550,
+        card: {
+            name: "Naruko", 
+            nameKey: "cards.naruko.cardName",
+            image: "img/cardNaruto.png", // Убедитесь, что файл существует
+            descriptionKey: "cards.naruko.description"
+        }
+    },
+    {
         id: "bee",
         nameKey: "cards.bee.name", 
         probabilityBase: 1/15000, 
@@ -925,6 +1040,21 @@ window.RARITIES_DATA = [
             nameKey: "cards.bee.cardName", // <-- ДОБАВЛЕНО
             image: "img/cardQueenBee.png",
             descriptionKey: "cards.bee.description"
+        }
+    },
+    {
+        id: "smoke",
+        nameKey: "cards.smoke.name",
+        probabilityBase: 1 / 14000, // Рядом с другими концептуальными картами
+        color: "#616161", // Серый, как дым
+        glowColor: "#BDBDBD", // Пепельное свечение
+        cssClass: "rarity-smoke",
+        currencyOnDuplicate: 1400,
+        card: {
+            name: "Fuma", 
+            nameKey: "cards.smoke.cardName",
+            image: "img/cardSmoke.png", // Убедитесь, что файл существует
+               descriptionKey: "cards.smoke.description"
         }
     },
     {
@@ -1421,7 +1551,7 @@ const SHOP_DATA = {
                 type: "core_fragment_chance",
                 chance: 0.001, // Ваш шанс (0.1%)
                 triggerRarities: bottomFeederRarities,
-                fragmentsNeeded: 10 // Сколько осколков нужно для 1 уровня
+                fragmentsNeeded: 30 // Сколько осколков нужно для 1 уровня
             }
         }
     ],

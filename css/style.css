@@ -2392,3 +2392,127 @@ html.theme-prestige {
     box-shadow: 0 0 8px #dc3545; /* <-- Добавили тень */
     animation: new-card-pulse 1.5s infinite; /* <-- Добавили пульсацию */
 }
+
+/* Alt Maternal (Кормящая) */
+.roll-slot.rarity-alt-maternal {
+    background: linear-gradient(145deg, #fff, #FFFDE7); /* От белого к кремовому */
+    color: #8D6E63; /* Мягкий коричневый текст */
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+    border: 1px solid #D7CCC8;
+    font-family: 'Georgia', serif;
+}
+.inventory-card.border-alt_maternal {
+    border-color: #FFFDE7; 
+    --rarity-glow-color: #FFFFFF;
+}
+
+/* Alt Witchy (Верховная) */
+.roll-slot.rarity-alt-witchy {
+    background: linear-gradient(160deg, #4A148C, #2c0b50);
+    color: #F3E5F5;
+    text-shadow: 0 0 10px #CE93D8, 0 0 5px #fff;
+    border: 1px solid #7B1FA2;
+    font-family: 'Cinzel Decorative', cursive;
+    text-transform: uppercase;
+}
+.inventory-card.border-alt_witchy {
+    border-color: #7B1FA2; 
+    --rarity-glow-color: #CE93D8;
+}
+
+/* Dionysia (Пьянящая) */
+.roll-slot.rarity-dionysia {
+    background: linear-gradient(135deg, #6A1B9A 0%, #4CAF50 100%); /* От фиолетового к зеленому */
+    color: #F3E5F5;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+    border: 1px solid #8E24AA;
+    font-family: 'Playfair Display SC', serif;
+}
+.inventory-card.border-dionysia {
+    border-color: #6A1B9A; 
+    --rarity-glow-color: #AED581;
+}
+
+/* Alt Mythic (Алая Королева) */
+.roll-slot.rarity-alt-mythic {
+    background: linear-gradient(145deg, #000, #B71C1C 80%);
+    color: #FFCDD2;
+    text-shadow: 0 0 8px #ff5252, 0 0 15px #ff5252;
+    border: 1px solid #D32F2F;
+    text-transform: uppercase;
+    animation: error-text-glitch 0.2s infinite alternate;
+}
+.inventory-card.border-alt_mythic {
+    border-color: #B71C1C; 
+    --rarity-glow-color: #ff5252;
+}
+
+/* Gojo (Безграничная) */
+.roll-slot.rarity-gojo {
+    background: #000;
+    color: #81D4FA;
+    text-shadow: 0 0 8px #81D4FA, 0 0 15px #0288D1, 0 0 20px #01579B;
+    border: 1px solid #4FC3F7;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: bold;
+    position: relative;
+    overflow: hidden;
+}
+.roll-slot.rarity-gojo::after {
+    content: '';
+    position: absolute; top:0; left:0; width: 100%; height: 100%;
+    background: radial-gradient(circle at center, rgba(129, 212, 250, 0.2) 0%, transparent 60%);
+    animation: cosmic-vortex-spin 10s linear infinite;
+}
+.inventory-card.border-gojo {
+    border-color: #0288D1; 
+    --rarity-glow-color: #81D4FA;
+}
+
+/* Kefla (Извергающаяся) */
+.roll-slot.rarity-kefla {
+    background: linear-gradient(160deg, #8BC34A, #33691E);
+    color: #F1F8E9;
+    text-shadow: 0 0 10px #C5E1A5, 0 0 20px #DCEDC8;
+    border: 2px solid #AED581;
+    font-family: 'Impact', sans-serif;
+    text-transform: uppercase;
+    animation: screen-shake 0.1s infinite;
+}
+.inventory-card.border-kefla {
+    border-color: #8BC34A; 
+    --rarity-glow-color: #DCEDC8;
+}
+
+/* Naruko (Обольстительная) */
+.roll-slot.rarity-naruko {
+    background: linear-gradient(45deg, #FFB74D, #FF7043);
+    color: #fff;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+    border: 1px solid #FF9800;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: bold;
+}
+.inventory-card.border-naruko {
+    border-color: #FF9800; 
+    --rarity-glow-color: #FFCC80;
+}
+
+/* Smoke (Дымчатая) */
+.roll-slot.rarity-smoke {
+    background: linear-gradient(180deg, #616161, #424242, #212121);
+    color: #ECEFF1;
+    text-shadow: 0 0 8px rgba(255,255,255,0.4);
+    border: 1px solid #757575;
+    position: relative;
+}
+.roll-slot.rarity-smoke > span {
+    animation: smoke-text-fade 5s infinite alternate ease-in-out;
+}
+@keyframes smoke-text-fade {
+    from { opacity: 0.7; } to { opacity: 1; }
+}
+.inventory-card.border-smoke {
+    border-color: #616161; 
+    --rarity-glow-color: #BDBDBD;
+}

@@ -136,6 +136,14 @@ window.locales.en = {
             cardName: "Cola Liberty", 
             description: "She has no idea what vodka or a kilometer is. But she has burgers and an eagle (that farms aura). She talks about freedom, democracy, and the right to bear large... guns." 
         },
+        alt_maternal: { name: "Nourishing", cardName: "Lactoriel", description: "This is a more... adult version of Tutoriel. She's ready to nourish you with her boundless love and... milk. It's for your 'Determination', of course." },
+        alt_witchy: { name: "Supreme", cardName: "Eja, the Arch-Cummoner", description: "Jizzy's mentor. She has perfected the arts of summoning and 'extraction' to a frightening degree. Her spells work with a slight gesture, and her creations... are grand." },
+        dionysia: { name: "Intoxicating", cardName: "Dionysia", description: "The goddess of wine, revelry, and madness (and orgies). Her parties last for weeks, and her gaze promises freedom from all worldly cares. Care for some wine?" },
+        alt_mythic: { name: "Bloody", cardName: "Girlycard", description: "She's not just a dhampir, she's a walking calamity. She enjoys long walks on the beach, big guns, and the total annihilation of her enemies. 'Bitches love cannons.'" },
+        gojo: { name: "Limitless", cardName: "Satsuki Gojo", description: "Throughout heaven and earth, she alone is the honored one. The Six Eyes will forever keep you in fear of her power, and hopefully, she won't feel like expanding your 'territory'..." },
+        kefla: { name: "Erupting", cardName: "Kef (LSSJ)", description: "The fusion of two Saiyan girls has unleashed unimaginable power. She's cocky, strong, and ready to erase you from existence with a single ki blast. I hope your blast is more powerful." },
+        naruko: { name: "Seductive", cardName: "Naruko", description: "The most powerful and unexpected jutsu. It seems she's relaxing in an onsen after a tough mission. Don't you want to join? I promise, there's no catch, dattebayo!" },
+        smoke: { name: "Smoky", cardName: "Fuma", description: "She is formless and intangible, like a fleeting memory or a wisp of smoke. She can be everywhere and nowhere at the same time. Try to catch her, if you can." },
     },
     // Shop Items
     shop: {
