@@ -1,255 +1,216 @@
 // js/visualEffects.js
 
 const VisualEffects = {
-    activeCleanupFunction: null, // Для хранения функции очистки текущего эффекта
+    // Отладка (true — подробные логи)
+    debug: false,
+
+    // Активный cleanup текущего эффекта
+    activeCleanupFunction: null,
+
+    // Музыка по умолчанию
     defaultMusicTrack: "audio/vibeOst1.mp3",
 
-    playMusic: function(trackSrc, audioEl, isUserInitiatedPlay = false) {
-        if (!audioEl) { console.warn("VS.playMusic: AudioEl не предоставлен."); return; }
-        if (!trackSrc) { console.warn("VS.playMusic: TrackSrc не предоставлен."); return; }
+    // Карта музыки для эффектов
+    effectMusicMap: {
+        error: "audio/error-sfx.mp3",
+        timestop: "audio/timestop-sfx.mp3",
+        motivation: "audio/motivation-sfx.mp3",
+        smokinsexystyle: "audio/smokinsexystyle-sfx.mp3",
+        uranium_alt_1: "audio/altUranium-sfx.mp3"
+        // при необходимости добавляйте новые
+    },
+
+    // Воспроизведение трека (без автозапуска при volume=0 или ручной паузе)
+    playMusic(trackSrc, audioEl, isUserInitiatedPlay = false) {
+        if (!audioEl) { console.warn("VisualEffects.playMusic: audioEl is missing"); return; }
+        if (!trackSrc) { console.warn("VisualEffects.playMusic: trackSrc is missing"); return; }
 
         const wasManuallyPausedByPlayer = audioEl.wasManuallyPaused === true;
-        const currentFullSrc = audioEl.currentSrc;
-        // Сравниваем конец currentFullSrc с trackSrc, чтобы учесть возможные различия в путях
-        const isSameTrack = currentFullSrc && currentFullSrc.endsWith(trackSrc);
+        const volumeIsZero = (audioEl.volume || 0) === 0;
+        const currentFullSrc = audioEl.currentSrc || "";
+        const isSameTrack = currentFullSrc.endsWith(trackSrc);
 
-        // 1. Если уже играет этот трек и это не пользовательский принудительный запуск - выходим.
+        // Уже играет — ничего не делаем
         if (isSameTrack && !audioEl.paused && !isUserInitiatedPlay) {
-            console.log("VS.playMusic: Уже играет этот трек, не форсировано:", trackSrc);
-            return;
-        }
-        // 2. Если трек тот же, но на паузе, И это НЕ пользовательский запуск, И он был на паузе вручную - выходим.
-        if (isSameTrack && audioEl.paused && !isUserInitiatedPlay && wasManuallyPausedByPlayer) {
-            console.log(`VS.playMusic: Трек ${trackSrc} тот же, был на ручной паузе, и это не запуск от пользователя. Воспроизведение отложено.`);
+            if (this.debug) console.log("VisualEffects.playMusic: same track already playing");
             return;
         }
 
-        const attemptPlayLogic = () => {
-            // Пытаемся воспроизвести, если:
-            // a) Это запуск от пользователя (isUserInitiatedPlay = true)
-            // b) ИЛИ музыка НЕ была поставлена на паузу ВРУЧНУЮ (!wasManuallyPausedByPlayer)
+        // Трек тот же, на паузе вручную — не запускаем без user-init
+        if (isSameTrack && audioEl.paused && !isUserInitiatedPlay && wasManuallyPausedByPlayer) {
+            if (this.debug) console.log("VisualEffects.playMusic: paused manually; skip auto play");
+            return;
+        }
+
+        const attemptPlay = () => {
+            if (volumeIsZero) {
+                if (this.debug) console.log("VisualEffects.playMusic: volume is 0 -> skip play");
+                return;
+            }
             if (isUserInitiatedPlay || !wasManuallyPausedByPlayer) {
-                const playPromise = audioEl.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        // Только пользовательский клик "Включить" должен сбрасывать флаг ручной паузы
-                        if (isUserInitiatedPlay) {
-                            delete audioEl.wasManuallyPaused;
-                            console.log("VS.playMusic: Запуск от пользователя, флаг wasManuallyPaused сброшен.");
-                        }
-                        console.log("VS.playMusic: Воспроизведение ЗАПУЩЕНО для:", trackSrc);
-                    }).catch(error => {
-                        console.warn(`VS.playMusic: ОШИБКА воспроизведения для ${trackSrc}:`, error);
-                    });
+                const p = audioEl.play();
+                if (p && typeof p.catch === 'function') {
+                    p.catch(err => console.warn("VisualEffects.playMusic: play() failed:", err));
                 }
             } else {
-                console.log(`VS.playMusic: Воспроизведение ОТЛОЖЕНО для ${trackSrc} (manuallyPaused: ${wasManuallyPausedByPlayer}, userInitiated: ${isUserInitiatedPlay})`);
+                if (this.debug) console.log("VisualEffects.playMusic: delayed due to manual pause");
             }
         };
 
-        // 3. Устанавливаем/меняем src, только если он действительно отличается или src пустой/невалидный.
-        if (!isSameTrack || !currentFullSrc || audioEl.src === window.location.href /* начальное состояние src */) {
+        if (!isSameTrack || !currentFullSrc || audioEl.src === window.location.href) {
             audioEl.src = trackSrc;
-            console.log("VS.playMusic: Источник звука установлен на:", trackSrc, ". Ожидание canplaythrough...");
-
-            // Определяем обработчики с возможностью их последующего удаления
-            const onCanPlayHandler = () => {
-                console.log(`VS.playMusic: 'canplaythrough' для ${trackSrc}. Попытка воспроизведения.`);
-                attemptPlayLogic();
-            };
-            const onErrorHandler = (e) => {
-                console.error(`VS.playMusic: Ошибка загрузки аудио ('error' event) для ${trackSrc}:`, e);
-            };
-
-            // Добавляем слушатели с опцией { once: true }, чтобы они автоматически удалились после первого срабатывания
-            audioEl.addEventListener('canplaythrough', onCanPlayHandler, { once: true });
-            audioEl.addEventListener('error', onErrorHandler, { once: true });
-            
-            audioEl.load(); // Явно вызываем load для нового источника
+            if (this.debug) console.log("VisualEffects.playMusic: set src, wait canplaythrough", trackSrc);
+            audioEl.addEventListener('canplaythrough', attemptPlay, { once: true });
+            audioEl.addEventListener('error', (e) => console.error("VisualEffects.playMusic: audio error:", e), { once: true });
+            audioEl.load();
         } else {
-            // SRC не менялся (например, трек тот же, но был на паузе).
-            // В этом случае можно сразу пытаться воспроизвести, так как данные уже должны быть загружены.
-            console.log(`VS.playMusic: SRC не менялся для ${trackSrc}. Прямая попытка воспроизведения.`);
-            attemptPlayLogic();
+            if (this.debug) console.log("VisualEffects.playMusic: same src, attempt direct play");
+            attemptPlay();
         }
     },
 
-    switchToDefaultMusic: function(audioEl, isInitialLoad = false) {
-        if (!audioEl) { console.warn("VS.switchToDefaultMusic: AudioEl не предоставлен."); return; }
-        console.log(`VS.switchToDefaultMusic вызван. isInitialLoad: ${isInitialLoad}, ManuallyPaused: ${audioEl.wasManuallyPaused}`);
-        
+    // Переключение на дефолтный трек (мягкая логика)
+    switchToDefaultMusic(audioEl, isInitialLoad = false) {
+        if (!audioEl) return;
         const isAlreadyDefault = audioEl.currentSrc && audioEl.currentSrc.endsWith(this.defaultMusicTrack);
-        // Музыка должна играть, если это не начальная загрузка И она не была поставлена на паузу вручную
-        const shouldPlayNow = !isInitialLoad && (audioEl.wasManuallyPaused === undefined || audioEl.wasManuallyPaused === false);
+        const shouldPlayNow = !isInitialLoad && audioEl.wasManuallyPaused !== true && (audioEl.volume || 0) > 0;
 
         if (!isAlreadyDefault) {
-            // Если src еще не дефолтный, устанавливаем его.
-            // playMusic сама решит, играть ли, основываясь на wasManuallyPaused и дождется canplaythrough.
-            // isUserInitiatedPlay будет true, если shouldPlayNow=true и трек на паузе (чтобы форсировать воспроизведение).
             this.playMusic(this.defaultMusicTrack, audioEl, shouldPlayNow && audioEl.paused);
         } else if (audioEl.paused && shouldPlayNow) {
-            // Если src уже дефолтный, но на паузе, и должен играть сейчас.
-            this.playMusic(this.defaultMusicTrack, audioEl, true); // Форсируем (isUserInitiatedPlay=true), чтобы точно заиграло.
+            this.playMusic(this.defaultMusicTrack, audioEl, true);
         } else if (isInitialLoad && (!audioEl.currentSrc || !audioEl.currentSrc.endsWith(this.defaultMusicTrack))) {
-            // Если это начальная загрузка и src еще не дефолтный, просто меняем src и вызываем load.
-            // Не пытаемся воспроизвести автоматически, это должно быть инициировано пользователем или настройками громкости.
             audioEl.src = this.defaultMusicTrack;
             audioEl.load();
-            console.log("VS.switchToDefaultMusic: Default source set on initial load (no play attempt).");
+            if (this.debug) console.log("VisualEffects.switchToDefaultMusic: set default on initial load");
         } else {
-             console.log("VS.switchToDefaultMusic: Уже дефолтный трек или воспроизведение отложено/не требуется.");
+            if (this.debug) console.log("VisualEffects.switchToDefaultMusic: no change");
         }
     },
 
-    // КАРТА МУЗЫКИ ДЛЯ ЭФФЕКТОВ
-    effectMusicMap: {
-        'error': "audio/error-sfx.mp3",
-        'timestop': "audio/timestop-sfx.mp3",
-        'motivation': "audio/motivation-sfx.mp3",
-        'smokinsexystyle': "audio/smokinsexystyle-sfx.mp3",
-        // 'uranium': "audio/uranium_ambient.mp3",
-        'uranium_alt_1': "audio/altUranium-sfx.mp3"
+    // Очистка overlay/классов перед применением нового эффекта
+    _resetOverlay(body, glitchOverlay) {
+        // Удаляем классы вида visual-effect-* у body
+        if (body) {
+            [...body.classList].forEach(cls => {
+                if (cls.startsWith('visual-effect-')) body.classList.remove(cls);
+            });
+        }
+        // Очищаем overlay: классы active-effect-*, дочерние элементы, скрываем
+        if (glitchOverlay) {
+            [...glitchOverlay.classList].forEach(cls => {
+                if (cls.startsWith('active-effect-')) glitchOverlay.classList.remove(cls);
+            });
+            if (glitchOverlay.childNodes.length) {
+                while (glitchOverlay.firstChild) glitchOverlay.firstChild.remove();
+            }
+            glitchOverlay.style.display = 'none';
+        }
     },
-    // ==========================================================================
-    // КОНЕЦ БЛОКА: Музыкальные функции и Карта музыки
-    // ==========================================================================
 
-    apply: function(effectId, targetElements, isInitialLoad = false) {
+    // Вспомогательный: создать scope-контейнер внутри overlay
+    _createScope(glitchOverlay, overlayClass = null) {
+        if (!glitchOverlay) return null;
+        glitchOverlay.style.display = 'block';
+        if (overlayClass) glitchOverlay.classList.add(overlayClass);
+        const scope = document.createElement('div');
+        scope.className = 've-scope';
+        glitchOverlay.appendChild(scope);
+        return scope;
+    },
+
+    // Вспомогательный: завершить/очистить scope
+    _cleanupScope(glitchOverlay, scope, overlayClass = null) {
+        try {
+            if (typeof gsap !== 'undefined') {
+                gsap.killTweensOf(scope);
+                if (scope && scope.querySelectorAll) {
+                    gsap.killTweensOf(scope.querySelectorAll('*'));
+                }
+            }
+        } catch (e) { /* ignore */ }
+
+        if (scope && scope.parentNode) scope.remove();
+        if (glitchOverlay && overlayClass) glitchOverlay.classList.remove(overlayClass);
+        if (glitchOverlay && glitchOverlay.childNodes.length === 0) {
+            glitchOverlay.style.display = 'none';
+        }
+    },
+
+    // Применить визуальный эффект (или снять, если effectId пуст)
+    apply(effectId, targetElements, isInitialLoad = false) {
+        // Снимаем предыдущий эффект
         if (this.activeCleanupFunction) {
-            this.activeCleanupFunction();
+            try { this.activeCleanupFunction(); } catch (e) { console.warn("VisualEffects.cleanup error:", e); }
             this.activeCleanupFunction = null;
         }
 
-        const { body, glitchOverlay, audioPlayer } = targetElements;
+        const { body, glitchOverlay, audioPlayer } = targetElements || {};
 
+        // Чистим overlay/классы
+        this._resetOverlay(body, glitchOverlay);
+
+        // Музыка
         if (audioPlayer) {
             const musicForThisEffect = effectId ? this.effectMusicMap[effectId] : null;
             const targetTrack = musicForThisEffect || this.defaultMusicTrack;
-
             if (isInitialLoad) {
-                // При начальной загрузке, если текущий трек не тот, что нужен, просто ставим src и load.
                 if (!audioPlayer.currentSrc || !audioPlayer.currentSrc.endsWith(targetTrack)) {
                     audioPlayer.src = targetTrack;
-                    audioPlayer.load(); // Явный load
-                    console.log(`VS.apply: Music source for '${effectId || 'default'}' set on initial load: ${targetTrack}`);
+                    audioPlayer.load();
+                    if (this.debug) console.log("VisualEffects.apply: set music src on initial load:", targetTrack);
                 }
             } else {
-                // Для смены эффекта (не isInitialLoad)
-                // isUserInitiatedPlay = false, так как это системное переключение.
-                // playMusic теперь сама корректно обработает загрузку и воспроизведение.
-                this.playMusic(targetTrack, audioPlayer, false); 
+                this.playMusic(targetTrack, audioPlayer, false);
             }
         }
-        
-        // Удаляем общие классы эффектов с body и оверлея
-        if (targetElements.body) {
-            targetElements.body.className = targetElements.body.className.replace(/\bvisual-effect-\S+/g, '');
-        }
-        if (targetElements.glitchOverlay) {
-            targetElements.glitchOverlay.className = targetElements.glitchOverlay.className.replace(/\bactive-effect-\S+/g, '');
-             while (targetElements.glitchOverlay.firstChild) { // Удаляем дочерние элементы оверлея
-                targetElements.glitchOverlay.firstChild.remove();
-            }
-            targetElements.glitchOverlay.style.display = 'none';
-        }
-        
+
         if (!effectId) {
-            console.log("All visual effects cleared.");
+            if (this.debug) console.log("VisualEffects.apply: cleared all effects");
             return;
         }
 
-        console.log(`Applying visual effect: ${effectId}`);
-        if (targetElements.glitchOverlay && (
-        effectId === 'error' || 
-        effectId === 'timestop' || 
-        effectId === 'motivation' || 
-        effectId === 'smokinsexystyle' || 
-        effectId === 'cosmic' ||
-        effectId === 'uranium_alt_1' || // Добавлено
-        effectId === 'witchy' ||         // Добавлено
-        effectId === 'blackhole'||      // Добавлено
-        effectId === 'berserk' ||
-        effectId === 'bee' ||
-        effectId === 'epic_alt_1' ||
-        effectId === 'legendary_alt_1' ||
-        effectId === 'alastor' ||
-        effectId === 'neon' ||
-        effectId === 'chlorine'
-        )) {
-        targetElements.glitchOverlay.style.display = 'block';
-    }
-
         const effectFunction = this.effects[effectId];
-        if (effectFunction) {
-            this.activeCleanupFunction = effectFunction(targetElements); // Запускаем эффект и сохраняем его функцию очистки
+        if (typeof effectFunction === 'function') {
+            const cleanup = effectFunction.call(this, targetElements, isInitialLoad);
+            if (typeof cleanup === 'function') {
+                this.activeCleanupFunction = cleanup;
+            }
         } else {
-            console.log(`No visual effect defined for ID: ${effectId}`);
+            console.log(`VisualEffects: no effect defined for ID '${effectId}'`);
         }
     },
 
+    // Список эффектов
     effects: {
-        'jackpot': function(targets) {
-            const { glitchOverlay } = targets;
+        // JACKPOT
+        jackpot(targets) {
+            const { glitchOverlay } = targets || {};
             if (!glitchOverlay) return null;
 
-            // --- Переменные для хранения ссылок на элементы и анимации ---
-            let elementsToCleanup = [];
-            let mainTimeline = gsap.timeline(); // Используем одну временную шкалу
+            const overlayClass = 'active-effect-jackpot';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
 
-            // --- Начальная настройка ---
-            glitchOverlay.innerHTML = '';
-            glitchOverlay.style.display = 'block';
-            glitchOverlay.classList.add('active-effect-jackpot');
+            if (typeof gsap === 'undefined') {
+                // Fallback: просто вспышка текста
+                const label = document.createElement('div');
+                label.textContent = 'JACKPOT!';
+                Object.assign(label.style, {
+                    position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                    fontSize: '64px', color: '#2ecc71', textShadow: '0 0 10px #2ecc71', fontWeight: 'bold'
+                });
+                scope.appendChild(label);
+                return () => this._cleanupScope(glitchOverlay, scope, overlayClass);
+            }
 
-            const cardImagePath = 'img/effects/jackpot1.png';
             const reelHeight = 350;
-            const reelItemsCount = 30;
+            const reelItemsCount = 24;
+            const cardImagePath = 'img/effects/jackpot1.png';
 
-            // --- ФУНКЦИЯ ДЛЯ СОЗДАНИЯ АУРЫ (теперь она независима) ---
-            const createAura = () => {
-                // Если эффект был очищен, пока мы ждали, не создаем ауру
-                if (!glitchOverlay.classList.contains('active-effect-jackpot')) {
-                    return;
-                }
-                console.log("Creating Persistent Aura.");
-                const auraContainer = document.createElement('div');
-                auraContainer.className = 'aura-container'; // Даем класс для легкой очистки
-                glitchOverlay.appendChild(auraContainer);
-                elementsToCleanup.push(auraContainer);
-
-                for (let i = 0; i < 120; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'jackpot-aura-particle';
-                    auraContainer.appendChild(particle);
-
-                    const isLeft = Math.random() > 0.5;
-                    const startX = isLeft ? gsap.utils.random(-80, window.innerWidth * 0.15) : gsap.utils.random(window.innerWidth * 0.85, window.innerWidth + 80);
-                    
-                    gsap.set(particle, {
-                        x: startX,
-                        y: gsap.utils.random(-80, window.innerHeight + 80),
-                        scale: gsap.utils.random(0.2, 1.5),
-                    });
-
-                    // Анимация жизни частицы (бесконечный цикл)
-                    gsap.to(particle, {
-                        duration: gsap.utils.random(2, 4),
-                        x: `+=${(isLeft ? 1 : -1) * gsap.utils.random(40, 100)}`,
-                        y: `+=${gsap.utils.random(-120, 120)}`,
-                        opacity: 0,
-                        scale: `*=${gsap.utils.random(0.7, 1.8)}`,
-                        ease: "power2.out",
-                        repeat: -1,
-                        delay: gsap.utils.random(0, 3)
-                    });
-                }
-            };
-            
-            // --- СОЗДАНИЕ СЛОТОВ ---
-            const slotsContainer = document.createElement('div');
-            slotsContainer.className = 'jackpot-slots-container';
-            glitchOverlay.appendChild(slotsContainer);
-            elementsToCleanup.push(slotsContainer); // Добавляем в массив для очистки
+            const container = document.createElement('div');
+            container.className = 'jackpot-slots-container';
+            scope.appendChild(container);
 
             const reels = [];
             for (let i = 0; i < 3; i++) {
@@ -263,186 +224,173 @@ const VisualEffects = {
                     reel.appendChild(img);
                 }
                 slot.appendChild(reel);
-                slotsContainer.appendChild(slot);
+                container.appendChild(slot);
                 reels.push(reel);
             }
 
-            // --- ПОСЛЕДОВАТЕЛЬНАЯ АНИМАЦИЯ ---
-            
-            // 1. Появление и вращение
-            mainTimeline.from(slotsContainer, { duration: 0.5, opacity: 0, scale: 0.8, ease: "back.out(1.7)" })
-                .to(reels, { y: `-=${reelHeight * (reelItemsCount - 5)}`, duration: 2, ease: "power1.in", stagger: 0.1 });
+            const tl = gsap.timeline();
+            tl.from(container, { duration: 0.5, opacity: 0, scale: 0.9, ease: "back.out(1.7)" })
+              .to(reels, { y: `-=${reelHeight * (reelItemsCount - 5)}`, duration: 1.6, ease: "power1.in", stagger: 0.12 });
 
-            // 2. Остановка барабанов
-            const stopReel = (reelIndex, targetPosition) => {
+            const stopReel = (reelIndex, pos) => {
                 const reel = reels[reelIndex];
-                const randomOffset = Math.floor(Math.random() * 5 - 2);
-                const finalPosition = -(targetPosition + randomOffset) * reelHeight;
-                return gsap.to(reel, { y: finalPosition, duration: 2.5, ease: "back.out(1)" });
+                const offset = Math.floor(Math.random() * 5 - 2);
+                const finalY = -(pos + offset) * reelHeight;
+                return gsap.to(reel, { y: finalY, duration: 1.6, ease: "back.out(1.2)" });
             };
-            mainTimeline.add(stopReel(1, 15), "-=0.5")
-                .add(stopReel(0, 15), ">-2.0")
-                .add(stopReel(2, 15), ">-2.0");
+            tl.add(stopReel(1, 12), "-=0.4")
+              .add(stopReel(0, 12), ">-1.6")
+              .add(stopReel(2, 12), ">-1.6")
+              .to(container, { duration: 0.6, opacity: 0, ease: "power1.in" }, ">+=0.2");
 
-            // 3. Вспышка
-            mainTimeline.to(glitchOverlay, { backgroundColor: 'rgba(46, 204, 113, 0.7)', duration: 0.1, repeat: 3, yoyo: true, ease: 'none' }, ">-0.3")
-                .set(glitchOverlay, { backgroundColor: 'transparent' });
+            // Аура после
+            tl.call(() => {
+                const aura = document.createElement('div');
+                aura.className = 'jackpot-aura-container';
+                scope.appendChild(aura);
+                for (let i = 0; i < 60; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'jackpot-aura-particle';
+                    aura.appendChild(p);
+                    const isLeft = Math.random() > 0.5;
+                    gsap.set(p, {
+                        x: isLeft ? gsap.utils.random(-80, window.innerWidth * 0.15) : gsap.utils.random(window.innerWidth * 0.85, window.innerWidth + 80),
+                        y: gsap.utils.random(-80, window.innerHeight + 80),
+                        scale: gsap.utils.random(0.2, 1.2),
+                        opacity: 0.8
+                    });
+                    gsap.to(p, {
+                        duration: gsap.utils.random(2.5, 4.5),
+                        x: `+=${(isLeft ? 1 : -1) * gsap.utils.random(40, 100)}`,
+                        y: `+=${gsap.utils.random(-120, 120)}`,
+                        opacity: 0,
+                        scale: `*=${gsap.utils.random(0.7, 1.8)}`,
+                        ease: "power2.out",
+                        repeat: -1,
+                        delay: gsap.utils.random(0, 2)
+                    });
+                }
+            });
 
-            // 4. Плавно убираем слоты
-            mainTimeline.to(slotsContainer, { duration: 1.0, opacity: 0, scale: 0.9, ease: "power1.in" });
-
-            // 5. ПОСЛЕ ВСЕГО ЭТОГО, вызываем создание ауры.
-            mainTimeline.call(createAura);
-
-
-            // --- ФУНКЦИЯ ОЧИСТКИ ---
             return () => {
-                if (mainTimeline) mainTimeline.kill();
-                // GSAP.killTweensOf() - более надежный способ остановить анимации,
-                // чем просто удалять элементы, к которым они привязаны.
-                gsap.killTweensOf(".jackpot-aura-particle");
-                
-                // Удаляем все созданные элементы
-                elementsToCleanup.forEach(el => {
-                    if (el.parentNode) {
-                        el.remove();
-                    }
-                });
-                
-                glitchOverlay.classList.remove('active-effect-jackpot');
-                glitchOverlay.style.display = 'none';
-                console.log("Jackpot effect (Final Attempt) cleaned up.");
+                try { tl.kill(); } catch (e) {}
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
             };
         },
-        'error': function(targets, isInitialLoad) {
-            const { glitchOverlay, body } = targets;
+
+        // ERROR (глитч)
+        error(targets) {
+            const { glitchOverlay, body } = targets || {};
             if (!glitchOverlay) return null;
 
-            glitchOverlay.classList.add('active-effect-error');
-            
-            // Создаем цветные слои для глитча
-                    const redLayer = document.createElement('div');
-                    redLayer.className = 'glitch-color-layer';
-                    redLayer.style.backgroundColor = 'rgba(255, 0, 0, 0.5)'; // Красный с прозрачностью
-                    redLayer.style.mixBlendMode = 'screen'; // Режим наложения
-                    glitchOverlay.appendChild(redLayer);
+            const overlayClass = 'active-effect-error';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
 
-                    const cyanLayer = document.createElement('div');
-                    cyanLayer.className = 'glitch-color-layer';
-                    cyanLayer.style.backgroundColor = 'rgba(0, 255, 255, 0.5)'; // Циан с прозрачностью
-                    cyanLayer.style.mixBlendMode = 'screen';
-                    glitchOverlay.appendChild(cyanLayer);
+            const gameWrapper = document.getElementById('gameWrapper') || body || document.body;
 
-                    // Основной таймлайн GSAP для глитч-эффекта
-                    const glitchTl = gsap.timeline({
-                        repeat: -1, // Бесконечное повторение
-                        repeatDelay: Math.random() * 0.5 + 0.1, // Случайная задержка между циклами
-                        onRepeat: () => { // Меняем задержку на каждой итерации для большей случайности
-                            glitchTl.repeatDelay(Math.random() * 0.5 + 0.1);
-                        }
-                    });
+            if (typeof gsap === 'undefined') {
+                // Fallback: статические цветные слои
+                const red = document.createElement('div');
+                red.style.cssText = 'position:absolute;inset:0;background:rgba(255,0,0,.15);mix-blend-mode:screen';
+                const cyan = document.createElement('div');
+                cyan.style.cssText = 'position:absolute;inset:0;background:rgba(0,255,255,.15);mix-blend-mode:screen';
+                scope.appendChild(red); scope.appendChild(cyan);
+                return () => this._cleanupScope(glitchOverlay, scope, overlayClass);
+            }
 
-                    // 1. Анимация дрожания экрана (применяем к body или к основному контейнеру игры)
-                    // Используем gsap.utils.random для случайных значений
-                    glitchTl.to(gameWrapper, { // Или к вашему главному игровому контейнеру
-                        duration: 0.03,
-                        x: () => gsap.utils.random(-3, 3, 1) + "px", // Случайный сдвиг по X
-                        y: () => gsap.utils.random(-3, 3, 1) + "px", // Случайный сдвиг по Y
-                        rotation: () => gsap.utils.random(-0.2, 0.2, 0.1) + "deg",
-                        ease: "steps(1)", // Резкие переходы
-                        repeat: 2, // Повторить дрожание несколько раз в цикле
-                        yoyo: true // Вернуться в исходное положение
-                    }, 0); // Начать сразу
+            const redLayer = document.createElement('div');
+            redLayer.className = 'glitch-color-layer red';
+            scope.appendChild(redLayer);
 
-                    // 2. Анимация цветных слоев
-                    glitchTl.fromTo(redLayer,
-                        { opacity: 0, x: () => gsap.utils.random(-10, 10, 1) + "px" },
-                        { duration: 0.05, opacity: () => Math.random() * 0.3 + 0.1, x: 0, ease: "steps(1)", repeat: 1, yoyo: true }
-                    , "<0.02"); // Начать чуть позже дрожания
+            const cyanLayer = document.createElement('div');
+            cyanLayer.className = 'glitch-color-layer cyan';
+            scope.appendChild(cyanLayer);
 
-                    glitchTl.fromTo(cyanLayer,
-                        { opacity: 0, x: () => gsap.utils.random(-10, 10, 1) + "px" },
-                        { duration: 0.05, opacity: () => Math.random() * 0.3 + 0.1, x: 0, ease: "steps(1)", repeat: 1, yoyo: true }
-                    , "<0.03"); // Начать еще чуть позже
+            const tl = gsap.timeline({
+                repeat: -1,
+                repeatDelay: Math.random() * 0.5 + 0.1,
+                onRepeat: () => tl.repeatDelay(Math.random() * 0.5 + 0.1)
+            });
 
-                    // 3. Динамическое создание и анимация глитч-линий
-                    const createAnimatedGlitchLine = () => {
-                        if (!glitchOverlay || glitchOverlay.style.display === 'none') return; // Не создавать, если оверлей скрыт
+            // Дрожание контейнера
+            if (gameWrapper) {
+                tl.to(gameWrapper, {
+                    duration: 0.03,
+                    x: () => gsap.utils.random(-3, 3) + "px",
+                    y: () => gsap.utils.random(-3, 3) + "px",
+                    rotation: () => gsap.utils.random(-0.2, 0.2) + "deg",
+                    ease: "steps(1)",
+                    repeat: 2,
+                    yoyo: true
+                }, 0);
+            }
 
-                        const line = document.createElement('div');
-                        line.className = 'glitch-line';
-                        line.style.height = `${gsap.utils.random(1, 8, 1)}px`;
-                        line.style.top = `${gsap.utils.random(0, 100)}%`;
-                        line.style.backgroundColor = Math.random() > 0.5 ? 'rgba(255,0,0,0.7)' : 'rgba(0,255,255,0.7)';
-                        // Начальное состояние для GSAP анимации
-                        gsap.set(line, { opacity: 0, x: Math.random() > 0.5 ? "-100%" : "100%" });
-                        
-                        glitchOverlay.appendChild(line);
+            // Цветные слои
+            tl.fromTo(redLayer, { opacity: 0, x: () => gsap.utils.random(-10, 10) + "px" },
+                { duration: 0.05, opacity: () => Math.random() * 0.3 + 0.1, x: 0, ease: "steps(1)", repeat: 1, yoyo: true }, "<0.02");
+            tl.fromTo(cyanLayer, { opacity: 0, x: () => gsap.utils.random(-10, 10) + "px" },
+                { duration: 0.05, opacity: () => Math.random() * 0.3 + 0.1, x: 0, ease: "steps(1)", repeat: 1, yoyo: true }, "<0.03");
 
-                        gsap.timeline()
-                            .to(line, { 
-                                duration: gsap.utils.random(0.05, 0.15), 
-                                x: 0, 
-                                opacity: gsap.utils.random(0.2, 0.5), 
-                                ease: "steps(3)" 
-                            })
-                            .to(line, { 
-                                duration: gsap.utils.random(0.03, 0.1), 
-                                x: Math.random() > 0.5 ? "100%" : "-100%", 
-                                opacity: 0, 
-                                ease: "steps(2)",
-                                delay: gsap.utils.random(0, 0.1), // Небольшая задержка перед исчезновением
-                                onComplete: () => line.remove() 
-                            });
-                    };
+            // Глитч-линии
+            const createLine = () => {
+                if (!scope.isConnected) return;
+                const line = document.createElement('div');
+                line.className = 'glitch-line';
+                line.style.height = `${gsap.utils.random(1, 8)}px`;
+                line.style.top = `${gsap.utils.random(0, 100)}%`;
+                scope.appendChild(line);
+                const ltl = gsap.timeline({ onComplete: () => line.remove() });
+                ltl.to(line, { duration: gsap.utils.random(0.05, 0.15), x: 0, opacity: gsap.utils.random(0.2, 0.5), ease: 'steps(3)' })
+                   .to(line, { duration: gsap.utils.random(0.03, 0.1), x: Math.random() > 0.5 ? "100%" : "-100%", opacity: 0, ease: 'steps(2)', delay: gsap.utils.random(0, 0.1) });
+            };
+            tl.call(createLine, null, ">0.01").call(createLine, null, ">0.03").call(createLine, null, ">0.05");
 
-                    // Добавляем вызов функции создания линий в основной таймлайн
-                    // Это будет вызывать функцию несколько раз в течение цикла основного таймлайна
-                    glitchTl.call(createAnimatedGlitchLine, null, ">0.01"); // ">0.01" - немного после предыдущих анимаций
-                    glitchTl.call(createAnimatedGlitchLine, null, ">0.03");
-                    glitchTl.call(createAnimatedGlitchLine, null, ">0.05");
-
-
-                    currentEffectCleanup = () => {
-                        glitchTl.kill(); // Убиваем GSAP таймлайн
-                        if (glitchOverlay) {
-                            while (glitchOverlay.firstChild) { // Удаляем все созданные слои и линии
-                                glitchOverlay.firstChild.remove();
-                            }
-                            glitchOverlay.style.display = 'none';
-                        }
-                        console.log("GSAP ERROR effect cleaned up.");
-                    };
-                
-
-            return () => { // Функция очистки для 'error'
-                glitchTl.kill();
-                if (glitchOverlay) {
-                    glitchOverlay.classList.remove('active-effect-error');
-                    while (glitchOverlay.firstChild) {
-                        glitchOverlay.firstChild.remove();
-                    }
-                    // glitchOverlay.style.display = 'none'; // Это сделает общая apply при снятии всех эффектов
-                }
-                console.log("ERROR effect cleaned up via VisualEffects module.");
+            return () => {
+                try { tl.kill(); } catch (e) {}
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
             };
         },
 
-        'uranium': function(targets, isInitialLoad) {
-            const { body } = targets;
+        // URANIUM (простой body-класс)
+        uranium(targets) {
+            const { body } = targets || {};
+            if (!body) return null;
             body.classList.add('visual-effect-uranium');
             return () => {
                 body.classList.remove('visual-effect-uranium');
-                console.log("Uranium effect cleaned up via VisualEffects module.");
             };
         },
 
-        'timestop': function(targets) {
-            // --- ЭТАП 0: ПОДГОТОВКА (без изменений) ---
-            const { glitchOverlay } = targets;
+        // TIMESTOP (PIXI с fallback)
+        timestop(targets) {
+            const { glitchOverlay } = targets || {};
             const gameWrapper = document.getElementById('gameWrapper');
             if (!glitchOverlay || !gameWrapper) return () => {};
-            
+
+            // Fallback без PIXI
+            if (typeof PIXI === 'undefined' || typeof gsap === 'undefined') {
+                const tl = typeof gsap !== 'undefined' ? gsap.timeline() : null;
+                if (tl) {
+                    tl.to(gameWrapper, { '--invert': 1, duration: 1.2, ease: 'power2.inOut' })
+                      .to(gameWrapper, { '--invert': 0, '--grayscale': 1, '--brightness': 0.9, duration: 1.2, ease: 'power2.inOut' }, '>');
+                }
+                return () => {
+                    if (tl) try { tl.kill(); } catch (e) {}
+                    if (typeof gsap !== 'undefined') {
+                        gsap.to(gameWrapper, { '--grayscale': 0, '--brightness': 1, duration: 0.6, onComplete: () => {
+                            gameWrapper.style.cssText = gameWrapper.style.cssText.replace(/--\w+:\s*[^;]+;/g, '');
+                        }});
+                    } else {
+                        gameWrapper.style.filter = '';
+                    }
+                };
+            }
+
+            const overlayClass = 'active-effect-timestop';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
+
             const zaWarudoText = document.createElement('div');
             zaWarudoText.textContent = 'ZA WARUDO!';
             Object.assign(zaWarudoText.style, {
@@ -451,14 +399,13 @@ const VisualEffects = {
                 color: 'rgba(255, 235, 59, 0.9)', zIndex: '10000', opacity: '0', pointerEvents: 'none',
                 textShadow: '3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 0 0 25px rgba(0,0,0,0.7)',
             });
-            glitchOverlay.appendChild(zaWarudoText);
+            scope.appendChild(zaWarudoText);
 
             const pixiApp = new PIXI.Application({
                 width: window.innerWidth, height: window.innerHeight, backgroundAlpha: 0,
-                resizeTo: window, autoDensity: true, resolution: window.devicePixelRatio || 1,
+                resizeTo: window, autoDensity: true, resolution: window.devicePixelRatio || 1
             });
-            glitchOverlay.appendChild(pixiApp.view);
-            glitchOverlay.style.display = 'block';
+            scope.appendChild(pixiApp.view);
             glitchOverlay.style.zIndex = '9998';
 
             const fragmentShader = `
@@ -468,589 +415,915 @@ const VisualEffects = {
                     float waveFront = u_time * 0.7; float waveWidth = 0.04; float edgeSoftness = 0.005;
                     float ring = smoothstep(waveFront - waveWidth - edgeSoftness, waveFront - waveWidth, dist) - smoothstep(waveFront, waveFront + edgeSoftness, dist);
                     if (ring > 0.0) {
-                        vec3 c1=vec3(1,.9,.3), c2=vec3(.5,.7,1); vec2 tc=normalize(center-uv); float sa=.008*ring;
+                        vec3 c1=vec3(1.,.9,.3), c2=vec3(.5,.7,1.); vec2 tc=normalize(center-uv); float sa=.008*ring;
                         float g1d=distance(uv+tc*sa,center), g1i=smoothstep(waveFront-waveWidth,waveFront,g1d)-smoothstep(waveFront,waveFront+edgeSoftness,g1d);
                         float g2d=distance(uv-tc*sa,center), g2i=smoothstep(waveFront-waveWidth,waveFront,g2d)-smoothstep(waveFront,waveFront+edgeSoftness,g2d);
                         gl_FragColor = vec4((c1*g1i)+(c2*g2i), ring*0.7);
                     } else { discard; }
                 }
             `;
-            const distortionFilter = new PIXI.Filter(null, fragmentShader, { u_time: 0.0, u_resolution: [pixiApp.screen.width, pixiApp.screen.height] });
-            const fullscreenQuad = new PIXI.Container();
-            fullscreenQuad.filterArea = pixiApp.screen;
-            fullscreenQuad.filters = [distortionFilter];
-            pixiApp.stage.addChild(fullscreenQuad);
+            const filter = new PIXI.Filter(null, fragmentShader, { u_time: 0.0, u_resolution: [pixiApp.screen.width, pixiApp.screen.height] });
+            const quad = new PIXI.Container();
+            quad.filterArea = pixiApp.screen;
+            quad.filters = [filter];
+            pixiApp.stage.addChild(quad);
 
-            // --- ЭТАП 2: ФИНАЛЬНАЯ ПЛАВНАЯ АНИМАЦИЯ ---
             const tl = gsap.timeline();
-            const uniforms = distortionFilter.uniforms;
+            const uniforms = filter.uniforms;
 
             tl.addLabel("expand")
               .to(uniforms, { u_time: 3.0, duration: 2.8, ease: "power2.inOut" }, "expand")
-              // Анимация текста
               .fromTo(zaWarudoText, { opacity: 0, scale: 1.5 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'power2.out' }, "expand+=0.2")
               .to(zaWarudoText, { opacity: 0, scale: 0.8, duration: 0.7, ease: 'power2.in' }, ">+=0.8")
-              // ПЛАВНО ПЕРЕХОДИМ В СОСТОЯНИЕ "ИНВЕРСИИ"
-              .to(gameWrapper, {
-                  '--invert': 1,
-                  '--hue-rotate': '180deg',
-                  '--saturate': 0.8,
-                  '--contrast': 1.1,
-                  duration: 2.8,
-                  ease: 'power2.inOut'
-              }, "expand");
-
-            tl.addLabel("contract", ">-1.2")
+              .to(gameWrapper, { '--invert': 1, '--hue-rotate': '180deg', '--saturate': 0.8, '--contrast': 1.1, duration: 2.8, ease: 'power2.inOut' }, "expand")
+              .addLabel("contract", ">-1.2")
               .to(uniforms, { u_time: -0.2, duration: 1.2, ease: "power3.in" }, "contract")
-              // ПЛАВНО ПЕРЕХОДИМ В МОНОХРОМНОЕ СОСТОЯНИЕ
-              .to(gameWrapper, {
-                  '--invert': 0, // Возвращаем инверсию к 0
-                  '--hue-rotate': '0deg', // Возвращаем цвет на место
-                  '--saturate': 1, // Возвращаем нормальную насыщенность
-                  '--grayscale': 1, // ПЛАВНО ПОВЫШАЕМ до 1
-                  '--brightness': 0.9,
-                  '--contrast': 1.1,
-                  duration: 2.0,
-                  ease: 'sine.inOut'
-              }, "contract");
+              .to(gameWrapper, { '--invert': 0, '--hue-rotate': '0deg', '--saturate': 1, '--grayscale': 1, '--brightness': 0.9, '--contrast': 1.1, duration: 2.0, ease: 'sine.inOut' }, "contract");
 
-            // --- ЭТАП 3: ОЧИСТКА ---
             return () => {
-                console.log("SMOOTH (CSS Variables) TIMESTOP effect cleaned up.");
-                tl.kill();
-                
-                // Плавно возвращаем все значения к дефолтным
+                try { tl.kill(); } catch (e) {}
                 gsap.to(gameWrapper, {
-                    '--grayscale': 0,
-                    '--brightness': 1,
-                    duration: 0.8,
-                    onComplete: () => {
-                        // Важно! Очищаем инлайновые стили, которые создает GSAP, чтобы не было конфликтов
-                        gameWrapper.style.cssText = gameWrapper.style.cssText.replace(/--\w+:\s*[^;]+;/g, '');
-                    }
+                    '--grayscale': 0, '--brightness': 1, duration: 0.8,
+                    onComplete: () => { gameWrapper.style.cssText = gameWrapper.style.cssText.replace(/--\w+:\s*[^;]+;/g, ''); }
                 });
-                
-                if (zaWarudoText) zaWarudoText.remove();
-                if (pixiApp) pixiApp.destroy(true, { children: true, texture: true, baseTexture: true });
+                try { pixiApp.destroy(true, { children: true, texture: true, baseTexture: true }); } catch (e) {}
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
             };
         },
-        'smokinsexystyle': function(targets) {
-        const { glitchOverlay } = targets;
-        if (!glitchOverlay) return null;
 
-        glitchOverlay.style.display = 'block'; // Показываем оверлей
+        // SSS (Dante)
+        smokinsexystyle(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
 
-        // Создаем контейнер для SSS лого
-        const sssContainer = document.createElement('div');
-        sssContainer.style.position = 'absolute';
-        // Позиционируем в правом верхнем углу (или любом другом)
-        sssContainer.style.top = '20px';
-        sssContainer.style.right = '20px';
-        sssContainer.style.zIndex = '10'; // Поверх других возможных элементов оверлея
-        // sssContainer.style.transform = 'rotate(-5deg)'; // Легкий наклон для стиля
+            const overlayClass = 'active-effect-sss';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
 
-        // Создаем сам текст "SSS"
-        const sssText = document.createElement('div');
-        sssText.textContent = 'SSS';
-        // Стилизуем текст под референс (примерные стили, можно доработать)
-        sssText.style.fontFamily = "'Pirata One', 'Arial Black', sans-serif"; // Или другой подходящий "металлический" шрифт
-        sssText.style.fontSize = 'clamp(40px, 8vw, 100px)'; // Адаптивный размер
-        sssText.style.fontWeight = '400';
-        sssText.style.color = '#FFD700'; // Золотой
-        sssText.style.webkitTextStroke = '2px #4A2A00'; // Коричневая обводка для объема
-        sssText.style.textStroke = '2px #4A2A00';
-        sssText.style.textShadow = `
-            2px 2px 0px #000,
-            -2px -2px 0px #000,
-            2px -2px 0px #000,
-            -2px 2px 0px #000,
-            0 0 15px rgba(255, 165, 0, 0.7), /* Оранжевое свечение */
-            0 0 30px rgba(255, 100, 0, 0.5)
-        `;
-        sssText.style.lineHeight = '1'; // Уменьшаем межстрочный интервал, если текст будет в несколько строк (здесь не актуально)
-        
-        // Добавляем "Smokin' Sexy Style!!" под SSS, если хотите
-        const subText = document.createElement('div');
-        subText.textContent = "Smokin' Sexy Style!!";
-        subText.style.fontFamily = "'Pirata One', cursive"; // Или другой рукописный/стильный
-        subText.style.fontSize = 'clamp(16px, 3vw, 30px)';
-        subText.style.color = '#FF8C00'; // Оранжевый
-        subText.style.textAlign = 'center';
-        subText.style.marginTop = '-10px'; // Подогнать позицию
-        subText.style.textShadow = '1px 1px 2px #000';
-        // subText.style.transform = 'rotate(-5deg)';
+            const container = document.createElement('div');
+            Object.assign(container.style, { position: 'absolute', top: '20px', right: '20px', zIndex: '10' });
+            const sssText = document.createElement('div');
+            sssText.textContent = 'SSS';
+            Object.assign(sssText.style, {
+                fontFamily: "'Pirata One','Arial Black',sans-serif", fontSize: 'clamp(40px,8vw,100px)', color: '#FFD700',
+                WebkitTextStroke: '2px #4A2A00', textShadow: '0 0 15px rgba(255,165,0,0.7), 0 0 30px rgba(255,100,0,0.5)'
+            });
+            const sub = document.createElement('div');
+            sub.textContent = "Smokin' Sexy Style!!";
+            Object.assign(sub.style, { fontFamily: "'Pirata One',cursive", fontSize: 'clamp(16px,3vw,30px)', color: '#FF8C00', textAlign: 'center', marginTop: '-10px', textShadow: '1px 1px 2px #000' });
 
-        sssContainer.appendChild(sssText);
-        sssContainer.appendChild(subText); // Раскомментируйте, если нужен подтекст
-        glitchOverlay.appendChild(sssContainer);
+            container.appendChild(sssText);
+            container.appendChild(sub);
+            scope.appendChild(container);
 
-        // Анимация появления и легкой пульсации
-        const tl = gsap.timeline();
-        tl.from(sssContainer, { 
-            duration: 0.7, 
-            x: '+=50px', // Появление справа
-            opacity: 0, 
-            scale: 0.8,
-            ease: 'back.out(1.7)' 
-        })
-        .to(sssText.style, { // Анимация textShadow для пульсации свечения
-            duration: 1.2,
-            textShadow: `
-                2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000,
-                0 0 25px rgba(255, 165, 0, 1),
-                0 0 45px rgba(255, 100, 0, 0.8)
-            `,
-            repeat: -1,
-            yoyo: true,
-            ease: 'power1.inOut'
-        }, "-=0.3"); // Начать чуть раньше конца появления
-
-        return () => { // Функция очистки
-            tl.kill(); // Останавливаем анимацию GSAP
-            if (sssContainer.parentNode) {
-                sssContainer.remove();
+            if (typeof gsap !== 'undefined') {
+                const tl = gsap.timeline();
+                tl.from(container, { duration: 0.7, x: '+=50px', opacity: 0, scale: 0.8, ease: 'back.out(1.7)' })
+                  .to(sssText, {
+                      duration: 1.2,
+                      css: { textShadow: '0 0 25px rgba(255,165,0,1), 0 0 45px rgba(255,100,0,0.8)' },
+                      repeat: -1, yoyo: true, ease: 'power1.inOut'
+                  }, "-=0.3");
+                return () => { try { tl.kill(); } catch (e) {} this._cleanupScope(glitchOverlay, scope, overlayClass); };
             }
-            // Не скрываем glitchOverlay здесь, т.к. он может использоваться другими эффектами
-            // Общая функция apply скроет его, если не останется активных эффектов, требующих оверлей
-            console.log("SSS (Dante) effect cleaned up.");
-        };
-    },
-    'motivation': function(targets) {
-        const { glitchOverlay } = targets;
-        if (!glitchOverlay) return null;
 
-        glitchOverlay.style.display = 'block';
-        const svgNS = "http://www.w3.org/2000/svg";
-        let animationInterval = null;
+            return () => this._cleanupScope(glitchOverlay, scope, overlayClass);
+        },
 
-        const createSlash = () => {
-            if (!glitchOverlay || glitchOverlay.style.display === 'none') return; // Проверка, активен ли еще оверлей
+        // MOTIVATION (slashes)
+        motivation(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
 
-            const svg = document.createElementNS(svgNS, "svg");
-            svg.style.position = 'absolute';
-            svg.style.left = '0';
-            svg.style.top = '0';
-            svg.style.width = '100%';
-            svg.style.height = '100%';
-            svg.style.overflow = 'visible'; // Чтобы линии не обрезались краями SVG
-            svg.style.pointerEvents = 'none';
-            glitchOverlay.appendChild(svg);
+            const overlayClass = 'active-effect-motivation';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
 
-            const line = document.createElementNS(svgNS, "line");
-            
-            // Параметры разреза
-            const startX = Math.random() * glitchOverlay.offsetWidth;
-            const startY = Math.random() * glitchOverlay.offsetHeight;
-            const length = gsap.utils.random(400, 2000); // Длина разреза
-            const angle = gsap.utils.random(0, Math.PI * 2); // Случайный угол
-            const endX = startX + Math.cos(angle) * length;
-            const endY = startY + Math.sin(angle) * length;
+            const svgNS = "http://www.w3.org/2000/svg";
+            let intervalId = null;
 
-            line.setAttribute("x1", startX.toString());
-            line.setAttribute("y1", startY.toString());
-            line.setAttribute("x2", startX.toString()); // Начальная точка для анимации "рисования"
-            line.setAttribute("y2", startY.toString());
+            const createSlash = () => {
+                if (!scope.isConnected) return;
+                const svg = document.createElementNS(svgNS, "svg");
+                Object.assign(svg.style, { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', overflow: 'visible', pointerEvents: 'none' });
+                scope.appendChild(svg);
 
-            line.style.stroke = `hsl(${gsap.utils.random(180, 240)}, 100%, ${gsap.utils.random(60, 80)}%)`; // Оттенки синего/голубого
-            line.style.strokeWidth = gsap.utils.random(2, 5).toString();
-            line.style.strokeLinecap = "round";
-            line.style.filter = `drop-shadow(0 0 ${gsap.utils.random(3, 8)}px ${line.style.stroke})`; // Свечение
+                const line = document.createElementNS(svgNS, "line");
+                const startX = Math.random() * glitchOverlay.offsetWidth;
+                const startY = Math.random() * glitchOverlay.offsetHeight;
+                const length = (Math.random() * 1600) + 400;
+                const angle = Math.random() * Math.PI * 2;
+                const endX = startX + Math.cos(angle) * length;
+                const endY = startY + Math.sin(angle) * length;
 
-            svg.appendChild(line);
+                line.setAttribute("x1", String(startX));
+                line.setAttribute("y1", String(startY));
+                line.setAttribute("x2", String(startX));
+                line.setAttribute("y2", String(startY));
 
-            gsap.timeline({ onComplete: () => svg.remove() }) // Удаляем SVG после анимации
-                .to(line, { // Анимация "рисования" линии
-                    attr: { x2: endX, y2: endY },
-                    duration: 0.15, // Быстро
-                    ease: "power2.out"
-                })
-                .to(line, { // Исчезновение
-                    opacity: 0,
-                    duration: 0.4,
-                    delay: 0.1 // Пауза перед исчезновением
-                }, ">"); 
-        };
-        
-        // Запускаем создание разрезов с интервалом
-        // Очищаем предыдущий интервал, если он был (важно для случаев быстрой смены эффектов)
-        if (animationInterval) clearInterval(animationInterval);
-        animationInterval = setInterval(createSlash, gsap.utils.random(300, 800)); // Интервал появления новых разрезов
-        createSlash(); // Создаем первый сразу
+                const hue = 180 + Math.random() * 60;
+                line.style.stroke = `hsl(${hue},100%,${Math.round(60 + Math.random() * 20)}%)`;
+                line.style.strokeWidth = String(2 + Math.random() * 3);
+                line.style.strokeLinecap = "round";
+                line.style.filter = `drop-shadow(0 0 ${Math.round(3 + Math.random() * 8)}px ${line.style.stroke})`;
+                svg.appendChild(line);
 
-        return () => { // Функция очистки
-            if (animationInterval) {
-                clearInterval(animationInterval);
-                animationInterval = null;
-            }
-            // Удаляем все оставшиеся SVG с разрезами
-            const svgs = glitchOverlay.querySelectorAll('svg');
-            svgs.forEach(svg => svg.remove());
-            // Не скрываем glitchOverlay здесь
-            console.log("Motivation (Vergil) effect cleaned up.");
-        };
-    },
-    'uranium_alt_1': function(targets) {
-        const { glitchOverlay } = targets;
-        if (!glitchOverlay) return null;
-        
-        glitchOverlay.style.display = 'block';
-        glitchOverlay.classList.add('active-effect-uranium', 'unstable-version');
+                if (typeof gsap !== 'undefined') {
+                    gsap.timeline({ onComplete: () => svg.remove() })
+                        .to(line, { attr: { x2: endX, y2: endY }, duration: 0.15, ease: "power2.out" })
+                        .to(line, { opacity: 0, duration: 0.4, delay: 0.1 }, ">");
+                } else {
+                    // Простейший fallback
+                    setTimeout(() => svg.remove(), 600);
+                }
+            };
 
-        return () => {
-            if (glitchOverlay) {
+            if (intervalId) clearInterval(intervalId);
+            const delay = 300 + Math.random() * 500;
+            intervalId = setInterval(createSlash, delay);
+            createSlash();
+
+            return () => {
+                if (intervalId) clearInterval(intervalId);
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
+            };
+        },
+
+        // URANIUM ALT 1 (простые классы)
+        uranium_alt_1(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const overlayClass = 'active-effect-uranium unstable-version';
+            glitchOverlay.style.display = 'block';
+            glitchOverlay.classList.add('active-effect-uranium', 'unstable-version');
+
+            return () => {
                 glitchOverlay.classList.remove('active-effect-uranium', 'unstable-version');
                 glitchOverlay.style.display = 'none';
-            }
-        };
-    },
+            };
+        },
 
-    'witchy': function(targets) {
-        const { glitchOverlay } = targets;
-        if (!glitchOverlay) return null;
-
-        glitchOverlay.style.display = 'block';
-        glitchOverlay.classList.add('active-effect-witchy');
-        const blobs = [];
-
-        for (let i = 0; i < 20; i++) {
-            const blob = document.createElement('div');
-            blob.className = 'witchy-goo-blob';
-            const size = gsap.utils.random(50, 250);
-            gsap.set(blob, {
-                width: size,
-                height: size,
-                x: `random(0, ${window.innerWidth})`,
-                y: `random(0, ${window.innerHeight})`,
-            });
-            glitchOverlay.appendChild(blob);
-            blobs.push(blob);
-
-            gsap.to(blob, {
-                duration: gsap.utils.random(10, 20),
-                x: `random(-200, ${window.innerWidth + 200})`,
-                y: `random(-200, ${window.innerHeight + 200})`,
-                rotation: 'random(-360, 360)',
-                repeat: -1,
-                yoyo: true,
-                ease: "sine.inOut"
-            });
-        }
-        
-        return () => {
-            gsap.killTweensOf(".witchy-goo-blob");
-            glitchOverlay.innerHTML = '';
-            glitchOverlay.classList.remove('active-effect-witchy');
-            glitchOverlay.style.display = 'none';
-        };
-    },
-    'blackhole': function(targets) {
-        const { glitchOverlay, body } = targets;
-        if (!glitchOverlay) return null;
-
-        glitchOverlay.classList.add('active-effect-blackhole');
-        glitchOverlay.style.display = 'block';
-        
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
-        const particles = [];
-
-        for (let i = 0; i < 200; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'blackhole-particle';
-            glitchOverlay.appendChild(particle);
-            
-            // Начальное положение частицы по краям экрана
-            const angle = Math.random() * Math.PI * 2;
-            const radius = Math.random() * (Math.max(centerX, centerY)) + Math.min(centerX, centerY);
-            
-            gsap.set(particle, {
-                x: centerX + Math.cos(angle) * radius,
-                y: centerY + Math.sin(angle) * radius,
-                scale: gsap.utils.random(0.5, 1.5)
-            });
-            
-            // Анимация затягивания в центр
-            gsap.to(particle, {
-                duration: gsap.utils.random(2, 5),
-                x: centerX,
-                y: centerY,
-                scale: 0,
-                opacity: 0,
-                ease: "power2.in",
-                repeat: -1,
-                delay: gsap.utils.random(0, 4)
-            });
-            particles.push(particle);
-        }
-
-        // Анимация "стягивания" самого игрового контейнера
-        const gameContainer = body.querySelector('.container-fluid');
-        if (gameContainer) {
-            gsap.to(gameContainer, {
-                duration: 15,
-                scale: 0.95,
-                filter: 'blur(1px)',
-                ease: "power1.inOut",
-                repeat: -1,
-                yoyo: true
-            });
-        }
-        
-        return () => {
-            gsap.killTweensOf(".blackhole-particle");
-            if(gameContainer) gsap.killTweensOf(gameContainer);
-            particles.forEach(p => p.remove());
-            if (gameContainer) {
-                gsap.set(gameContainer, { clearProps: "all" });
-            }
-            if (glitchOverlay) {
-                glitchOverlay.classList.remove('active-effect-blackhole');
-                glitchOverlay.style.display = 'none';
-            }
-        };
-    },
-
-    'cosmic': function(targets) {
-        const { glitchOverlay } = targets;
-        if (!glitchOverlay) return null;
-
-        glitchOverlay.classList.add('active-effect-cosmic');
-        glitchOverlay.style.display = 'block';
-        const elements = [];
-
-        // Создаем звезды
-        for (let i = 0; i < 50; i++) {
-            const star = document.createElement('div');
-            star.className = 'cosmic-star';
-            const size = gsap.utils.random(1, 3);
-            star.style.width = `${size}px`;
-            star.style.height = `${size}px`;
-            star.style.top = `${gsap.utils.random(0, 100)}%`;
-            star.style.left = `${gsap.utils.random(0, 100)}%`;
-            star.style.animationDelay = `${gsap.utils.random(0, 4)}s`;
-            glitchOverlay.appendChild(star);
-            elements.push(star);
-        }
-        
-        // Создаем туманности
-        for (let i = 0; i < 5; i++) {
-            const nebula = document.createElement('div');
-            nebula.className = 'cosmic-nebula';
-            const size = gsap.utils.random(300, 600);
-            nebula.style.width = `${size}px`;
-            nebula.style.height = `${size}px`;
-            nebula.style.top = `${gsap.utils.random(-20, 80)}%`;
-            nebula.style.left = `${gsap.utils.random(-20, 80)}%`;
-            nebula.style.background = `radial-gradient(ellipse, hsla(${gsap.utils.random(200, 260)}, 100%, 70%, 0.3) 0%, transparent 70%)`;
-            glitchOverlay.appendChild(nebula);
-            elements.push(nebula);
-
-            gsap.to(nebula, {
-                duration: gsap.utils.random(20, 40),
-                opacity: gsap.utils.random(0.2, 0.5),
-                rotation: '+=360',
-                repeat: -1,
-                yoyo: true,
-                ease: 'sine.inOut'
-            });
-        }
-
-        return () => {
-            gsap.killTweensOf(".cosmic-nebula");
-            elements.forEach(el => el.remove());
-            if (glitchOverlay) {
-                glitchOverlay.classList.remove('active-effect-cosmic');
-                glitchOverlay.style.display = 'none';
-            }
-        };
-    },
-
-    'russian': function(targets) {
-        const gameWrapper = document.getElementById('gameWrapper');
-        if (!gameWrapper) return null;
-
-        gameWrapper.classList.add('visual-effect-russian-drunk');
-
-        return () => {
-            if (gameWrapper) {
-                gameWrapper.classList.remove('visual-effect-russian-drunk');
-            }
-        };
-    },
-
-    'berserk': function(targets) {
-            const { glitchOverlay } = targets;
+        // WITCHY
+        witchy(targets) {
+            const { glitchOverlay } = targets || {};
             if (!glitchOverlay) return null;
 
-            glitchOverlay.classList.add('active-effect-berserk');
-            
+            const overlayClass = 'active-effect-witchy';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
+
+            const blobs = [];
+            const count = 20;
+            for (let i = 0; i < count; i++) {
+                const blob = document.createElement('div');
+                blob.className = 'witchy-goo-blob';
+                const size = 50 + Math.random() * 200;
+                blob.style.width = size + 'px';
+                blob.style.height = size + 'px';
+                scope.appendChild(blob);
+                blobs.push(blob);
+
+                if (typeof gsap !== 'undefined') {
+                    gsap.set(blob, { x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight });
+                    gsap.to(blob, {
+                        duration: 10 + Math.random() * 10,
+                        x: `random(-200, ${window.innerWidth + 200})`,
+                        y: `random(-200, ${window.innerHeight + 200})`,
+                        rotation: 'random(-360, 360)',
+                        repeat: -1, yoyo: true, ease: "sine.inOut"
+                    });
+                }
+            }
+
+            return () => {
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
+            };
+        },
+
+        // BLACKHOLE
+        blackhole(targets) {
+            const { glitchOverlay, body } = targets || {};
+            if (!glitchOverlay) return null;
+
+            const overlayClass = 'active-effect-blackhole';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
+
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+
+            const particles = [];
+            const count = 200;
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('div');
+                p.className = 'blackhole-particle';
+                scope.appendChild(p);
+                particles.push(p);
+
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * Math.max(centerX, centerY) + Math.min(centerX, centerY);
+                if (typeof gsap !== 'undefined') {
+                    gsap.set(p, { x: centerX + Math.cos(angle) * radius, y: centerY + Math.sin(angle) * radius, scale: Math.random() + 0.5, opacity: 1 });
+                    gsap.to(p, {
+                        duration: 2 + Math.random() * 3,
+                        x: centerX, y: centerY, scale: 0, opacity: 0, ease: "power2.in", repeat: -1, delay: Math.random() * 4
+                    });
+                } else {
+                    p.style.left = (centerX + Math.cos(angle) * radius) + 'px';
+                    p.style.top = (centerY + Math.sin(angle) * radius) + 'px';
+                }
+            }
+
+            // Лёгкое дыхание основного контейнера
+            const gameContainer = body ? body.querySelector('.container-fluid') : null;
+            if (gameContainer && typeof gsap !== 'undefined') {
+                gsap.to(gameContainer, { duration: 15, scale: 0.95, filter: 'blur(1px)', ease: "power1.inOut", repeat: -1, yoyo: true });
+            }
+
+            return () => {
+                if (typeof gsap !== 'undefined') {
+                    if (gameContainer) gsap.killTweensOf(gameContainer);
+                }
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
+            };
+        },
+
+        // COSMIC
+        cosmic(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+
+            const overlayClass = 'active-effect-cosmic';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
+
+            const elements = [];
+
+            // Звезды
+            const stars = 50;
+            for (let i = 0; i < stars; i++) {
+                const star = document.createElement('div');
+                star.className = 'cosmic-star';
+                const size = 1 + Math.random() * 2;
+                Object.assign(star.style, {
+                    width: `${size}px`, height: `${size}px`,
+                    top: `${Math.random() * 100}%`, left: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 4}s`
+                });
+                scope.appendChild(star);
+                elements.push(star);
+            }
+            // Туманности
+            const nebulas = 5;
+            for (let i = 0; i < nebulas; i++) {
+                const nebula = document.createElement('div');
+                nebula.className = 'cosmic-nebula';
+                const size = 300 + Math.random() * 300;
+                nebula.style.width = `${size}px`;
+                nebula.style.height = `${size}px`;
+                nebula.style.top = `${-20 + Math.random() * 100}%`;
+                nebula.style.left = `${-20 + Math.random() * 100}%`;
+                nebula.style.background = `radial-gradient(ellipse, hsla(${200 + Math.random() * 60}, 100%, 70%, 0.3) 0%, transparent 70%)`;
+                scope.appendChild(nebula);
+                elements.push(nebula);
+
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(nebula, {
+                        duration: 20 + Math.random() * 20,
+                        opacity: 0.2 + Math.random() * 0.3,
+                        rotation: '+=360',
+                        repeat: -1,
+                        yoyo: true,
+                        ease: 'sine.inOut'
+                    });
+                }
+            }
+
+            return () => {
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
+            };
+        },
+
+        // RUSSIAN
+        russian(targets) {
+            const gameWrapper = document.getElementById('gameWrapper');
+            if (!gameWrapper) return null;
+            gameWrapper.classList.add('visual-effect-russian-drunk');
+            return () => { gameWrapper.classList.remove('visual-effect-russian-drunk'); };
+        },
+
+        // BERSERK
+        berserk(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+
+            const overlayClass = 'active-effect-berserk';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
+
             const brand = document.createElement('div');
             brand.className = 'berserk-brand';
-            glitchOverlay.appendChild(brand);
+            scope.appendChild(brand);
 
-            const tl = gsap.timeline({ repeat: -1, yoyo: true });
-
-            tl.fromTo(brand, {
-                opacity: 0.7,
-                scale: 1,
-                // Начальное положение в центре
-                x: "-50%", 
-                y: "-50%"
-            }, {
-                duration: 2.5,
-                opacity: 1,
-                scale: 1.05,
-                // Анимация кровавого свечения фильтра
-                filter: "drop-shadow(0 0 15px rgba(255, 20, 20, 1)) saturate(1.8) contrast(1.3)",
-                ease: "power1.inOut"
-            })
-            // Добавляем эффект "кровотечения" - легкое дрожание и смещение
-            .to(brand, {
-                duration: 0.1,
-                x: "-51%", // Сдвиг на 1%
-                y: "-49%",
-                repeat: 3,
-                yoyo: true,
-                ease: "rough({ template: none.out, strength: 1, points: 20, taper: 'none', randomize: true, clamp: false})"
-            }, "-=0.5");
-
-            return () => {
-                tl.kill();
-                if (brand.parentNode) brand.remove();
-                if (glitchOverlay) glitchOverlay.classList.remove('active-effect-berserk');
-            };
+            let tl = null;
+            if (typeof gsap !== 'undefined') {
+                tl = gsap.timeline({ repeat: -1, yoyo: true });
+                tl.fromTo(brand, { opacity: 0.7, scale: 1, x: "-50%", y: "-50%" },
+                                  { duration: 2.5, opacity: 1, scale: 1.05, filter: "drop-shadow(0 0 15px rgba(255,20,20,1)) saturate(1.8) contrast(1.3)", ease: "power1.inOut" })
+                  .to(brand, { duration: 0.1, x: "-51%", y: "-49%", repeat: 3, yoyo: true, ease: "power1.inOut" }, "-=0.5");
+            }
+            return () => { try { tl && tl.kill(); } catch (e) {} this._cleanupScope(glitchOverlay, scope, overlayClass); };
         },
 
-    'bee': function(targets) {
-            const { glitchOverlay } = targets;
+        // BEE
+        bee(targets) {
+            const { glitchOverlay } = targets || {};
             if (!glitchOverlay) return null;
 
-            glitchOverlay.classList.add('active-effect-bee');
-            const bees = [];
+            const overlayClass = 'active-effect-bee';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
 
-            for (let i = 0; i < 15; i++) {
-                const bee = document.createElement('div');
-                bee.className = 'bee-particle';
-                glitchOverlay.appendChild(bee);
-                bees.push(bee);
+            // Отключаем старый фоновый паттерн из CSS (вернём назад в cleanup)
+            const prevBg = glitchOverlay.style.background;
+            const prevBgImg = glitchOverlay.style.backgroundImage;
+            const prevAnim = glitchOverlay.style.animation;
+            glitchOverlay.style.background = 'transparent';
+            glitchOverlay.style.backgroundImage = 'none';
+            glitchOverlay.style.animation = 'none';
 
-                // Запускаем анимацию для каждой пчелы
-                gsap.to(bee, {
-                    duration: gsap.utils.random(3, 6),
-                    x: `random(0, ${window.innerWidth})`,
-                    y: `random(0, ${window.innerHeight})`,
-                    rotation: "random(-45, 45)",
-                    ease: "power1.inOut",
-                    repeat: -1,
+            const hasGSAP = typeof gsap !== 'undefined';
+            const hasMP = hasGSAP && typeof window.MotionPathPlugin !== 'undefined';
+            if (hasGSAP && hasMP && gsap.registerPlugin) {
+                gsap.registerPlugin(window.MotionPathPlugin);
+            }
+            const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches || false;
+
+            // ---------- Реальные "соты" (SVG) ----------
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const honeySvg = document.createElementNS(svgNS, 'svg');
+            Object.assign(honeySvg, { id: 'beeHoneycombSvg' });
+            Object.assign(honeySvg.style, {
+                position: 'absolute',
+                inset: '0',
+                pointerEvents: 'none',
+                opacity: '0.35'
+            });
+            honeySvg.setAttribute('width', '100%');
+            honeySvg.setAttribute('height', '100%');
+            scope.appendChild(honeySvg);
+
+            const honeyGroup = document.createElementNS(svgNS, 'g');
+            honeySvg.appendChild(honeyGroup);
+
+            function buildHoneycomb() {
+                while (honeyGroup.firstChild) honeyGroup.firstChild.remove();
+
+                const W = window.innerWidth;
+                const H = window.innerHeight;
+
+                // Плоско-верхние шестиугольники (flat-top)
+                const r = reduceMotion ? 10 : 14;                   // "радиус" (от центра до угла по X)
+                const w = 2 * r;                                    // ширина
+                const h = Math.sqrt(3) * r;                         // высота
+                const xStep = 0.75 * w;                             // шаг по X между центрами
+                const yStep = h;                                    // шаг по Y между центрами
+                const cols = Math.ceil(W / xStep) + 2;
+                const rows = Math.ceil(H / yStep) + 2;
+
+                function hexPoints(cx, cy, r) {
+                    const halfH = (Math.sqrt(3) * r) / 2;
+                    return [
+                        [cx - r,     cy],
+                        [cx - r/2,   cy - halfH],
+                        [cx + r/2,   cy - halfH],
+                        [cx + r,     cy],
+                        [cx + r/2,   cy + halfH],
+                        [cx - r/2,   cy + halfH]
+                    ];
+                }
+
+                for (let c = 0; c < cols; c++) {
+                    for (let rIdx = 0; rIdx < rows; rIdx++) {
+                        const cx = c * xStep + r;                                  // небольшой отступ от левого края
+                        const cy = rIdx * yStep + (c % 2 ? yStep / 2 : 0);         // смещение каждой второй колонки
+
+                        const poly = document.createElementNS(svgNS, 'polygon');
+                        poly.setAttribute(
+                            'points',
+                            hexPoints(cx, cy, r)
+                                .map(p => p.join(','))
+                                .join(' ')
+                        );
+                        poly.setAttribute('fill', 'rgba(255,193,7,0.06)');         // мягкая заливка соты
+                        poly.setAttribute('stroke', 'rgba(255,193,7,0.20)');       // контур
+                        poly.setAttribute('stroke-width', '1');
+                        honeyGroup.appendChild(poly);
+                    }
+                }
+            }
+
+            buildHoneycomb();
+
+            // Лёгкое "дыхание" фона
+            let honeyTween = null;
+            if (hasGSAP && !reduceMotion) {
+                honeyTween = gsap.to(honeyGroup, {
+                    x: '-=20',
+                    y: '+=12',
                     yoyo: true,
-                    delay: gsap.utils.random(0, 5)
+                    repeat: -1,
+                    duration: 8,
+                    ease: 'sine.inOut'
                 });
             }
 
-            return () => {
-                bees.forEach(bee => {
-                    gsap.killTweensOf(bee);
-                    if (bee.parentNode) bee.remove();
+            // При ресайзе пересобираем сетку
+            const onResize = () => {
+                buildHoneycomb();
+            };
+            window.addEventListener('resize', onResize);
+
+            // ---------- Пчёлы (SVG) ----------
+            const BEE_COUNT = reduceMotion ? 6 : 14;
+            const bees = [];
+
+            const vw = () => window.innerWidth;
+            const vh = () => window.innerHeight;
+            const margin = 40;
+            const rand = (min, max) => Math.random() * (max - min) + min;
+
+            function createBeeSVG(scale = 1) {
+                // Контейнер, который будем двигать по кривой
+                const wrap = document.createElement('div');
+                Object.assign(wrap.style, {
+                    position: 'absolute',
+                    left: '0px',
+                    top: '0px',
+                    width: `${28 * scale}px`,
+                    height: `${22 * scale}px`,
+                    transform: `translate(${rand(margin, vw() - margin)}px, ${rand(margin, vh() - margin)}px)`,
+                    willChange: 'transform'
                 });
-                if (glitchOverlay) glitchOverlay.classList.remove('active-effect-bee');
+
+                const svg = document.createElementNS(svgNS, 'svg');
+                svg.setAttribute('width', 28 * scale);
+                svg.setAttribute('height', 22 * scale);
+                svg.setAttribute('viewBox', '0 0 28 22');
+                svg.style.overflow = 'visible';
+
+                // Группа всей пчелы
+                const g = document.createElementNS(svgNS, 'g');
+                svg.appendChild(g);
+
+                // Тело (эллипс)
+                const body = document.createElementNS(svgNS, 'ellipse');
+                body.setAttribute('cx', '14');
+                body.setAttribute('cy', '11');
+                body.setAttribute('rx', '9');
+                body.setAttribute('ry', '6');
+                body.setAttribute('fill', '#FFC107');
+                g.appendChild(body);
+
+                // Полоски (3 тёмные полоски)
+                const stripes = [8, 12, 16].map((x) => {
+                    const r = document.createElementNS(svgNS, 'rect');
+                    r.setAttribute('x', String(x));
+                    r.setAttribute('y', '5.2');
+                    r.setAttribute('width', '2.5');
+                    r.setAttribute('height', '11.6');
+                    r.setAttribute('fill', '#4E342E');
+                    r.setAttribute('opacity', '0.9');
+                    g.appendChild(r);
+                    return r;
+                });
+
+                // Голова
+                const head = document.createElementNS(svgNS, 'circle');
+                head.setAttribute('cx', '7');
+                head.setAttribute('cy', '11');
+                head.setAttribute('r',  '4');
+                head.setAttribute('fill', '#3D2B1F');
+                g.appendChild(head);
+
+                // Жало
+                const sting = document.createElementNS(svgNS, 'polygon');
+                sting.setAttribute('points', '22,11 26,10 22,12');
+                sting.setAttribute('fill', '#3D2B1F');
+                g.appendChild(sting);
+
+                // Крылышки (две группы для удобного вращения)
+                const leftWingG  = document.createElementNS(svgNS, 'g');
+                const rightWingG = document.createElementNS(svgNS, 'g');
+                g.appendChild(leftWingG);
+                g.appendChild(rightWingG);
+
+                const leftWing = document.createElementNS(svgNS, 'path');
+                leftWing.setAttribute('d', 'M12 8 C 9 5, 7 6, 7.2 8.8 C 7.4 11.2, 9.8 10.6, 12 9 Z');
+                leftWing.setAttribute('fill', 'rgba(255,255,255,0.9)');
+                leftWing.setAttribute('stroke', 'rgba(255,255,255,0.6)');
+                leftWing.setAttribute('stroke-width', '0.5');
+                leftWingG.appendChild(leftWing);
+
+                const rightWing = document.createElementNS(svgNS, 'path');
+                rightWing.setAttribute('d', 'M16 8 C 19 5, 21 6, 20.8 8.8 C 20.6 11.2, 18.2 10.6, 16 9 Z');
+                rightWing.setAttribute('fill', 'rgba(255,255,255,0.9)');
+                rightWing.setAttribute('stroke', 'rgba(255,255,255,0.6)');
+                rightWing.setAttribute('stroke-width', '0.5');
+                rightWingG.appendChild(rightWing);
+
+                // Точки поворота крыльев
+                leftWingG.style.transformOrigin  = `${12 * scale}px ${8 * scale}px`;
+                rightWingG.style.transformOrigin = `${16 * scale}px ${8 * scale}px`;
+
+                wrap.appendChild(svg);
+                scope.appendChild(wrap);
+
+                // Взмах крыльев
+                if (hasGSAP && !reduceMotion) {
+                    gsap.to(leftWingG,  { rotate: 15, duration: 0.08, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+                    gsap.to(rightWingG, { rotate:-15, duration: 0.08, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+                }
+
+                return wrap;
+            }
+
+            function randomPathFrom(x0, y0) {
+                const end = { x: rand(margin, vw() - margin), y: rand(margin, vh() - margin) };
+                const c1  = { x: rand(margin, vw() - margin), y: rand(margin, vh() - margin) };
+                const c2  = { x: rand(margin, vw() - margin), y: rand(margin, vh() - margin) };
+                return [{ x: x0, y: y0 }, c1, c2, end];
+            }
+
+            function trail(beeWrap) {
+                if (!hasGSAP || reduceMotion || Math.random() > 0.04) return;
+                const dot = document.createElement('div');
+                Object.assign(dot.style, {
+                    position: 'absolute',
+                    width: '4px',
+                    height: '4px',
+                    borderRadius: '50%',
+                    background: '#FFC107',
+                    boxShadow: '0 0 6px #FFC107',
+                    left: '0px',
+                    top: '0px',
+                    pointerEvents: 'none',
+                    opacity: '0.9'
+                });
+                scope.appendChild(dot);
+                const x = gsap.getProperty(beeWrap, 'x') || 0;
+                const y = gsap.getProperty(beeWrap, 'y') || 0;
+                gsap.set(dot, { x, y });
+                gsap.to(dot, { duration: 0.6, opacity: 0, y: '-=10', ease: 'sine.out', onComplete() { dot.remove(); } });
+            }
+
+            function fly(beeWrap) {
+                if (!(hasGSAP && hasMP)) {
+                    // Fallback без MotionPath: плавные линейные перелёты
+                    const dur = rand(800, 1600);
+                    const x = rand(margin, vw() - margin);
+                    const y = rand(margin, vh() - margin);
+                    beeWrap.style.transition = `transform ${dur}ms ease-in-out`;
+                    beeWrap.style.transform  = `translate(${x}px, ${y}px)`;
+                    const t = setTimeout(() => fly(beeWrap), dur + rand(200, 500));
+                    beeWrap._fallbackTimer = t;
+                    return;
+                }
+
+                const x0 = gsap.getProperty(beeWrap, 'x') || rand(margin, vw() - margin);
+                const y0 = gsap.getProperty(beeWrap, 'y') || rand(margin, vh() - margin);
+                const path = randomPathFrom(x0, y0);
+                const dur = rand(6, 12) * (reduceMotion ? 1.2 : 1);
+
+                const tween = gsap.to(beeWrap, {
+                    duration: dur,
+                    ease: 'sine.inOut',
+                    motionPath: { path, curviness: 1.5, autoRotate: true },
+                    onUpdate: () => trail(beeWrap),
+                    onComplete: () => fly(beeWrap)
+                });
+                beeWrap._tween = tween;
+            }
+
+            for (let i = 0; i < BEE_COUNT; i++) {
+                const scale = rand(0.9, 1.2);
+                const bee = createBeeSVG(scale);
+                bees.push(bee);
+                fly(bee);
+            }
+
+            // ---------- Очистка ----------
+            return () => {
+                if (hasGSAP) {
+                    try { honeyTween && honeyTween.kill(); } catch (e) {}
+                    bees.forEach(b => { try { b._tween && b._tween.kill(); } catch(e){} });
+                } else {
+                    bees.forEach(b => { if (b._fallbackTimer) clearTimeout(b._fallbackTimer); });
+                }
+                window.removeEventListener('resize', onResize);
+
+                // Вернём фоновые стили overlay назад
+                glitchOverlay.style.background = prevBg;
+                glitchOverlay.style.backgroundImage = prevBgImg;
+                glitchOverlay.style.animation = prevAnim;
+
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
             };
         },
-        
-        'epic_alt_1': function(targets) {
-            const { glitchOverlay } = targets;
+
+        // EPIC ALT 1 (velocity lines)
+        epic_alt_1(targets) {
+            const { glitchOverlay } = targets || {};
             if (!glitchOverlay) return null;
-            
+
+            const overlayClass = 'active-effect-epic-alt-1';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
+
             const container = document.createElement('div');
             container.className = 'velocity-line-container';
-            glitchOverlay.appendChild(container);
+            scope.appendChild(container);
 
             const lines = [];
-            
             for (let i = 0; i < 20; i++) {
                 const line = document.createElement('div');
                 line.className = 'velocity-line';
                 container.appendChild(line);
                 lines.push(line);
 
-                gsap.fromTo(line, {
-                    y: `random(0, ${window.innerHeight})`,
-                    x: `random(-${window.innerWidth}, -100)`,
-                    width: "random(100, 400)",
-                    opacity: "random(0.3, 0.8)"
-                }, {
-                    duration: gsap.utils.random(0.5, 1.5),
-                    x: `+=${window.innerWidth * 2}`,
-                    ease: "none", // Используем "none" для равномерной скорости, как у ветра
-                    repeat: -1,
-                    delay: gsap.utils.random(0, 1.5)
-                });
+                if (typeof gsap !== 'undefined') {
+                    gsap.fromTo(line, {
+                        y: `random(0, ${window.innerHeight})`,
+                        x: `random(-${window.innerWidth}, -100)`,
+                        width: "random(100, 400)",
+                        opacity: "random(0.3, 0.8)"
+                    }, {
+                        duration: 0.5 + Math.random(),
+                        x: `+=${window.innerWidth * 2}`,
+                        ease: "none",
+                        repeat: -1,
+                        delay: Math.random() * 1.5
+                    });
+                }
             }
 
-            return () => {
-                lines.forEach(line => gsap.killTweensOf(line));
-                if (container.parentNode) container.remove();
-            };
+            return () => { this._cleanupScope(glitchOverlay, scope, overlayClass); };
         },
 
-        'legendary_alt_1': function(targets) {
-            const { glitchOverlay } = targets;
+        // LEGENDARY ALT 1 (конфетти)
+        legendary_alt_1(targets) {
+            const { glitchOverlay } = targets || {};
             if (!glitchOverlay) return null;
 
-            const particles = [];
+            const overlayClass = 'active-effect-legendary-alt-1';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
+
             const colors = ["#f06292", "#f8bbd0", "#ff4081", "#ffeb3b", "#4fc3f7"];
+            for (let i = 0; i < 120; i++) {
+                const p = document.createElement('div');
+                p.className = 'confetti-particle';
+                p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                scope.appendChild(p);
 
-            for (let i = 0; i < 150; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'confetti-particle';
-                particle.style.backgroundColor = gsap.utils.random(colors);
-                glitchOverlay.appendChild(particle);
-                particles.push(particle);
-
-                gsap.fromTo(particle, {
-                    x: `random(0, ${window.innerWidth})`,
-                    y: -20,
-                    opacity: 1
-                }, {
-                    duration: gsap.utils.random(3, 7),
-                    y: window.innerHeight + 20,
-                    opacity: 0,
-                    rotationX: "random(0, 360)",
-                    rotationY: "random(0, 360)",
-                    ease: "power1.in",
-                    repeat: -1,
-                    delay: gsap.utils.random(0, 6)
-                });
+                if (typeof gsap !== 'undefined') {
+                    gsap.fromTo(p, {
+                        x: `random(0, ${window.innerWidth})`,
+                        y: -20, opacity: 1
+                    }, {
+                        duration: 3 + Math.random() * 4,
+                        y: window.innerHeight + 20,
+                        opacity: 0,
+                        rotationX: "random(0, 360)",
+                        rotationY: "random(0, 360)",
+                        ease: "power1.in",
+                        repeat: -1,
+                        delay: Math.random() * 6
+                    });
+                }
             }
 
-            return () => {
-                particles.forEach(p => gsap.killTweensOf(p));
-                glitchOverlay.innerHTML = ''; // Быстрый способ очистить все частицы
-            };
+            return () => { this._cleanupScope(glitchOverlay, scope, overlayClass); };
         },
-        'neon': function(targets) {
-            const { glitchOverlay } = targets;
+
+        // NEON
+        neon(targets) {
+            const { glitchOverlay } = targets || {};
             if (!glitchOverlay) return null;
-            
+
+            const overlayClass = 'active-effect-neon';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
+
             const container = document.createElement('div');
             container.className = 'neon-border-container';
-            
             const sides = ['top', 'right', 'bottom', 'left'];
             sides.forEach(side => {
                 const tube = document.createElement('div');
                 tube.className = `neon-tube neon-tube-${side}`;
                 container.appendChild(tube);
             });
+            scope.appendChild(container);
 
-            glitchOverlay.appendChild(container);
-            glitchOverlay.classList.add('active-effect-neon');
+            return () => { this._cleanupScope(glitchOverlay, scope, overlayClass); };
+        },
+        // Жёсткий глитч для ERROR ALT (Corrupted Core)
+        error_alt_1(targets) {
+            const { glitchOverlay, body } = targets || {};
+            if (!glitchOverlay) return null;
 
+            const overlayClass = 'active-effect-error-alt';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
+
+            const hasGSAP = typeof gsap !== 'undefined';
+            const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches || false;
+
+            // Локальные стили эффекта (никаких внешних CSS не нужно)
+            const styleEl = document.createElement('style');
+            styleEl.textContent = `
+            .ve-err-alt-layer {
+                position: absolute; inset: 0; pointer-events: none;
+            }
+            .ve-err-alt-scanlines {
+                background: repeating-linear-gradient(transparent 0 2px, rgba(0,0,0,.18) 2px 3px);
+                mix-blend-mode: multiply; opacity: .55;
+            }
+            .ve-err-alt-rgb { mix-blend-mode: screen; opacity: .45; }
+            .ve-err-alt-rgb.red  { background: rgba(255,0,0,.18); }
+            .ve-err-alt-rgb.cyan { background: rgba(0,255,255,.16); }
+            .ve-err-alt-vignette { box-shadow: inset 0 0 120px rgba(0,0,0,.4); }
+            .ve-err-alt-text {
+                position: absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+                font-family: "Courier New", monospace; font-weight: 700; letter-spacing: .25em;
+                color:#ff3d00; text-shadow: 0 0 6px #ff6e40, -1px 0 #00e5ff, 1px 0 #e91e63;
+                opacity:.85; pointer-events:none; white-space:nowrap; user-select:none;
+            }
+            .ve-err-alt-slice {
+                position:absolute; left:0; width:100%;
+                background: linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+                mix-blend-mode: overlay;
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .ve-err-alt-scanlines { opacity: .35; }
+            }
+            `;
+            scope.appendChild(styleEl);
+
+            // Слои: сканлайны / RGB split / виньетка / текст
+            const scan = document.createElement('div');
+            scan.className = 've-err-alt-layer ve-err-alt-scanlines';
+            scope.appendChild(scan);
+
+            const rgbRed  = document.createElement('div');
+            const rgbCyan = document.createElement('div');
+            rgbRed.className  = 've-err-alt-layer ve-err-alt-rgb red';
+            rgbCyan.className = 've-err-alt-layer ve-err-alt-rgb cyan';
+            scope.appendChild(rgbRed);
+            scope.appendChild(rgbCyan);
+
+            const vignette = document.createElement('div');
+            vignette.className = 've-err-alt-layer ve-err-alt-vignette';
+            scope.appendChild(vignette);
+
+            const label = document.createElement('div');
+            label.className = 've-err-alt-text';
+            label.textContent = 'CORRUPTED CORE';
+            scope.appendChild(label);
+
+            // Анимации
+            const slices = new Set();
+            const timers = [];
+            const tweens = [];
+
+            // Микродрожь кадра (всего эффекта)
+            if (hasGSAP && !reduceMotion) {
+                const shake = gsap.timeline({ repeat: -1 });
+                shake
+                .to(scope, { duration: 0.06, x:  1.5, y: -1.0, rotation: -0.2, ease:'steps(1)' })
+                .to(scope, { duration: 0.06, x: -1.0, y:  1.2, rotation:  0.2, ease:'steps(1)' })
+                .to(scope, { duration: 0.06, x:  0.0, y:  0.0, rotation:  0.0, ease:'steps(1)' });
+                tweens.push(shake);
+            }
+
+            // Постоянное лёгкое смещение каналов (RGB split)
+            function animateRGB() {
+                if (!hasGSAP) return;
+                const d = reduceMotion ? 0.15 : 0.12;
+                const offset = reduceMotion ? 1.0 : 2.5;
+                const tl = gsap.timeline({ repeat: -1, yoyo: true });
+                tl.to(rgbRed,  { duration: d, x: -offset, y:  offset, ease:'sine.inOut' }, 0)
+                .to(rgbCyan, { duration: d, x:  offset, y: -offset, ease:'sine.inOut' }, 0);
+                tweens.push(tl);
+            }
+            animateRGB();
+
+            // “Срезы” — горизонтальные полосы, дёргающиеся по X
+            function spawnSlice(burst = false) {
+                const slice = document.createElement('div');
+                slice.className = 've-err-alt-slice';
+                const height = burst ? (Math.random() * 40 + 12) : (Math.random() * 24 + 6);
+                const top = Math.random() * (window.innerHeight - height);
+                slice.style.top = `${top}px`;
+                slice.style.height = `${height}px`;
+                scope.appendChild(slice);
+                slices.add(slice);
+
+                if (hasGSAP) {
+                    const dx1 = (Math.random() * 2 - 1) * (burst ? 180 : 90);
+                    const dx2 = (Math.random() * 2 - 1) * (burst ? 220 : 110);
+                    const t = gsap.timeline({
+                        onComplete: () => { slices.delete(slice); slice.remove(); }
+                    });
+                    const stepEase = 'steps(6)';
+
+                    t.to(slice, { duration: 0.08, x: dx1, ease: stepEase })
+                    .to(slice, { duration: 0.06, x: -dx2, ease: stepEase })
+                    .to(slice, { duration: 0.05, x: 0,    ease: stepEase });
+                    tweens.push(t);
+                } else {
+                    // Фолбэк без GSAP
+                    slice.style.transition = 'transform 80ms steps(6, end)';
+                    slice.style.transform  = `translateX(${(Math.random()*120-60)|0}px)`;
+                    const h1 = setTimeout(() => {
+                        slice.style.transform = `translateX(${(Math.random()*140-70)|0}px)`;
+                    }, 90);
+                    const h2 = setTimeout(() => {
+                        slice.style.transform = `translateX(0px)`;
+                    }, 160);
+                    const h3 = setTimeout(() => {
+                        slices.delete(slice); slice.remove();
+                    }, 230);
+                    timers.push(h1,h2,h3);
+                }
+            }
+
+            // Поток мелких срезов
+            const baseInterval = reduceMotion ? 180 : 120;
+            const sliceInterval = setInterval(() => {
+                // 1–3 среза за тик
+                const count = 1 + (reduceMotion ? 0 : Math.floor(Math.random()*2));
+                for (let i=0;i<count;i++) spawnSlice(false);
+            }, baseInterval);
+            timers.push(sliceInterval);
+
+            // Периодические “взрывы” глитча: много срезов + сильный RGB shift + дергание текста
+            function burstGlitch() {
+                const burstCount = reduceMotion ? 6 : 12;
+                for (let i=0;i<burstCount;i++) spawnSlice(true);
+
+                if (hasGSAP) {
+                    // Усилим RGB split на короткое время
+                    const amp = gsap.timeline();
+                    amp.to([rgbRed, rgbCyan], { duration: 0.08, x: (i,el)=> el===rgbRed ? -12 : 12, y: (i,el)=> el===rgbRed ? 12 : -12, ease:'steps(5)' })
+                    .to([rgbRed, rgbCyan], { duration: 0.12, x: 0, y: 0, ease:'steps(5)' });
+                    tweens.push(amp);
+
+                    // Текст дёргаем/скошенно
+                    const txt = gsap.timeline();
+                    txt.to(label, { duration: 0.06, x: -6, skewX: -8, ease:'steps(2)' })
+                    .to(label, { duration: 0.06, x:  6, skewX:  8, ease:'steps(2)' })
+                    .to(label, { duration: 0.06, x:  0, skewX:  0, ease:'steps(2)' });
+                    tweens.push(txt);
+
+                    // Быстрая тряска всего экрана
+                    const frame = gsap.timeline();
+                    frame.to(scope, { duration: 0.04, x: 3, y: -2, rotation: 0.5, ease:'steps(1)' })
+                        .to(scope, { duration: 0.04, x:-3, y:  2, rotation:-0.5, ease:'steps(1)' })
+                        .to(scope, { duration: 0.04, x: 0, y:  0, rotation: 0,   ease:'steps(1)' });
+                    tweens.push(frame);
+                }
+            }
+            const burstTimer = setInterval(burstGlitch, reduceMotion ? 3000 : 2000);
+            timers.push(burstTimer);
+
+            // Пульсация яркости сканлайнов (лёгкая)
+            if (hasGSAP && !reduceMotion) {
+                const sc = gsap.to(scan, { duration: 1.2, opacity: 0.35, yoyo: true, repeat: -1, ease:'sine.inOut' });
+                tweens.push(sc);
+            }
+
+            // Текст “CORRUPTED CORE” — лёгкая нестабильность
+            if (hasGSAP && !reduceMotion) {
+                const txt = gsap.to(label, { duration: 0.8, opacity: 0.65, yoyo: true, repeat: -1, ease:'sine.inOut' });
+                tweens.push(txt);
+            }
+
+            // Очистка
             return () => {
-                if(container.parentNode) container.remove();
-                if(glitchOverlay) glitchOverlay.classList.remove('active-effect-neon');
+                timers.forEach(id => {
+                    try {
+                        if (typeof id === 'number') clearInterval(id);
+                        else clearTimeout(id);
+                    } catch(e){}
+                });
+                if (hasGSAP) {
+                    tweens.forEach(t => { try { t.kill(); } catch(e){} });
+                }
+                slices.forEach(s => { try { s.remove(); } catch(e){} });
+                try { styleEl.remove(); } catch(e){}
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
             };
         },
-
-        // 'inversion': function(targets) { ... }
-        // ... другие эффекты ...
     }
 };
