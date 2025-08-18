@@ -179,6 +179,7 @@ window.locales.ru = {
         luckyRollCounter: "До Lucky Roll",
         youGot: "Вы получили",
         isNew: "НОВАЯ!",
+        currentBonus: "Текущий бонус:",
         duplicateReward: "Получено за дубликат",
         totalDuplicateReward: "Всего получено за дубликаты",
         luckTooltipTitle: "Удача — это ваш главный множитель успеха. Она не просто увеличивает шансы, а делает каждый ваш ролл 'качественнее'.\n\n- При удаче 1.0 шансы соответствуют базовым.\n- При удаче 2.0 ваши шансы на выпадение редкой карты становятся вдвое выше по сравнению с шансами на неудачу.\n\nУдача особенно эффективна для выбивания самых редких карт!",
@@ -228,6 +229,14 @@ window.locales.ru = {
         },
         luckCoreFragments: "Осколков Ядра:",
         effectiveChance: "Эффективный шанс (с вашей удачей):",
+        backpack: "Рюкзак",
+        workshop: "Мастерская",
+        materials: "Материалы",
+        myEquipment: "Моя экипировка",
+        noMaterials: "Материалов пока нет.",
+        noOwnedEquipment: "Купленной экипировки пока нет.",
+        noRecipes: "Рецептов пока нет.",
+        craft: "Скрафтить"
     },
     // Уведомления
     notifications: {
@@ -264,6 +273,8 @@ window.locales.ru = {
         reward: "Награда",
         luckCoreFragmentFound: "Найден Осколок Ядра Удачи! ({current}/{needed})",
         luckCoreAmplifiedByFragments: "Ядро Удачи усилено с помощью Осколков!",
+        notEnoughMaterials: "Недостаточно материалов!",
+        craftSuccess: "Крафт успешно выполнен!"
     },
     debug: {
         notifications: {
@@ -330,6 +341,31 @@ window.locales.ru = {
             name: "Классический Набор",
             description: "Соберите первые 5 карт базовых редкостей.",
             rewardName: "Тема 'Классика'"
+        }
+    },
+    materials: {
+        scrap:           { name: "Мусор (Scrap)" },
+        obsidian_shard:  { name: "Осколок обсидиана" },
+        silken_thread:   { name: "Шёлковая нить" },
+        lava_core:       { name: "Ядро лавы" },
+        carbon_shard:    { name: "Углеродный осколок" }
+    },
+    craft: {
+        theme_obsidian_forge: {
+            name: "Тема: Обсидиановая кузня",
+            description: "Закалено в расплавленном камне. Открывает тёмную престижную тему."
+        },
+        equip_steel_edge: {
+            name: "Стальной Клинок",
+            description: "Полированный артефакт. Даёт предмет экипировки."
+        },
+        card_alt_shroom: {
+            name: "Альт-карта: Болетус",
+            description: "Сплети шёлк и разожги лавовое ядро, чтобы создать альт-версию Грибной."
+        },
+        token_tier_up: {
+            name: "Токен: +1 Тир",
+            description: "Следующий ролл повышается на +1 тир (одноразовый)."
         }
     }
 };

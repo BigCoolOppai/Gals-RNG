@@ -97,6 +97,12 @@
                     <button class="nav-link" id="shop-tab" data-bs-toggle="tab" data-bs-target="#shop" type="button" role="tab" aria-controls="shop" aria-selected="false" data-i18n="ui.shop">Магазин</button>
                 </li>
                 <li class="nav-item" role="presentation">
+                     <button class="nav-link" id="backpack-tab" data-bs-toggle="tab" data-bs-target="#backpack" type="button" role="tab" aria-controls="backpack" aria-selected="false" data-i18n="ui.backpack">Рюкзак</button> 
+                </li> 
+                <li class="nav-item" role="presentation">
+                     <button class="nav-link" id="workshop-tab" data-bs-toggle="tab" data-bs-target="#workshop" type="button" role="tab" aria-controls="workshop" aria-selected="false" data-i18n="ui.workshop">Мастерская</button>
+                </li>
+                <li class="nav-item" role="presentation">
                     <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="false" data-i18n="ui.settings">Настройки</button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -167,6 +173,24 @@
                         <!-- Элементы улучшений будут добавлены сюда JS -->
                     </div>
                     <div id="luckCoreSection" class="mt-4"></div>
+                </div>
+
+                <!--Рюкзак и Мастерская-->
+                <div class="tab-pane fade" id="backpack" role="tabpanel" aria-labelledby="backpack-tab">
+                    <h2 data-i18n="ui.backpack">Рюкзак</h2>
+                    <div id="materialsGrid" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3">
+
+                    </div>
+                    <hr>
+                    <h4 data-i18n="ui.myEquipment">Моя экипировка</h4> 
+                    <div id="ownedEquipmentList" class="list-group">
+
+                    </div> 
+                </div>
+                <div class="tab-pane fade" id="workshop" role="tabpanel" aria-labelledby="workshop-tab"> 
+                    <h2 data-i18n="ui.workshop">Мастерская</h2> <div id="craftRecipesList" class="list-group">
+
+                    </div> 
                 </div>
 
                 <!-- Settings Tab -->
@@ -330,6 +354,7 @@
     <script src="js/achievements.js"></script> <!-- <<< НОВЫЙ ФАЙЛ -->
     <script src="js/saveManager.js"></script>
     <script src="js/localization.js"></script>
+    <script src="js/crafting.js"></script>
 
     <script src="js/game.js"></script>
     <script src="js/visualEffects.js"></script> 

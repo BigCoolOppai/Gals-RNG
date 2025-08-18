@@ -226,6 +226,7 @@ window.locales.en = {
         luckyRollNext: "✨ Lucky Roll is next! ✨",
         luckyRollCounter: "Until Lucky Roll",
         youGot: "You got",
+        currentBonus: "Current bonus:",
         isNew: "NEW!",
         duplicateReward: "Received for duplicate",
         totalDuplicateReward: "Total received for duplicates",
@@ -275,7 +276,15 @@ window.locales.en = {
             'theme-prestige': 'Prestige',
         },
         luckCoreFragments: "Core Fragments:",
-        effectiveChance: "Effective Chance (with your luck):",  
+        effectiveChance: "Effective Chance (with your luck):",
+        backpack: "Backpack",
+        workshop: "Workshop",
+        materials: "Materials",
+        myEquipment: "My Equipment",
+        noMaterials: "No materials yet.",
+        noOwnedEquipment: "No owned equipment yet.",
+        noRecipes: "No recipes available.",
+        craft: "Craft"  
     },
     // Notifications
     notifications: {
@@ -311,13 +320,16 @@ window.locales.en = {
         reward: "Reward",
         luckCoreFragmentFound: "Found a Luck Core Fragment! ({current}/{needed})",
         luckCoreAmplifiedByFragments: "Luck Core amplified using Fragments!",
+        notEnoughMaterials: "Not enough materials!",
+        craftSuccess: "Craft completed!",
+        notEnoughForRebirth: "Not enough shards for Rebirth!"
     },
     debug: {
         notifications: {
             allCardsUnlocked: "All cards unlocked!",
             cardAdded: "Card added for rarity:",
             guaranteedRoll: "Performed a guaranteed roll for",
-            notEnoughForRebirth: "Not enough shards for Rebirth!"
+            
         },
         effect: {
             active: "Active",
@@ -382,5 +394,30 @@ window.locales.en = {
             description: "Collect the first 5 cards of the base rarities.",
             rewardName: "'Classic' Theme"
         }
+    },
+    materials: {
+        scrap:           { name: "Scrap" },
+        obsidian_shard:  { name: "Obsidian Shard" },
+        silken_thread:   { name: "Silken Thread" },
+        lava_core:       { name: "Lava Core" },
+        carbon_shard:    { name: "Carbon Shard" }
+    },
+    craft: {
+        theme_obsidian_forge: {
+        name: "Theme: Obsidian Forge",
+        description: "Tempered in molten stone. Unlocks a dark, prestige-like theme."
+    },
+    equip_steel_edge: {
+        name: "Steel Edge",
+        description: "A polished relic. Grants an equipment item."
+    },
+    card_alt_shroom: {
+        name: "Alt Card: Boletus",
+        description: "Weave silk and ignite a lava core to craft the alt Shroom."
+    },
+    token_tier_up: {
+        name: "Token: Tier +1",
+        description: "Your next roll is upgraded by +1 tier (consumed on use)."
+    }
     }
 };

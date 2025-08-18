@@ -1127,9 +1127,9 @@ const VisualEffects = {
 
             return () => { this._cleanupScope(glitchOverlay, scope, overlayClass); };
         },
-        // Жёсткий глитч для ERROR ALT (Corrupted Core)
+        // ЖЁСТКИЙ ГЛИТЧ ДЛЯ ALT-ERROR (Corrupted Core)
         error_alt_1(targets) {
-            const { glitchOverlay, body } = targets || {};
+            const { glitchOverlay } = targets || {};
             if (!glitchOverlay) return null;
 
             const overlayClass = 'active-effect-error-alt';
@@ -1138,155 +1138,176 @@ const VisualEffects = {
 
             const hasGSAP = typeof gsap !== 'undefined';
             const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches || false;
+            const supportsBackdrop =
+                typeof CSS !== 'undefined' &&
+                (CSS.supports('backdrop-filter', 'contrast(1.2)') || CSS.supports('-webkit-backdrop-filter', 'contrast(1.2)'));
 
-            // Локальные стили эффекта (никаких внешних CSS не нужно)
+            // Локальные стили (без внешнего CSS)
             const styleEl = document.createElement('style');
             styleEl.textContent = `
-            .ve-err-alt-layer {
-                position: absolute; inset: 0; pointer-events: none;
+            .ve-ea-layer{position:absolute;inset:0;pointer-events:none}
+            .ve-ea-scan{background:repeating-linear-gradient(transparent 0 2px,rgba(0,0,0,.18) 2px 3px);opacity:.55;mix-blend-mode:multiply}
+            .ve-ea-rgb{mix-blend-mode:screen;opacity:.45}
+            .ve-ea-rgb.red{background:rgba(255,0,0,.18)}
+            .ve-ea-rgb.cyan{background:rgba(0,255,255,.16)}
+            .ve-ea-vignette{box-shadow:inset 0 0 120px rgba(0,0,0,.4)}
+            .ve-ea-text{
+                position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+                font-family: "Courier New", monospace;font-weight:700;letter-spacing:.25em;
+                color:#ff3d00;text-shadow:0 0 6px #ff6e40,-1px 0 #00e5ff,1px 0 #e91e63;
+                opacity:.85;white-space:nowrap;user-select:none;pointer-events:none
             }
-            .ve-err-alt-scanlines {
-                background: repeating-linear-gradient(transparent 0 2px, rgba(0,0,0,.18) 2px 3px);
-                mix-blend-mode: multiply; opacity: .55;
+            .ve-ea-slice{
+                position:absolute;left:0;width:100%;
+                background:rgba(255,255,255,0.001); /* триггер для backdrop-filter */
+                mix-blend-mode:normal;
             }
-            .ve-err-alt-rgb { mix-blend-mode: screen; opacity: .45; }
-            .ve-err-alt-rgb.red  { background: rgba(255,0,0,.18); }
-            .ve-err-alt-rgb.cyan { background: rgba(0,255,255,.16); }
-            .ve-err-alt-vignette { box-shadow: inset 0 0 120px rgba(0,0,0,.4); }
-            .ve-err-alt-text {
-                position: absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-                font-family: "Courier New", monospace; font-weight: 700; letter-spacing: .25em;
-                color:#ff3d00; text-shadow: 0 0 6px #ff6e40, -1px 0 #00e5ff, 1px 0 #e91e63;
-                opacity:.85; pointer-events:none; white-space:nowrap; user-select:none;
+            .ve-ea-block{
+                position:absolute;
+                background:rgba(255,255,255,.06);
+                mix-blend-mode:overlay;
+                opacity:.0
             }
-            .ve-err-alt-slice {
-                position:absolute; left:0; width:100%;
-                background: linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
-                mix-blend-mode: overlay;
-            }
-            @media (prefers-reduced-motion: reduce) {
-                .ve-err-alt-scanlines { opacity: .35; }
+            @media (prefers-reduced-motion: reduce){
+                .ve-ea-scan{opacity:.35}
             }
             `;
             scope.appendChild(styleEl);
 
-            // Слои: сканлайны / RGB split / виньетка / текст
-            const scan = document.createElement('div');
-            scan.className = 've-err-alt-layer ve-err-alt-scanlines';
-            scope.appendChild(scan);
+            // Базовые слои
+            const scan = document.createElement('div');  scan.className = 've-ea-layer ve-ea-scan'; scope.appendChild(scan);
+            const rgbR = document.createElement('div');  rgbR.className = 've-ea-layer ve-ea-rgb red';  scope.appendChild(rgbR);
+            const rgbC = document.createElement('div');  rgbC.className = 've-ea-layer ve-ea-rgb cyan'; scope.appendChild(rgbC);
+            const vign = document.createElement('div');  vign.className = 've-ea-layer ve-ea-vignette'; scope.appendChild(vign);
+            const label = document.createElement('div'); label.className = 've-ea-text'; label.textContent = 'CORRUPTED CORE'; scope.appendChild(label);
 
-            const rgbRed  = document.createElement('div');
-            const rgbCyan = document.createElement('div');
-            rgbRed.className  = 've-err-alt-layer ve-err-alt-rgb red';
-            rgbCyan.className = 've-err-alt-layer ve-err-alt-rgb cyan';
-            scope.appendChild(rgbRed);
-            scope.appendChild(rgbCyan);
-
-            const vignette = document.createElement('div');
-            vignette.className = 've-err-alt-layer ve-err-alt-vignette';
-            scope.appendChild(vignette);
-
-            const label = document.createElement('div');
-            label.className = 've-err-alt-text';
-            label.textContent = 'CORRUPTED CORE';
-            scope.appendChild(label);
-
-            // Анимации
-            const slices = new Set();
             const timers = [];
             const tweens = [];
+            const liveNodes = new Set();
 
-            // Микродрожь кадра (всего эффекта)
+            // Микро‑дрожь всего кадра
             if (hasGSAP && !reduceMotion) {
                 const shake = gsap.timeline({ repeat: -1 });
-                shake
-                .to(scope, { duration: 0.06, x:  1.5, y: -1.0, rotation: -0.2, ease:'steps(1)' })
-                .to(scope, { duration: 0.06, x: -1.0, y:  1.2, rotation:  0.2, ease:'steps(1)' })
-                .to(scope, { duration: 0.06, x:  0.0, y:  0.0, rotation:  0.0, ease:'steps(1)' });
+                shake.to(scope, { duration: 0.06, x:  1.5, y: -1.0, rotation: -0.2, ease: 'steps(1)' })
+                    .to(scope, { duration: 0.06, x: -1.0, y:  1.2, rotation:  0.2, ease: 'steps(1)' })
+                    .to(scope, { duration: 0.06, x:  0,    y:  0,   rotation:  0,   ease: 'steps(1)' });
                 tweens.push(shake);
             }
 
-            // Постоянное лёгкое смещение каналов (RGB split)
-            function animateRGB() {
-                if (!hasGSAP) return;
-                const d = reduceMotion ? 0.15 : 0.12;
-                const offset = reduceMotion ? 1.0 : 2.5;
+            // Постоянный RGB split
+            if (hasGSAP) {
+                const d = reduceMotion ? 0.18 : 0.12;
+                const off = reduceMotion ? 1.0 : 2.6;
                 const tl = gsap.timeline({ repeat: -1, yoyo: true });
-                tl.to(rgbRed,  { duration: d, x: -offset, y:  offset, ease:'sine.inOut' }, 0)
-                .to(rgbCyan, { duration: d, x:  offset, y: -offset, ease:'sine.inOut' }, 0);
+                tl.to(rgbR, { duration: d, x: -off, y:  off, ease: 'sine.inOut' }, 0)
+                .to(rgbC, { duration: d, x:  off, y: -off, ease: 'sine.inOut' }, 0);
                 tweens.push(tl);
             }
-            animateRGB();
 
-            // “Срезы” — горизонтальные полосы, дёргающиеся по X
+            // Лёгкая пульсация сканлайнов/текста
+            if (hasGSAP && !reduceMotion) {
+                tweens.push(gsap.to(scan,  { duration: 1.2, opacity: 0.35, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
+                tweens.push(gsap.to(label, { duration: 0.8, opacity: 0.65, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
+            }
+
+            // Создание "среза" (горизонтальной полосы) с искажением фона
             function spawnSlice(burst = false) {
                 const slice = document.createElement('div');
-                slice.className = 've-err-alt-slice';
-                const height = burst ? (Math.random() * 40 + 12) : (Math.random() * 24 + 6);
-                const top = Math.random() * (window.innerHeight - height);
+                slice.className = 've-ea-slice';
+                const h = burst ? (Math.random() * 60 + 18) : (Math.random() * 28 + 10);
+                const top = Math.random() * (window.innerHeight - h);
                 slice.style.top = `${top}px`;
-                slice.style.height = `${height}px`;
+                slice.style.height = `${h}px`;
+
+                // Настоящее искажение фона — backdrop-filter
+                if (supportsBackdrop) {
+                    const baseBF = 'contrast(1.35) saturate(1.5) hue-rotate(-12deg) brightness(1.08)';
+                    const burstBF = 'invert(1) contrast(1.6) saturate(1.6) hue-rotate(180deg)';
+                    slice.style.backdropFilter = burst ? burstBF : baseBF;
+                    slice.style.webkitBackdropFilter = burst ? burstBF : baseBF;
+                } else {
+                    // Fallback без backdrop-filter
+                    slice.style.background = 'linear-gradient(90deg, rgba(255,255,255,.05), rgba(255,255,255,.01))';
+                    slice.style.mixBlendMode = 'overlay';
+                }
+
                 scope.appendChild(slice);
-                slices.add(slice);
+                liveNodes.add(slice);
 
                 if (hasGSAP) {
                     const dx1 = (Math.random() * 2 - 1) * (burst ? 180 : 90);
                     const dx2 = (Math.random() * 2 - 1) * (burst ? 220 : 110);
                     const t = gsap.timeline({
-                        onComplete: () => { slices.delete(slice); slice.remove(); }
+                        onComplete: () => { liveNodes.delete(slice); slice.remove(); }
                     });
-                    const stepEase = 'steps(6)';
-
-                    t.to(slice, { duration: 0.08, x: dx1, ease: stepEase })
-                    .to(slice, { duration: 0.06, x: -dx2, ease: stepEase })
-                    .to(slice, { duration: 0.05, x: 0,    ease: stepEase });
+                    const step = 'steps(6)';
+                    t.to(slice, { duration: 0.08, x: dx1, ease: step })
+                    .to(slice, { duration: 0.06, x: -dx2, ease: step })
+                    .to(slice, { duration: 0.05, x: 0,    ease: step });
                     tweens.push(t);
                 } else {
-                    // Фолбэк без GSAP
                     slice.style.transition = 'transform 80ms steps(6, end)';
                     slice.style.transform  = `translateX(${(Math.random()*120-60)|0}px)`;
-                    const h1 = setTimeout(() => {
-                        slice.style.transform = `translateX(${(Math.random()*140-70)|0}px)`;
-                    }, 90);
-                    const h2 = setTimeout(() => {
-                        slice.style.transform = `translateX(0px)`;
-                    }, 160);
-                    const h3 = setTimeout(() => {
-                        slices.delete(slice); slice.remove();
-                    }, 230);
+                    const h1 = setTimeout(() => { slice.style.transform = `translateX(${(Math.random()*140-70)|0}px)`; }, 90);
+                    const h2 = setTimeout(() => { slice.style.transform = `translateX(0px)`; }, 160);
+                    const h3 = setTimeout(() => { liveNodes.delete(slice); slice.remove(); }, 230);
                     timers.push(h1,h2,h3);
                 }
             }
 
-            // Поток мелких срезов
-            const baseInterval = reduceMotion ? 180 : 120;
-            const sliceInterval = setInterval(() => {
-                // 1–3 среза за тик
-                const count = 1 + (reduceMotion ? 0 : Math.floor(Math.random()*2));
-                for (let i=0;i<count;i++) spawnSlice(false);
-            }, baseInterval);
-            timers.push(sliceInterval);
+            // Мелкие блок‑глитчи (дешёвые пиксельные “квадраты”)
+            function spawnBlock() {
+                const b = document.createElement('div');
+                b.className = 've-ea-block';
+                const w = Math.random() * 120 + 40;
+                const h = Math.random() * 40 + 14;
+                const x = Math.random() * (window.innerWidth  - w);
+                const y = Math.random() * (window.innerHeight - h);
+                Object.assign(b.style, { left: `${x}px`, top: `${y}px`, width: `${w}px`, height: `${h}px` });
+                scope.appendChild(b);
+                liveNodes.add(b);
 
-            // Периодические “взрывы” глитча: много срезов + сильный RGB shift + дергание текста
-            function burstGlitch() {
-                const burstCount = reduceMotion ? 6 : 12;
-                for (let i=0;i<burstCount;i++) spawnSlice(true);
+                if (hasGSAP && !reduceMotion) {
+                    const t = gsap.timeline({
+                        onComplete: () => { liveNodes.delete(b); b.remove(); }
+                    });
+                    t.to(b, { duration: 0.06, opacity: 0.6, ease: 'steps(3)' })
+                    .to(b, { duration: 0.08, opacity: 0.0, ease: 'steps(3)' });
+                    tweens.push(t);
+                } else {
+                    b.style.opacity = '0.5';
+                    const h1 = setTimeout(() => { b.style.opacity = '0'; }, 90);
+                    const h2 = setTimeout(() => { liveNodes.delete(b); b.remove(); }, 180);
+                    timers.push(h1,h2);
+                }
+            }
+
+            // Постоянный поток мелких срезов
+            const baseInterval = reduceMotion ? 200 : 120;
+            const sliceT = setInterval(() => {
+                const count = 1 + (reduceMotion ? 0 : Math.floor(Math.random() * 2)); // 1–2
+                for (let i = 0; i < count; i++) spawnSlice(false);
+                if (Math.random() < 0.25 && !reduceMotion) spawnBlock();
+            }, baseInterval);
+            timers.push(sliceT);
+
+            // Периодические «взрывы» глитча
+            function burst() {
+                const c = reduceMotion ? 6 : 12;
+                for (let i = 0; i < c; i++) spawnSlice(true);
 
                 if (hasGSAP) {
-                    // Усилим RGB split на короткое время
                     const amp = gsap.timeline();
-                    amp.to([rgbRed, rgbCyan], { duration: 0.08, x: (i,el)=> el===rgbRed ? -12 : 12, y: (i,el)=> el===rgbRed ? 12 : -12, ease:'steps(5)' })
-                    .to([rgbRed, rgbCyan], { duration: 0.12, x: 0, y: 0, ease:'steps(5)' });
+                    amp.to([rgbR, rgbC], { duration: 0.08, x: (i,el)=> el===rgbR ? -12 : 12, y: (i,el)=> el===rgbR ? 12 : -12, ease:'steps(5)' })
+                    .to([rgbR, rgbC], { duration: 0.12, x: 0, y: 0, ease:'steps(5)' });
                     tweens.push(amp);
 
-                    // Текст дёргаем/скошенно
                     const txt = gsap.timeline();
                     txt.to(label, { duration: 0.06, x: -6, skewX: -8, ease:'steps(2)' })
                     .to(label, { duration: 0.06, x:  6, skewX:  8, ease:'steps(2)' })
                     .to(label, { duration: 0.06, x:  0, skewX:  0, ease:'steps(2)' });
                     tweens.push(txt);
 
-                    // Быстрая тряска всего экрана
                     const frame = gsap.timeline();
                     frame.to(scope, { duration: 0.04, x: 3, y: -2, rotation: 0.5, ease:'steps(1)' })
                         .to(scope, { duration: 0.04, x:-3, y:  2, rotation:-0.5, ease:'steps(1)' })
@@ -1294,20 +1315,8 @@ const VisualEffects = {
                     tweens.push(frame);
                 }
             }
-            const burstTimer = setInterval(burstGlitch, reduceMotion ? 3000 : 2000);
-            timers.push(burstTimer);
-
-            // Пульсация яркости сканлайнов (лёгкая)
-            if (hasGSAP && !reduceMotion) {
-                const sc = gsap.to(scan, { duration: 1.2, opacity: 0.35, yoyo: true, repeat: -1, ease:'sine.inOut' });
-                tweens.push(sc);
-            }
-
-            // Текст “CORRUPTED CORE” — лёгкая нестабильность
-            if (hasGSAP && !reduceMotion) {
-                const txt = gsap.to(label, { duration: 0.8, opacity: 0.65, yoyo: true, repeat: -1, ease:'sine.inOut' });
-                tweens.push(txt);
-            }
+            const burstT = setInterval(burst, reduceMotion ? 3000 : 2000);
+            timers.push(burstT);
 
             // Очистка
             return () => {
@@ -1320,10 +1329,439 @@ const VisualEffects = {
                 if (hasGSAP) {
                     tweens.forEach(t => { try { t.kill(); } catch(e){} });
                 }
-                slices.forEach(s => { try { s.remove(); } catch(e){} });
+                liveNodes.forEach(n => { try { n.remove(); } catch(e){} });
                 try { styleEl.remove(); } catch(e){}
                 this._cleanupScope(glitchOverlay, scope, overlayClass);
             };
         },
+
+        // 1) Silken — «лёгкие лепестки» и шёлковые ленты
+        silken(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const scope = this._createScope(glitchOverlay, 'active-effect-silken');
+            if (!scope) return null;
+
+            const hasGSAP = typeof gsap !== 'undefined';
+            const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches || false;
+            const PETALS = reduceMotion ? 10 : 18;
+
+            const styleEl = document.createElement('style');
+            styleEl.textContent = `
+            .ve-silk-petal {
+                position:absolute; width:14px; height:10px;
+                background: radial-gradient(circle at 30% 30%, #f8bbd0 0%, #ec407a 75%, #e91e63 100%);
+                border-radius: 55% 70% 60% 85% / 60% 70% 60% 70%;
+                filter: drop-shadow(0 0 4px rgba(236, 64, 122, 0.5));
+                opacity: .95; pointer-events:none; will-change: transform, opacity;
+            }
+            .ve-silk-ribbon {
+                position:absolute; width:180px; height:8px;
+                background: linear-gradient(90deg, rgba(244,143,177,.0), rgba(244,143,177,.55), rgba(244,143,177,0));
+                filter: blur(0.5px); border-radius: 6px; opacity: .55; pointer-events:none;
+                will-change: transform, opacity;
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .ve-silk-ribbon { opacity: .35; }
+            }
+            `;
+            scope.appendChild(styleEl);
+
+            const petals = [];
+            const ribbons = [];
+            const tweens = [];
+            const timers = [];
+
+            const vw = () => window.innerWidth;
+            const vh = () => window.innerHeight;
+            const rand = (a,b)=>Math.random()*(b-a)+a;
+
+            function spawnPetal() {
+                const p = document.createElement('div');
+                p.className = 've-silk-petal';
+                p.style.left = rand(-50, vw()+50) + 'px';
+                p.style.top = '-20px';
+                scope.appendChild(p);
+                petals.push(p);
+
+                const dur = rand(8, 14) * (reduceMotion ? 1.2 : 1);
+                const x = parseFloat(p.style.left);
+                const yEnd = vh() + 40;
+                const xDrift = x + rand(-120, 120);
+
+                if (hasGSAP) {
+                    const t = gsap.to(p, {
+                        duration: dur,
+                        x: xDrift - x,
+                        y: yEnd,
+                        rotation: rand(-180, 180),
+                        ease: 'sine.inOut',
+                        onComplete: () => {
+                            p.remove();
+                            petals.splice(petals.indexOf(p), 1);
+                            if (!reduceMotion) spawnPetal();
+                        }
+                    });
+                    tweens.push(t);
+                } else {
+                    p.style.transition = `transform ${dur}s linear, opacity 1s linear`;
+                    const timer = setTimeout(()=>{
+                        p.style.transform = `translate(${(xDrift - x)}px, ${yEnd}px) rotate(${rand(-180,180)}deg)`;
+                        setTimeout(()=>{ p.remove(); }, dur*1000 + 1000);
+                    }, 30);
+                    timers.push(timer);
+                }
+            }
+
+            function spawnRibbon() {
+                const r = document.createElement('div');
+                r.className = 've-silk-ribbon';
+                r.style.left = rand(-100, vw()-80) + 'px';
+                r.style.top = rand(0, vh()*0.6) + 'px';
+                r.style.transform = `rotate(${rand(-12,12)}deg)`;
+                scope.appendChild(r);
+                ribbons.push(r);
+
+                if (hasGSAP && !reduceMotion) {
+                    const t = gsap.to(r, {
+                        duration: rand(6,10),
+                        x: rand(-120, 120),
+                        y: rand(30, 80),
+                        opacity: rand(0.25, 0.55),
+                        ease: 'sine.inOut', yoyo: true, repeat: -1
+                    });
+                    tweens.push(t);
+                }
+            }
+
+            for (let i=0;i<PETALS;i++) spawnPetal();
+            for (let i=0;i<(reduceMotion?1:3);i++) spawnRibbon();
+
+            return () => {
+                if (hasGSAP) tweens.forEach(t=>{ try{t.kill();}catch(e){} });
+                timers.forEach(id=>clearTimeout(id));
+                try{ styleEl.remove(); }catch(e){}
+                this._cleanupScope(glitchOverlay, scope, 'active-effect-silken');
+            };
+        },
+
+        // 2) Lava — «угольки» и тепловая рябь
+        lava(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const scope = this._createScope(glitchOverlay, 'active-effect-lava');
+            if (!scope) return null;
+
+            const hasGSAP = typeof gsap !== 'undefined';
+            const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches || false;
+            const EMBERS = reduceMotion ? 16 : 32;
+
+            const styleEl = document.createElement('style');
+            styleEl.textContent = `
+            .ve-lava-heat {
+                position:absolute; inset:0; pointer-events:none;
+                background: linear-gradient(180deg, rgba(255,153,0,0.06), rgba(255,87,34,0.03));
+                filter: contrast(1.06) saturate(1.06);
+            }
+            .ve-ember {
+                position:absolute; width:3px; height:3px; border-radius:50%;
+                background:#FF9800; box-shadow:0 0 8px #FF6D00, 0 0 12px rgba(255,87,34,.6);
+                pointer-events:none; opacity:.9; will-change:transform,opacity;
+            }
+            @media (prefers-reduced-motion: reduce) { .ve-lava-heat{opacity:.4} }
+            `;
+            scope.appendChild(styleEl);
+
+            const heat = document.createElement('div');
+            heat.className = 've-lava-heat';
+            scope.appendChild(heat);
+
+            const tweens = [];
+            const embers = [];
+
+            if (hasGSAP && !reduceMotion) {
+                const t = gsap.to(heat, { duration: 4, y: -10, yoyo:true, repeat:-1, ease:'sine.inOut' });
+                tweens.push(t);
+            }
+
+            const vw = () => window.innerWidth;
+            const vh = () => window.innerHeight;
+            const rand = (a,b)=>Math.random()*(b-a)+a;
+
+            function spawnEmber() {
+                const e = document.createElement('div');
+                e.className = 've-ember';
+                e.style.left = rand(0, vw()) + 'px';
+                e.style.top = (vh() + rand(0, 40)) + 'px';
+                scope.appendChild(e);
+                embers.push(e);
+
+                const dur = rand(2.5, 4.5) * (reduceMotion ? 1.2 : 1);
+                const xDrift = rand(-30, 30);
+                const yUp = -vh() - 60;
+
+                if (hasGSAP) {
+                    const t = gsap.to(e, {
+                        duration: dur,
+                        x: `+=${xDrift}`, y: yUp,
+                        opacity: rand(0.2, 0.6),
+                        ease:'power2.out',
+                        onComplete: () => {
+                            e.remove();
+                            embers.splice(embers.indexOf(e),1);
+                            if (!reduceMotion) spawnEmber();
+                        }
+                    });
+                    tweens.push(t);
+                } else {
+                    e.style.transition = `transform ${dur}s ease-out, opacity ${dur}s linear`;
+                    const tm = setTimeout(()=>{
+                        e.style.transform = `translate(${xDrift}px, ${yUp}px)`;
+                        e.style.opacity = '0.3';
+                        setTimeout(()=>{ e.remove(); }, dur*1000+100);
+                    }, 20);
+                    embers.push(e);
+                }
+            }
+
+            for (let i=0;i<EMBERS;i++) spawnEmber();
+
+            return () => {
+                if (hasGSAP) tweens.forEach(t=>{ try{t.kill();}catch(e){} });
+                embers.forEach(e=>{ try{e.remove();}catch(_){} });
+                try{ styleEl.remove(); }catch(_){}
+                this._cleanupScope(glitchOverlay, scope, 'active-effect-lava');
+            };
+        },
+
+        // 3) Shroom — «споры» и редкие «пыхи»
+        shroom(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const scope = this._createScope(glitchOverlay, 'active-effect-shroom');
+            if (!scope) return null;
+
+            const hasGSAP = typeof gsap !== 'undefined';
+            const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches || false;
+
+            const styleEl = document.createElement('style');
+            styleEl.textContent = `
+            .ve-spore {
+                position:absolute; width:3px; height:3px; border-radius:50%;
+                background: #FFE082; box-shadow: 0 0 6px #FFD54F;
+                opacity:.9; pointer-events:none; will-change:transform,opacity;
+            }
+            `;
+            scope.appendChild(styleEl);
+
+            const spores = [];
+            const tweens = [];
+            const timers = [];
+
+            const vw = () => window.innerWidth;
+            const vh = () => window.innerHeight;
+            const rand = (a,b)=>Math.random()*(b-a)+a;
+
+            function spawnSpore() {
+                const s = document.createElement('div');
+                s.className = 've-spore';
+                s.style.left = rand(0, vw()) + 'px';
+                s.style.top  = (vh() + rand(0, 40)) + 'px';
+                scope.appendChild(s);
+                spores.push(s);
+
+                const dur = rand(5, 9) * (reduceMotion ? 1.2 : 1);
+                const xDrift = rand(-50,50);
+                const yUp = -vh() - 30;
+
+                if (hasGSAP) {
+                    const t = gsap.to(s, {
+                        duration: dur,
+                        x: `+=${xDrift}`, y: yUp,
+                        opacity: rand(0.25, 0.7),
+                        ease: 'sine.inOut',
+                        onComplete: () => { s.remove(); spores.splice(spores.indexOf(s),1); if (!reduceMotion) spawnSpore(); }
+                    });
+                    tweens.push(t);
+                } else {
+                    s.style.transition = `transform ${dur}s ease-in-out, opacity ${dur}s linear`;
+                    const tm = setTimeout(()=>{
+                        s.style.transform = `translate(${xDrift}px, ${yUp}px)`;
+                        s.style.opacity = '0.3';
+                        setTimeout(()=>{ s.remove(); }, dur*1000+100);
+                    }, 20);
+                    timers.push(tm);
+                }
+            }
+
+            function puffCluster() {
+                const cx = rand(50, vw()-50);
+                const cy = rand(vh()*0.5, vh()-40);
+                const count = reduceMotion ? 8 : 14;
+                for (let i=0;i<count;i++) {
+                    const s = document.createElement('div');
+                    s.className = 've-spore';
+                    s.style.left = cx + 'px';
+                    s.style.top  = cy + 'px';
+                    scope.appendChild(s);
+                    spores.push(s);
+
+                    if (hasGSAP) {
+                        const t = gsap.to(s, {
+                            duration: rand(1.2, 2.0),
+                            x: rand(-60,60),
+                            y: rand(-80,-10),
+                            opacity: 0,
+                            ease: 'power1.out',
+                            onComplete: () => { s.remove(); spores.splice(spores.indexOf(s),1); }
+                        });
+                        tweens.push(t);
+                    } else {
+                        s.style.transition = `transform 1.5s ease-out, opacity 1.5s linear`;
+                        const tm = setTimeout(()=>{
+                            s.style.transform = `translate(${rand(-60,60)}px, ${rand(-80,-10)}px)`;
+                            s.style.opacity = '0';
+                            setTimeout(()=>{ s.remove(); }, 1600);
+                        }, 20);
+                        timers.push(tm);
+                    }
+                }
+            }
+
+            for (let i=0;i<(reduceMotion?12:22);i++) spawnSpore();
+            const puffT = setInterval(puffCluster, reduceMotion ? 5000 : 3500);
+            timers.push(puffT);
+
+            return () => {
+                timers.forEach(id=>clearInterval(id));
+                if (hasGSAP) tweens.forEach(t=>{ try{t.kill();}catch(e){} });
+                spores.forEach(s=>{ try{s.remove();}catch(_){ } });
+                try{ styleEl.remove(); }catch(_){}
+                this._cleanupScope(glitchOverlay, scope, 'active-effect-shroom');
+            };
+        },
+
+
+        // 5) Doctor — «ЭКГ» линия и лёгкие сердечки
+        doctor(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const scope = this._createScope(glitchOverlay, 'active-effect-doctor');
+            if (!scope) return null;
+
+            const hasGSAP = typeof gsap !== 'undefined';
+            const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches || false;
+
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const styleEl = document.createElement('style');
+            styleEl.textContent = `
+            .ve-ekg { position:absolute; left:0; right:0; bottom:10%; height:120px; pointer-events:none; }
+            .ve-ekg path { stroke: #e91e63; stroke-width: 2; fill: none; filter: drop-shadow(0 0 4px rgba(233,30,99,0.8)); }
+            .ve-heart { position:absolute; font-size: 16px; color: #ff1744; text-shadow: 0 0 6px rgba(255,23,68,0.8); pointer-events:none; opacity:0; }
+            @media (prefers-reduced-motion: reduce){ .ve-ekg path { filter:none; } }
+            `;
+            scope.appendChild(styleEl);
+
+            const svg = document.createElementNS(svgNS, 'svg');
+            svg.classList.add('ve-ekg');
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '120');
+            scope.appendChild(svg);
+
+            const path = document.createElementNS(svgNS, 'path');
+            svg.appendChild(path);
+
+            function buildEKGPath(width) {
+                const baseline = 70;
+                let p = `M 0 ${baseline}`;
+                const step = 80;
+                for (let x=0; x<=width + step; x+=step) {
+                    p += ` L ${x+25} ${baseline}`;
+                    p += ` L ${x+35} ${baseline}`;
+                    p += ` L ${x+40} ${baseline-30}`;
+                    p += ` L ${x+45} ${baseline+30}`;
+                    p += ` L ${x+50} ${baseline}`;
+                    p += ` L ${x+80} ${baseline}`;
+                }
+                return p;
+            }
+
+            function layout() {
+                const w = window.innerWidth;
+                const d = buildEKGPath(w);
+                path.setAttribute('d', d);
+                const len = path.getTotalLength ? path.getTotalLength() : w*2;
+                path.style.strokeDasharray = `${len}`;
+                path.style.strokeDashoffset = `${len}`;
+                return len;
+            }
+
+            const totalLen = layout();
+            const onResize = () => layout();
+            window.addEventListener('resize', onResize);
+
+            const tweens = [];
+            if (hasGSAP) {
+                const speed = reduceMotion ? 6 : 4;
+                const t = gsap.to(path, {
+                    strokeDashoffset: 0,
+                    duration: speed,
+                    ease: 'none',
+                    repeat: -1
+                });
+                tweens.push(t);
+            } else {
+                let offs = totalLen;
+                let stopped = false;
+                let ekgTimerId = 0;
+                const tick = () => {
+                    if (stopped) return;
+                    offs -= 8;
+                    if (offs <= 0) offs = totalLen;
+                    path.style.strokeDashoffset = `${offs}`;
+                    ekgTimerId = setTimeout(tick, reduceMotion ? 60 : 30);
+                };
+                ekgTimerId = setTimeout(tick, 60);
+                tweens.push({ kill(){ stopped = true; clearTimeout(ekgTimerId); } });
+            }
+
+            const hearts = [];
+            const timers = [];
+            function spawnHeart() {
+                const h = document.createElement('div');
+                h.className = 've-heart';
+                h.textContent = '❤';
+                h.style.left = (window.innerWidth * 0.2 + Math.random()*window.innerWidth*0.6) + 'px';
+                h.style.top  = (window.innerHeight * 0.25 + Math.random()*window.innerHeight*0.2) + 'px';
+                scope.appendChild(h);
+                hearts.push(h);
+
+                if (hasGSAP && !reduceMotion) {
+                    const t = gsap.timeline({
+                        onComplete: ()=>{ h.remove(); hearts.splice(hearts.indexOf(h),1); }
+                    });
+                    t.to(h, { duration: 0.2, opacity: 1, scale: 1.0, ease:'sine.out' })
+                    .to(h, { duration: 0.8, y: -20, opacity: 0, ease:'sine.in' });
+                    tweens.push(t);
+                } else {
+                    h.style.transition = 'opacity .2s linear, transform 1s ease-in';
+                    setTimeout(()=>{ h.style.opacity='1'; h.style.transform='translateY(-20px)'; }, 10);
+                    const tm = setTimeout(()=>{ h.remove(); }, 1100);
+                    timers.push(tm);
+                }
+            }
+            const heartInterval = setInterval(spawnHeart, reduceMotion ? 1600 : 900);
+            timers.push(heartInterval);
+
+            return () => {
+                window.removeEventListener('resize', onResize);
+                timers.forEach(id => clearInterval(id));
+                if (hasGSAP) tweens.forEach(t=>{ try{t.kill();}catch(e){} });
+                hearts.forEach(h=>{ try{h.remove();}catch(_){ } });
+                try{ styleEl.remove(); }catch(_){}
+                this._cleanupScope(glitchOverlay, scope, 'active-effect-doctor');
+            };
+        },
+            
     }
 };

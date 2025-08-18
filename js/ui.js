@@ -453,6 +453,9 @@ const UI = (() => {
         renderRebirthSection();
         updateEquippedItemsDisplay(playerData.equippedItems);
         toggleMultiRollButton(hasAnyMulti(playerData));
+        renderMaterials(playerData);
+        renderOwnedEquipment(playerData);
+        renderWorkshop(playerData);
 
         if (typeof playerData.luckyRollCounter !== 'undefined') {
             const currentThreshold = playerData.luckyRollThreshold || 11;
@@ -1127,6 +1130,151 @@ const UI = (() => {
         inventoryCounterElement.textContent = `${L.get('ui.opened')}: ${uniqueOpenedCount} / ${totalPossibleCount}`;
     }
 
+    // Рендер материалов в рюкзаке
+    function renderMaterials(playerData) {
+    const grid = document.getElementById('materialsGrid');
+    if (!grid) return;
+
+    const mats = window.MATERIALS_DATA || {};
+    const entries = Object.keys(mats).map(id => ({
+        id, count: (playerData.materials && playerData.materials[id]) || 0
+    })).filter(e => e.count > 0).sort((a,b) => a.id.localeCompare(b.id));
+
+    if (entries.length === 0) {
+        grid.innerHTML = `<p class="text-muted small">${L.get('ui.noMaterials') || 'No materials yet.'}</p>`;
+        return;
+    }
+
+    grid.innerHTML = '';
+    entries.forEach(e => {
+        const m = mats[e.id];
+        const name = L.get(m.nameKey) || e.id;
+        const col = document.createElement('div');
+        col.className = 'col';
+        col.innerHTML = `
+        <div class="card bg-dark-subtle h-100">
+            <div class="card-body text-center">
+            <img class="material-icon" src="${m.icon}" alt="${name}">
+            <div class="mt-2 fw-bold">${name}</div>
+            <div class="text-info-emphasis">x${e.count}</div>
+            </div>
+        </div>
+        `;
+        grid.appendChild(col);
+    });
+    }
+
+    // Рендер списка всей купленной экипировки + кнопки (надеть/снять)
+    function renderOwnedEquipment(playerData) {
+    const list = document.getElementById('ownedEquipmentList');
+    if (!list) return;
+
+    // 1) Безопасно берём данные магазина
+    const equipmentData = (typeof SHOP_DATA !== 'undefined' && SHOP_DATA.equipment)
+        ? SHOP_DATA.equipment
+        : [];
+
+    // 2) Собираем множество «владения»:
+    //    - purchased_<id> из inventory
+    //    - id из equippedItems (чтобы показывать даже из старых сейвов)
+    const ownedIds = new Set();
+    (playerData.inventory || []).forEach(id => {
+        if (typeof id === 'string' && id.startsWith('purchased_')) {
+        ownedIds.add(id.slice('purchased_'.length));
+        }
+    });
+    (playerData.equippedItems || []).forEach(e => {
+        if (e && e.id) ownedIds.add(e.id);
+    });
+
+    const owned = equipmentData.filter(eq => ownedIds.has(eq.id));
+
+    if (owned.length === 0) {
+        list.innerHTML = `<p class="text-muted small">${L.get('ui.noOwnedEquipment') || 'No owned equipment yet.'}</p>`;
+        return;
+    }
+
+    list.innerHTML = owned.map(eq => {
+        const isEquipped = (playerData.equippedItems || []).some(e => e.id === eq.id);
+        const btnText = isEquipped ? (L.get('ui.unequipItem') || 'Unequip') : (L.get('ui.equip') || 'Equip');
+        const btnClass = isEquipped ? 'btn-outline-danger' : 'btn-outline-primary';
+        return `
+        <div class="list-group-item d-flex justify-content-between align-items-center ${isEquipped ? 'equipped' : ''}">
+            <div>
+            <strong>${L.get(eq.nameKey)}</strong>
+            <small class="d-block text-muted">${L.get(eq.descriptionKey)}</small>
+            </div>
+            <div>
+            <button class="btn btn-sm ${btnClass} equip-toggle-btn" data-item-id="${eq.id}">${btnText}</button>
+            </div>
+        </div>
+        `;
+    }).join('');
+
+    // Кнопки надеть/снять
+    list.querySelectorAll('.equip-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+        const id = btn.dataset.itemId;
+        const isEquipped = (playerData.equippedItems || []).some(e => e.id === id);
+        if (isEquipped) {
+            Game.unequipItem(id);
+        } else {
+            const itemData = equipmentData.find(eq => eq.id === id);
+            if (itemData) Game.equipItem(itemData);
+        }
+        UI.updateAll(Game.getPlayerData());
+        });
+    });
+    }
+
+    // Рендер мастерской (рецепты крафта)
+    function renderWorkshop(playerData) {
+    const list = document.getElementById('craftRecipesList');
+    if (!list) return;
+
+    const recipes = window.CRAFT_RECIPES || [];
+    if (recipes.length === 0) {
+        list.innerHTML = `<p class="text-muted small">${L.get('ui.noRecipes') || 'No recipes yet.'}</p>`;
+        return;
+    }
+
+    list.innerHTML = recipes.map(r => {
+        const can = Object.entries(r.cost).every(([id, need]) => (playerData.materials?.[id] || 0) >= need);
+        const costHtml = Object.entries(r.cost).map(([id, need]) => {
+        const mat = window.MATERIALS_DATA?.[id];
+        const have = playerData.materials?.[id] || 0;
+        const matName = mat ? (L.get(mat.nameKey) || id) : id;
+        return `<span class="badge bg-secondary me-1">${matName}: ${have}/${need}</span>`;
+        }).join(' ');
+
+        const name = L.get(r.nameKey) || r.id;
+        const desc = L.get(r.descriptionKey) || '';
+
+        return `
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+            <strong>${name}</strong>
+            <small class="d-block text-muted">${desc}</small>
+            <div class="mt-1">${costHtml}</div>
+            </div>
+            <button class="btn btn-sm btn-success craft-btn" data-id="${r.id}" ${can ? '' : 'disabled'}>
+            ${L.get('ui.craft') || 'Craft'}
+            </button>
+        </div>
+        `;
+    }).join('');
+
+    list.querySelectorAll('.craft-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+        if (typeof Game.craftItem === 'function') {
+            Game.craftItem(btn.dataset.id);
+        } else {
+            console.warn('Game.craftItem is not available');
+        }
+        });
+    });
+    }
+
     function showCardModal(parentId, allVersions) {
         const versionSwitcher = document.getElementById('versionSwitcher');
         const visualEffectControls = document.getElementById('visualEffectControls');
@@ -1553,6 +1701,8 @@ const UI = (() => {
 
         requestAnimationFrame(processChunk);
     }
+
+    
 
     // --- Публичный интерфейс ---
     return {

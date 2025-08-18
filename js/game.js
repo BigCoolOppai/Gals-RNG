@@ -89,6 +89,9 @@ const Game = (() => {
 
         d.lastRollTimestamp = Number.isFinite(d.lastRollTimestamp) ? d.lastRollTimestamp : 0;
 
+        d.materials = d.materials || {}; // { materialId: count }
+        d.tokens = d.tokens || {}; // { tokenId: count }
+
         // Статистика — глубокая копия дефолтов
         if (!d.stats) {
             d.stats = deepClone(defaults.stats || {});
@@ -388,6 +391,56 @@ const Game = (() => {
                 UI.updateAll(getPlayerData());
             }
         }
+    }
+
+    function addMaterials(materialId, amount) {
+        if (amount <= 0) return;
+        if (!playerData.materials[materialId]) playerData.materials[materialId] = 0;
+        playerData.materials[materialId] += amount;
+        }
+
+        function hasMaterials(costObj) {
+        return Object.entries(costObj).every(([id, need]) => (playerData.materials[id] || 0) >= need);
+        }
+
+        function spendMaterials(costObj) {
+        if (!hasMaterials(costObj)) return false;
+        for (const [id, need] of Object.entries(costObj)) {
+        playerData.materials[id] -= need;
+        }
+        return true;
+        }
+
+        function craftItem(recipeId) {
+        const recipe = (window.CRAFT_RECIPES || []).find(r => r.id === recipeId);
+        if (!recipe) {
+        console.warn('CRAFT: recipe not found', recipeId);
+        return false;
+        }
+        if (!hasMaterials(recipe.cost)) {
+        if (typeof UI !== 'undefined' && UI.showNotification) UI.showNotification(L.get('notifications.notEnoughMaterials') || 'Not enough materials', 'danger');
+        return false;
+        }
+        spendMaterials(recipe.cost);
+
+        // Применяем результат
+        const res = recipe.result;
+        if (res.type === 'ui_theme') {
+        if (!playerData.unlockedThemes.includes(res.themeId)) playerData.unlockedThemes.push(res.themeId);
+        if (typeof UI !== 'undefined' && UI.applyTheme) UI.applyTheme(res.themeId);
+        } else if (res.type === 'equipment') {
+        // Кладём как купленный
+        const invId = 'purchased_' + res.itemId;
+        if (!playerData.inventory.includes(invId)) playerData.inventory.push(invId);
+        } else if (res.type === 'card') {
+        addCardToInventory(res.rarityId);
+        } else if (res.type === 'token') {
+        playerData.tokens[res.tokenId] = (playerData.tokens[res.tokenId] || 0) + 1;
+        }
+        saveGame();
+        if (typeof UI !== 'undefined' && UI.updateAll) UI.updateAll(getPlayerData());
+        if (typeof UI !== 'undefined' && UI.showNotification) UI.showNotification(L.get('notifications.craftSuccess') || 'Crafted!', 'success');
+        return true;
     }
 
     // --- Перерождение ---
@@ -856,6 +909,18 @@ const Game = (() => {
             }
         }
 
+        // Материалы с дубликатов (по таблице выпадений)
+        if (!isNew && window.MATERIAL_DROPS) {
+            const drops = window.MATERIAL_DROPS[rarityId] || [];
+            drops.forEach(entry => {
+            if (Math.random() < entry.chance) {
+            const amt = entry.min + Math.floor(Math.random() * (entry.max - entry.min + 1));
+            addMaterials(entry.materialId, amt);
+            console.log("Materials: +${amt} ${entry.materialId} from ${rarityId}");
+            }
+            });
+        }
+
         // Бонус % к валюте за дубли
         let totalBonusPercent = 0;
         playerData.equippedItems.forEach(item => {
@@ -940,9 +1005,13 @@ const Game = (() => {
     }
 
     function processMultiRollResult(results) {
-        // Ачивка: 5 rare в мультиролле (пример)
-        const isFiveRares = results.every(res => res.rarity.id === 'rare');
-        if (isFiveRares && !playerData.completedAchievements.includes('five_rares_in_multi')) {
+        // Считаем "редкие" как parent 'rare' и alt-версии
+        const rareCount = results.filter(res => {
+            const id = res.rarity.id;
+            return id === 'rare' || id.startsWith('rare_');
+        }).length;
+
+        if (rareCount >= 5 && !playerData.completedAchievements.includes('five_rares_in_multi')) {
             grantAchievement('five_rares_in_multi');
         }
     }
@@ -1280,6 +1349,7 @@ const Game = (() => {
         getDiscountedCost,
         getActiveEvent,
         setActiveTheme,
-        calculateRebirthBonus
+        calculateRebirthBonus,
+        craftItem, addMaterials, hasMaterials, spendMaterials
     };
 })();
