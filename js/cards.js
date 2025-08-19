@@ -475,6 +475,22 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "bleached",
+        nameKey: "cards.bleached.name",
+        minPrestige: 2,
+        probabilityBase: 1 / 1200000,
+        color: "#111111",
+        glowColor: "#ff6a00",
+        cssClass: "rarity-bleached",
+        currencyOnDuplicate: 120000,
+        card: {
+            name: "Substitute",
+            nameKey: "cards.bleached.cardName",
+            image: "img/cardBleached.png",
+            descriptionKey: "cards.bleached.description"
+        }
+    },
+    {
         id: "garbage_alt_1",
         nameKey: "cards.garbage_alt_1.name",
         displayParentId: "garbage",
@@ -488,6 +504,22 @@ window.RARITIES_DATA = [
             nameKey: "cards.garbage_alt_1.cardName",
             image: "img/altGarbage.png",
             descriptionKey: "cards.garbage_alt_1.description"
+        }
+    },
+    {
+        id: "scrap_golem",
+        nameKey: "cards.scrap_golem.name",
+        rollable: false,               // ВАЖНО: не попадает в пул ролла
+        probabilityBase: 1 / 999999,   // не используется, можно любое
+        color: "#8D6E63",              // тёплый «металлолом»
+        glowColor: "#BCAAA4",
+        cssClass: "rarity-scrap-golem",
+        currencyOnDuplicate: 5000,
+        card: {
+            name: "Scrap Golem",
+            nameKey: "cards.scrap_golem.cardName",
+            image: "img/cardScrapGolem.png", // положи файл позже; временно можно любую картинку
+            descriptionKey: "cards.scrap_golem.description"
         }
     },
     {
@@ -512,7 +544,7 @@ window.RARITIES_DATA = [
         nameKey: "cards.alt_mythic.name",
         displayParentId: "mythic",
         minPrestige: 1,
-        probabilityBase: 1 / 64000,
+        probabilityBase: 1 / 640000,
         color: "#B71C1C",
         glowColor: "#FF8A80",
         cssClass: "rarity-alt-mythic",
@@ -643,6 +675,21 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "afro",
+        nameKey: "cards.afro.name",
+        probabilityBase: 1 / 350000,
+        color: "#6A1B9A",
+        glowColor: "#E1BEE7",
+        cssClass: "rarity-afro",
+        currencyOnDuplicate: 35000,
+        card: {
+            name: "Afro Queen",
+            nameKey: "cards.afro.cardName",
+            image: "img/cardAfro.png",
+            descriptionKey: "cards.afro.description"
+        }
+    },
+    {
         id: "berserk_alt_1",
         nameKey: "cards.berserk_alt_1.name",
         displayParentId: "berserk",
@@ -659,6 +706,7 @@ window.RARITIES_DATA = [
             descriptionKey: "cards.berserk_alt_1.description"
         }
     },
+    
     {
         id: "mechanic",
         nameKey: "cards.mechanic.name",
@@ -1552,6 +1600,31 @@ const SHOP_DATA = {
                 triggerRarities: bottomFeederRarities,
                 fragmentsNeeded: 30
             }
+        },
+        // --- craft-only equipment (получаются только через крафт; в магазине не отображаются) ---
+        {
+        id: "equip_disco_glasses",
+        nameKey: "shop.equipment.equip_disco_glasses.name",
+        descriptionKey: "shop.equipment.equip_disco_glasses.description",
+        type: "equipment",
+        craftOnly: true,
+        luckBonus: 1.5
+        },
+        {
+        id: "equip_soul_badge",
+        nameKey: "shop.equipment.equip_soul_badge.name",
+        descriptionKey: "shop.equipment.equip_soul_badge.description",
+        type: "equipment",
+        craftOnly: true,
+        effect: { type: "lucky_roll_accelerator", rolls_reduced: 1 }
+        },
+        {
+        id: "equip_afro_pick",
+        nameKey: "shop.equipment.equip_afro_pick.name",
+        descriptionKey: "shop.equipment.equip_afro_pick.description",
+        type: "equipment",
+        craftOnly: true,
+        effect: { type: "cumulative_luck_on_low_rolls", bonusPerStack: 0.03, maxStacks: 12, triggerRarities: bottomFeederRarities }
         }
     ],
     upgrades: [

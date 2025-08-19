@@ -2549,3 +2549,143 @@ html.theme-prestige {
 #materialsGrid .card-body .text-info-emphasis { font-size: 1.05rem; font-weight: 700; }
 
 #materialsGrid .card.bg-dark-subtle { min-height: 260px; }
+
+
+.roll-slot.rarity-bleached {
+color: #ffe0b2; 
+background:
+linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(18,18,18,0.95) 100%),
+repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 8px, transparent 8px 16px);
+border: 2px solid #ff6a00;
+text-shadow: 0 0 8px #ff6a00, 0 0 16px rgba(255,106,0,0.6);
+font-family: 'Orbitron', sans-serif;
+}
+.inventory-card.border-bleached {
+border-color: #ff6a00;
+--rarity-glow-color: #ff6a00;
+}
+
+
+.roll-slot.rarity-afro {
+color: #f3e5f5; 
+background:
+radial-gradient(ellipse at 50% 10%, rgba(123,31,162,0.5) 0%, transparent 60%),
+linear-gradient(160deg, #4a148c 0%, #7b1fa2 100%);
+border: 1px solid #ce93d8;
+text-shadow: 0 0 10px #ce93d8, 0 0 5px #ffffff;
+font-family: 'Orbitron', sans-serif;
+}
+.inventory-card.border-afro {
+border-color: #ce93d8;
+--rarity-glow-color: #ce93d8;
+}
+
+/* Theme: Shinigami (черный/белый/оранжевый) */
+html.theme-shinigami {
+  --theme-bg: #0f0f10;
+  --theme-container-bg: #181818;
+  --theme-text: #f0f0f0;
+  --theme-accent: #ff6a00;
+  --theme-accent-hover: #ff8a33;
+  --theme-border: #303030;
+}
+.theme-shinigami body { background-color: var(--theme-bg); color: var(--theme-text); }
+.theme-shinigami .tab-content, .theme-shinigami .list-group-item { background-color: var(--theme-container-bg); border-color: var(--theme-border); }
+.theme-shinigami .btn-primary { background-color: var(--theme-accent); border-color: var(--theme-accent); }
+.theme-shinigami .btn-primary:hover { background-color: var(--theme-accent-hover); border-color: var(--theme-accent-hover); }
+
+/* Scrap Golem (промышленный, «ломовой») */
+.roll-slot.rarity-scrap-golem {
+  color: #ECEFF1;
+  background:
+    repeating-linear-gradient( 45deg, rgba(255,255,255,0.03) 0 8px, transparent 8px 16px ),
+    linear-gradient(160deg, #37474F 0%, #263238 100%);
+  border: 1px solid #BCAAA4;
+  text-shadow: 0 0 8px rgba(188,170,164,0.6), 0 0 3px #000;
+  font-family: 'Orbitron', sans-serif;
+}
+.inventory-card.border-scrap_golem {
+  border-color: #BCAAA4;
+  --rarity-glow-color: #BCAAA4;
+}
+
+/* Theme: Obsidian (тёмный базальт + оранжево-лавовый акцент) */
+html.theme-obsidian {
+--theme-bg: #0b0c0e; 
+--theme-container-bg: #14171b; 
+--theme-text: #e6e7eb; 
+--theme-accent: #ff6a00; 
+--theme-accent-hover: #ff8a33; 
+--theme-border: #242a30; 
+color-scheme: dark;
+}
+
+
+.theme-obsidian body {
+background-color: var(--theme-bg);
+color: var(--theme-text);
+position: relative;
+}
+.theme-obsidian body::before {
+content: '';
+position: fixed;
+inset: 0;
+pointer-events: none;
+z-index: -1;
+background:
+radial-gradient(ellipse at 60% 20%, rgba(255,106,0,0.12), transparent 55%),
+radial-gradient(ellipse at 25% 80%, rgba(255,106,0,0.08), transparent 60%),
+repeating-linear-gradient( 35deg, rgba(255,255,255,0.02) 0 8px, transparent 8px 16px);
+filter: saturate(1.1) contrast(1.05);
+}
+
+/* контейнеры/карточки/списки */
+.theme-obsidian .tab-content,
+.theme-obsidian .list-group-item {
+background-color: var(--theme-container-bg);
+border-color: var(--theme-border);
+}
+.theme-obsidian .card.bg-dark-subtle {
+background-color: var(--theme-container-bg) !important;
+border-color: var(--theme-border) !important;
+}
+
+/* заголовки и акценты */
+.theme-obsidian h1, .theme-obsidian h2, .theme-obsidian h3, .theme-obsidian h4 {
+color: var(--theme-text);
+text-shadow: 0 0 6px rgba(255,106,0,0.18);
+}
+
+/* кнопки/контролы */
+.theme-obsidian .btn-primary {
+background-color: var(--theme-accent);
+border-color: var(--theme-accent);
+box-shadow: 0 0 6px rgba(255,106,0,0.35);
+}
+.theme-obsidian .btn-primary:hover {
+background-color: var(--theme-accent-hover);
+border-color: var(--theme-accent-hover);
+}
+.theme-obsidian .btn-outline-secondary {
+color: var(--theme-text);
+border-color: var(--theme-border);
+}
+
+/* вкладки */
+.theme-obsidian .nav-tabs {
+border-bottom-color: var(--theme-border);
+}
+.theme-obsidian .nav-tabs .nav-link {
+color: #b9c0c6;
+border-bottom-color: var(--theme-border);
+}
+.theme-obsidian .nav-tabs .nav-link.active {
+color: var(--theme-text);
+background-color: var(--theme-container-bg);
+border-color: var(--theme-border) var(--theme-border) var(--theme-container-bg);
+}
+
+/* небольшие штрихи */
+.theme-obsidian .badge.bg-warning {
+color: #1b1d20;
+}

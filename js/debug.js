@@ -4,6 +4,7 @@ const Debug = (() => {
     let currencyInput, addCurrencyBtn, spendCurrencyBtn, setCurrencyBtn;
     let unlockAllBtn, cardSelect, unlockOneBtn;
     let raritySelect, guaranteedRollBtn;
+    let materialSelect, materialAmount, addMatBtn, subMatBtn, setMatBtn;
 
     function cacheDOMElements() {
         panel = document.getElementById('debugPanel');
@@ -41,6 +42,84 @@ const Debug = (() => {
             rarityOption.value = rarity.id;
             rarityOption.textContent = rarityName;
             raritySelect.appendChild(rarityOption);
+        });
+    }
+
+    function injectMaterialsSection() {
+        if (!panel) return;
+        // если уже вставлено — не дублируем
+        if (document.getElementById('debugMaterialsSection')) return;
+
+        const sec = document.createElement('div');
+        sec.className = 'debug-section';
+        sec.id = 'debugMaterialsSection';
+        sec.innerHTML = `
+            <h4>${L.get('ui.materials') || 'Материалы'}</h4>
+            <select id="debugMaterialSelect"></select>
+            <input type="number" id="debugMaterialAmount" placeholder="${L.get('ui.amount') || 'Количество'}" value="10">
+            <div class="debug-btn-group">
+            <button id="debugAddMaterialBtn">${L.get('debug.add') || 'Добавить'}</button>
+            <button id="debugSubMaterialBtn">${L.get('debug.sub') || 'Отнять'}</button>
+            <button id="debugSetMaterialBtn">${L.get('debug.set') || 'Установить'}</button>
+            </div>
+        `;
+        panel.appendChild(sec);
+
+        // кэшируем только что созданные элементы
+        materialSelect  = document.getElementById('debugMaterialSelect');
+        materialAmount  = document.getElementById('debugMaterialAmount');
+        addMatBtn       = document.getElementById('debugAddMaterialBtn');
+        subMatBtn       = document.getElementById('debugSubMaterialBtn');
+        setMatBtn       = document.getElementById('debugSetMaterialBtn');
+
+        populateMaterialsSelect();
+        bindMaterialButtons();
+        }
+
+        function populateMaterialsSelect() {
+        if (!materialSelect) return;
+        // очистка
+        materialSelect.innerHTML = '';
+        const mats = window.MATERIALS_DATA || {};
+        Object.keys(mats).forEach(id => {
+            const m = mats[id];
+            const opt = document.createElement('option');
+            opt.value = id;
+            opt.textContent = L.get(m.nameKey) || id;
+            materialSelect.appendChild(opt);
+        });
+        }
+
+        function bindMaterialButtons() {
+        const parseAmt = () => {
+            const v = parseInt(materialAmount?.value || '0', 10);
+            return Number.isFinite(v) ? v : 0;
+        };
+
+        addMatBtn?.addEventListener('click', () => {
+            const id = materialSelect?.value;
+            const amt = parseAmt();
+            if (!id || !amt) return;
+            Game.addMaterials(id, amt);
+            UI.updateAll(Game.getPlayerData());
+        });
+
+        subMatBtn?.addEventListener('click', () => {
+            const id = materialSelect?.value;
+            const amt = parseAmt();
+            if (!id || !amt) return;
+            Game.addMaterials(id, -amt);
+            UI.updateAll(Game.getPlayerData());
+        });
+
+        setMatBtn?.addEventListener('click', () => {
+            const id = materialSelect?.value;
+            const amt = parseAmt();
+            if (!id) return;
+            const pd = Game.getPlayerData();
+            pd.materials[id] = Math.max(0, amt);
+            Game.saveGame();
+            UI.updateAll(pd);
         });
     }
 
@@ -90,6 +169,7 @@ const Debug = (() => {
     function init() {
         cacheDOMElements();
         populateSelects();
+        injectMaterialsSection(); 
         bindEvents();
         console.log("Debug Panel Initialized. Call Debug.show() to open.");
     }

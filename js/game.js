@@ -393,10 +393,12 @@ const Game = (() => {
         }
     }
 
-    function addMaterials(materialId, amount) {
-        if (amount <= 0) return;
-        if (!playerData.materials[materialId]) playerData.materials[materialId] = 0;
-        playerData.materials[materialId] += amount;
+        function addMaterials(materialId, amount) {
+            if (amount <= 0) return;
+            if (!playerData.materials[materialId]) playerData.materials[materialId] = 0;
+            playerData.materials[materialId] += amount;
+            if (!playerData.stats) playerData.stats = {};
+            playerData.stats.materialsCollectedTotal = (playerData.stats.materialsCollectedTotal || 0) + amount;
         }
 
         function hasMaterials(costObj) {
@@ -438,6 +440,11 @@ const Game = (() => {
         playerData.tokens[res.tokenId] = (playerData.tokens[res.tokenId] || 0) + 1;
         }
         saveGame();
+        if (playerData?.stats) playerData.stats.itemsCrafted = (playerData.stats.itemsCrafted || 0) + 1;
+        // Проверяем ачивки сразу после крафта
+        if (typeof checkAchievementsAndCollections === 'function') {
+        try { checkAchievementsAndCollections(); } catch (e) { console.warn('Achievements check after craft failed:', e); }
+        }
         if (typeof UI !== 'undefined' && UI.updateAll) UI.updateAll(getPlayerData());
         if (typeof UI !== 'undefined' && UI.showNotification) UI.showNotification(L.get('notifications.craftSuccess') || 'Crafted!', 'success');
         return true;
@@ -551,22 +558,19 @@ const Game = (() => {
         });
         luck += misfortuneBonus;
 
-        // Самый сильный буст
-        let maxBoostBonus = 0;
+        // Суммарный буст (стакается)
+        let boostSum = 0;
         playerData.activeBoosts.forEach(boost => {
-            if (boost.type === "luck_boost" && boost.luckBonus > maxBoostBonus) {
-                maxBoostBonus = boost.luckBonus;
+            if (boost.type === "luck_boost") {
+                boostSum += boost.luckBonus;
             }
         });
-
-        // Эффект катализатора
+        // Катализатор усиливает сумму
         if (playerData.activeMechanicalEffect === 'space_alt_2') {
             const effectData = getRarityDataById('space_alt_2', playerData)?.mechanicalEffect;
-            if (effectData) {
-                maxBoostBonus *= effectData.multiplier;
-            }
+            if (effectData) boostSum *= effectData.multiplier;
         }
-        luck += maxBoostBonus;
+        luck += boostSum;
 
         // "Путь меча" (мотивация)
         if (playerData.activeMechanicalEffect === 'motivation') {
@@ -664,6 +668,7 @@ const Game = (() => {
         const availableRarities = RARITIES_DATA.filter(r => {
             const prestigeOk = (r.minPrestige || 0) <= playerData.prestigeLevel;
             if (!prestigeOk) return false;
+            if (r.rollable === false) return false;
             if (r.id === 'salt' && !playerData.completedAchievements.includes('unlock_salt_card')) {
                 return false;
             }
@@ -726,6 +731,13 @@ const Game = (() => {
             finalEffectiveLuck += effectData.luckBonus;
             console.log(`%cJACKPOT EFFECT TRIGGERED! +${effectData.luckBonus} Luck for this roll!`, "color: gold; font-weight: bold;");
             const message = L.get('notifications.jackpotEffectTriggered').replace('{bonus}', effectData.luckBonus);
+            // One-shot визуальный эффект на 2.5с
+            try {
+                if (typeof UI !== 'undefined' && UI.applyVisualEffect) {
+                    UI.applyVisualEffect('jackpot');
+                    setTimeout(() => UI.applyVisualEffect(playerData.activeVisualEffectRarityId || null), 2500);
+                }
+            } catch (e) { /* ignore */ }
             notify(message, 'warning');
         }
 
@@ -840,6 +852,13 @@ const Game = (() => {
                                     .replace('{upgraded}', upgradedName);
 
                             notify(message, 'danger');
+                            // One-shot глитч при апгрейде
+                            try {
+                                if (typeof UI !== 'undefined' && UI.applyVisualEffect) {
+                                    UI.applyVisualEffect('error_alt_1');
+                                    setTimeout(() => UI.applyVisualEffect(playerData.activeVisualEffectRarityId || null), 1200);
+                                }
+                            } catch (e) { /* ignore */ }
                         }
                     }
                 }
@@ -909,15 +928,18 @@ const Game = (() => {
             }
         }
 
-        // Материалы с дубликатов (по таблице выпадений)
-        if (!isNew && window.MATERIAL_DROPS) {
+        // Материалы (дубли и/или первый раз) по таблице выпадений
+        if (window.MATERIAL_DROPS) {
             const drops = window.MATERIAL_DROPS[rarityId] || [];
             drops.forEach(entry => {
-            if (Math.random() < entry.chance) {
-            const amt = entry.min + Math.floor(Math.random() * (entry.max - entry.min + 1));
-            addMaterials(entry.materialId, amt);
-            console.log("Materials: +${amt} ${entry.materialId} from ${rarityId}");
-            }
+                const mode = entry.applyOn || 'duplicate'; // совместимость со старыми данными
+                const applies = (mode === 'both') || (mode === 'first' && isNew) || (mode === 'duplicate' && !isNew);
+                if (applies && Math.random() < entry.chance) {
+                    const amt = entry.min + Math.floor(Math.random() * (entry.max - entry.min + 1));
+                    addMaterials(entry.materialId, amt);
+                    
+                    console.log(`Materials: +${amt} ${entry.materialId} from ${rarityId}`);
+                }
             });
         }
 
@@ -1315,6 +1337,67 @@ const Game = (() => {
         saveGame();
     }
 
+    function getLuckBreakdown() {
+        const p = playerData;
+        const base = 1.0;
+
+        const core = calculateLuckFromCore(p.luckCoreLevel || 0);
+        const prestige = calculateRebirthBonus(p);
+
+        // blackhole duplicates
+        const bhPerDup = getRarityDataById('blackhole', p)?.mechanicalEffect?.luckBonusPerDuplicate ?? 0.01;
+        const bhDup = (p.duplicateCounts?.blackhole || 0) * bhPerDup;
+
+        // equipment (плоские бонусы и несчастье)
+        let equipFlat = 0;
+        let misfortune = 0;
+        (p.equippedItems || []).forEach(item => {
+            if (item.luckBonus) equipFlat += item.luckBonus;
+            if (item.effect?.type === 'cumulative_luck_on_low_rolls') {
+            const stacks = Math.min(p.misfortuneStacks || 0, (item.effect.maxStacks ?? Infinity));
+            misfortune += stacks * item.effect.bonusPerStack;
+            }
+        });
+
+        // boosts (сумма; катализатор)
+        const boosts = (p.activeBoosts || []).filter(b => b.type === 'luck_boost')
+                        .map(b => ({ id: b.id, name: b.name, value: b.luckBonus, endsAt: b.endTime }));
+        const boostSum = boosts.reduce((s,b) => s + (b.value || 0), 0);
+        let catalystMult = 1;
+        if (p.activeMechanicalEffect === 'space_alt_2') {
+            const eff = getRarityDataById('space_alt_2', p)?.mechanicalEffect;
+            if (eff?.multiplier) catalystMult = eff.multiplier;
+        }
+
+        // motivation (меч)
+        let motivation = 0;
+        if (p.activeMechanicalEffect === 'motivation') {
+            const eff = getRarityDataById('motivation', p)?.mechanicalEffect;
+            if (eff) {
+            const timeSince = Date.now() - (p.lastRollTimestamp || 0);
+            if (timeSince <= eff.timeoutSeconds * 1000) {
+                motivation = Math.min((p.motivationStacks || 0) * eff.bonusPerRoll, eff.maxBonus);
+            }
+            }
+        }
+
+        const total = base + core + prestige + bhDup + equipFlat + misfortune + motivation + (boostSum * catalystMult);
+
+        return {
+            total,
+            components: [
+            { key:'base',       label:'Base',               type:'flat', value: base },
+            { key:'core',       label:'Luck Core',          type:'flat', value: core },
+            { key:'prestige',   label:'Prestige',           type:'flat', value: prestige },
+            { key:'blackhole',  label:'Blackhole Dupes',    type:'flat', value: bhDup },
+            { key:'equip',      label:'Equipment (flat)',   type:'flat', value: equipFlat },
+            { key:'misfortune', label:'Misfortune stacks',  type:'flat', value: misfortune },
+            { key:'motivation', label:'Sword Path',         type:'flat', value: motivation },
+            { key:'boosts',     label:'Boosts sum',         type:'flat', value: boostSum, mult: catalystMult, list: boosts }
+            ]
+        };
+    }
+
     // Публичный интерфейс модуля
     return {
         init,
@@ -1350,6 +1433,6 @@ const Game = (() => {
         getActiveEvent,
         setActiveTheme,
         calculateRebirthBonus,
-        craftItem, addMaterials, hasMaterials, spendMaterials
+        craftItem, addMaterials, hasMaterials, spendMaterials, getLuckBreakdown,
     };
 })();

@@ -54,6 +54,13 @@ const ACHIEVEMENTS_DATA = {
             nameKey: 'achievements.get_salt_card.rewardName'
         }
     },
+    // Достичь 2-го престижа
+    'reach_prestige_2': {
+    nameKey: 'achievements.reach_prestige_2.name',
+    descriptionKey: 'achievements.reach_prestige_2.description',
+    condition: (playerData) => playerData.prestigeLevel >= 2,
+    reward: { type: 'currency', amount: 10000 }
+    },
     'reach_prestige_6': {
         nameKey: 'achievements.reach_prestige_6.name',
         descriptionKey: 'achievements.reach_prestige_6.description',
@@ -103,6 +110,39 @@ const ACHIEVEMENTS_DATA = {
         },
         reward: { type: 'currency', amount: 500000 }
     },
+    // Получить новую карту: Bleached
+    'get_bleached_card': {
+    nameKey: 'achievements.get_bleached_card.name',
+    descriptionKey: 'achievements.get_bleached_card.description',
+    condition: (playerData) => playerData.inventory.includes('bleached'),
+    reward: { type: 'currency', amount: 25000 }
+    },
+
+    // Получить новую карту: Afro
+    'get_afro_card': {
+    nameKey: 'achievements.get_afro_card.name',
+    descriptionKey: 'achievements.get_afro_card.description',
+    condition: (playerData) => playerData.inventory.includes('afro'),
+    reward: { type: 'currency', amount: 15000 }
+    },
+
+    // Скрафтить 3 любых предмета/карты/темы (суммарно)
+    'craft_3_items': {
+    nameKey: 'achievements.craft_3_items.name',
+    descriptionKey: 'achievements.craft_3_items.description',
+    condition: (playerData) => (playerData.stats?.itemsCrafted || 0) >= 3,
+    reward: { type: 'currency', amount: 7500 }
+    },
+
+    // Собрать 100 материалов суммарно
+    'collect_100_materials_total': {
+    nameKey: 'achievements.collect_100_materials_total.name',
+    descriptionKey: 'achievements.collect_100_materials_total.description',
+    condition: (playerData) => (playerData.stats?.materialsCollectedTotal || 0) >= 100,
+    reward: { type: 'currency', amount: 5000 }
+    },
+
+    
 };
 
 const COLLECTIONS_DATA = {

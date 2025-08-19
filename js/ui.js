@@ -264,6 +264,7 @@ const UI = (() => {
 
         const stats = playerData.stats;
         const seenRaritiesSet = new Set(playerData.seenRarities || []);
+        renderLuckBreakdownUI();
 
         statsTotalRollsEl && (statsTotalRollsEl.textContent = stats.totalRolls || 0);
 
@@ -276,6 +277,7 @@ const UI = (() => {
 
         statsCurrencyFromDuplicatesEl && (statsCurrencyFromDuplicatesEl.textContent = stats.currencyFromDuplicates || 0);
         statsTotalRebirthsEl && (statsTotalRebirthsEl.textContent = playerData.prestigeLevel || 0);
+        
 
         if (statsByRarityContainerEl) {
             statsByRarityContainerEl.innerHTML = '';
@@ -306,7 +308,80 @@ const UI = (() => {
                 statsByRarityContainerEl.appendChild(listItem);
             });
         }
+        
     }
+
+    function renderLuckBreakdownUI() {
+        const hostRow = document.getElementById('playerStatsContainer');
+        if (!hostRow || typeof Game.getLuckBreakdown !== 'function') return;
+
+        let box = document.getElementById('luckBreakdownBox');
+        if (!box) {
+            box = document.createElement('div');
+            box.id = 'luckBreakdownBox';
+            box.className = 'col-md-12 mb-3';
+            // вставляем САМЫМ ВЕРХОМ
+            hostRow.insertBefore(box, hostRow.firstChild);
+        }
+
+        const lb = Game.getLuckBreakdown();
+        const t = (k) => L.get(`ui.luckBreakdown.${k}`);
+        const fmt = (v) => (v >= 0 ? '+' : '') + v.toFixed(3);
+
+        const labels = {
+            base: t('base'),
+            core: t('core'),
+            prestige: t('prestige'),
+            blackhole: t('blackhole'),
+            equip: t('equip'),
+            misfortune: t('misfortune'),
+            motivation: t('motivation'),
+            boosts: t('boosts')
+        };
+
+        const leftItems = ['base','core','prestige','blackhole','equip','misfortune','motivation']
+            .map(key => {
+            const comp = lb.components.find(c => c.key === key) || { value: 0 };
+            return `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>${labels[key]}</span>
+                <span class="badge bg-primary rounded-pill">${fmt(comp.value)}</span>
+                </li>
+            `;
+            }).join('');
+
+        const compBoosts = lb.components.find(c => c.key === 'boosts') || { value: 0, mult: 1, list: [] };
+        const boostLines = (compBoosts.list || [])
+            .map(b => `<div class="small text-info">${b.name || b.id}: ${fmt(b.value)}</div>`)
+            .join('') || `<div class="text-muted small">${t('noBoosts')}</div>`;
+
+        const multBadge = compBoosts.mult && compBoosts.mult !== 1
+            ? `<span class="badge bg-warning text-dark ms-2">×${compBoosts.mult.toFixed(2)}</span>` : '';
+
+        box.innerHTML = `
+            <div class="card bg-dark-subtle">
+            <div class="card-body">
+                <h4>${t('title')}</h4>
+                <div class="row">
+                <div class="col-md-6">
+                    <ul class="list-group">${leftItems}</ul>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-2">
+                    <strong>${t('boosts')}</strong> ${multBadge}
+                    </div>
+                    ${boostLines}
+                    <hr class="my-2">
+                    <div class="d-flex justify-content-between">
+                    <span><strong>${t('total')}</strong></span>
+                    <span class="badge bg-success rounded-pill">${lb.total.toFixed(3)}</span>
+                    </div>
+                </div>
+                </div>
+            </div>
+            </div>
+        `;
+        }
 
     // --- Очередь модалки "Новая карта" ---
     function showNewCard(rollResult) {
@@ -1103,7 +1178,7 @@ const UI = (() => {
 
                 img.src = activeSkinData.card.image;
                 nameDiv.textContent = L.get(activeSkinData.card.nameKey);
-                cardDiv.classList.add(`border-${activeSkinData.cssClass || activeSkinData.id}`);
+                cardDiv.classList.add(`border-${activeSkinData.id}`);
                 cardDiv.style.setProperty('--rarity-glow-color', activeSkinData.glowColor);
 
                 const allPossibleVersions = [rarityData, ...RARITIES_DATA.filter(r => r.displayParentId === rarityData.id)];
@@ -1507,7 +1582,8 @@ const UI = (() => {
         };
 
         renderSection(boostShop, SHOP_DATA.boosts, 'boost');
-        renderSection(equipmentShop, SHOP_DATA.equipment, 'equipment');
+        const equipmentForShop = (SHOP_DATA.equipment || []).filter(eq => !eq.craftOnly);
+        renderSection(equipmentShop, equipmentForShop, 'equipment');
         renderSection(upgradesShop, SHOP_DATA.upgrades, 'upgrade');
 
         const equipmentHeader = document.querySelector('#equipmentShop')?.previousElementSibling;
@@ -1584,19 +1660,36 @@ const UI = (() => {
             return;
         }
 
-        equippedItemsDisplay.innerHTML = equippedItems.map(item => {
-            const itemName = item.nameKey ? L.get(item.nameKey) : (item.name || 'Unknown Item');
-            const shopItem = SHOP_DATA.equipment.find(shopItem => shopItem.id === item.id);
-            let effectText = L.get('debug.effect.active');
-            if (shopItem?.luckBonus) effectText = `+${shopItem.luckBonus.toFixed(2)} ${L.get('ui.luck').toLowerCase()}`;
-            else if (shopItem?.effect?.type === 'duplicate_currency_bonus_percent') effectText = `+${(shopItem.effect.value * 100).toFixed(0)}% 💎`;
-            else if (shopItem?.effect?.type === 'cumulative_luck_on_low_rolls') effectText = `${L.get('debug.effect.cumulative')} (+${shopItem.effect.bonusPerStack}/${L.get('debug.effect.stack')})`;
+        const chips = [];
+        (equippedItems || []).forEach(item => {
+        const shopItem = (SHOP_DATA.equipment || []).find(s => s.id === item.id);
+        // craftOnly не показываем в магазине
+        if (shopItem?.craftOnly) return;
+        const itemName = item.nameKey ? L.get(item.nameKey) : (item.name || 'Unknown Item');
+        let effectText = L.get('debug.effect.active');
+        if (shopItem?.luckBonus) {
+            effectText = `+${shopItem.luckBonus.toFixed(2)} ${L.get('ui.luck').toLowerCase()}`;
+        } else if (shopItem?.effect?.type === 'duplicate_currency_bonus_percent') {
+            effectText = `+${(shopItem.effect.value * 100).toFixed(0)}% 💎`;
+        } else if (shopItem?.effect?.type === 'cumulative_luck_on_low_rolls') {
+            effectText = `${L.get('debug.effect.cumulative')} (+${shopItem.effect.bonusPerStack}/${L.get('debug.effect.stack')})`;
+        }
 
-            return `<div class="equipped-item-chip badge bg-info text-dark me-1 mb-1 p-2">
-                <span>${itemName} <small class="text-white-75">(${effectText})</small></span>
-                <button class="btn btn-xs btn-outline-light btn-remove-equip ms-2" data-item-id="${item.id}" title="${L.get('ui.unequipItem')}">×</button>
-            </div>`;
-        }).join('');
+        chips.push(
+        `<div class="equipped-item-chip badge bg-info text-dark me-1 mb-1 p-2">
+            <span>${itemName} <small class="text-white-75">(${effectText})</small></span>
+            <button class="btn btn-xs btn-outline-light btn-remove-equip ms-2" data-item-id="${item.id}" title="${L.get('ui.unequipItem')}">×</button>
+        </div>`
+        );
+        });
+        equippedItemsDisplay.innerHTML = chips.join('');
+        // обработчики снятия
+        equippedItemsDisplay.querySelectorAll('.btn-remove-equip').forEach(btn => {
+        btn.addEventListener('click', () => {
+        Game.unequipItem(btn.dataset.itemId);
+        UI.updateAll(Game.getPlayerData());
+        });
+        });
 
         equippedItemsDisplay.querySelectorAll('.btn-remove-equip').forEach(btn => {
             btn.addEventListener('click', () => {

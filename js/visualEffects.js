@@ -1127,212 +1127,182 @@ const VisualEffects = {
 
             return () => { this._cleanupScope(glitchOverlay, scope, overlayClass); };
         },
-        // ЖЁСТКИЙ ГЛИТЧ ДЛЯ ALT-ERROR (Corrupted Core)
+       
+        // ALT-ERROR (Corrupted Core) — максимальный глитч (без reduceMotion, без backdrop-filter)
         error_alt_1(targets) {
-            const { glitchOverlay } = targets || {};
-            if (!glitchOverlay) return null;
+        const { glitchOverlay } = targets || {};
+        if (!glitchOverlay) return null;
 
-            const overlayClass = 'active-effect-error-alt';
-            const scope = this._createScope(glitchOverlay, overlayClass);
-            if (!scope) return null;
+        const overlayClass = 'active-effect-error-alt';
+        const scope = this._createScope(glitchOverlay, overlayClass);
+        if (!scope) return null;
 
-            const hasGSAP = typeof gsap !== 'undefined';
-            const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches || false;
-            const supportsBackdrop =
-                typeof CSS !== 'undefined' &&
-                (CSS.supports('backdrop-filter', 'contrast(1.2)') || CSS.supports('-webkit-backdrop-filter', 'contrast(1.2)'));
+        // Фиксируем локальный контейнер
+        Object.assign(scope.style, {
+            position: 'absolute',
+            inset: '0',
+            pointerEvents: 'none'
+        });
 
-            // Локальные стили (без внешнего CSS)
-            const styleEl = document.createElement('style');
-            styleEl.textContent = `
-            .ve-ea-layer{position:absolute;inset:0;pointer-events:none}
-            .ve-ea-scan{background:repeating-linear-gradient(transparent 0 2px,rgba(0,0,0,.18) 2px 3px);opacity:.55;mix-blend-mode:multiply}
-            .ve-ea-rgb{mix-blend-mode:screen;opacity:.45}
-            .ve-ea-rgb.red{background:rgba(255,0,0,.18)}
-            .ve-ea-rgb.cyan{background:rgba(0,255,255,.16)}
-            .ve-ea-vignette{box-shadow:inset 0 0 120px rgba(0,0,0,.4)}
-            .ve-ea-text{
-                position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-                font-family: "Courier New", monospace;font-weight:700;letter-spacing:.25em;
-                color:#ff3d00;text-shadow:0 0 6px #ff6e40,-1px 0 #00e5ff,1px 0 #e91e63;
-                opacity:.85;white-space:nowrap;user-select:none;pointer-events:none
+        const hasGSAP = typeof gsap !== 'undefined';
+        const rand = (a,b)=>Math.random()*(b-a)+a;
+
+        // Локальные стили (без backdrop/mix overlay-«ковров»)
+        const styleEl = document.createElement('style');
+        styleEl.textContent = `
+            .g2-layer{position:absolute;inset:0;pointer-events:none}
+            .g2-r,.g2-c{position:absolute;inset:0;mix-blend-mode:screen;opacity:.45}
+            .g2-r{background:rgba(255,0,0,.18)}
+            .g2-c{background:rgba(0,255,255,.16)}
+            .g2-scan{background:repeating-linear-gradient(transparent 0 2px,rgba(0,0,0,.22) 2px 3px);opacity:.42}
+            .g2-noise{background:repeating-conic-gradient(rgba(255,255,255,.035) 0% 10%, transparent 10% 20%);opacity:.12}
+            .g2-slice{
+            position:absolute;left:0;width:100%;height:8px;opacity:0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.26), transparent);
+            filter: saturate(1.25) contrast(1.05);
             }
-            .ve-ea-slice{
-                position:absolute;left:0;width:100%;
-                background:rgba(255,255,255,0.001); /* триггер для backdrop-filter */
-                mix-blend-mode:normal;
+            .g2-vbar{
+            position:absolute;top:0;bottom:0;width:10px;opacity:0;
+            background: linear-gradient(180deg, transparent, rgba(255,255,255,.18), transparent);
+            filter: saturate(1.3) contrast(1.1);
             }
-            .ve-ea-block{
-                position:absolute;
-                background:rgba(255,255,255,.06);
-                mix-blend-mode:overlay;
-                opacity:.0
+            .g2-block{
+            position:absolute;width:18px;height:10px;opacity:.0; border-radius:2px;
+            background: linear-gradient(90deg, rgba(255,64,64,.55), rgba(0,255,255,.45));
+            box-shadow: 0 0 10px rgba(255,64,64,.6), 0 0 10px rgba(0,255,255,.5);
             }
-            @media (prefers-reduced-motion: reduce){
-                .ve-ea-scan{opacity:.35}
+            .g2-title{
+            position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+            font-family:"Courier New",monospace;font-weight:700;letter-spacing:.26em;
+            color:#ff6e40; text-shadow:0 0 8px #ff6e40, -1px 0 #00e5ff, 1px 0 #e91e63;
+            opacity:.9;white-space:nowrap;user-select:none;pointer-events:none;
             }
-            `;
-            scope.appendChild(styleEl);
+            .g2-ghost{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); pointer-events:none; white-space:nowrap;
+                        font-family:"Courier New",monospace; font-weight:700; letter-spacing:.26em; opacity:.55; }
+            .g2-ghost.r{ color:#ff6e40; text-shadow: 0 0 10px #ff6e40; mix-blend-mode:screen; }
+            .g2-ghost.c{ color:#00e5ff; text-shadow: 0 0 10px #00e5ff; mix-blend-mode:screen; }
+        `;
+        scope.appendChild(styleEl);
 
-            // Базовые слои
-            const scan = document.createElement('div');  scan.className = 've-ea-layer ve-ea-scan'; scope.appendChild(scan);
-            const rgbR = document.createElement('div');  rgbR.className = 've-ea-layer ve-ea-rgb red';  scope.appendChild(rgbR);
-            const rgbC = document.createElement('div');  rgbC.className = 've-ea-layer ve-ea-rgb cyan'; scope.appendChild(rgbC);
-            const vign = document.createElement('div');  vign.className = 've-ea-layer ve-ea-vignette'; scope.appendChild(vign);
-            const label = document.createElement('div'); label.className = 've-ea-text'; label.textContent = 'CORRUPTED CORE'; scope.appendChild(label);
+        // Базовые слои
+        const scan  = document.createElement('div');  scan.className  = 'g2-layer g2-scan';  scope.appendChild(scan);
+        const noise = document.createElement('div');  noise.className = 'g2-layer g2-noise'; scope.appendChild(noise);
+        const red   = document.createElement('div');  red.className   = 'g2-layer g2-r';     scope.appendChild(red);
+        const cyan  = document.createElement('div');  cyan.className  = 'g2-layer g2-c';     scope.appendChild(cyan);
 
-            const timers = [];
-            const tweens = [];
-            const liveNodes = new Set();
+        // Заголовок + фантомы
+        const label = document.createElement('div');  label.className = 'g2-title'; label.textContent = 'CORRUPTED CORE'; scope.appendChild(label);
+        const ghostR = document.createElement('div'); ghostR.className = 'g2-ghost r'; ghostR.textContent = 'CORRUPTED CORE'; scope.appendChild(ghostR);
+        const ghostC = document.createElement('div'); ghostC.className = 'g2-ghost c'; ghostC.textContent = 'CORRUPTED CORE'; scope.appendChild(ghostC);
 
-            // Микро‑дрожь всего кадра
-            if (hasGSAP && !reduceMotion) {
-                const shake = gsap.timeline({ repeat: -1 });
-                shake.to(scope, { duration: 0.06, x:  1.5, y: -1.0, rotation: -0.2, ease: 'steps(1)' })
-                    .to(scope, { duration: 0.06, x: -1.0, y:  1.2, rotation:  0.2, ease: 'steps(1)' })
-                    .to(scope, { duration: 0.06, x:  0,    y:  0,   rotation:  0,   ease: 'steps(1)' });
-                tweens.push(shake);
-            }
+        // Коллекции для очистки
+        const tweens = [];
+        const timers = [];
 
-            // Постоянный RGB split
+        // Спавны
+        const spawnSlice = () => {
+            const h = 6 + Math.random()*18;
+            const y = Math.random() * (scope.clientHeight - h);
+            const s = document.createElement('div');
+            s.className = 'g2-slice'; s.style.top = `${y}px`; s.style.height = `${h}px`;
+            scope.appendChild(s);
             if (hasGSAP) {
-                const d = reduceMotion ? 0.18 : 0.12;
-                const off = reduceMotion ? 1.0 : 2.6;
-                const tl = gsap.timeline({ repeat: -1, yoyo: true });
-                tl.to(rgbR, { duration: d, x: -off, y:  off, ease: 'sine.inOut' }, 0)
-                .to(rgbC, { duration: d, x:  off, y: -off, ease: 'sine.inOut' }, 0);
-                tweens.push(tl);
+            const dx = (Math.random()*2-1) * 180;
+            const tl = gsap.timeline({ onComplete: () => s.remove() });
+            tl.set(s, { opacity: .7, x: 0 })
+                .to(s, { duration: 0.055, x: dx, ease: 'steps(4)' })
+                .to(s, { duration: 0.085, x: 0,  opacity: 0, ease: 'steps(3)' });
+            tweens.push(tl);
+            } else {
+            s.style.opacity = '.7'; s.style.transform = 'translateX(100px)';
+            setTimeout(()=>s.remove(), 200);
             }
+        };
 
-            // Лёгкая пульсация сканлайнов/текста
-            if (hasGSAP && !reduceMotion) {
-                tweens.push(gsap.to(scan,  { duration: 1.2, opacity: 0.35, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
-                tweens.push(gsap.to(label, { duration: 0.8, opacity: 0.65, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
+        const spawnVBar = () => {
+            const x = Math.random() * scope.clientWidth;
+            const w = 6 + Math.random()*14;
+            const b = document.createElement('div');
+            b.className = 'g2-vbar'; b.style.left = `${x}px`; b.style.width = `${w}px`;
+            scope.appendChild(b);
+            if (hasGSAP) {
+            const tl = gsap.timeline({ onComplete: () => b.remove() });
+            tl.set(b, { opacity: .5 })
+                .to(b, { duration: 0.16, opacity: 0, ease: 'power1.in' });
+            tweens.push(tl);
+            } else {
+            b.style.opacity = '.5'; setTimeout(()=>b.remove(), 170);
             }
+        };
 
-            // Создание "среза" (горизонтальной полосы) с искажением фона
-            function spawnSlice(burst = false) {
-                const slice = document.createElement('div');
-                slice.className = 've-ea-slice';
-                const h = burst ? (Math.random() * 60 + 18) : (Math.random() * 28 + 10);
-                const top = Math.random() * (window.innerHeight - h);
-                slice.style.top = `${top}px`;
-                slice.style.height = `${h}px`;
-
-                // Настоящее искажение фона — backdrop-filter
-                if (supportsBackdrop) {
-                    const baseBF = 'contrast(1.35) saturate(1.5) hue-rotate(-12deg) brightness(1.08)';
-                    const burstBF = 'invert(1) contrast(1.6) saturate(1.6) hue-rotate(180deg)';
-                    slice.style.backdropFilter = burst ? burstBF : baseBF;
-                    slice.style.webkitBackdropFilter = burst ? burstBF : baseBF;
-                } else {
-                    // Fallback без backdrop-filter
-                    slice.style.background = 'linear-gradient(90deg, rgba(255,255,255,.05), rgba(255,255,255,.01))';
-                    slice.style.mixBlendMode = 'overlay';
-                }
-
-                scope.appendChild(slice);
-                liveNodes.add(slice);
-
-                if (hasGSAP) {
-                    const dx1 = (Math.random() * 2 - 1) * (burst ? 180 : 90);
-                    const dx2 = (Math.random() * 2 - 1) * (burst ? 220 : 110);
-                    const t = gsap.timeline({
-                        onComplete: () => { liveNodes.delete(slice); slice.remove(); }
-                    });
-                    const step = 'steps(6)';
-                    t.to(slice, { duration: 0.08, x: dx1, ease: step })
-                    .to(slice, { duration: 0.06, x: -dx2, ease: step })
-                    .to(slice, { duration: 0.05, x: 0,    ease: step });
-                    tweens.push(t);
-                } else {
-                    slice.style.transition = 'transform 80ms steps(6, end)';
-                    slice.style.transform  = `translateX(${(Math.random()*120-60)|0}px)`;
-                    const h1 = setTimeout(() => { slice.style.transform = `translateX(${(Math.random()*140-70)|0}px)`; }, 90);
-                    const h2 = setTimeout(() => { slice.style.transform = `translateX(0px)`; }, 160);
-                    const h3 = setTimeout(() => { liveNodes.delete(slice); slice.remove(); }, 230);
-                    timers.push(h1,h2,h3);
-                }
+        const spawnBlock = () => {
+            const bw = 12 + Math.random()*28;
+            const bh = 6  + Math.random()*16;
+            const bx = Math.random() * (scope.clientWidth  - bw);
+            const by = Math.random() * (scope.clientHeight - bh);
+            const blk = document.createElement('div');
+            blk.className = 'g2-block';
+            Object.assign(blk.style, { left: `${bx}px`, top: `${by}px`, width: `${bw}px`, height: `${bh}px` });
+            scope.appendChild(blk);
+            if (hasGSAP) {
+            const dx = (Math.random()*2-1) * 60;
+            const dy = (Math.random()*2-1) * 30;
+            const tl = gsap.timeline({ onComplete: () => blk.remove() });
+            tl.set(blk, { opacity: .75, x: 0, y: 0, skewX: rand(-12,12) })
+                .to(blk, { duration: 0.08, x: dx, y: dy, ease: 'steps(2)' })
+                .to(blk, { duration: 0.10, x: 0,  y: 0,  opacity: 0, ease: 'steps(2)' });
+            tweens.push(tl);
+            } else {
+            blk.style.opacity = '.7'; setTimeout(()=>blk.remove(), 180);
             }
+        };
 
-            // Мелкие блок‑глитчи (дешёвые пиксельные “квадраты”)
-            function spawnBlock() {
-                const b = document.createElement('div');
-                b.className = 've-ea-block';
-                const w = Math.random() * 120 + 40;
-                const h = Math.random() * 40 + 14;
-                const x = Math.random() * (window.innerWidth  - w);
-                const y = Math.random() * (window.innerHeight - h);
-                Object.assign(b.style, { left: `${x}px`, top: `${y}px`, width: `${w}px`, height: `${h}px` });
-                scope.appendChild(b);
-                liveNodes.add(b);
+        if (hasGSAP) {
+            // RGB‑сдвиг
+            tweens.push(gsap.timeline({ repeat:-1, yoyo:true })
+            .to(red,  { duration: .12, x:-3, y: 3, ease:'sine.inOut' })
+            .to(red,  { duration: .12, x: 0, y: 0, ease:'sine.inOut' }));
+            tweens.push(gsap.timeline({ repeat:-1, yoyo:true })
+            .to(cyan, { duration: .12, x: 3, y:-3, ease:'sine.inOut' })
+            .to(cyan, { duration: .12, x: 0, y: 0, ease:'sine.inOut' }));
 
-                if (hasGSAP && !reduceMotion) {
-                    const t = gsap.timeline({
-                        onComplete: () => { liveNodes.delete(b); b.remove(); }
-                    });
-                    t.to(b, { duration: 0.06, opacity: 0.6, ease: 'steps(3)' })
-                    .to(b, { duration: 0.08, opacity: 0.0, ease: 'steps(3)' });
-                    tweens.push(t);
-                } else {
-                    b.style.opacity = '0.5';
-                    const h1 = setTimeout(() => { b.style.opacity = '0'; }, 90);
-                    const h2 = setTimeout(() => { liveNodes.delete(b); b.remove(); }, 180);
-                    timers.push(h1,h2);
-                }
-            }
+            // Дрожание кадра
+            tweens.push(gsap.timeline({ repeat:-1 })
+            .to(scope, { duration: .06, x: 1.6, y:-1.2, rotation:-0.25, ease:'steps(1)' })
+            .to(scope, { duration: .06, x:-1.2, y: 1.4, rotation: 0.25, ease:'steps(1)' })
+            .to(scope, { duration: .06, x: 0,   y: 0,   rotation: 0,    ease:'steps(1)' }));
 
-            // Постоянный поток мелких срезов
-            const baseInterval = reduceMotion ? 200 : 120;
-            const sliceT = setInterval(() => {
-                const count = 1 + (reduceMotion ? 0 : Math.floor(Math.random() * 2)); // 1–2
-                for (let i = 0; i < count; i++) spawnSlice(false);
-                if (Math.random() < 0.25 && !reduceMotion) spawnBlock();
-            }, baseInterval);
-            timers.push(sliceT);
+            // «Дыхание» сканлайнов и шум
+            tweens.push(gsap.to(scan,  { duration: 1.0, opacity: .3, yoyo:true, repeat:-1, ease:'sine.inOut' }));
+            tweens.push(gsap.to(noise, { duration: .9,  opacity: .18, yoyo:true, repeat:-1, ease:'sine.inOut' }));
 
-            // Периодические «взрывы» глитча
-            function burst() {
-                const c = reduceMotion ? 6 : 12;
-                for (let i = 0; i < c; i++) spawnSlice(true);
+            // Надпись и фантомы (мини‑джиттер)
+            tweens.push(gsap.timeline({ repeat:-1, yoyo:true })
+            .to(label, { duration:.1, skewX: rand(-4,4), skewY: rand(-2,2), ease:'steps(1)' })
+            .to(label, { duration:.1, skewX: 0, skewY: 0, ease:'steps(1)' }));
+            tweens.push(gsap.timeline({ repeat:-1, yoyo:true })
+            .to(ghostR, { duration:.08, x:'+=2', y:'+=1', opacity:.6, ease:'steps(1)' })
+            .to(ghostR, { duration:.08, x:'-=2', y:'-=1', opacity:.45, ease:'steps(1)' }));
+            tweens.push(gsap.timeline({ repeat:-1, yoyo:true })
+            .to(ghostC, { duration:.08, x:'-=2', y:'-=1', opacity:.6, ease:'steps(1)' })
+            .to(ghostC, { duration:.08, x:'+=2', y:'+=1', opacity:.45, ease:'steps(1)' }));
 
-                if (hasGSAP) {
-                    const amp = gsap.timeline();
-                    amp.to([rgbR, rgbC], { duration: 0.08, x: (i,el)=> el===rgbR ? -12 : 12, y: (i,el)=> el===rgbR ? 12 : -12, ease:'steps(5)' })
-                    .to([rgbR, rgbC], { duration: 0.12, x: 0, y: 0, ease:'steps(5)' });
-                    tweens.push(amp);
+            // Потоки всплесков
+            timers.push(setInterval(() => { const n = Math.random() < 0.35 ? 3 : 1; for (let i=0;i<n;i++) spawnSlice(); }, 95));
+            timers.push(setInterval(() => { if (Math.random() < 0.7) spawnVBar(); }, 220));
+            timers.push(setInterval(() => { const n = 2 + Math.floor(Math.random()*4); for (let i=0;i<n;i++) spawnBlock(); }, 240));
+        } else {
+            // Fallback без GSAP — хотя бы срезы и надпись
+            timers.push(setInterval(spawnSlice, 120));
+        }
 
-                    const txt = gsap.timeline();
-                    txt.to(label, { duration: 0.06, x: -6, skewX: -8, ease:'steps(2)' })
-                    .to(label, { duration: 0.06, x:  6, skewX:  8, ease:'steps(2)' })
-                    .to(label, { duration: 0.06, x:  0, skewX:  0, ease:'steps(2)' });
-                    tweens.push(txt);
-
-                    const frame = gsap.timeline();
-                    frame.to(scope, { duration: 0.04, x: 3, y: -2, rotation: 0.5, ease:'steps(1)' })
-                        .to(scope, { duration: 0.04, x:-3, y:  2, rotation:-0.5, ease:'steps(1)' })
-                        .to(scope, { duration: 0.04, x: 0, y:  0, rotation: 0,   ease:'steps(1)' });
-                    tweens.push(frame);
-                }
-            }
-            const burstT = setInterval(burst, reduceMotion ? 3000 : 2000);
-            timers.push(burstT);
-
-            // Очистка
-            return () => {
-                timers.forEach(id => {
-                    try {
-                        if (typeof id === 'number') clearInterval(id);
-                        else clearTimeout(id);
-                    } catch(e){}
-                });
-                if (hasGSAP) {
-                    tweens.forEach(t => { try { t.kill(); } catch(e){} });
-                }
-                liveNodes.forEach(n => { try { n.remove(); } catch(e){} });
-                try { styleEl.remove(); } catch(e){}
-                this._cleanupScope(glitchOverlay, scope, overlayClass);
-            };
+        // Очистка
+        return () => {
+            try { timers.forEach(id => clearInterval(id)); } catch(e){}
+            try { tweens.forEach(t => { try { t.kill(); } catch(e){} }); } catch(e){}
+            try { styleEl.remove(); } catch(e){}
+            this._cleanupScope(glitchOverlay, scope, overlayClass);
+        };
         },
 
         // 1) Silken — «лёгкие лепестки» и шёлковые ленты
@@ -1761,6 +1731,141 @@ const VisualEffects = {
                 try{ styleEl.remove(); }catch(_){}
                 this._cleanupScope(glitchOverlay, scope, 'active-effect-doctor');
             };
+        },
+        // BLEACHED — оранжевые «слэши» + пульсирующие кольца
+        bleached(targets) {
+        const { glitchOverlay } = targets || {};
+        if (!glitchOverlay) return null;
+        const overlayClass = 'active-effect-bleached';
+        const scope = this._createScope(glitchOverlay, overlayClass);
+        if (!scope) return null;
+
+        // фиксируем контейнер
+        Object.assign(scope.style, { position: 'absolute', inset: '0', pointerEvents: 'none' });
+
+        const hasGSAP = typeof gsap !== 'undefined';
+
+        // локальный стиль
+        const styleEl = document.createElement('style');
+        styleEl.textContent = `
+            .bl-slice{position:absolute;width:2px;height:160px;background:linear-gradient(180deg,#ff6a00,#ffe0b2);box-shadow:0 0 12px #ff6a00;opacity:.95;transform-origin:center}
+            .bl-ring{position:absolute;border:2px solid rgba(255,106,0,.6);border-radius:50%;box-shadow:0 0 16px rgba(255,106,0,.6);opacity:.35}
+        `;
+        scope.appendChild(styleEl);
+
+        const tweens = [];
+        const timers = [];
+
+        const spawnSlash = () => {
+            const d = document.createElement('div');
+            d.className = 'bl-slice';
+            scope.appendChild(d);
+            const x = Math.random()*scope.clientWidth, y = Math.random()*scope.clientHeight;
+            d.style.left = `${x}px`; d.style.top = `${y}px`; d.style.transform = `rotate(${Math.random()*360}deg)`;
+            if (hasGSAP) {
+            const tl = gsap.timeline({ onComplete:() => d.remove() });
+            tl.fromTo(d,{scaleY:.2,opacity:0},{duration:.22,scaleY:1.4,opacity:1,ease:'power2.out'})
+                .to(d,{duration:.32,opacity:0,scaleY:.1,ease:'power2.in'});
+            tweens.push(tl);
+            } else {
+            d.style.opacity = '1'; setTimeout(()=>{ d.style.opacity='0'; setTimeout(()=>d.remove(), 160); }, 120);
+            }
+        };
+
+        const spawnRing = () => {
+            const r = document.createElement('div');
+            r.className = 'bl-ring';
+            const size = 80 + Math.random()*160;
+            r.style.width = `${size}px`; r.style.height = `${size}px`;
+            r.style.left = `${Math.random()*(scope.clientWidth - size)}px`;
+            r.style.top  = `${Math.random()*(scope.clientHeight - size)}px`;
+            scope.appendChild(r);
+            if (hasGSAP) {
+            const tl = gsap.timeline({ onComplete:()=>r.remove() });
+            tl.fromTo(r,{scale:.2,opacity:.15},{duration:.8,scale:1.35,opacity:.0,ease:'sine.out'});
+            tweens.push(tl);
+            } else {
+            setTimeout(()=>r.remove(), 800);
+            }
+        };
+
+        // потоки
+        timers.push(setInterval(() => { for (let i=0;i<2;i++) spawnSlash(); }, 110));
+        timers.push(setInterval(() => { spawnRing(); }, 300));
+
+        // автоостанова для one‑shot использования (если включаешь кнопкой — эффект всё равно чисто снимается через cleanup)
+        const killer = setTimeout(()=>{ timers.forEach(clearInterval); }, 2000);
+
+        return () => {
+            try { timers.forEach(clearInterval); clearTimeout(killer); } catch(e){}
+            try { tweens.forEach(t => { try{t.kill();}catch(e){} }); } catch(e){}
+            try { styleEl.remove(); } catch(e){}
+            this._cleanupScope(glitchOverlay, scope, overlayClass);
+        };
+        },
+
+        // AFRO — неоновый эквалайзер + фиолетовые искры
+        afro(targets) {
+        const { glitchOverlay } = targets || {};
+        if (!glitchOverlay) return null;
+        const overlayClass = 'active-effect-afro';
+        const scope = this._createScope(glitchOverlay, overlayClass);
+        if (!scope) return null;
+
+        Object.assign(scope.style, { position: 'absolute', inset: '0', pointerEvents: 'none' });
+        const hasGSAP = typeof gsap !== 'undefined';
+
+        // контейнер барабанов
+        const barWrap = document.createElement('div');
+        Object.assign(barWrap.style, {
+            position:'absolute', bottom:'10%', left:'10%', right:'10%', height:'22%',
+            display:'flex', gap:'8px', alignItems:'flex-end', pointerEvents:'none'
+        });
+        scope.appendChild(barWrap);
+
+        const bars = [];
+        for (let i=0;i<24;i++){
+            const b = document.createElement('div');
+            Object.assign(b.style,{
+            flex:'1 1 auto', height:'10%',
+            background:'linear-gradient(180deg,#e1bee7,#7b1fa2)',
+            boxShadow:'0 0 12px #7b1fa2', borderRadius:'4px', opacity:.95
+            });
+            barWrap.appendChild(b); bars.push(b);
+            if (hasGSAP) {
+            const t = gsap.to(b,{
+                height:`${30+Math.random()*70}%`, duration:0.4+Math.random()*0.6,
+                yoyo:true, repeat:-1, ease:'sine.inOut', delay:Math.random()*0.4
+            });
+            // запомним для cleanup
+            b._tw = t;
+            }
+        }
+
+        // искры
+        const sparks = [];
+        const spawnSpark = () => {
+            const s = document.createElement('div');
+            Object.assign(s.style,{
+            position:'absolute', width:'6px', height:'6px', borderRadius:'50%',
+            background:'#b388ff', boxShadow:'0 0 8px #b388ff',
+            left:`${10+Math.random()*80}%`, top:`${15+Math.random()*60}%`, opacity:.9
+            });
+            scope.appendChild(s); sparks.push(s);
+            if (hasGSAP) {
+            gsap.to(s,{ y:-40-Math.random()*40, opacity:0, duration:0.8, ease:'power1.out', onComplete:()=>s.remove() });
+            } else { setTimeout(()=>s.remove(),800); }
+        };
+        const sparkTimer = setInterval(spawnSpark, 90);
+        const killer = setTimeout(()=>clearInterval(sparkTimer), 2000);
+
+        return () => {
+            try { clearInterval(sparkTimer); clearTimeout(killer); } catch(e){}
+            if (hasGSAP) bars.forEach(b=>{ try{ b._tw && b._tw.kill(); }catch(e){} });
+            sparks.forEach(s=>{ try{s.remove();}catch(e){} });
+            barWrap.remove?.();
+            this._cleanupScope(glitchOverlay, scope, overlayClass);
+        };
         },
             
     }

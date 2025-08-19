@@ -96,6 +96,13 @@ window.locales.ru = {
         kefla: { name: "Извергающаяся", cardName: "Кеф (LSSJ)", description: "Слияние двух девушек-саянов породило невообразимую мощь. Она дерзкая, сильная и готова стереть тебя с лица земли одним залпом ки. Надеюсь твой залп будет помощнее." },
         naruko: { name: "Обольстительная", cardName: "Наруко", description: "Самое мощное и неожиданное дзюцу. Кажется, она отдыхает в онсэне после тяжелой миссии. Не хочешь присоединиться? Обещаю, тут нет подвоха, даттебайо!" },
         smoke: { name: "Дымчатая", cardName: "Фума", description: "Она бесформенна и неосязаема, как мимолётное воспоминание или струйка дыма. Она может быть везде и нигде одновременно. Попробуй поймай, если сможешь." },
+        bleached: { name: "Пустофицированная", cardName: "Куросаки", description: "Эта рыжая девица напоролась не на тот меч и стала временной защитницей душ. Ей предстоит пройти еще очень длинный путь..." },
+        afro: { name: "Афро", cardName: "Долорес", description: "Долорес просто знает что она крута, и всё тут. Также она изобрела известный танец, кажется, Гипнодэнс." },
+        scrap_golem: {
+            name: "Ржавая",
+            cardName: "Мусорный Голем",
+            description: "Груда металлолома, оживлённая твоей волей. Она неутомима, как цеховая сирена, и тяжела, как твои решения."
+        }
     },
     // Предметы магазина
     shop: {
@@ -116,7 +123,10 @@ window.locales.ru = {
             equip_distortion_chronometer: { name: "Хронометр Искажений", description: "Lucky Roll срабатывает на 2 ролла раньше (каждый 9-й вместо 11-го)." },
             equip_abyssal_hand: { name: "Донная Длань", description: "Усиленная версия Длани Неудачника. Увеличивает удачу за каждую из 12 самых частых карт подряд." },
             equip_fates_thread: { name: "Нить Судьбы", description: "При Перерождении с этой экипировкой, вы сохраните один случайный предмет из экипированных." },
-            equip_alchemists_stone: { name: "Камень Алхимика", description: "Дает очень малый шанс превратить осколки с дубликатов 'донных' карт в Осколок Ядра Удачи." }
+            equip_alchemists_stone: { name: "Камень Алхимика", description: "Дает очень малый шанс превратить осколки с дубликатов 'донных' карт в Осколок Ядра Удачи." },
+            equip_disco_glasses: { name: "Диско‑Очки", description: "+1.5 к удаче." },
+            equip_soul_badge:   { name: "Значок Души", description: "Lucky Roll срабатывает на 1 ролл раньше. Доступно через крафт." },
+            equip_afro_pick:    { name: "Афро‑Пик", description: "Накопительная удача от частых карт: +0.03/стак (макс 12). Доступно через крафт." }
         },
         upgrades: {
             upgrade_fast_roll: { name: "Быстрый Ролл", description: "Уменьшает время анимации ролла до ~0.75 сек." },
@@ -226,6 +236,8 @@ window.locales.ru = {
             'theme-classic': 'Классика',
             'theme-salt': 'Соль',
             'theme-prestige': 'Престиж',
+            'theme-shinigami': 'Шинигами',
+            'theme-obsidian': 'Обсидиановая'
         },
         luckCoreFragments: "Осколков Ядра:",
         effectiveChance: "Эффективный шанс (с вашей удачей):",
@@ -236,7 +248,21 @@ window.locales.ru = {
         noMaterials: "Материалов пока нет.",
         noOwnedEquipment: "Купленной экипировки пока нет.",
         noRecipes: "Рецептов пока нет.",
-        craft: "Скрафтить"
+        craft: "Скрафтить",
+        luckBreakdown: {
+            title: "Состав удачи",
+            base: "База",
+            core: "Ядро удачи",
+            prestige: "Престиж",
+            blackhole: "Дубли Blackhole",
+            equip: "Экипировка (плоско)",
+            misfortune: "Рука несчастья",
+            motivation: "Путь меча",
+            boosts: "Бусты",
+            multiplier: "множитель",
+            noBoosts: "Нет активных бустов",
+            total: "Итого"
+        }
     },
     // Уведомления
     notifications: {
@@ -335,6 +361,11 @@ window.locales.ru = {
         use_fates_thread: { name: "Нить Ариадны", description: "Успешно сохранить предмет при Перерождении с помощью 'Нити Судьбы'." },
         empower_core_with_stone: { name: "Алхимик-Стажер", description: "Усилить Ядро Удачи с помощью 'Камня Алхимика' 1 раз." },
         first_mega_rare: { name: "За гранью удачи", description: "Получить свою первую карту с шансом выпадения реже чем 1 к миллиону." },
+        get_bleached_card: { name: "Вкус Синигами", description: "Получить карту «Подменный»." },
+        get_afro_card: { name: "Королева Танцпола", description: "Получить карту «Афро»." },
+        craft_3_items: { name: "Первый Ремесленник", description: "Скрафтить 3 предмета." },
+        collect_100_materials_total: { name: "Мелкий Скупщик", description: "Собрать 100 материалов (суммарно)." },
+        reach_prestige_2: { name: "Начало Пути", description: "Достичь 2‑го престижа." }
     },
     collections: {
         classic_set: {
@@ -344,11 +375,26 @@ window.locales.ru = {
         }
     },
     materials: {
-        scrap:           { name: "Мусор (Scrap)" },
+        scrap:           { name: "Мусор" },
         obsidian_shard:  { name: "Осколок обсидиана" },
         silken_thread:   { name: "Шёлковая нить" },
         lava_core:       { name: "Ядро лавы" },
-        carbon_shard:    { name: "Углеродный осколок" }
+        carbon_shard:    { name: "Углеродный осколок" },
+        hollow_mask:     { name: "Фрагмент маски" },
+        soul_shard:      { name: "Осколок души" },
+        reiatsu_thread:  { name: "Нить Реяцу" },
+        afro_fiber:      { name: "Афро‑Волокно" },
+        neon_tube:       { name: "Неоновая трубка" },
+        cosmic_dust:     { name: "Космическая пыль" },
+        moon_tears:      { name: "Лунные слёзы" },
+        gold_leaf:       { name: "Золотой лист" },
+        steel_ingot:     { name: "Стальной слиток" },
+        vinyl_chip:      { name: "Виниловый чип" },
+        crystal_shard:   { name: "Кристальный осколок" },
+        graphite_powder: { name: "Графитовый порошок" },
+        bee_royal_jelly: { name: "Маточное желе" },
+        shroom_spores:   { name: "Грибные споры" },
+        devil_chain_link:{ name: "Звено цепи" }
     },
     craft: {
         theme_obsidian_forge: {
@@ -363,9 +409,10 @@ window.locales.ru = {
             name: "Альт-карта: Болетус",
             description: "Сплети шёлк и разожги лавовое ядро, чтобы создать альт-версию Грибной."
         },
-        token_tier_up: {
-            name: "Токен: +1 Тир",
-            description: "Следующий ролл повышается на +1 тир (одноразовый)."
+        theme_shinigami: { name: "Тема: Синигами", description: "Чёрный, белый и оранжевый. Узоры пустых и лёгкое красное свечение." },
+        card_scrap_golem: {
+            name: "Карта: Скрап‑Голем (эксклюзив)",
+            description: "150 лома и щепотка графита — и груда металла встанет на твой путь. Собери, закали, оживи."
         }
     }
 };

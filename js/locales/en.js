@@ -144,6 +144,21 @@ window.locales.en = {
         kefla: { name: "Erupting", cardName: "Kef (LSSJ)", description: "The fusion of two Saiyan girls has unleashed unimaginable power. She's cocky, strong, and ready to erase you from existence with a single ki blast. I hope your blast is more powerful." },
         naruko: { name: "Seductive", cardName: "Naruko", description: "The most powerful and unexpected jutsu. It seems she's relaxing in an onsen after a tough mission. Don't you want to join? I promise, there's no catch, dattebayo!" },
         smoke: { name: "Smoky", cardName: "Fuma", description: "She is formless and intangible, like a fleeting memory or a wisp of smoke. She can be everywhere and nowhere at the same time. Try to catch her, if you can." },
+        bleached: {
+            name: "Hollowfied",
+            cardName: "Kurosaki",
+            description: "This red‑haired girl ended up on the wrong end of a sword and became a temporary guardian of souls. She still has a long road ahead..."
+        },
+        afro: {
+            name: "Afro",
+            cardName: "Dolores",
+            description: "Dolores simply knows she’s cool—period. She may or may not have invented a certain famous dance—the Hypno Dance."
+        },
+        scrap_golem: {
+            name: "Scrapbound",
+            cardName: "Scrap Golem",
+            description: "A hulking frame hammered from junk and resolve. It moves because you willed it to."
+        }
     },
     // Shop Items
     shop: {
@@ -165,6 +180,9 @@ window.locales.en = {
             equip_abyssal_hand: { name: "Abyssal Hand", description: "An enhanced version of the Hand of Misfortune. Increases luck for each of the 12 most common cards in a row." },
             equip_fates_thread: { name: "Fate's Thread", description: "When you Rebirth with this item equipped, you will preserve one random item from equipped." },
             equip_alchemists_stone: { name: "Alchemist's Stone", description: "Grants a very small chance to transmute shards from 'bottom-feeder' duplicates into a Luck Core Fragment." },
+            equip_disco_glasses: { name: "Disco Glasses", description: "+1.5 luck" },
+            equip_soul_badge:    { name: "Soul Badge", description: "Lucky Roll triggers 1 roll sooner. Available via crafting." },
+            equip_afro_pick:     { name: "Afro Pick", description: "Cumulative luck from common streaks: +0.03/stack (max 12). Available via crafting." }
         },
         upgrades: {
             upgrade_fast_roll: { name: "Fast Roll", description: "Reduces roll animation time to ~0.75 sec." },
@@ -274,6 +292,8 @@ window.locales.en = {
             'theme-classic': 'Classic',
             'theme-salt': 'Salt',
             'theme-prestige': 'Prestige',
+            'theme-shinigami': 'Shinigami',
+            'theme-obsidian': 'Obsidian'
         },
         luckCoreFragments: "Core Fragments:",
         effectiveChance: "Effective Chance (with your luck):",
@@ -284,7 +304,21 @@ window.locales.en = {
         noMaterials: "No materials yet.",
         noOwnedEquipment: "No owned equipment yet.",
         noRecipes: "No recipes available.",
-        craft: "Craft"  
+        craft: "Craft",
+        luckBreakdown: {
+            title: "Luck Breakdown",
+            base: "Base",
+            core: "Luck Core",
+            prestige: "Prestige",
+            blackhole: "Blackhole dupes",
+            equip: "Equipment (flat)",
+            misfortune: "Misfortune stacks",
+            motivation: "Sword Path",
+            boosts: "Boosts",
+            multiplier: "multiplier",
+            noBoosts: "No active boosts",
+            total: "Total"
+        }  
     },
     // Notifications
     notifications: {
@@ -387,6 +421,11 @@ window.locales.en = {
         use_fates_thread: { name: "Ariadne's Thread", description: "Successfully preserve an item on Rebirth using 'Fate's Thread'." },
         empower_core_with_stone: { name: "Apprentice Alchemist", description: "Amplify the Luck Core using the 'Alchemist's Stone' once." },
         first_mega_rare: { name: "Beyond Luck", description: "Obtain your first card with a drop chance rarer than 1 in a million." },
+        get_bleached_card: { name: "Taste of Shinigami", description: "Obtain the 'Bleached' card." },
+        get_afro_card: { name: "Dancefloor Queen", description: "Obtain the 'Afro' card." },
+        craft_3_items: { name: "First Crafter", description: "Craft 3 items." },
+        collect_100_materials_total: { name: "Small Hoarder", description: "Collect 100 materials (total)." },
+        reach_prestige_2: { name: "The Path Begins", description: "Reach Prestige 2." }
     },
     collections: {
         classic_set: {
@@ -400,7 +439,22 @@ window.locales.en = {
         obsidian_shard:  { name: "Obsidian Shard" },
         silken_thread:   { name: "Silken Thread" },
         lava_core:       { name: "Lava Core" },
-        carbon_shard:    { name: "Carbon Shard" }
+        carbon_shard:    { name: "Carbon Shard" },
+        hollow_mask:     { name: "Hollow Mask Fragment" },
+        soul_shard:      { name: "Soul Shard" },
+        reiatsu_thread:  { name: "Reiatsu Thread" },
+        afro_fiber:      { name: "Afro Fiber" },
+        neon_tube:       { name: "Neon Tube" },
+        cosmic_dust:     { name: "Cosmic Dust" },
+        moon_tears:      { name: "Moon Tears" },
+        gold_leaf:       { name: "Gold Leaf" },
+        steel_ingot:     { name: "Steel Ingot" },
+        vinyl_chip:      { name: "Vinyl Chip" },
+        crystal_shard:   { name: "Crystal Shard" },
+        graphite_powder: { name: "Graphite Powder" },
+        bee_royal_jelly: { name: "Royal Jelly" },
+        shroom_spores:   { name: "Shroom Spores" },
+        devil_chain_link:{ name: "Chain Link" }
     },
     craft: {
         theme_obsidian_forge: {
@@ -415,9 +469,10 @@ window.locales.en = {
         name: "Alt Card: Boletus",
         description: "Weave silk and ignite a lava core to craft the alt Shroom."
     },
-    token_tier_up: {
-        name: "Token: Tier +1",
-        description: "Your next roll is upgraded by +1 tier (consumed on use)."
+    theme_shinigami: { name: "Theme: Shinigami", description: "Black, white and orange. Hollow patterns and a faint red glow." },
+    card_scrap_golem: {
+        name: "Card: Scrap Golem (exclusive)",
+        description: "150 scrap and a pinch of graphite—shape the heap and wake the metal."
     }
     }
 };
