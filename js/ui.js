@@ -1153,24 +1153,38 @@ const UI = (() => {
         }
 
         const parentCards = sortedRarities.filter(r => !r.displayParentId);
-
+        
         parentCards.forEach(rarityData => {
             const allCardVersions = [rarityData, ...availableRarities.filter(r => r.displayParentId === rarityData.id)];
+            
             const openedVersions = allCardVersions.filter(v => playerData.inventory.includes(v.id));
             const isAnyVersionOpened = openedVersions.length > 0;
+
+            const activeSkinId = playerData.activeSkins[rarityData.id] || rarityData.id;
+            const vView = (playerData.variantView || {})[activeSkinId];              // 'negative' | null
+            const hasNeg = ((playerData.ownedVariants || {})[activeSkinId]?.negative || 0) > 0;
+            const shouldShowNegativeForThisFamily = isAnyVersionOpened && vView === 'negative' && hasNeg;
+
             const hasUnseenVersion = allCardVersions.some(v => playerData.unseenCardIds.includes(v.id));
 
             const col = document.createElement('div');
             col.className = 'col';
             const cardDiv = document.createElement('div');
             cardDiv.className = 'inventory-card';
-            if (hasUnseenVersion) cardDiv.classList.add('new-card');
-            cardDiv.dataset.rarityId = rarityData.id;
+
+            if (shouldShowNegativeForThisFamily) {
+            cardDiv.classList.add('variant-negative');
+            }
 
             const img = document.createElement('img');
             img.className = 'inventory-card-image';
             const nameDiv = document.createElement('div');
             nameDiv.className = 'inventory-card-name';
+            
+            if (hasUnseenVersion) cardDiv.classList.add('new-card');
+            cardDiv.dataset.rarityId = rarityData.id;
+
+            
 
             if (isAnyVersionOpened) {
                 const activeSkinId = playerData.activeSkins[rarityData.id] || rarityData.id;
@@ -1366,6 +1380,9 @@ const UI = (() => {
         mechanicalEffectControls.innerHTML = '';
 
         const showVersionDetails = (versionData) => {
+            const modalRoot = document.getElementById('cardModal');
+            // Сбрасываем на старте — чтобы негатив не "залипал"
+            modalRoot.classList.remove('variant-negative');
             modalCardImage.src = versionData.card.image;
             modalCardName.textContent = L.get(versionData.card.nameKey);
             modalCardRarity.textContent = `${L.get('ui.rarity')}: ${L.get(versionData.nameKey)}`;
@@ -1449,6 +1466,64 @@ const UI = (() => {
                 <h5>${L.get('mechanical_effects.description_title')}${mechEquippedIndicator}</h5>
                 <p class="text-muted small">${mechDescriptionText}</p>
             `;
+
+            // --- Переключатель мутаций (для ЭТОЙ версии) ---
+            const variantContainerId = 'variantFilterGroup';
+            let variantGroup = document.getElementById(variantContainerId);
+            if (!variantGroup) {
+                variantGroup = document.createElement('div');
+                variantGroup.id = variantContainerId;
+                variantGroup.className = 'd-flex justify-content-center align-items-center flex-wrap gap-2 mt-3';
+                document.getElementById('versionSwitcher')?.insertAdjacentElement('afterend', variantGroup);
+            }
+            variantGroup.innerHTML = '';
+
+            const pd = Game.getPlayerData();
+            const vCounts = (pd.ownedVariants || {})[versionData.id] || {};
+            const hasNegative = (vCounts.negative || 0) > 0;
+
+            // Кнопка "Обычная"
+            const btnNormal = document.createElement('button');
+            btnNormal.type = 'button';
+            btnNormal.className = 'btn btn-sm btn-outline-light';
+            btnNormal.textContent = L.get('ui.variant.normal') || 'Normal';
+            btnNormal.addEventListener('click', () => applyVariantToModal(null));
+            variantGroup.appendChild(btnNormal);
+
+            // Кнопка "Негатив" — только если у ЭТОЙ версии выбит
+            if (hasNegative) {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'btn btn-sm btn-outline-warning';
+                b.textContent = L.get('mutations.negative.name') || 'Negative';
+                b.addEventListener('click', () => applyVariantToModal('negative'));
+                variantGroup.appendChild(b);
+            } else {
+                const hint = document.createElement('div');
+                hint.className = 'text-muted small mt-2';
+                hint.textContent = L.get('ui.noVariants') || 'No variants owned for this card.';
+                variantGroup.appendChild(hint);
+            }
+
+            // Применение к модалке + сохранение выбора для ЭТОЙ версии
+            function applyVariantToModal(vid) {
+                modalRoot.classList.remove('variant-negative');
+                if (vid === 'negative') modalRoot.classList.add('variant-negative');
+
+                // Сохраняем локальный выбор версии
+                pd.variantView = pd.variantView || {};
+                pd.variantView[versionData.id] = vid || null; // 'negative' | null
+                Game.saveGame();
+
+                // Перерисовать грид, чтобы семья показывала инверт только если активный скин = эта версия
+                renderInventory(Game.getPlayerData());
+            }
+
+            // На закрытии модалки всегда очищаем класс — чтобы не влияло на другие карты
+            const modalEl = document.getElementById('cardModal');
+            modalEl.addEventListener('hidden.bs.modal', () => {
+                modalRoot.classList.remove('variant-negative');
+            }, { once: true });
 
             if (mechEffectData) {
                 const equipBtn = document.createElement('button');

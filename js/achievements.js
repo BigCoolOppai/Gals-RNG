@@ -142,6 +142,28 @@ const ACHIEVEMENTS_DATA = {
     reward: { type: 'currency', amount: 5000 }
     },
 
+    // Иметь 5 разных карт с мутацией "Негатив"
+    'variants_negative_5': {
+    nameKey: 'achievements.variants_negative_5.name',
+    descriptionKey: 'achievements.variants_negative_5.description',
+    condition: (p) => {
+        const ov = p.ownedVariants || {};
+        let cnt = 0;
+        for (const cardId in ov) {
+        if (ov[cardId]?.negative > 0) cnt++;
+        }
+        return cnt >= 5;
+    },
+    reward: { type: 'currency', amount: 15000 }
+    },
+    // Собрать 500 материалов суммарно
+    'collect_500_materials_total': {
+    nameKey: 'achievements.collect_500_materials_total.name',
+    descriptionKey: 'achievements.collect_500_materials_total.description',
+    condition: (p) => (p.stats?.materialsCollectedTotal || 0) >= 500,
+    reward: { type: 'currency', amount: 10000 }
+    },
+
     
 };
 

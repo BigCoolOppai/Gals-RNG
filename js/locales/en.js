@@ -158,6 +158,36 @@ window.locales.en = {
             name: "Scrapbound",
             cardName: "Scrap Golem",
             description: "A hulking frame hammered from junk and resolve. It moves because you willed it to."
+        },
+        orochi: {
+            name: "Snaky",
+            cardName: "Orochi",
+            description: "An ancient patroness of serpents with little humanity left. Still, a couple of “not‑so‑small” details suggest she’s very much a woman."
+        },
+        western: {
+            name: "Western",
+            cardName: "Jessie",
+            description: "Every duel ends her way. The bounty on her head? $1,876,000."
+        },
+        jade: {
+            name: "Green",
+            cardName: "Emerald",
+            description: "Not just a woman with a staff — a ruthless fighter. CUMALITY."
+        },
+        gamer: {
+            name: "Gamer",
+            cardName: "@FragQueen2001",
+            description: "Apparently, even mid‑“activity” she refuses to tab out."
+        },
+        fenek: {
+            name: "Fluffy",
+            cardName: "Fluffy",
+            description: "A cute fennec girl you simply cannot resist petting."
+        },
+        slime: {
+            name: "Sticky",
+            cardName: "CubeSlime",
+            description: "A green slime girl with a few cubes on her head. Looks like she came from somewhere else…"
         }
     },
     // Shop Items
@@ -182,7 +212,10 @@ window.locales.en = {
             equip_alchemists_stone: { name: "Alchemist's Stone", description: "Grants a very small chance to transmute shards from 'bottom-feeder' duplicates into a Luck Core Fragment." },
             equip_disco_glasses: { name: "Disco Glasses", description: "+1.5 luck" },
             equip_soul_badge:    { name: "Soul Badge", description: "Lucky Roll triggers 1 roll sooner. Available via crafting." },
-            equip_afro_pick:     { name: "Afro Pick", description: "Cumulative luck from common streaks: +0.03/stack (max 12). Available via crafting." }
+            equip_afro_pick:     { name: "Afro Pick", description: "Cumulative luck from common streaks: +0.03/stack (max 12). Available via crafting." },
+            equip_catalyst_lens:  { name: "Catalyst Lens", description: "+50% card mutation chance (additive)." },
+            equip_refiner_gloves: { name: "Refiner Gloves", description: "+25% material drop chance." },
+            equip_boost_capacitor:{ name: "Boost Capacitor", description: "×1.5 duration for temporary boosts." }
         },
         upgrades: {
             upgrade_fast_roll: { name: "Fast Roll", description: "Reduces roll animation time to ~0.75 sec." },
@@ -200,6 +233,8 @@ window.locales.en = {
     },
     // UI Elements
     ui: {
+        variant: { normal: "Normal"},
+        noVariants: "No variants owned for this card.",
         prismaticShards: "Prismatic Shards",
         luck: "Luck",
         activeBoosts: "Active Boosts",
@@ -403,6 +438,10 @@ window.locales.en = {
         black_clover: {
             name: "Black Clover",
             description: "Time to test your fortune! Your Luck is doubled for the duration of this event."
+        },
+        workshop_rush: {
+            name: "Workshop Rush",
+            description: "A week of crafting: more materials and a chance for special card variants."
         }
     },
     achievements: {
@@ -425,7 +464,11 @@ window.locales.en = {
         get_afro_card: { name: "Dancefloor Queen", description: "Obtain the 'Afro' card." },
         craft_3_items: { name: "First Crafter", description: "Craft 3 items." },
         collect_100_materials_total: { name: "Small Hoarder", description: "Collect 100 materials (total)." },
-        reach_prestige_2: { name: "The Path Begins", description: "Reach Prestige 2." }
+        reach_prestige_2: { name: "The Path Begins", description: "Reach Prestige 2." },
+        
+        variants_negative_5: { name: "Five Negatives", description: "Own 5 cards with the “Negative” variant." },
+        collect_500_materials_total: { name: "Stockpiler", description: "Collect 500 materials (total)." }
+
     },
     collections: {
         classic_set: {
@@ -474,5 +517,6 @@ window.locales.en = {
         name: "Card: Scrap Golem (exclusive)",
         description: "150 scrap and a pinch of graphite—shape the heap and wake the metal."
     }
-    }
+    },
+    mutations: { negative: { name: "Negative" } },
 };

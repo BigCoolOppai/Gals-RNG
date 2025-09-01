@@ -618,6 +618,24 @@ const Game = (() => {
         return totalLuckBonus;
     }
 
+    function getVariantChanceBonusFromEquipment() {
+        let sum = 0;
+        (playerData.equippedItems || []).forEach(item => {
+            if (item?.effect?.type === 'variant_chance_bonus') sum += (item.effect.value || 0); // 0.5 => +50%
+        });
+        return sum; // как доля
+    }
+    function maybeRollVariant(rarityId) {
+        const base = window.MUTATION_BASE_CHANCE || 0.02; // 2%
+        let chance = base * (1 + getVariantChanceBonusFromEquipment());
+        const activeEvent = getActiveEvent();
+        if (activeEvent?.effect?.type === 'variant_chance_multiplier') {
+            chance *= activeEvent.effect.multiplier;
+        }
+        // только "negative" на этом этапе
+        return (Math.random() < Math.min(chance, 0.2)) ? 'negative' : null;
+    }
+
     // Стоимость усиления Ядра
     function getLuckCoreAmplificationCost() {
         const coreLevel = playerData.luckCoreLevel || 0;
@@ -641,6 +659,59 @@ const Game = (() => {
         if (typeof UI !== 'undefined' && UI.updateAll) {
             UI.updateAll(getPlayerData());
         }
+    }
+
+    // --- NEW: бонус к шансу материалов из экипировки/ивента (аддитивный) ---
+    function getMaterialDropBonusPercent() {
+    let sum = 0;
+    (playerData.equippedItems || []).forEach(item => {
+        if (item?.effect?.type === 'material_drop_bonus_percent') {
+        sum += (item.effect.value || 0); // 0.25 => +25%
+        }
+    });
+    // Ивент (если активен): множитель переводим в добавку
+    const ev = getActiveEvent && getActiveEvent();
+    if (ev && ev.effect?.type === 'material_drop_multiplier') {
+        sum += (ev.effect.multiplier - 1); // 1.5 => +0.5
+    }
+    return sum; // возвращаем долю, не проценты
+    }
+
+    // --- NEW: применить дроп материалов для данной карты ---
+    function applyMaterialDrops(rarityId, isNew) {
+    if (!window.MATERIAL_DROPS) return;
+    const drops = window.MATERIAL_DROPS[rarityId] || [];
+    const bonus = getMaterialDropBonusPercent(); // например 0.25 => +25%
+
+    drops.forEach(entry => {
+        const mode = entry.applyOn || 'duplicate'; // совместимость со старым форматом
+        const applies =
+        mode === 'both' ||
+        (mode === 'first' && isNew) ||
+        (mode === 'duplicate' && !isNew);
+
+        if (!applies) return;
+
+        // Шанс c учётом бонусов (кэп 100%)
+        const chance = Math.min(1, (entry.chance || 0) * (1 + bonus));
+        if (Math.random() < chance) {
+        const amt = entry.min + Math.floor(Math.random() * (entry.max - entry.min + 1));
+        addMaterials(entry.materialId, amt);
+        // eslint-disable-next-line no-console
+        console.log(`Materials: +${amt} ${entry.materialId} from ${rarityId} (p=${(chance*100).toFixed(1)}%)`);
+        }
+    });
+    }
+
+    // --- NEW: множитель длительности бустов из экипировки (мультипликативный) ---
+    function getBoostDurationMultiplier() {
+    let mult = 1;
+    (playerData.equippedItems || []).forEach(item => {
+        if (item?.effect?.type === 'boost_duration_multiplier') {
+        mult *= (item.effect.value || 1); // 1.5 => ×1.5
+        }
+    });
+    return mult;
     }
 
     // --- Ролл Карточек ---
@@ -891,6 +962,17 @@ const Game = (() => {
         const isNew = meta.isNewViaUpgrade || !playerData.inventory.includes(rarityId);
         addCardToInventory(rarityId);
 
+        // Мутация (negative): не зависит от удачи на этом этапе
+        let variantId = null;
+        try {
+        variantId = maybeRollVariant(rarityId);
+        if (variantId) {
+            const ov = (playerData.ownedVariants ||= {});
+            const entry = (ov[rarityId] ||= {});
+            entry[variantId] = (entry[variantId] || 0) + 1;
+        }
+        } catch (e) { console.warn('Variant roll failed', e); }
+
         let baseDuplicateReward = 0;
 
         if (!isNew) {
@@ -928,20 +1010,8 @@ const Game = (() => {
             }
         }
 
-        // Материалы (дубли и/или первый раз) по таблице выпадений
-        if (window.MATERIAL_DROPS) {
-            const drops = window.MATERIAL_DROPS[rarityId] || [];
-            drops.forEach(entry => {
-                const mode = entry.applyOn || 'duplicate'; // совместимость со старыми данными
-                const applies = (mode === 'both') || (mode === 'first' && isNew) || (mode === 'duplicate' && !isNew);
-                if (applies && Math.random() < entry.chance) {
-                    const amt = entry.min + Math.floor(Math.random() * (entry.max - entry.min + 1));
-                    addMaterials(entry.materialId, amt);
-                    
-                    console.log(`Materials: +${amt} ${entry.materialId} from ${rarityId}`);
-                }
-            });
-        }
+
+        applyMaterialDrops(rarityId, isNew);
 
         // Бонус % к валюте за дубли
         let totalBonusPercent = 0;
@@ -972,6 +1042,12 @@ const Game = (() => {
                 addCurrency(finalDuplicateReward);
                 playerData.stats.currencyFromDuplicates += finalDuplicateReward;
             }
+        }
+        if (variantId) {
+        const vdef = window.MUTATIONS?.[variantId];
+        if (vdef?.duplicateMultiplier && finalDuplicateReward > 0) {
+            finalDuplicateReward = Math.ceil(finalDuplicateReward * vdef.duplicateMultiplier);
+        }
         }
 
         if (!playerData.stats.rollsByRarity) playerData.stats.rollsByRarity = {};
@@ -1022,7 +1098,8 @@ const Game = (() => {
             },
             isNew,
             duplicateReward: finalDuplicateReward,
-            meta: meta
+            meta: meta,
+            variantId
         };
     }
 
@@ -1131,27 +1208,30 @@ const Game = (() => {
 
     // --- Бусты ---
     function activateBoost(boostData) {
-        const now = Date.now();
-        const existingBoost = playerData.activeBoosts.find(b => b.id === boostData.id);
+    const now = Date.now();
+    const existingBoost = (playerData.activeBoosts || []).find(b => b.id === boostData.id);
 
-        if (existingBoost) {
-            const remainingTime = Math.max(0, existingBoost.endTime - now);
-            existingBoost.endTime = now + remainingTime + (boostData.durationSeconds * 1000);
-            console.log(`Boost '${L.get(boostData.nameKey)}' duration extended. New end time: ${new Date(existingBoost.endTime).toLocaleTimeString()}`);
-        } else {
-            const newBoost = {
-                id: boostData.id,
-                type: boostData.type,
-                name: L.get(boostData.nameKey),
-                endTime: now + (boostData.durationSeconds * 1000),
-                luckBonus: boostData.luckBonus
-            };
-            playerData.activeBoosts.push(newBoost);
-            console.log(`Boost activated: ${L.get(boostData.nameKey)}. Ends at: ${new Date(newBoost.endTime).toLocaleTimeString()}`);
-        }
+    // Учтём мультипликатор длительности (экипировка)
+    const durationMs = Math.floor((boostData.durationSeconds || 0) * 1000 * getBoostDurationMultiplier());
 
-        checkActiveBoosts();
-        saveGame();
+    if (existingBoost) {
+        const remainingTime = Math.max(0, existingBoost.endTime - now);
+        existingBoost.endTime = now + remainingTime + durationMs;
+        console.log(`Boost '${L.get(boostData.nameKey)}' duration extended. New end: ${new Date(existingBoost.endTime).toLocaleTimeString()}`);
+    } else {
+        const newBoost = {
+        id: boostData.id,
+        type: boostData.type,
+        name: L.get(boostData.nameKey),
+        endTime: now + durationMs,
+        luckBonus: boostData.luckBonus
+        };
+        playerData.activeBoosts.push(newBoost);
+        console.log(`Boost activated: ${L.get(boostData.nameKey)}. Ends at: ${new Date(newBoost.endTime).toLocaleTimeString()}`);
+    }
+
+    checkActiveBoosts && checkActiveBoosts();
+    saveGame();
     }
 
     let boostCheckInterval = null;

@@ -120,5 +120,31 @@ window.CRAFT_RECIPES = [
     descriptionKey: 'craft.card_scrap_golem.description',
     cost: { scrap: 150, graphite_powder: 10 },
     result: { type: 'card', rarityId: 'scrap_golem' } 
-  }
+  },
+  {
+  id: 'equip_catalyst_lens_recipe',
+  nameKey: 'shop.equipment.equip_catalyst_lens.name',
+  descriptionKey: 'shop.equipment.equip_catalyst_lens.description',
+  // Усиливает шанс мутации карт на +50% (аддитивно к базовому)
+  cost: { crystal_shard: 1, neon_tube: 2, soul_shard: 2 },
+  result: { type: 'equipment', itemId: 'equip_catalyst_lens' }
+},
+
+{
+  id: 'equip_refiner_gloves_recipe',
+  nameKey: 'shop.equipment.equip_refiner_gloves.name',
+  descriptionKey: 'shop.equipment.equip_refiner_gloves.description',
+  // +25% к шансам выпадения материалов (аддитивно)
+  cost: { steel_ingot: 3, graphite_powder: 2, carbon_shard: 5 },
+  result: { type: 'equipment', itemId: 'equip_refiner_gloves' }
+},
+
+{
+  id: 'equip_boost_capacitor_recipe',
+  nameKey: 'shop.equipment.equip_boost_capacitor.name',
+  descriptionKey: 'shop.equipment.equip_boost_capacitor.description',
+  // ×1.5 к длительности временных бустов (мультипликативно)
+  cost: { gold_leaf: 2, neon_tube: 1, crystal_shard: 1 },
+  result: { type: 'equipment', itemId: 'equip_boost_capacitor' }
+},
 ];

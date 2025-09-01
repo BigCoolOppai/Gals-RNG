@@ -22,6 +22,9 @@ const SaveManager = (() => {
         unseenCardIds: [],
         seenAchievements: [],
         activeBoosts: [], // { id, type, endTime, luckBonus }
+        variantView: {}, 
+        ownedVariants: {}, // { [cardId]: { negative: count, ... } }
+        variantSettings: { showBadges: true, variantsOnly: false },
         equippedItems: [], // { id, name, luckBonus } - сохраняем копии, чтобы не зависеть от изменений в SHOP_DATA
         purchasedUpgrades: {
             fastRoll: false,
@@ -110,6 +113,9 @@ const SaveManager = (() => {
                 savePlayerData(mergedData);
             }
             // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+            mergedData.ownedVariants  = mergedData.ownedVariants  || {};
+            mergedData.variantView   = mergedData.variantView   || {};
+            mergedData.variantSettings = mergedData.variantSettings || { showBadges: true, variantsOnly: false };
 
             console.log("Game data loaded successfully.");
             return mergedData;

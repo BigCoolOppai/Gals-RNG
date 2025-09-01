@@ -44,6 +44,22 @@ const EVENTS_DATA = [
             type: 'global_luck_multiplier',
             multiplier: 2.0
         }
+    },
+    {
+    id: 'workshop_rush_2025',
+    nameKey: 'events.workshop_rush.name',
+    descriptionKey: 'events.workshop_rush.description',
+    startDate: '2025-09-01T00:00:00Z',
+    endDate:   '2025-09-29T23:59:59Z',
+    effect: { type: 'material_drop_multiplier', multiplier: 1.5 }
+    },
+    {
+    id: 'workshop_rush_variant_boost_2025',
+    nameKey: 'events.workshop_rush.name',
+    descriptionKey: 'events.workshop_rush.description',
+    startDate: '2025-09-01T00:00:00Z',
+    endDate:   '2025-09-29T23:59:59Z',
+    effect: { type: 'variant_chance_multiplier', multiplier: 1.3 }
     }
     // Сюда можно будет добавлять новые эвенты в будущем
 ];

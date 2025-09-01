@@ -1,5 +1,17 @@
 // js/cards.js
 
+// --- Mutations (card variants, not separate rarities) ---
+window.MUTATIONS = {
+  negative: {
+    id: 'negative',
+    nameKey: 'mutations.negative.name',
+    cssClass: 'variant-negative',
+    duplicateMultiplier: 2.0 // ×2 к награде за дубль
+  }
+};
+// Базовый шанс мутации (НЕ зависит от удачи; усиливается предметами/ивентом)
+window.MUTATION_BASE_CHANCE = 0.02; // 2%
+
 // Полный список редкостей.
 // Важно: порядок должен быть от САМОЙ РЕДКОЙ к САМОЙ ЧАСТОЙ (для апгрейдов по индексам)!
 window.RARITIES_DATA = [
@@ -297,6 +309,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "orochi",
+        nameKey: "cards.orochi.name",
+        minPrestige: 3,
+        // отсылка к «восьми головам/хвостам»: 3,808,008
+        probabilityBase: 1 / 3808008,
+        color: "#0e0e10",
+        glowColor: "#9e9e9e",
+        cssClass: "rarity-orochi",
+        currencyOnDuplicate: 380800,
+        card: {
+            name: "Orochi",
+            nameKey: "cards.orochi.cardName",
+            image: "img/cardOrochi.png",
+            descriptionKey: "cards.orochi.description"
+        }
+    },
+    {
         id: "salt",
         nameKey: "cards.salt.name",
         probabilityBase: 1 / 3584427,
@@ -396,6 +425,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "western",
+        nameKey: "cards.western.name",
+        minPrestige: 2,
+        // год «дикого запада»: 1876
+        probabilityBase: 1 / 1876000,
+        color: "#6d4c41",
+        glowColor: "#ffca28",
+        cssClass: "rarity-western",
+        currencyOnDuplicate: 187600,
+        card: {
+            name: "Jessie",
+            nameKey: "cards.western.cardName",
+            image: "img/cardWestern.png",
+            descriptionKey: "cards.western.description"
+        }
+    },
+    {
         id: "maternal",
         nameKey: "cards.maternal.name",
         minPrestige: 1,
@@ -491,6 +537,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "jade",
+        nameKey: "cards.jade.name",
+        minPrestige: 3,
+        // MK‑11: 1/1,110,011
+        probabilityBase: 1 / 1110011,
+        color: "#1b5e20",
+        glowColor: "#00e676",
+        cssClass: "rarity-jade",
+        currencyOnDuplicate: 111001,
+        card: {
+            name: "Emerald",
+            nameKey: "cards.jade.cardName",
+            image: "img/cardJade.png",
+            descriptionKey: "cards.jade.description"
+        }
+    },
+    {
         id: "garbage_alt_1",
         nameKey: "cards.garbage_alt_1.name",
         displayParentId: "garbage",
@@ -537,6 +600,23 @@ window.RARITIES_DATA = [
             nameKey: "cards.silken_alt_sushi.cardName",
             image: "img/altAsian.png",
             descriptionKey: "cards.silken_alt_sushi.description"
+        }
+    },
+    {
+        id: "gamer",
+        nameKey: "cards.gamer.name",
+        minPrestige: 1,
+        // отсылка к «2001»: 1/702,001
+        probabilityBase: 1 / 702001,
+        color: "#311b92",
+        glowColor: "#7e57c2",
+        cssClass: "rarity-gamer",
+        currencyOnDuplicate: 70200,
+        card: {
+            name: "@Nagibator2001",
+            nameKey: "cards.gamer.cardName",
+            image: "img/cardGamer.png",
+            descriptionKey: "cards.gamer.description"
         }
     },
     {
@@ -675,6 +755,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "fenek",
+        nameKey: "cards.fenek.name",
+        minPrestige: 1,
+        // «360» уши/окружность: 1/360,036
+        probabilityBase: 1 / 360036,
+        color: "#ffb74d",
+        glowColor: "#ffe0b2",
+        cssClass: "rarity-fenek",
+        currencyOnDuplicate: 36003,
+        card: {
+            name: "Fluffy",
+            nameKey: "cards.fenek.cardName",
+            image: "img/cardFenek.png",
+            descriptionKey: "cards.fenek.description"
+        }
+    },
+    {
         id: "afro",
         nameKey: "cards.afro.name",
         probabilityBase: 1 / 350000,
@@ -721,6 +818,23 @@ window.RARITIES_DATA = [
             nameKey: "cards.mechanic.cardName",
             image: "img/cardMechanic.png",
             descriptionKey: "cards.mechanic.description"
+        }
+    },
+    {
+        id: "slime",
+        nameKey: "cards.slime.name",
+        minPrestige: 1,
+        // 256k — привет майнкрафту/степеням двойки
+        probabilityBase: 1 / 256000,
+        color: "#388e3c",
+        glowColor: "#a5d6a7",
+        cssClass: "rarity-slime",
+        currencyOnDuplicate: 25600,
+        card: {
+            name: "CubeSlime",
+            nameKey: "cards.slime.cardName",
+            image: "img/cardSlime.png",
+            descriptionKey: "cards.slime.description"
         }
     },
     {
@@ -1625,6 +1739,30 @@ const SHOP_DATA = {
         type: "equipment",
         craftOnly: true,
         effect: { type: "cumulative_luck_on_low_rolls", bonusPerStack: 0.03, maxStacks: 12, triggerRarities: bottomFeederRarities }
+        },
+        {
+        id: "equip_catalyst_lens",
+        nameKey: "shop.equipment.equip_catalyst_lens.name",
+        descriptionKey: "shop.equipment.equip_catalyst_lens.description",
+        type: "equipment",
+        craftOnly: true,
+        effect: { type: "variant_chance_bonus", value: 0.5 } // +50% к шансу мутации (аддитивно)
+        },
+        {
+        id: "equip_refiner_gloves",
+        nameKey: "shop.equipment.equip_refiner_gloves.name",
+        descriptionKey: "shop.equipment.equip_refiner_gloves.description",
+        type: "equipment",
+        craftOnly: true,
+        effect: { type: "material_drop_bonus_percent", value: 0.25 } // +25% к шансу материалов
+        },
+        {
+        id: "equip_boost_capacitor",
+        nameKey: "shop.equipment.equip_boost_capacitor.name",
+        descriptionKey: "shop.equipment.equip_boost_capacitor.description",
+        type: "equipment",
+        craftOnly: true,
+        effect: { type: "boost_duration_multiplier", value: 1.5 } // ×1.5 к длительности бустов
         }
     ],
     upgrades: [
