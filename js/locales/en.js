@@ -188,7 +188,14 @@ window.locales.en = {
             name: "Sticky",
             cardName: "CubeSlime",
             description: "A green slime girl with a few cubes on her head. Looks like she came from somewhere else…"
-        }
+        },
+        gojo_alt: { name: "Malevolent", cardName: "Queen of Curses", description: "She is the one who lived a thousand years ago and held all sorcerers in fear. Fortunately, she now has a worthy rival." },
+        bean: { name: "Beany", cardName: "Green Bean", description: "Just a green girl. Just happens to be a bean. Just loves plants. Nothing strange about that... right?" },
+        brainrot: { name: "Brainrot", cardName: "Bub Bub Bub Sahur", description: "This is a strange, bald, wooden girl who also carries a bat for some reason. Nevertheless, you'd better not miss the sound of her hits." },
+        fenek_alt: { name: "Foxy", cardName: "Fox Face", description: "Oh, what a cute little fox has run up to you! If only she wouldn't hiss..." },
+        ellen_alt_student: { name: "Student", cardName: "Student Maid", description: "Don't tell anyone, but she's not a student! She's just pretending for some mission. It suits her, though..." },
+        ellen: { name: "Sharky", cardName: "Shark Maid", description: "A rather cute maid who has a shark tail. Though her weapon scares me..." },
+        nicole: { name: "Business", cardName: "Case Huntress", description: "Oh, you caught her off-mission. Awkward... Well, enjoy the view, and I hope she doesn't charge you for it." },
     },
     // Shop Items
     shop: {

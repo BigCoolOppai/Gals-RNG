@@ -65,6 +65,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "gojo_alt", 
+        nameKey: "cards.gojo_alt.name",
+        displayParentId: "gojo",
+        minPrestige: 4,
+        probabilityBase: 1 / 45000000,
+        color: "#1A237E",
+        glowColor: "#E91E63",
+        cssClass: "rarity-malevolent",
+        currencyOnDuplicate: 4500000,
+        card: {
+            name: "Queen of Curses", 
+            nameKey: "cards.gojo_alt.cardName",
+            image: "img/altGojo.png",
+            descriptionKey: "cards.gojo_alt.description"
+        }
+    },
+    {
         id: "seductress",
         nameKey: "cards.seductress.name",
         displayParentId: "vacation",
@@ -105,7 +122,7 @@ window.RARITIES_DATA = [
         color: "#4CAF50",
         glowColor: "#B9F6CA",
         cssClass: "rarity-kefla",
-        currencyOnDuplicate: 1500000,
+        currencyOnDuplicate: 1300000,
         card: {
             name: "Kefla",
             nameKey: "cards.kefla.cardName",
@@ -144,6 +161,36 @@ window.RARITIES_DATA = [
             nameKey: "cards.dionysia.cardName",
             image: "img/cardDionysia.png",
             descriptionKey: "cards.dionysia.description"
+        }
+    },
+    {
+        id: "bean", 
+        nameKey: "cards.bean.name",
+        probabilityBase: 1 / 10000001,
+        color: "#4CAF50",
+        glowColor: "#AED581",
+        cssClass: "rarity-bean",
+        currencyOnDuplicate: 1000000,
+        card: {
+            name: "Green Bean", 
+            nameKey: "cards.bean.cardName",
+            image: "img/cardBean.png",
+            descriptionKey: "cards.bean.description"
+        }
+    },
+    {
+        id: "brainrot", 
+        nameKey: "cards.brainrot.name",
+        probabilityBase: 1 / 10000000,
+        color: "#A1887F",
+        glowColor: "#D7CCC8",
+        cssClass: "rarity-brainrot",
+        currencyOnDuplicate: 1000000,
+        card: {
+            name: "Bub Bub Bub Sahur", 
+            nameKey: "cards.brainrot.cardName",
+            image: "img/cardSahur.png",
+            descriptionKey: "cards.brainrot.description"
         }
     },
     {
@@ -208,7 +255,7 @@ window.RARITIES_DATA = [
         color: "#795548",
         glowColor: "#A1887F",
         cssClass: "rarity-ensnared",
-        currencyOnDuplicate: 60100,
+        currencyOnDuplicate: 601000,
         card: {
             name: "Elf in a Trap",
             nameKey: "cards.ensnared.cardName",
@@ -225,7 +272,7 @@ window.RARITIES_DATA = [
         color: "#9CCC65",
         glowColor: "#C5E1A5",
         cssClass: "rarity-goblin-alt",
-        currencyOnDuplicate: 500000,
+        currencyOnDuplicate: 500002,
         card: {
             name: "Satisfied Tur'gata",
             nameKey: "cards.goblin_alt_1.cardName",
@@ -326,18 +373,68 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "fenek_alt",
+        nameKey: "cards.fenek_alt.name",
+        displayParentId: "fenek",
+        minPrestige: 2,
+        probabilityBase: 1 / 3600000,
+        color: "#FFB74D",
+        glowColor: "#FFE0B2",
+        cssClass: "rarity-fenek-alt",
+        currencyOnDuplicate: 360000,
+        card: {
+            name: "Fox Face", 
+            nameKey: "cards.fenek_alt.cardName",
+            image: "img/altFenek.png",
+            descriptionKey: "cards.fenek_alt.description"
+        }
+    },
+    {
         id: "salt",
         nameKey: "cards.salt.name",
         probabilityBase: 1 / 3584427,
         color: "#FFFFFF",
         glowColor: "#B0BEC5",
         cssClass: "rarity-salt",
-        currencyOnDuplicate: 5500,
+        currencyOnDuplicate: 358442,
         card: {
             name: "NaCl-chan",
             nameKey: "cards.salt.cardName",
             image: "img/cardSalt.png",
             descriptionKey: "cards.salt.description"
+        }
+    },
+    {
+        id: "ellen_alt_student", 
+        nameKey: "cards.ellen_alt_student.name",
+        displayParentId: "ellen",
+        minPrestige: 4,
+        probabilityBase: 1 / 3500000,
+        color: "#90A4AE",
+        glowColor: "#E0F7FA",
+        cssClass: "rarity-student",
+        currencyOnDuplicate: 350000,
+        card: {
+            name: "Student Maid", 
+            nameKey: "cards.ellen_alt_student.cardName",
+            image: "img/altEllen.png",
+            descriptionKey: "cards.ellen_alt_student.description"
+        }
+    },
+    {
+        id: "ellen",
+        nameKey: "cards.ellen.name",
+        minPrestige: 2,
+        probabilityBase: 1 / 3000000,
+        color: "#2196F3",
+        glowColor: "#81D4FA",
+        cssClass: "rarity-shark",
+        currencyOnDuplicate: 300000,
+        card: {
+            name: "Shark Maid", 
+            nameKey: "cards.ellen.cardName",
+            image: "img/cardEllen.png",
+            descriptionKey: "cards.ellen.description"
         }
     },
     {

@@ -2783,3 +2783,31 @@ color: #1b1d20;
   border-color: #a5d6a7;
   --rarity-glow-color: #a5d6a7;
 }
+
+/* Зловещая (Альт Годжо) */
+.roll-slot.rarity-malevolent { background: linear-gradient(160deg, #1A237E, #000); color: #E8EAF6; border: 1px solid #3F51B5; text-shadow: 0 0 10px #E91E63; }
+.inventory-card.border-gojo_alt { border-color: #1A237E; --rarity-glow-color: #E91E63; }
+
+/* Бобовая */
+.roll-slot.rarity-bean { background: linear-gradient(145deg, #66BB6A, #388E3C); color: #E8F5E9; border: 1px solid #81C784; }
+.inventory-card.border-bean { border-color: #4CAF50; --rarity-glow-color: #AED581; }
+
+/* Брейнрот */
+.roll-slot.rarity-brainrot { background: linear-gradient(145deg, #A1887F, #795548); color: #EFEBE9; border: 1px solid #BCAAA4; }
+.inventory-card.border-brainrot { border-color: #A1887F; --rarity-glow-color: #D7CCC8; }
+
+/* Лисья (Альт Фенек) */
+.roll-slot.rarity-fenek-alt { background: linear-gradient(145deg, #FFB74D, #FB8C00); color: #FFF3E0; border: 1px solid #FFCC80; }
+.inventory-card.border-fenek_alt { border-color: #FFB74D; --rarity-glow-color: #FFE0B2; }
+
+/* Студенческая (Альт Акула) */
+.roll-slot.rarity-student { background: linear-gradient(145deg, #B0BEC5, #78909c); color: #263238; border: 1px solid #CFD8DC; }
+.inventory-card.border-ellen_alt_student { border-color: #90A4AE; --rarity-glow-color: #E0F7FA; }
+
+/* Акулья */
+.roll-slot.rarity-shark { background: linear-gradient(145deg, #42A5F5, #1976D2); color: #E3F2FD; border: 1px solid #64B5F6; }
+.inventory-card.border-ellen { border-color: #2196F3; --rarity-glow-color: #81D4FA; }
+
+/* Деловая */
+.roll-slot.rarity-business { background: linear-gradient(145deg, #757575, #424242); color: #FAFAFA; border: 1px solid #9E9E9E; }
+.inventory-card.border-nicole { border-color: #616161; --rarity-glow-color: #BDBDBD; }
