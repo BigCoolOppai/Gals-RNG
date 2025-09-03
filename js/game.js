@@ -346,10 +346,7 @@ const Game = (() => {
 
     // --- Инвентарь и Редкости ---
     function addCardToInventory(rarityId) {
-        if (rarityId === 'garbage') {
-            // "Мусор" не добавляем в коллекцию/инвентарь
-            return false;
-        }
+        
 
         const rarityData = getRarityDataById(rarityId, playerData);
         if (!rarityData) return false;
