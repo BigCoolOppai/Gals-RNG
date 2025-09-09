@@ -163,6 +163,12 @@ const ACHIEVEMENTS_DATA = {
     condition: (p) => (p.stats?.materialsCollectedTotal || 0) >= 500,
     reward: { type: 'currency', amount: 10000 }
     },
+    gold_999_purity: {
+        nameKey: 'achievements.gold_999_purity.name',
+        descriptionKey: 'achievements.gold_999_purity.description',
+        condition: (p) => (p.ownedVariants?.gold?.gold || 0) > 0, // карта id: 'gold', мутация: 'gold'
+        reward: { type: 'currency', amount: 5000000 } // ПОМЕНЯТЬ НАГРАДУ НА ТЕМУ В БУДУЩЕМ
+    },
 
     
 };
@@ -178,6 +184,20 @@ const COLLECTIONS_DATA = {
             type: 'ui_theme', 
             themeId: 'theme-classic',
             nameKey: 'collections.classic_set.rewardName'
+        }
+    },
+    chocolate_set: {
+        nameKey: 'collections.chocolate_set.name',
+        descriptionKey: 'collections.chocolate_set.description',
+        // Полный список лимиток эвента
+        cardIds: [
+        'choco_missy','choco_crema','choco_common','choco',
+        'choco_espresso','choco_white','choco_lewd','choco_peppermint'
+        ],
+        reward: {
+        type: 'ui_theme',
+        themeId: 'theme-choco',
+        nameKey: 'collections.chocolate_set.rewardName'
         }
     }
     // Сюда можно будет добавлять новые коллекции

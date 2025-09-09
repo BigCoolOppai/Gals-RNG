@@ -196,6 +196,51 @@ window.locales.en = {
         ellen_alt_student: { name: "Student", cardName: "Student Maid", description: "Don't tell anyone, but she's not a student! She's just pretending for some mission. It suits her, though..." },
         ellen: { name: "Sharky", cardName: "Shark Maid", description: "A rather cute maid who has a shark tail. Though her weapon scares me..." },
         nicole: { name: "Business", cardName: "Case Huntress", description: "Oh, you caught her off-mission. Awkward... Well, enjoy the view, and I hope she doesn't charge you for it." },
+        choco_missy: {
+        name: "Smudged",
+        cardName: "Missy",
+        description: "Warm, friendly, and a little playful. She set out to make some chocolate and got herself messy. At least the chocolate turned out great :)"
+        },
+        choco_crema: {
+        name: "Creamy",
+        cardName: "Crema",
+        description: "This hot girl loves ice cream with chocolate glaze. She’s like glaze herself — sweet and delicious…"
+        },
+        choco_common: {
+        name: "Rich",
+        cardName: "Eva in Chocolate",
+        description: "Eva decided to make hot chocolate for herself and a partner… she just hasn’t found that partner yet. Care to be the one?"
+        },
+        choco: {
+        name: "Chocolate",
+        cardName: "Chocolate Bar",
+        description: "Someone cooked a lot of chocolate, and she appeared. She doesn’t mind if you try a taste."
+        },
+        choco_espresso: {
+        name: "Bitter",
+        cardName: "Espresso",
+        description: "Deep, chocolatey, dark with coffee notes — that’s what you’ll feel in her presence. Direct contact is even more exciting :)"
+        },
+        choco_white: {
+        name: "White",
+        cardName: "White Chocolate",
+        description: "Chocolate got bored and decided to make herself a partner. She might have overdone it and now feels a bit jealous. But you’re not limited — enjoy both!"
+        },
+        choco_lewd: {
+        name: "Molded",
+        cardName: "Chocolate Cutie",
+        description: "A piece molded from chocolate into a very alluring shape. It’s suspiciously warm… almost alive."
+        },
+        choco_peppermint: {
+        name: "Peppermint",
+        cardName: "Miss Mint Pepper",
+        description: "She’s not really into chocolate and prefers to stand aside — yet she refreshes absolutely everything."
+        },
+        hornet: {
+            name: "Beetly",
+            cardName: "Beetle",
+            description: "Fast and precise like a needle strike. Fine threads and a steel temper — don’t come too close. EDITO! EGALE!"
+        },
     },
     // Shop Items
     shop: {
@@ -203,7 +248,11 @@ window.locales.en = {
             boost_small: { name: "Small Luck Boost", description: "+0.1 to luck for 30 seconds." },
             boost_medium: { name: "Medium Luck Boost", description: "+0.25 to luck for 2 minutes." },
             boost_large: { name: "Large Luck Boost", description: "+0.5 to luck for 5 minutes." },
-            boost_titanic: { name: "Titanic Luck Boost", description: "+1.0 to luck for 10 minutes." }
+            boost_titanic: { name: "Titanic Luck Boost", description: "+1.0 to luck for 10 minutes." },
+            boost_variant:   { name: "Variant Booster",  description: "+50% card mutation chance for 10 minutes." },
+            boost_materials: { name: "Material Forager", description: "+50% material drop chance for 5 minutes." },
+            boost_luckyroll: { name: "Quartz Timer",     description: "Lucky Roll triggers 1 roll sooner (10 minutes)." }
+  
         },
         equipment: {
             equip_talisman: { name: "Novice's Talisman", description: "+0.05 to luck (permanent)." },
@@ -335,7 +384,8 @@ window.locales.en = {
             'theme-salt': 'Salt',
             'theme-prestige': 'Prestige',
             'theme-shinigami': 'Shinigami',
-            'theme-obsidian': 'Obsidian'
+            'theme-obsidian': 'Obsidian',
+            'theme-choco': 'Chocolate'
         },
         luckCoreFragments: "Core Fragments:",
         effectiveChance: "Effective Chance (with your luck):",
@@ -449,6 +499,10 @@ window.locales.en = {
         workshop_rush: {
             name: "Workshop Rush",
             description: "A week of crafting: more materials and a chance for special card variants."
+        },
+        chocolate: {
+            name: "Chocolate Event",
+            description: "Limited chocolate cards are available only during this event. They are extremely rare."
         }
     },
     achievements: {
@@ -474,7 +528,11 @@ window.locales.en = {
         reach_prestige_2: { name: "The Path Begins", description: "Reach Prestige 2." },
         
         variants_negative_5: { name: "Five Negatives", description: "Own 5 cards with the “Negative” variant." },
-        collect_500_materials_total: { name: "Stockpiler", description: "Collect 500 materials (total)." }
+        collect_500_materials_total: { name: "Stockpiler", description: "Collect 500 materials (total)." },
+        gold_999_purity: {
+            name: "999 Fineness",
+            description: "Get a Golden mutation on the 'Goldy' card.",
+        }
 
     },
     collections: {
@@ -482,6 +540,11 @@ window.locales.en = {
             name: "Classic Set",
             description: "Collect the first 5 cards of the base rarities.",
             rewardName: "'Classic' Theme"
+        },
+        chocolate_set: {
+            name: "Chocolate Set",
+            description: "Collect all limited chocolate cards.",
+            rewardName: "Chocolate Theme"
         }
     },
     materials: {
@@ -525,5 +588,9 @@ window.locales.en = {
         description: "150 scrap and a pinch of graphite—shape the heap and wake the metal."
     }
     },
-    mutations: { negative: { name: "Negative" } },
+    mutations: { 
+        negative: { name: "Negative" },
+        gold:   { name: "Golden" },
+        voided: { name: "Voided" }
+     },
 };

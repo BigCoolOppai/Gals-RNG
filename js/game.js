@@ -168,6 +168,19 @@ const Game = (() => {
         return getDiscountedCost(originalCost);
     }
 
+    function isCardAvailableNow(r, p) {
+        if ((r.minPrestige || 0) > p.prestigeLevel) return false;
+        if (r.rollable === false) return false;
+        if (r.id === 'diamond' && !p.isSupporter) return false;
+        if (r.id === 'salt' && !p.completedAchievements.includes('unlock_salt_card')) return false;
+        // ЛИМИТКИ: доступны к роллу только во время своего ивента
+        if (r.availability?.type === 'event') {
+            const ev = getActiveEvent();
+            return !!ev && ev.id === r.availability.eventId;
+        }
+        return true;
+    }
+
     // --- Пассивные эффекты ---
     function updateActivePassives() {
         const newActivePassives = {};
@@ -410,6 +423,19 @@ const Game = (() => {
         return true;
         }
 
+        function getMaterialDropBonusPercent() {
+            let sum = 0;
+            (playerData.equippedItems || []).forEach(item => {
+                if (item?.effect?.type === 'material_drop_bonus_percent') sum += (item.effect.value || 0);
+            });
+            const ev = getActiveEvent && getActiveEvent();
+            if (ev && ev.effect?.type === 'material_drop_multiplier') sum += (ev.effect.multiplier - 1);
+            (playerData.activeBoosts || []).forEach(b => {
+                if (b.type === 'material_drop_multiplier') sum += ((b.multiplier || 1) - 1);
+            });
+            return sum;
+        }
+
         function craftItem(recipeId) {
         const recipe = (window.CRAFT_RECIPES || []).find(r => r.id === recipeId);
         if (!recipe) {
@@ -622,15 +648,32 @@ const Game = (() => {
         });
         return sum; // как доля
     }
+
+    function getVariantChanceBonusGlobal() {
+        let sum = getVariantChanceBonusFromEquipment(); // +50% от линзы
+        const ev = getActiveEvent();
+        if (ev?.effect?.type === 'variant_chance_multiplier') sum += (ev.effect.multiplier - 1);
+        // будущие бусты:
+        (playerData.activeBoosts || []).forEach(b => {
+            if (b.type === 'variant_chance_multiplier') sum += (b.multiplier - 1);
+        });
+        return sum; // доля
+    }
+
     function maybeRollVariant(rarityId) {
-        const base = window.MUTATION_BASE_CHANCE || 0.02; // 2%
-        let chance = base * (1 + getVariantChanceBonusFromEquipment());
-        const activeEvent = getActiveEvent();
-        if (activeEvent?.effect?.type === 'variant_chance_multiplier') {
-            chance *= activeEvent.effect.multiplier;
+        const defs = window.MUTATIONS || {};
+        const bonus = getVariantChanceBonusGlobal();
+        const results = [];
+        for (const vid in defs) {
+            const def = defs[vid];
+            let p = (def.baseChance || 0) * (1 + bonus);
+            p = Math.min(p, 0.25); // кэп
+            if (Math.random() < p) results.push(vid);
         }
-        // только "negative" на этом этапе
-        return (Math.random() < Math.min(chance, 0.2)) ? 'negative' : null;
+        if (results.length === 0) return null;
+        // Выбираем самую редкую из сработавших (минимальный baseChance)
+        results.sort((a, b) => (defs[a].baseChance || 1) - (defs[b].baseChance || 1));
+        return results[0];
     }
 
     // Стоимость усиления Ядра
@@ -675,29 +718,29 @@ const Game = (() => {
     }
 
     // --- NEW: применить дроп материалов для данной карты ---
-    function applyMaterialDrops(rarityId, isNew) {
-    if (!window.MATERIAL_DROPS) return;
-    const drops = window.MATERIAL_DROPS[rarityId] || [];
-    const bonus = getMaterialDropBonusPercent(); // например 0.25 => +25%
+    function applyMaterialDrops(rarityId, isNew, opts = {}) {
+        if (!window.MATERIAL_DROPS) return;
+        const drops = window.MATERIAL_DROPS[rarityId] || [];
+        const bonus = getMaterialDropBonusPercent(); // доля
+        const force = !!opts.force;                  // гарантия дропа
+        const mult  = Math.max(1, opts.multiplier || 1);
 
-    drops.forEach(entry => {
-        const mode = entry.applyOn || 'duplicate'; // совместимость со старым форматом
-        const applies =
-        mode === 'both' ||
-        (mode === 'first' && isNew) ||
-        (mode === 'duplicate' && !isNew);
+        drops.forEach(entry => {
+            const mode = entry.applyOn || 'duplicate';
+            const applies =
+            mode === 'both' ||
+            (mode === 'first' && isNew) ||
+            (mode === 'duplicate' && !isNew);
+            if (!applies) return;
 
-        if (!applies) return;
-
-        // Шанс c учётом бонусов (кэп 100%)
-        const chance = Math.min(1, (entry.chance || 0) * (1 + bonus));
-        if (Math.random() < chance) {
-        const amt = entry.min + Math.floor(Math.random() * (entry.max - entry.min + 1));
-        addMaterials(entry.materialId, amt);
-        // eslint-disable-next-line no-console
-        console.log(`Materials: +${amt} ${entry.materialId} from ${rarityId} (p=${(chance*100).toFixed(1)}%)`);
-        }
-    });
+            let chance = force ? 1 : Math.min(1, (entry.chance || 0) * (1 + bonus));
+            if (Math.random() < chance) {
+            let amt = entry.min + Math.floor(Math.random() * (entry.max - entry.min + 1));
+            amt = Math.max(1, Math.round(amt * mult));
+            addMaterials(entry.materialId, amt);
+            console.log(`Materials: +${amt} ${entry.materialId} from ${rarityId} (p=${(chance*100).toFixed(1)}%, x${mult})`);
+            }
+        });
     }
 
     // --- NEW: множитель длительности бустов из экипировки (мультипликативный) ---
@@ -733,18 +776,7 @@ const Game = (() => {
             playerData.motivationStacks = 0;
         }
 
-        const availableRarities = RARITIES_DATA.filter(r => {
-            const prestigeOk = (r.minPrestige || 0) <= playerData.prestigeLevel;
-            if (!prestigeOk) return false;
-            if (r.rollable === false) return false;
-            if (r.id === 'salt' && !playerData.completedAchievements.includes('unlock_salt_card')) {
-                return false;
-            }
-            if (r.id === 'diamond' && !playerData.isSupporter) {
-                return false;
-            }
-            return true;
-        });
+        const availableRarities = RARITIES_DATA.filter(r => isCardAvailableNow(r, playerData));
 
         // Lucky Roll
         let isLuckyRollActiveThisRoll = false;
@@ -757,6 +789,12 @@ const Game = (() => {
         if (chronometer) {
             luckyRollThreshold -= (chronometer.effect.rolls_reduced || 0);
         }
+
+        const rollsReducedFromBoosts = (playerData.activeBoosts || [])
+        .filter(b => b.type === 'lucky_roll_accelerator')
+        .reduce((acc, b) => acc + (b.rolls_reduced || 0), 0);
+        luckyRollThreshold -= rollsReducedFromBoosts;
+        
         luckyRollThreshold = Math.max(2, luckyRollThreshold); // Минимальный порог
 
         playerData.luckyRollThreshold = luckyRollThreshold;
@@ -970,6 +1008,10 @@ const Game = (() => {
         }
         } catch (e) { console.warn('Variant roll failed', e); }
 
+        if (variantId === 'gold' && rarityId === 'gold' && !playerData.completedAchievements.includes('gold_999_purity')) {
+            grantAchievement('gold_999_purity');
+        }
+
         let baseDuplicateReward = 0;
 
         if (!isNew) {
@@ -1007,8 +1049,11 @@ const Game = (() => {
             }
         }
 
-
-        applyMaterialDrops(rarityId, isNew);
+        const vdef = window.MUTATIONS?.[variantId];
+        const matOpts = (vdef && vdef.forceMaterialDrop)
+        ? { force: true, multiplier: vdef.materialMultiplier || 1 }
+        : {};
+        applyMaterialDrops(rarityId, isNew, matOpts);
 
         // Бонус % к валюте за дубли
         let totalBonusPercent = 0;
@@ -1034,18 +1079,18 @@ const Game = (() => {
             console.log(`Event Bonus: Original: ${finalDuplicateReward - eventBonus}, Multiplier: x${multiplier}, New: ${finalDuplicateReward}`);
         }
 
-        if (!fragmentGenerated) {
-            if (finalDuplicateReward > 0) {
-                addCurrency(finalDuplicateReward);
-                playerData.stats.currencyFromDuplicates += finalDuplicateReward;
-            }
+
+        // --- МУТАЦИЯ: множитель дубля (GOLD/VOIDED) — ПОСЛЕ всех бонусов, ДО addCurrency ---
+        if (vdef && typeof vdef.duplicateMultiplier === 'number') {
+        finalDuplicateReward = Math.ceil(finalDuplicateReward * vdef.duplicateMultiplier);
         }
-        if (variantId) {
-        const vdef = window.MUTATIONS?.[variantId];
-        if (vdef?.duplicateMultiplier && finalDuplicateReward > 0) {
-            finalDuplicateReward = Math.ceil(finalDuplicateReward * vdef.duplicateMultiplier);
+
+        // --- Начисление валюты (если не был сгенерирован фрагмент Алхимика и сумма > 0) ---
+        if (!fragmentGenerated && finalDuplicateReward > 0) {
+        addCurrency(finalDuplicateReward);
+        playerData.stats.currencyFromDuplicates += finalDuplicateReward;
         }
-        }
+        
 
         if (!playerData.stats.rollsByRarity) playerData.stats.rollsByRarity = {};
         if (!playerData.stats.rollsByRarity[rarityData.id]) {
@@ -1217,11 +1262,14 @@ const Game = (() => {
         console.log(`Boost '${L.get(boostData.nameKey)}' duration extended. New end: ${new Date(existingBoost.endTime).toLocaleTimeString()}`);
     } else {
         const newBoost = {
-        id: boostData.id,
-        type: boostData.type,
-        name: L.get(boostData.nameKey),
-        endTime: now + durationMs,
-        luckBonus: boostData.luckBonus
+            id: boostData.id,
+            type: boostData.type,
+            name: L.get(boostData.nameKey),
+            endTime: now + durationMs,
+            // универсальные поля (чтобы логика могла их читать)
+            luckBonus: boostData.luckBonus,
+            multiplier: boostData.multiplier,
+            rolls_reduced: boostData.rolls_reduced
         };
         playerData.activeBoosts.push(newBoost);
         console.log(`Boost activated: ${L.get(boostData.nameKey)}. Ends at: ${new Date(newBoost.endTime).toLocaleTimeString()}`);
@@ -1510,6 +1558,6 @@ const Game = (() => {
         getActiveEvent,
         setActiveTheme,
         calculateRebirthBonus,
-        craftItem, addMaterials, hasMaterials, spendMaterials, getLuckBreakdown,
+        craftItem, addMaterials, hasMaterials, spendMaterials, getLuckBreakdown, isCardAvailableNow,
     };
 })();

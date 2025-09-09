@@ -494,7 +494,7 @@ const UI = (() => {
     function performNextAutoroll() {
         if (!isAutorolling || isRolling) return;
 
-        clearInterval(autorollTimer);
+        clearTimeout(autorollTimer);
         autorollTimer = null;
 
         const playerData = Game.getPlayerData();
@@ -563,8 +563,10 @@ const UI = (() => {
                 timerHtml = `<small class="d-block">${L.get('events.timeLeft')}: ${days}д ${hours}ч</small>`;
             }
 
+            const extraClass = activeEvent.bannerClass || '';
+
             eventBanner.innerHTML = `
-                <div class="alert alert-info" role="alert">
+                <div class="alert alert-info ${extraClass}" role="alert">
                     <h5 class="alert-heading">🎉 ${L.get(activeEvent.nameKey)}</h5>
                     <p>${L.get(activeEvent.descriptionKey)}</p>
                     ${timerHtml}
@@ -1132,10 +1134,9 @@ const UI = (() => {
         inventoryGrid.innerHTML = '';
 
         // Доступные карты для игрока
-        const availableRarities = RARITIES_DATA
-            .filter(r => (r.minPrestige || 0) <= playerData.prestigeLevel)
-            .filter(r => !(r.id === 'diamond' && !playerData.isSupporter))
-            .filter(r => !(r.id === 'salt' && !playerData.completedAchievements.includes('unlock_salt_card')));
+        const availableRarities = RARITIES_DATA.filter(r =>
+            Game.isCardAvailableNow(r, playerData) || playerData.inventory.includes(r.id)
+        );
 
         let sortedRarities = [...availableRarities];
 
@@ -1161,9 +1162,12 @@ const UI = (() => {
             const isAnyVersionOpened = openedVersions.length > 0;
 
             const activeSkinId = playerData.activeSkins[rarityData.id] || rarityData.id;
+
             const vView = (playerData.variantView || {})[activeSkinId];              // 'negative' | null
             const hasNeg = ((playerData.ownedVariants || {})[activeSkinId]?.negative || 0) > 0;
-            const shouldShowNegativeForThisFamily = isAnyVersionOpened && vView === 'negative' && hasNeg;
+
+            const chosenVariant = (playerData.variantView || {})[activeSkinId] || null;
+            const hasChosenVariant = !!(chosenVariant && (playerData.ownedVariants || {})[activeSkinId]?.[chosenVariant] > 0);
 
             const hasUnseenVersion = allCardVersions.some(v => playerData.unseenCardIds.includes(v.id));
 
@@ -1172,9 +1176,8 @@ const UI = (() => {
             const cardDiv = document.createElement('div');
             cardDiv.className = 'inventory-card';
 
-            if (shouldShowNegativeForThisFamily) {
-            cardDiv.classList.add('variant-negative');
-            }
+            if (hasChosenVariant) cardDiv.classList.add(`variant-${chosenVariant}`);
+
 
             const img = document.createElement('img');
             img.className = 'inventory-card-image';
@@ -1205,9 +1208,35 @@ const UI = (() => {
 
             cardDiv.appendChild(img);
             cardDiv.appendChild(nameDiv);
+
+            // ВАРИАНТ-ЧИП (N/G/V) — после img/name, с z-index
+            if (hasChosenVariant) {
+            const chip = document.createElement('div');
+            chip.className = 'variant-chip position-absolute';
+            chip.style.right = '6px';
+            chip.style.top   = '6px';
+            chip.style.zIndex = '3';
+            const sym = { negative: 'N', gold: 'G', voided: 'V' }[chosenVariant] || '•';
+            chip.textContent = sym;
+            cardDiv.appendChild(chip);
+            }
+
+            // LIMITED — тоже после img/name, с z-index
+            if (rarityData.availability?.type === 'event') {
+            const badge = document.createElement('div');
+            badge.className = 'badge bg-warning text-dark position-absolute m-1';
+            badge.style.left = '6px';
+            badge.style.top = '6px';
+            badge.style.zIndex = '2';
+            badge.textContent = 'LIMITED';
+            cardDiv.appendChild(badge);
+            }
+
             col.appendChild(cardDiv);
             inventoryGrid.appendChild(col);
         });
+
+        
 
         // Счётчики (скрываем diamond для не-саппортера)
         const viewableRarities = availableRarities.filter(r => !(r.id === 'diamond' && !playerData.isSupporter));
@@ -1414,6 +1443,33 @@ const UI = (() => {
                 modalCardChance.insertAdjacentElement('afterend', effectiveChanceEl);
             }
 
+            function stripModalVariants() {
+            Object.keys(muts).forEach(k => modalRoot.classList.remove(`variant-${k}`));
+            modalRoot.classList.remove('variant-negative');
+            }
+
+            function applyVariantFromSave() {
+            const pd = Game.getPlayerData();
+            const savedVid = (pd.variantView || {})[versionData.id] || null;
+            stripModalVariants();
+            if (savedVid) modalRoot.classList.add(`variant-${savedVid}`);
+
+            // обновить бейдж в заголовке модалки
+            let badge = document.getElementById('modalVariantBadge');
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.id = 'modalVariantBadge';
+                badge.className = 'variant-chip ms-2';
+                document.getElementById('cardModalLabel')?.appendChild(badge);
+            }
+            if (savedVid) {
+                badge.textContent = chipMap[savedVid] || '•';
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+            }
+
             // ВИЗУАЛЬНЫЕ ЭФФЕКТЫ
             visualEffectControls.innerHTML = '';
             const cardHasEffect = VisualEffects.effects.hasOwnProperty(versionData.id);
@@ -1467,22 +1523,23 @@ const UI = (() => {
                 <p class="text-muted small">${mechDescriptionText}</p>
             `;
 
-            // --- Переключатель мутаций (для ЭТОЙ версии) ---
+            // --- Переключатель мутаций (универсально) ---
+            const muts = window.MUTATIONS || {};
             const variantContainerId = 'variantFilterGroup';
             let variantGroup = document.getElementById(variantContainerId);
             if (!variantGroup) {
-                variantGroup = document.createElement('div');
-                variantGroup.id = variantContainerId;
-                variantGroup.className = 'd-flex justify-content-center align-items-center flex-wrap gap-2 mt-3';
-                document.getElementById('versionSwitcher')?.insertAdjacentElement('afterend', variantGroup);
+            variantGroup = document.createElement('div');
+            variantGroup.id = variantContainerId;
+            variantGroup.className = 'd-flex justify-content-center align-items-center flex-wrap gap-2 mt-3';
+            document.getElementById('versionSwitcher')?.insertAdjacentElement('afterend', variantGroup);
             }
             variantGroup.innerHTML = '';
 
             const pd = Game.getPlayerData();
             const vCounts = (pd.ownedVariants || {})[versionData.id] || {};
-            const hasNegative = (vCounts.negative || 0) > 0;
+            const chipMap = { negative: 'N', gold: 'G', voided: 'V' };
 
-            // Кнопка "Обычная"
+            // Кнопка NORMAL
             const btnNormal = document.createElement('button');
             btnNormal.type = 'button';
             btnNormal.className = 'btn btn-sm btn-outline-light';
@@ -1490,40 +1547,56 @@ const UI = (() => {
             btnNormal.addEventListener('click', () => applyVariantToModal(null));
             variantGroup.appendChild(btnNormal);
 
-            // Кнопка "Негатив" — только если у ЭТОЙ версии выбит
-            if (hasNegative) {
-                const b = document.createElement('button');
-                b.type = 'button';
-                b.className = 'btn btn-sm btn-outline-warning';
-                b.textContent = L.get('mutations.negative.name') || 'Negative';
-                b.addEventListener('click', () => applyVariantToModal('negative'));
-                variantGroup.appendChild(b);
-            } else {
-                const hint = document.createElement('div');
-                hint.className = 'text-muted small mt-2';
-                hint.textContent = L.get('ui.noVariants') || 'No variants owned for this card.';
-                variantGroup.appendChild(hint);
-            }
+            // Остальные — только те, что выбиты
+            Object.keys(muts).forEach(vid => {
+            const cnt = vCounts[vid] || 0;
+            if (cnt <= 0) return;
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'btn btn-sm btn-outline-warning';
+            b.textContent = L.get(muts[vid].nameKey) || vid.toUpperCase();
+            b.addEventListener('click', () => applyVariantToModal(vid));
+            variantGroup.appendChild(b);
+            });
 
             // Применение к модалке + сохранение выбора для ЭТОЙ версии
             function applyVariantToModal(vid) {
-                modalRoot.classList.remove('variant-negative');
-                if (vid === 'negative') modalRoot.classList.add('variant-negative');
+            const modalRoot = document.getElementById('cardModal');
+            // снять любые variant-* классы
+            Object.keys(muts).forEach(k => modalRoot.classList.remove(`variant-${k}`));
+            modalRoot.classList.remove('variant-negative');
+            if (vid) modalRoot.classList.add(`variant-${vid}`);
 
-                // Сохраняем локальный выбор версии
-                pd.variantView = pd.variantView || {};
-                pd.variantView[versionData.id] = vid || null; // 'negative' | null
-                Game.saveGame();
+            // Сохраняем локальный выбор версии
+            pd.variantView = pd.variantView || {};
+            pd.variantView[versionData.id] = vid || null;
+            Game.saveGame();
 
-                // Перерисовать грид, чтобы семья показывала инверт только если активный скин = эта версия
-                renderInventory(Game.getPlayerData());
+            // Бейдж в модалке (короткий)
+            let badge = document.getElementById('modalVariantBadge');
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.id = 'modalVariantBadge';
+                badge.className = 'variant-chip ms-2';
+                document.getElementById('cardModalLabel')?.appendChild(badge);
+            }
+            badge.textContent = vid ? (chipMap[vid] || '•') : '';
+            badge.style.display = vid ? 'inline-block' : 'none';
+
+            // Перерисовать грид, чтобы семья показывала выбранный вид
+            renderInventory(Game.getPlayerData());
             }
 
-            // На закрытии модалки всегда очищаем класс — чтобы не влияло на другие карты
             const modalEl = document.getElementById('cardModal');
-            modalEl.addEventListener('hidden.bs.modal', () => {
-                modalRoot.classList.remove('variant-negative');
-            }, { once: true });
+            const mutsAll = window.MUTATIONS || {};
+            function stripAllModalVariants() {
+            Object.keys(mutsAll).forEach(k => modalRoot.classList.remove(`variant-${k}`));
+            modalRoot.classList.remove('variant-negative'); // на всякий случай
+            const b = document.getElementById('modalVariantBadge');
+            if (b) b.style.display = 'none';
+            }
+            // вместо старого “remove variant-negative”:
+            modalEl.addEventListener('hidden.bs.modal', stripAllModalVariants, {once:true});
 
             if (mechEffectData) {
                 const equipBtn = document.createElement('button');
@@ -1555,6 +1628,7 @@ const UI = (() => {
                 `;
                 mechanicalEffectControls.innerHTML += passiveHtml;
             }
+            applyVariantFromSave();
         };
 
         // Переключатель версий

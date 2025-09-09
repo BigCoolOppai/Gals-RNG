@@ -7,6 +7,23 @@ window.MUTATIONS = {
     nameKey: 'mutations.negative.name',
     cssClass: 'variant-negative',
     duplicateMultiplier: 2.0 // ×2 к награде за дубль
+  },
+  gold: {
+    id: 'gold',
+    nameKey: 'mutations.gold.name',
+    cssClass: 'variant-gold',
+    baseChance: 0.006,                // 0.6%
+    duplicateMultiplier: 3.0          // x3 к награде за дубль
+  },
+  voided: {
+    id: 'voided',
+    nameKey: 'mutations.voided.name',
+    cssClass: 'variant-voided',
+    baseChance: 0.004,                // 0.4%
+    duplicateMultiplier: 0.0,         // дубль = 0 валюты
+    grantMaterial: { id: 'soul_shard', min: 1, max: 2 }, // можно поменять на другой материал
+    forceMaterialDrop: true,          // гарантия дропа
+    materialMultiplier: 3             // x3 к количеству
   }
 };
 // Базовый шанс мутации (НЕ зависит от удачи; усиливается предметами/ивентом)
@@ -48,6 +65,16 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "choco_peppermint",
+        nameKey: "cards.choco_peppermint.name",
+        probabilityBase: 1 / 100000000, // 1 / 100 млн
+        color: "#2f3e2c", glowColor: "#b3ffcc",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 10000000,
+        availability: { type: 'event', eventId: 'choco_2025' },
+        card: { nameKey: "cards.choco_peppermint.cardName", image: "img/limited/chocolateEvent/cardPeppermint.png", descriptionKey: "cards.choco_peppermint.description" }
+        },
+    {
         id: "blackhole_alt_1",
         nameKey: "cards.blackhole_alt_1.name",
         displayParentId: "blackhole",
@@ -65,6 +92,16 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "choco_lewd",
+        nameKey: "cards.choco_lewd.name",
+        probabilityBase: 1 / 50000000, // 1 / 50 млн
+        color: "#4a2525", glowColor: "#ffb3c6",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 5000000,
+        availability: { type: 'event', eventId: 'choco_2025' },
+        card: { nameKey: "cards.choco_lewd.cardName", image: "img/limited/chocolateEvent/cardChocoPussy.png", descriptionKey: "cards.choco_lewd.description" }
+    },
+    {
         id: "gojo_alt", 
         nameKey: "cards.gojo_alt.name",
         displayParentId: "gojo",
@@ -80,6 +117,16 @@ window.RARITIES_DATA = [
             image: "img/altGojo.png",
             descriptionKey: "cards.gojo_alt.description"
         }
+    },
+    {
+        id: "choco_white",
+        nameKey: "cards.choco_white.name",
+        probabilityBase: 1 / 20000001, // 1 / 20 млн
+        color: "#e8e0cc", glowColor: "#fff2c4",
+        cssClass: "rarity-epic",
+        currencyOnDuplicate: 2000000,
+        availability: { type: 'event', eventId: 'choco_2025' },
+        card: { nameKey: "cards.choco_white.cardName", image: "img/limited/chocolateEvent/cardWhiteChoco.png", descriptionKey: "cards.choco_white.description" }
     },
     {
         id: "seductress",
@@ -164,6 +211,16 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "choco_espresso",
+        nameKey: "cards.choco_espresso.name",
+        probabilityBase: 1 / 10000002, // 1 / 10 млн
+        color: "#2c1b14", glowColor: "#d1a780",
+        cssClass: "rarity-epic",
+        currencyOnDuplicate: 1000000,
+        availability: { type: 'event', eventId: 'choco_2025' },
+        card: { nameKey: "cards.choco_espresso.cardName", image: "img/limited/chocolateEvent/cardEspresso.png", descriptionKey: "cards.choco_espresso.description" }
+    },
+    {
         id: "bean", 
         nameKey: "cards.bean.name",
         probabilityBase: 1 / 10000001,
@@ -230,6 +287,21 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "hornet",
+        nameKey: "cards.hornet.name",
+        minPrestige: 2,                       // доступна с 2-го перерождения
+        probabilityBase: 1 / 7300000,         // 1 / 7 300 000
+        color: "#c62828",                      // базовый цвет (красный/бордовый)
+        glowColor: "#ffcdd2",                  // мягкое розово-кремовое свечение
+        cssClass: "rarity-hornet",
+        currencyOnDuplicate: 730000,
+        card: {
+            nameKey: "cards.hornet.cardName",
+            image: "img/cardHornet.png",
+            descriptionKey: "cards.hornet.description"
+        }
+    },
+    {
         id: "altShroom",
         nameKey: "cards.altShroom.name",
         displayParentId: "shroom",
@@ -279,6 +351,16 @@ window.RARITIES_DATA = [
             image: "img/altGoblin.png",
             descriptionKey: "cards.goblin_alt_1.description"
         }
+    },
+    {
+        id: "choco",
+        nameKey: "cards.choco.name",
+        probabilityBase: 1 / 5000001, // 1 / 5 млн
+        color: "#5a3a2e", glowColor: "#ffd9b3",
+        cssClass: "rarity-epic",
+        currencyOnDuplicate: 500000,
+        availability: { type: 'event', eventId: 'choco_2025' },
+        card: { nameKey: "cards.choco.cardName", image: "img/limited/chocolateEvent/cardChoco.png", descriptionKey: "cards.choco.description" }
     },
     {
         id: "tamer",
@@ -405,6 +487,16 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "choco_common",
+        nameKey: "cards.choco_common.name",
+        probabilityBase: 1 / 3500001, // 1 / 3.5 млн
+        color: "#6b4635", glowColor: "#ffdfb8",
+        cssClass: "rarity-rare",
+        currencyOnDuplicate: 350000,
+        availability: { type: 'event', eventId: 'choco_2025' },
+        card: { nameKey: "cards.choco_common.cardName", image: "img/limited/chocolateEvent/cardCommonChocolate.png", descriptionKey: "cards.choco_common.description" }
+    },
+    {
         id: "ellen_alt_student", 
         nameKey: "cards.ellen_alt_student.name",
         displayParentId: "ellen",
@@ -470,6 +562,16 @@ window.RARITIES_DATA = [
             image: "img/altGoat.png",
             descriptionKey: "cards.alt_maternal.description"
         }
+    },
+    {
+        id: "choco_crema",
+        nameKey: "cards.choco_crema.name",
+        probabilityBase: 1 / 2000002, // 1 / 2 млн
+        color: "#8b5e3c", glowColor: "#ffe0b3",
+        cssClass: "rarity-rare",
+        currencyOnDuplicate: 200000,
+        availability: { type: 'event', eventId: 'choco_2025' },
+        card: { nameKey: "cards.choco_crema.cardName", image: "img/limited/chocolateEvent/cardCrema.png", descriptionKey: "cards.choco_crema.description" }
     },
     {
         id: "shy_princess",
@@ -649,6 +751,16 @@ window.RARITIES_DATA = [
             image: "img/cardJade.png",
             descriptionKey: "cards.jade.description"
         }
+    },
+    {
+        id: "choco_missy",
+        nameKey: "cards.choco_missy.name",
+        probabilityBase: 1 / 1000001, // 1 / 1 млн
+        color: "#80543a", glowColor: "#ffd7a1",
+        cssClass: "rarity-rare",
+        currencyOnDuplicate: 100000,
+        availability: { type: 'event', eventId: 'choco_2025' },
+        card: { nameKey: "cards.choco_missy.cardName", image: "img/limited/chocolateEvent/cardMissy.png", descriptionKey: "cards.choco_missy.description" }
     },
     {
         id: "garbage_alt_1",
@@ -1735,6 +1847,9 @@ const SHOP_DATA = {
         { id: "boost_medium", nameKey: "shop.boosts.boost_medium.name", descriptionKey: "shop.boosts.boost_medium.description", cost: 250, durationSeconds: 120, luckBonus: 0.25, type: "luck_boost" },
         { id: "boost_large", nameKey: "shop.boosts.boost_large.name", descriptionKey: "shop.boosts.boost_large.description", cost: 600, durationSeconds: 300, luckBonus: 0.5, type: "luck_boost" },
         { id: "boost_titanic", nameKey: "shop.boosts.boost_titanic.name", descriptionKey: "shop.boosts.boost_titanic.description", cost: 1500, durationSeconds: 600, luckBonus: 1.0, type: "luck_boost" },
+        { id: "boost_variant",    nameKey: "shop.boosts.boost_variant.name",    descriptionKey: "shop.boosts.boost_variant.description",    cost: 12000, durationSeconds: 600, type: "variant_chance_multiplier",  multiplier: 1.5 },
+        { id: "boost_materials",  nameKey: "shop.boosts.boost_materials.name",  descriptionKey: "shop.boosts.boost_materials.description",  cost: 9000,  durationSeconds: 300, type: "material_drop_multiplier",    multiplier: 1.5 },
+        { id: "boost_luckyroll",  nameKey: "shop.boosts.boost_luckyroll.name",  descriptionKey: "shop.boosts.boost_luckyroll.description",  cost: 8000,  durationSeconds: 600, type: "lucky_roll_accelerator",       rolls_reduced: 1 }
     ],
     equipment: [
         { id: "equip_talisman", nameKey: "shop.equipment.equip_talisman.name", descriptionKey: "shop.equipment.equip_talisman.description", cost: 300, luckBonus: 0.05, type: "equipment" },

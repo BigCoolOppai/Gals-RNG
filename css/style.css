@@ -2699,6 +2699,48 @@ color: #1b1d20;
   filter: invert(1) hue-rotate(180deg) saturate(0.9) contrast(1.05);
 }
 
+/* GOLD: заметный тёплый фильтр + фольгированный шиммер */
+#cardModal.variant-gold #modalCardImage,
+.inventory-card.variant-gold .inventory-card-image {
+  filter: url(#gold-emboss-filter) saturate(1.08) contrast(1.06);
+  box-shadow: 0 0 16px rgba(255,215,0,0.65), 0 0 32px rgba(255,215,0,0.28);
+}
+
+
+
+#cardModal.variant-voided #modalCardImage,
+.inventory-card.variant-voided .inventory-card-image {
+  filter: grayscale(0.9) contrast(4) brightness(0.9) !important;
+  box-shadow: 0 0 14px rgba(0,0,0,0.65), 0 0 28px rgba(0,0,0,0.35);
+}
+
+/* Маленькие бейджи для вариантов (N/G/V) */
+.variant-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #111;
+  background: #ffd54f; /* по умолчанию — золотистая */
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+  pointer-events: none;
+}
+.inventory-card.variant-voided .variant-chip,
+#cardModal.variant-voided .variant-chip {
+  color: #c9e3ff;
+  background: #1b2633;
+}
+.inventory-card.variant-negative .variant-chip,
+#cardModal.variant-negative .variant-chip {
+  color: #111;
+  background: #bdbdbd;
+}
+
 
 /* Orochi — ч/б хаори, «змеиные» переливы */
 .roll-slot.rarity-orochi {
@@ -2811,3 +2853,611 @@ color: #1b1d20;
 /* Деловая */
 .roll-slot.rarity-business { background: linear-gradient(145deg, #757575, #424242); color: #FAFAFA; border: 1px solid #9E9E9E; }
 .inventory-card.border-nicole { border-color: #616161; --rarity-glow-color: #BDBDBD; }
+
+/* --- Chocolate Event: Limited cards --- */
+
+/* Missy — тёплый молочный шоколад */
+.roll-slot.rarity-choco_missy {
+  color: #ffe0c2;
+  background: linear-gradient(145deg, #7a4b2a 0%, #9b5e34 100%);
+  text-shadow: 0 0 6px rgba(255,224,194,0.6), 0 0 2px #000;
+  border: 1px solid rgba(255,224,194,0.25);
+}
+.inventory-card.border-choco_missy {
+  border-color: #C17F5F;
+  --rarity-glow-color: #ffd7a1;
+}
+
+/* Crema — карамельно-сливочная */
+.roll-slot.rarity-choco_crema {
+  color: #fff3e0;
+  background: linear-gradient(145deg, #a87446 0%, #d6a162 100%);
+  text-shadow: 0 0 6px rgba(255,243,224,0.6), 0 0 2px #000;
+  border: 1px solid rgba(214,161,98,0.25);
+}
+.inventory-card.border-choco_crema {
+  border-color: #d9ac77;
+  --rarity-glow-color: #ffe0b2;
+}
+
+/* Насыщенная (Ева в шоколаде) — плотный какао */
+.roll-slot.rarity-choco_common {
+  color: #ffd7b5;
+  background: linear-gradient(160deg, #5b3a2e 0%, #3e2723 100%);
+  text-shadow: 0 0 6px rgba(255,215,181,0.5), 0 0 2px #000;
+  border: 1px solid rgba(139,90,59,0.25);
+}
+.inventory-card.border-choco_common {
+  border-color: #8d5a3b;
+  --rarity-glow-color: #ffcc99;
+}
+
+/* Шоколадная (Шоколадка) — сбалансированная */
+.roll-slot.rarity-choco {
+  color: #ffe6cc;
+  background: linear-gradient(145deg, #6b3e2b 0%, #8e5a3c 100%);
+  text-shadow: 0 0 6px rgba(255,230,204,0.6), 0 0 2px #000;
+  border: 1px solid rgba(160,107,79,0.25);
+}
+.inventory-card.border-choco {
+  border-color: #a06b4f;
+  --rarity-glow-color: #ffd7a1;
+}
+
+/* Горькая (Эспрессо) — очень тёмная */
+.roll-slot.rarity-choco_espresso {
+  color: #c7a07b;
+  background: linear-gradient(160deg, #2a1a14 0%, #1b0f0a 100%);
+  text-shadow: 0 0 6px rgba(199,160,123,0.6), 0 0 2px #000;
+  border: 1px solid rgba(89,60,43,0.35);
+}
+.inventory-card.border-choco_espresso {
+  border-color: #5c3b2a;
+  --rarity-glow-color: #b68a6a;
+}
+
+/* Белая (Белый шоколад) — светлая, сливочная */
+.roll-slot.rarity-choco_white {
+  color: #5e4033;
+  background: linear-gradient(145deg, #fff3e0 0%, #f6e7c9 100%);
+  text-shadow: 0 0 6px rgba(255,255,255,0.65);
+  border: 1px solid rgba(243,229,171,0.4);
+}
+.inventory-card.border-choco_white {
+  border-color: #f3e5ab;
+  --rarity-glow-color: #fff2c4;
+}
+
+/* Формованная (Шоколадная пусечка) — тёмный шоколад с розовым свечением */
+.roll-slot.rarity-choco_lewd {
+  color: #ffd1d9;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255,179,198,0.18) 0%, transparent 45%),
+    linear-gradient(160deg, #4a2525 0%, #7a3a3a 100%);
+  text-shadow: 0 0 8px rgba(255,179,198,0.75), 0 0 2px #000;
+  border: 1px solid rgba(204,122,138,0.35);
+}
+.inventory-card.border-choco_lewd {
+  border-color: #cc7a8a;
+  --rarity-glow-color: #ffb3c6;
+}
+
+/* Мятная (Мисс Мята Перчинова) — холодный ментол */
+.roll-slot.rarity-choco_peppermint {
+  color: #c9ffe0;
+  background: linear-gradient(160deg, #274036 0%, #1d2e27 100%);
+  text-shadow: 0 0 8px rgba(179,255,204,0.7), 0 0 2px #000;
+  border: 1px solid rgba(127,209,168,0.35);
+}
+.inventory-card.border-choco_peppermint {
+  border-color: #7fd1a8;
+  --rarity-glow-color: #b3ffcc;
+}
+
+/* --- Шоколадный баннер --- */
+.alert.choco-banner {
+  color: #f4eadf;
+  background:
+    radial-gradient(ellipse at 20% -10%, rgba(255, 204, 153, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 110% 30%, rgba(255, 204, 153, 0.12) 0%, transparent 40%),
+    linear-gradient(135deg, #2a1912 0%, #3a2217 55%, #4a2a1b 100%);
+  border: 1px solid rgba(217, 139, 50, 0.35);
+  box-shadow: inset 0 0 18px rgba(0,0,0,0.35), 0 0 16px rgba(58,34,23,0.4);
+}
+.alert.choco-banner .alert-heading {
+  color: #ffd7a1;
+  text-shadow: 0 0 8px rgba(255, 215, 161, 0.35);
+}
+.alert.choco-banner p {
+  margin-bottom: 0.3rem;
+  color: #f2e4d6;
+}
+
+/* ==========================
+   THEME: CHOCO (Premium)
+   ========================== */
+html.theme-choco {
+  /* Базовая палитра */
+  --choco-bg-1: #120904;
+  --choco-bg-2: #190e09;
+  --choco-bg-3: #1f130d;
+  --choco-tile: #2a1710;
+  --choco-ink: #f7efe5;
+  --choco-muted: #d7c9b8;
+
+  --choco-accent: #d98b32;      /* карамель */
+  --choco-accent-2: #f0b35e;    /* светлая карамель */
+  --choco-accent-3: #8b5e3c;    /* тёмная карамель */
+  --choco-border: #3c2418;
+
+  --choco-success: #6bc37a;
+  --choco-info: #f3d5a8;
+  --choco-warning: #ffd188;
+  --choco-danger: #f07373;
+
+  color-scheme: dark;
+}
+
+/* Фон: плитка шоколада с мягкими высветлениями */
+.theme-choco body {
+  background-color: var(--choco-bg-1);
+  color: var(--choco-ink);
+}
+.theme-choco body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    /* сетка плитки */
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient( 0deg, rgba(255,255,255,0.02) 1px, transparent 1px) 0 0 / 28px 28px,
+    /* карамельные пятна */
+    radial-gradient(circle at 14% 8%, rgba(217,139,50,0.06), transparent 45%),
+    radial-gradient(circle at 80% 82%, rgba(217,139,50,0.05), transparent 40%),
+    linear-gradient(135deg, var(--choco-bg-2), var(--choco-bg-3) 60%, #24160f);
+  filter: saturate(1.02) contrast(1.02);
+}
+
+/* Заголовки */
+.theme-choco h1, .theme-choco h2, .theme-choco h3, .theme-choco h4 {
+  color: var(--choco-ink);
+  text-shadow: 0 0 6px rgba(217,139,50,0.18);
+}
+
+/* Табы */
+.theme-choco .nav-tabs { border-bottom-color: var(--choco-border); }
+.theme-choco .nav-tabs .nav-link {
+  color: var(--choco-muted);
+  border-bottom-color: var(--choco-border);
+  background: transparent;
+}
+.theme-choco .nav-tabs .nav-link.active {
+  color: var(--choco-ink);
+  background-color: var(--choco-bg-3);
+  border-color: var(--choco-border) var(--choco-border) var(--choco-bg-3);
+  position: relative;
+}
+.theme-choco .nav-tabs .nav-link.active::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--choco-accent), transparent);
+}
+
+/* Карточки и контейнеры */
+.theme-choco .tab-content,
+.theme-choco .list-group-item,
+.theme-choco .card.bg-dark-subtle {
+  background-color: var(--choco-bg-3) !important;
+  border-color: var(--choco-border) !important;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.35);
+}
+
+/* Инвентарь — плитка, мягкие блики */
+.theme-choco .inventory-card {
+  background:
+    radial-gradient(circle at 12% 20%, rgba(255,255,255,0.04), transparent 30%),
+    radial-gradient(circle at 88% 82%, rgba(255,255,255,0.03), transparent 30%),
+    linear-gradient(135deg, #1a100b, #21140e 60%, #291a12);
+  border-color: var(--choco-border);
+}
+.theme-choco .inventory-card-name {
+  background: linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.82));
+  color: #f4eadf;
+}
+.theme-choco .inventory-card:hover {
+  box-shadow: 0 10px 20px rgba(0,0,0,0.55), 0 0 18px rgba(217,139,50,0.25);
+}
+
+/* LIMITED — ленточка в углу */
+.theme-choco .inventory-card .badge.bg-warning {
+  background: linear-gradient(145deg, #ffd188, #f0b35e);
+  color: #3a2418;
+  transform: rotate(-10deg);
+  border: 1px solid rgba(58,36,24,0.25);
+  box-shadow: 0 0 10px rgba(240,179,94,0.35);
+}
+
+/* Чип варианта (N/G/V) */
+.theme-choco .variant-chip {
+  background: linear-gradient(145deg, #ffe29a, #ffd188);
+  color: #322015;
+  border: 1px solid rgba(212,165,102,0.4);
+}
+
+/* Кнопки */
+.theme-choco .btn-primary {
+  background-color: var(--choco-accent);
+  border-color: var(--choco-accent);
+  box-shadow: 0 0 6px rgba(217,139,50,0.45);
+}
+.theme-choco .btn-primary:hover {
+  background-color: var(--choco-accent-2);
+  border-color: var(--choco-accent-2);
+}
+.theme-choco .btn-outline-secondary {
+  color: var(--choco-ink);
+  border-color: var(--choco-border);
+}
+.theme-choco .btn-success { background-color: #4ea761; border-color: #4ea761; }
+.theme-choco .btn-danger  { background-color: #c85b5b; border-color: #c85b5b; }
+
+/* Магазин — цены и кнопки */
+.theme-choco .list-group-item .badge.bg-warning {
+  background: linear-gradient(180deg, #ffd188, #f0b35e);
+  color: #3a2418;
+  border: 1px solid rgba(58,36,24,0.25);
+}
+
+/* Модалки */
+.theme-choco .modal-content {
+  background: linear-gradient(135deg, #1e130d, #28180f 60%, #311d12);
+  border: 1px solid var(--choco-border);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.2), 0 20px 40px rgba(0,0,0,0.55);
+}
+.theme-choco .modal-header {
+  border-bottom-color: var(--choco-border);
+  background: linear-gradient(180deg, rgba(217,139,50,0.08), rgba(0,0,0,0));
+}
+.theme-choco .btn-close.btn-close-white { filter: invert(0) grayscale(0); }
+
+/* Тултипы */
+.theme-choco .tooltip .tooltip-inner {
+  background: #2a1710;
+  color: #f4eadf;
+  border: 1px solid var(--choco-border);
+}
+
+/* Слайдер громкости */
+.theme-choco .form-range::-webkit-slider-runnable-track {
+  background: linear-gradient(90deg, var(--choco-accent), var(--choco-accent-2));
+  height: 6px; border-radius: 3px;
+}
+.theme-choco .form-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  margin-top: -6px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ffe6c0, #f0b35e 60%, #a7692e);
+  border: 1px solid rgba(0,0,0,0.35);
+  box-shadow: 0 0 8px rgba(240,179,94,0.55);
+}
+
+/* Нотификации */
+.theme-choco #notificationsContainer .alert {
+  background: linear-gradient(145deg, #21140e, #2a1710);
+  color: var(--choco-ink);
+  border: 1px solid var(--choco-border);
+}
+.theme-choco #notificationsContainer .alert-success { border-left: 3px solid var(--choco-success); }
+.theme-choco #notificationsContainer .alert-info    { border-left: 3px solid var(--choco-accent-2); }
+.theme-choco #notificationsContainer .alert-warning { border-left: 3px solid var(--choco-warning); }
+.theme-choco #notificationsContainer .alert-danger  { border-left: 3px solid var(--choco-danger); }
+
+/* Ролл-строка */
+.theme-choco .roll-animation-container {
+  background: linear-gradient( 180deg, #0e0806, #120a07);
+  border-color: var(--choco-border);
+  box-shadow: inset 0 0 12px rgba(0,0,0,0.6);
+}
+.theme-choco .roll-slot {
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+}
+
+/* Полученная карточка */
+.theme-choco .received-card {
+  border-color: var(--choco-accent);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.45), 0 0 16px rgba(217,139,50,0.25);
+}
+
+/* Баннер ивента (если активирован choco-banner) */
+.theme-choco .alert.choco-banner {
+  color: #f4eadf;
+  background:
+    radial-gradient(ellipse at 20% -10%, rgba(255, 204, 153, 0.14) 0%, transparent 50%),
+    radial-gradient(ellipse at 110% 30%, rgba(255, 204, 153, 0.10) 0%, transparent 40%),
+    linear-gradient(135deg, #2a1912 0%, #3a2217 55%, #4a2a1b 100%);
+  border: 1px solid rgba(217, 139, 50, 0.35);
+  box-shadow: inset 0 0 18px rgba(0,0,0,0.35), 0 0 16px rgba(58,34,23,0.4);
+}
+.theme-choco .alert.choco-banner .alert-heading {
+  color: #ffd7a1;
+  text-shadow: 0 0 8px rgba(255, 215, 161, 0.35);
+}
+
+/* Скроллбар (WebKit) */
+.theme-choco ::-webkit-scrollbar { width: 10px; height: 10px; }
+.theme-choco ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #5a3a2e, #8e5a3c);
+  border: 2px solid #1a100b;
+  border-radius: 10px;
+}
+.theme-choco ::-webkit-scrollbar-track {
+  background: #1a100b;
+}
+
+/* Включаем кремовые акценты у бейджей/иконок */
+.theme-choco .badge.bg-warning { color: #3a2418; }
+.theme-choco .currency-icon { filter: hue-rotate(-10deg) saturate(1.2); }
+
+/* ==========================
+   THEME CHOCO — Buttons
+   ========================== */
+
+/* Базовая форма всех кнопок в теме */
+.theme-choco .btn {
+  border-radius: 12px;
+  border: 1px solid var(--choco-border);
+  color: var(--choco-ink);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.35);
+  transition: transform .05s ease-out, box-shadow .15s ease, background .15s ease, color .15s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.theme-choco .btn:active { transform: translateY(1px) scale(0.995); }
+.theme-choco .btn:disabled, .theme-choco .btn.disabled {
+  filter: saturate(0.7);
+  opacity: 0.75;
+  box-shadow: none;
+}
+
+/* Focus ring (аккуратный карамельный) */
+.theme-choco .btn:focus-visible {
+  outline: 2px solid var(--choco-accent-2);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(240,179,94,0.25);
+}
+
+/* 1) ROLL и вариации — целевые ID + их классы */
+
+/* Roll (btn-primary по умолчанию) */
+.theme-choco #rollButton,
+.theme-choco .btn-primary {
+  background: linear-gradient(145deg, #d98b32 0%, #a7672a 100%);
+  border-color: #8a5425;
+  color: #1a100b;
+  box-shadow: 0 3px 10px rgba(217,139,50,0.35), inset 0 1px 0 rgba(255,240,220,0.25);
+}
+.theme-choco #rollButton:hover,
+.theme-choco .btn-primary:hover {
+  background: linear-gradient(145deg, #f0b35e 0%, #bf7a35 100%);
+  box-shadow: 0 6px 16px rgba(217,139,50,0.45);
+}
+.theme-choco #rollButton:active,
+.theme-choco .btn-primary:active {
+  background: linear-gradient(145deg, #bf7a35 0%, #8a5425 100%);
+}
+
+/* Лёгкий “глянец” для Roll */
+.theme-choco #rollButton {
+  position: relative;
+  overflow: hidden;
+}
+.theme-choco #rollButton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 40%, transparent 60%);
+  opacity: 0;
+  transform: translateX(-60%);
+  transition: opacity .2s ease;
+  pointer-events: none;
+}
+.theme-choco #rollButton:hover::after { opacity: 1; transform: translateX(0%); }
+.theme-choco #rollButton:active::after { opacity: .9; transform: translateX(10%); }
+
+/* Multi-Roll (btn-info по умолчанию) — “ирис/тоффи” */
+.theme-choco #multiRollButton,
+.theme-choco .btn-info {
+  background: linear-gradient(145deg, #b87b3a 0%, #8b5e3c 100%);
+  border-color: #724a2f;
+  color: #fff2e0;
+  box-shadow: 0 3px 10px rgba(184,123,58,0.35), inset 0 1px 0 rgba(255,230,200,0.15);
+}
+.theme-choco #multiRollButton:hover,
+.theme-choco .btn-info:hover {
+  background: linear-gradient(145deg, #d79a57 0%, #a66e49 100%);
+}
+
+/* Autoroll: в “готов” — мягкий шоколад; во “включен” (.btn-danger) — пряный какао/вишня */
+.theme-choco #autorollButton.btn-success,
+.theme-choco .btn-success {
+  background: linear-gradient(145deg, #9c6a44 0%, #6f4b32 100%);
+  border-color: #573a28;
+  color: #f6eadc;
+  box-shadow: 0 3px 10px rgba(156,106,68,0.35);
+}
+.theme-choco #autorollButton.btn-success:hover,
+.theme-choco .btn-success:hover {
+  background: linear-gradient(145deg, #c28a5e 0%, #8a5c3f 100%);
+}
+
+/* Autoroll включён → “остановить”: .btn-danger — тёмный какао с ягодной нотой */
+.theme-choco #autorollButton.btn-danger,
+.theme-choco .btn-danger {
+  background: linear-gradient(145deg, #9c3a3a 0%, #6d2922 100%);
+  border-color: #53201c;
+  color: #ffe9e9;
+  box-shadow: 0 3px 10px rgba(156,58,58,0.35);
+}
+.theme-choco #autorollButton.btn-danger:hover,
+.theme-choco .btn-danger:hover {
+  background: linear-gradient(145deg, #b54a4a 0%, #7e2f27 100%);
+}
+
+/* 2) Системные второстепенные и outline‑кнопки */
+
+/* Secondary — шоколадная плитка */
+.theme-choco .btn-secondary {
+  background: linear-gradient(145deg, #2a1710 0%, #1c110b 100%);
+  border-color: var(--choco-border);
+  color: var(--choco-ink);
+}
+.theme-choco .btn-secondary:hover {
+  background: linear-gradient(145deg, #3a2217 0%, #27170f 100%);
+}
+
+/* Warning — карамель */
+.theme-choco .btn-warning {
+  background: linear-gradient(145deg, #ffd188 0%, #f0b35e 100%);
+  border-color: #d89a4d;
+  color: #3a2418;
+}
+.theme-choco .btn-warning:hover {
+  background: linear-gradient(145deg, #ffe0ab 0%, #f7c47f 100%);
+}
+
+/* Outline-варианты (заливаются шоколадом при hover) */
+.theme-choco .btn-outline-primary {
+  color: #f6eadc;
+  border-color: #a7672a;
+}
+.theme-choco .btn-outline-primary:hover {
+  background: linear-gradient(145deg, #d98b32 0%, #a7672a 100%);
+  color: #1a100b;
+}
+
+.theme-choco .btn-outline-secondary {
+  color: #f6eadc;
+  border-color: var(--choco-border);
+}
+.theme-choco .btn-outline-secondary:hover {
+  background: linear-gradient(145deg, #2a1710 0%, #1c110b 100%);
+  color: var(--choco-ink);
+}
+
+.theme-choco .btn-outline-danger {
+  color: #ffd7d7;
+  border-color: #7e2f27;
+}
+.theme-choco .btn-outline-danger:hover {
+  background: linear-gradient(145deg, #9c3a3a 0%, #6d2922 100%);
+  color: #ffe9e9;
+}
+
+/* Смежные маленькие кнопки/чипы (например, equip/unequip) */
+.theme-choco .btn-sm {
+  border-radius: 10px;
+}
+
+/* Кнопка “Amplify” (ядро удачи) — визуально выделим */
+.theme-choco #amplifyLuckCoreBtn {
+  background: linear-gradient(145deg, #f0b35e 0%, #d98b32 100%);
+  border-color: #b4762b;
+  color: #3a2418;
+  box-shadow: 0 4px 12px rgba(240,179,94,0.35);
+}
+.theme-choco #amplifyLuckCoreBtn:hover {
+  background: linear-gradient(145deg, #ffd188 0%, #f0b35e 100%);
+}
+
+/* Переключатели (switch) — кремово‑карамельные */
+.theme-choco .form-check-input:checked {
+  background-color: #f0b35e;
+  border-color: #b4762b;
+  box-shadow: 0 0 0 3px rgba(240,179,94,0.25);
+}
+
+/* Кнопка закрытия модалки — деликатнее */
+.theme-choco .btn-close {
+  filter: invert(92%) sepia(9%) saturate(120%) hue-rotate(340deg) brightness(98%);
+  opacity: .9;
+}
+
+/* ========== THEME CHOCO — Fix: badges, chips, Equipped, texts ========== */
+
+/* Общий перехват бейджей */
+.theme-choco .badge { border: 1px solid rgba(0,0,0,0.18); }
+
+/* Luck Breakdown / Basic Stats (bg-primary → карамель) */
+.theme-choco .badge.bg-primary,
+.theme-choco .badge.bg-primary.rounded-pill {
+  background: linear-gradient(145deg, #d98b32, #a7672a);
+  color: #1a100b;
+  border-color: #8a5425;
+  box-shadow: 0 1px 0 rgba(255,240,220,0.25) inset, 0 0 6px rgba(217,139,50,0.25);
+}
+
+/* Информационные бейджи (Equipped, timers, и т.п.) */
+.theme-choco .badge.bg-info {
+  background: linear-gradient(145deg, #b87b3a, #8b5e3c);
+  color: #fff2e0;
+  border-color: #724a2f;
+}
+
+/* На всякий — успех/опасность (встречаются в счётчиках/итогах) */
+.theme-choco .badge.bg-success {
+  background: linear-gradient(145deg, #6bc37a, #4ea761);
+  color: #0f1a12;
+  border-color: #2f6f42;
+}
+.theme-choco .badge.bg-danger {
+  background: linear-gradient(145deg, #b54a4a, #7e2f27);
+  color: #ffe9e9;
+  border-color: #53201c;
+}
+/* warning у нас уже карамельный выше; оставим, но подчистим границу */
+.theme-choco .badge.bg-warning { border-color: #c08f4d; }
+
+/* Текстовые акценты (строки в Luck Breakdown и ещё кое-где) */
+.theme-choco .text-info    { color: var(--choco-accent-2) !important; } /* крем‑карамель */
+.theme-choco .text-primary { color: var(--choco-accent)   !important; }
+.theme-choco .text-success { color: #8dd69c               !important; }
+.theme-choco .text-danger  { color: #f07373               !important; }
+
+/* Equipped чипы (в магазине, блок "Надето") */
+.theme-choco .equipped-item-chip {
+  background: linear-gradient(145deg, #ffe0ab, #f0b35e);
+  color: #3a2418;
+  border: 1px solid rgba(58,36,24,0.35);
+  box-shadow: 0 2px 8px rgba(240,179,94,0.25), inset 0 1px 0 rgba(255,240,220,0.25);
+}
+.theme-choco .equipped-item-chip .btn-remove-equip,
+.theme-choco .equipped-item-chip .btn-outline-light {
+  color: #3a2418;
+  border-color: rgba(58,36,24,0.4);
+}
+.theme-choco .equipped-item-chip .btn-remove-equip:hover,
+.theme-choco .equipped-item-chip .btn-outline-light:hover {
+  background: rgba(58,36,24,0.08);
+}
+
+/* На всякий: чипы вариантов и лента LIMITED в инвентаре поверх img */
+.theme-choco .inventory-card .variant-chip { z-index: 3; }
+.theme-choco .inventory-card .badge        { z-index: 2; }
+
+/* Жучья (Hornet) — светлый “шёлк” + алый акцент */
+.roll-slot.rarity-hornet {
+  color: #2b1a1a; /* тёмный текст */
+  background:
+    linear-gradient(145deg, #efe9e5 0%, #f7f3ef 60%, #e0d5ce 100%),
+    repeating-linear-gradient(45deg, rgba(198,40,40,0.08) 0 8px, transparent 8px 16px);
+  text-shadow: 0 0 6px rgba(255,255,255,0.6), 0 0 2px rgba(0,0,0,0.3);
+  border: 1px solid rgba(198,40,40,0.45);
+}
+.inventory-card.border-hornet {
+  border-color: #c62828;
+  --rarity-glow-color: #ffcdd2;
+}

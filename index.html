@@ -28,6 +28,27 @@
                 <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="goo" />
                 <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
             </filter>
+            <filter id="gold-emboss-filter" color-interpolation-filters="sRGB" x="-10%" y="-10%" width="120%" height="120%">
+                <!-- Сдвиг каналов: больше тёплых тонов, меньше синего -->
+                <feColorMatrix in="SourceGraphic" type="matrix" values="
+                    1.15 0.08 0.00 0 0
+                    0.05 1.05 0.00 0 0
+                    0.00 0.00 0.85 0 0
+                    0    0    0    1 0" result="warm"/>
+
+                <!-- Мягкие блики под углом (псевдо-рельеф) -->
+                <feGaussianBlur in="SourceAlpha" stdDeviation="1.1" result="alpha"/>
+                <feSpecularLighting in="alpha" surfaceScale="2.2" specularConstant="0.6" specularExponent="18" lighting-color="#ffd54f" result="spec">
+                    <fePointLight x="-1500" y="-1500" z="3000"/>
+                </feSpecularLighting>
+                <feComposite in="spec" in2="warm" operator="in" result="specOnWarm"/>
+
+                <!-- Лёгкий эмбосс 45° -->
+                <feBlend in="warm" in2="specOnWarm" mode="screen" result="lit"/>
+                <feConvolveMatrix in="lit" order="3" kernelMatrix="-2 -1 0 -1 1 1 0 1 2" divisor="1" bias="0" edgeMode="duplicate" result="emboss"/>
+                <feBlend in="emboss" in2="warm" mode="overlay"/>
+            </filter>
+            
         </defs>
     </svg>
     <!-- <<< КОНЕЦ НОВОГО БЛОКА SVG ФИЛЬТРОВ >>> -->
@@ -291,7 +312,7 @@
         <footer class="text-center mt-5 mb-3">
             <hr>
             <p class="text-muted small">
-                Gal's RNG - Version 0.2.6a "Some Cards"
+                Gal's RNG - Version 0.2.7 "Choco Event"
             </p>
             <!-- Можно добавить еще что-то, например, копирайт или ссылку на вас -->
             <p class="text-muted small">© 2025 BigCoolOppai</p>
