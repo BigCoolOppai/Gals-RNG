@@ -6,6 +6,7 @@ window.MUTATIONS = {
     id: 'negative',
     nameKey: 'mutations.negative.name',
     cssClass: 'variant-negative',
+    baseChance: window.MUTATION_BASE_CHANCE || 0.02,
     duplicateMultiplier: 2.0 // ×2 к награде за дубль
   },
   gold: {
