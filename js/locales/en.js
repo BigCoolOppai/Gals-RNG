@@ -241,6 +241,29 @@ window.locales.en = {
             cardName: "Beetle",
             description: "Fast and precise like a needle strike. Fine threads and a steel temper — don’t come too close. EDITO! EGALE!"
         },
+        gyro: {
+            name: "Spinning",
+            cardName: "Master of Steel Balls",
+            description: "She has mastered the legendary technique of her Italian family and is ready to dive into the most epic horse race. Oh, and by the way — she’s got some pretty cool teeth."
+        },
+
+        president: {
+            name: "Duplicating",
+            cardName: "President",
+            description: "Filthy acts at a reasonable price… Such is the strength of this woman… Perhaps there exists a male version of her?"
+        },
+
+        bazil: {
+            name: "Blind?",
+            cardName: "Cat Basilik",
+            description: "A cunning cat who deceives wooden men just to gain an advantage. Once, however, she failed to trick one — and oh, did she fully receive his ‘golden key’."
+        },
+
+        miyabi: {
+            name: "Frosty",
+            cardName: "Fox with a Katana",
+            description: "A talented and determined girl whose radiance calls toward new heights. Apparently, she has just caught sight of that very summit..."
+        }
     },
     // Shop Items
     shop: {
@@ -289,6 +312,7 @@ window.locales.en = {
     },
     // UI Elements
     ui: {
+        searchCards: "Search...",
         variant: { normal: "Normal"},
         noVariants: "No variants owned for this card.",
         prismaticShards: "Prismatic Shards",
@@ -448,7 +472,14 @@ window.locales.en = {
         luckCoreAmplifiedByFragments: "Luck Core amplified using Fragments!",
         notEnoughMaterials: "Not enough materials!",
         craftSuccess: "Craft completed!",
-        notEnoughForRebirth: "Not enough shards for Rebirth!"
+        notEnoughForRebirth: "Not enough shards for Rebirth!",
+        mutation_single: "Mutation: {variant} on “{card}”!",
+        mutation_multi: "Mutations in roll: {list}",
+        mutation: {
+            negative: "Negative — alternate visual.",
+            gold: "Golden: duplicate reward ×3.",
+            voided: "Voided: 💎 0, but materials are guaranteed ×3."
+        }
     },
     debug: {
         notifications: {

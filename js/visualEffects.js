@@ -744,289 +744,87 @@ const VisualEffects = {
             const scope = this._createScope(glitchOverlay, overlayClass);
             if (!scope) return null;
 
-            // Отключаем старый фоновый паттерн из CSS (вернём назад в cleanup)
-            const prevBg = glitchOverlay.style.background;
-            const prevBgImg = glitchOverlay.style.backgroundImage;
-            const prevAnim = glitchOverlay.style.animation;
-            glitchOverlay.style.background = 'transparent';
-            glitchOverlay.style.backgroundImage = 'none';
-            glitchOverlay.style.animation = 'none';
+            // Настройка фонового тайла (на случай, если CSS не применился/хочешь другой размер)
+            const prevImg  = glitchOverlay.style.backgroundImage;
+            const prevSize = glitchOverlay.style.backgroundSize;
+            const prevRep  = glitchOverlay.style.backgroundRepeat;
 
-            const hasGSAP = typeof gsap !== 'undefined';
-            const hasMP = hasGSAP && typeof window.MotionPathPlugin !== 'undefined';
-            if (hasGSAP && hasMP && gsap.registerPlugin) {
-                gsap.registerPlugin(window.MotionPathPlugin);
-            }
+            // Оставь путь/размеры под свой тайл
+            glitchOverlay.style.backgroundImage  = "url('img/effects/honeycomb.png')";
+            glitchOverlay.style.backgroundSize   = '72px 72px';
+            glitchOverlay.style.backgroundRepeat = 'repeat';
+
             const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches || false;
-
-            // ---------- Реальные "соты" (SVG) ----------
-            const svgNS = 'http://www.w3.org/2000/svg';
-            const honeySvg = document.createElementNS(svgNS, 'svg');
-            Object.assign(honeySvg, { id: 'beeHoneycombSvg' });
-            Object.assign(honeySvg.style, {
-                position: 'absolute',
-                inset: '0',
-                pointerEvents: 'none',
-                opacity: '0.35'
-            });
-            honeySvg.setAttribute('width', '100%');
-            honeySvg.setAttribute('height', '100%');
-            scope.appendChild(honeySvg);
-
-            const honeyGroup = document.createElementNS(svgNS, 'g');
-            honeySvg.appendChild(honeyGroup);
-
-            function buildHoneycomb() {
-                while (honeyGroup.firstChild) honeyGroup.firstChild.remove();
-
-                const W = window.innerWidth;
-                const H = window.innerHeight;
-
-                // Плоско-верхние шестиугольники (flat-top)
-                const r = reduceMotion ? 10 : 14;                   // "радиус" (от центра до угла по X)
-                const w = 2 * r;                                    // ширина
-                const h = Math.sqrt(3) * r;                         // высота
-                const xStep = 0.75 * w;                             // шаг по X между центрами
-                const yStep = h;                                    // шаг по Y между центрами
-                const cols = Math.ceil(W / xStep) + 2;
-                const rows = Math.ceil(H / yStep) + 2;
-
-                function hexPoints(cx, cy, r) {
-                    const halfH = (Math.sqrt(3) * r) / 2;
-                    return [
-                        [cx - r,     cy],
-                        [cx - r/2,   cy - halfH],
-                        [cx + r/2,   cy - halfH],
-                        [cx + r,     cy],
-                        [cx + r/2,   cy + halfH],
-                        [cx - r/2,   cy + halfH]
-                    ];
-                }
-
-                for (let c = 0; c < cols; c++) {
-                    for (let rIdx = 0; rIdx < rows; rIdx++) {
-                        const cx = c * xStep + r;                                  // небольшой отступ от левого края
-                        const cy = rIdx * yStep + (c % 2 ? yStep / 2 : 0);         // смещение каждой второй колонки
-
-                        const poly = document.createElementNS(svgNS, 'polygon');
-                        poly.setAttribute(
-                            'points',
-                            hexPoints(cx, cy, r)
-                                .map(p => p.join(','))
-                                .join(' ')
-                        );
-                        poly.setAttribute('fill', 'rgba(255,193,7,0.06)');         // мягкая заливка соты
-                        poly.setAttribute('stroke', 'rgba(255,193,7,0.20)');       // контур
-                        poly.setAttribute('stroke-width', '1');
-                        honeyGroup.appendChild(poly);
-                    }
-                }
-            }
-
-            buildHoneycomb();
-
-            // Лёгкое "дыхание" фона
-            let honeyTween = null;
-            if (hasGSAP && !reduceMotion) {
-                honeyTween = gsap.to(honeyGroup, {
-                    x: '-=20',
-                    y: '+=12',
-                    yoyo: true,
-                    repeat: -1,
-                    duration: 8,
-                    ease: 'sine.inOut'
-                });
-            }
-
-            // При ресайзе пересобираем сетку
-            const onResize = () => {
-                buildHoneycomb();
-            };
-            window.addEventListener('resize', onResize);
-
-            // ---------- Пчёлы (SVG) ----------
-            const BEE_COUNT = reduceMotion ? 6 : 14;
-            const bees = [];
-
             const vw = () => window.innerWidth;
             const vh = () => window.innerHeight;
-            const margin = 40;
-            const rand = (min, max) => Math.random() * (max - min) + min;
 
-            function createBeeSVG(scale = 1) {
-                // Контейнер, который будем двигать по кривой
-                const wrap = document.createElement('div');
-                Object.assign(wrap.style, {
-                    position: 'absolute',
-                    left: '0px',
-                    top: '0px',
-                    width: `${28 * scale}px`,
-                    height: `${22 * scale}px`,
-                    transform: `translate(${rand(margin, vw() - margin)}px, ${rand(margin, vh() - margin)}px)`,
-                    willChange: 'transform'
-                });
+            // Адаптивная плотность пчёл, но жёсткий верхний лимит
+            const maxByWidth = Math.ceil(vw() / 500) + 4; // 5..10
+            const COUNT = Math.max(5, Math.min(10, maxByWidth)) * (reduceMotion ? 0.5 : 1);
+            const bees = [];
+            const tweens = [];
 
-                const svg = document.createElementNS(svgNS, 'svg');
-                svg.setAttribute('width', 28 * scale);
-                svg.setAttribute('height', 22 * scale);
-                svg.setAttribute('viewBox', '0 0 28 22');
-                svg.style.overflow = 'visible';
+            function spawnBee() {
+                const b = document.createElement('div');
+                b.className = 'bee-particle'; // у тебя уже есть стили
+                b.style.position = 'absolute';
+                b.style.pointerEvents = 'none';
+                scope.appendChild(b);
+                bees.push(b);
 
-                // Группа всей пчелы
-                const g = document.createElementNS(svgNS, 'g');
-                svg.appendChild(g);
+                const startX = Math.random() * vw();
+                const startY = Math.random() * vh();
+                const dx = (120 + Math.random() * 160) * (Math.random() < 0.5 ? -1 : 1);
+                const dy = (80  + Math.random() * 120) * (Math.random() < 0.5 ? -1 : 1);
+                const rot = Math.random() * 60 - 30;
 
-                // Тело (эллипс)
-                const body = document.createElementNS(svgNS, 'ellipse');
-                body.setAttribute('cx', '14');
-                body.setAttribute('cy', '11');
-                body.setAttribute('rx', '9');
-                body.setAttribute('ry', '6');
-                body.setAttribute('fill', '#FFC107');
-                g.appendChild(body);
-
-                // Полоски (3 тёмные полоски)
-                const stripes = [8, 12, 16].map((x) => {
-                    const r = document.createElementNS(svgNS, 'rect');
-                    r.setAttribute('x', String(x));
-                    r.setAttribute('y', '5.2');
-                    r.setAttribute('width', '2.5');
-                    r.setAttribute('height', '11.6');
-                    r.setAttribute('fill', '#4E342E');
-                    r.setAttribute('opacity', '0.9');
-                    g.appendChild(r);
-                    return r;
-                });
-
-                // Голова
-                const head = document.createElementNS(svgNS, 'circle');
-                head.setAttribute('cx', '7');
-                head.setAttribute('cy', '11');
-                head.setAttribute('r',  '4');
-                head.setAttribute('fill', '#3D2B1F');
-                g.appendChild(head);
-
-                // Жало
-                const sting = document.createElementNS(svgNS, 'polygon');
-                sting.setAttribute('points', '22,11 26,10 22,12');
-                sting.setAttribute('fill', '#3D2B1F');
-                g.appendChild(sting);
-
-                // Крылышки (две группы для удобного вращения)
-                const leftWingG  = document.createElementNS(svgNS, 'g');
-                const rightWingG = document.createElementNS(svgNS, 'g');
-                g.appendChild(leftWingG);
-                g.appendChild(rightWingG);
-
-                const leftWing = document.createElementNS(svgNS, 'path');
-                leftWing.setAttribute('d', 'M12 8 C 9 5, 7 6, 7.2 8.8 C 7.4 11.2, 9.8 10.6, 12 9 Z');
-                leftWing.setAttribute('fill', 'rgba(255,255,255,0.9)');
-                leftWing.setAttribute('stroke', 'rgba(255,255,255,0.6)');
-                leftWing.setAttribute('stroke-width', '0.5');
-                leftWingG.appendChild(leftWing);
-
-                const rightWing = document.createElementNS(svgNS, 'path');
-                rightWing.setAttribute('d', 'M16 8 C 19 5, 21 6, 20.8 8.8 C 20.6 11.2, 18.2 10.6, 16 9 Z');
-                rightWing.setAttribute('fill', 'rgba(255,255,255,0.9)');
-                rightWing.setAttribute('stroke', 'rgba(255,255,255,0.6)');
-                rightWing.setAttribute('stroke-width', '0.5');
-                rightWingG.appendChild(rightWing);
-
-                // Точки поворота крыльев
-                leftWingG.style.transformOrigin  = `${12 * scale}px ${8 * scale}px`;
-                rightWingG.style.transformOrigin = `${16 * scale}px ${8 * scale}px`;
-
-                wrap.appendChild(svg);
-                scope.appendChild(wrap);
-
-                // Взмах крыльев
-                if (hasGSAP && !reduceMotion) {
-                    gsap.to(leftWingG,  { rotate: 15, duration: 0.08, yoyo: true, repeat: -1, ease: 'sine.inOut' });
-                    gsap.to(rightWingG, { rotate:-15, duration: 0.08, yoyo: true, repeat: -1, ease: 'sine.inOut' });
-                }
-
-                return wrap;
-            }
-
-            function randomPathFrom(x0, y0) {
-                const end = { x: rand(margin, vw() - margin), y: rand(margin, vh() - margin) };
-                const c1  = { x: rand(margin, vw() - margin), y: rand(margin, vh() - margin) };
-                const c2  = { x: rand(margin, vw() - margin), y: rand(margin, vh() - margin) };
-                return [{ x: x0, y: y0 }, c1, c2, end];
-            }
-
-            function trail(beeWrap) {
-                if (!hasGSAP || reduceMotion || Math.random() > 0.04) return;
-                const dot = document.createElement('div');
-                Object.assign(dot.style, {
-                    position: 'absolute',
-                    width: '4px',
-                    height: '4px',
-                    borderRadius: '50%',
-                    background: '#FFC107',
-                    boxShadow: '0 0 6px #FFC107',
-                    left: '0px',
-                    top: '0px',
-                    pointerEvents: 'none',
-                    opacity: '0.9'
-                });
-                scope.appendChild(dot);
-                const x = gsap.getProperty(beeWrap, 'x') || 0;
-                const y = gsap.getProperty(beeWrap, 'y') || 0;
-                gsap.set(dot, { x, y });
-                gsap.to(dot, { duration: 0.6, opacity: 0, y: '-=10', ease: 'sine.out', onComplete() { dot.remove(); } });
-            }
-
-            function fly(beeWrap) {
-                if (!(hasGSAP && hasMP)) {
-                    // Fallback без MotionPath: плавные линейные перелёты
-                    const dur = rand(800, 1600);
-                    const x = rand(margin, vw() - margin);
-                    const y = rand(margin, vh() - margin);
-                    beeWrap.style.transition = `transform ${dur}ms ease-in-out`;
-                    beeWrap.style.transform  = `translate(${x}px, ${y}px)`;
-                    const t = setTimeout(() => fly(beeWrap), dur + rand(200, 500));
-                    beeWrap._fallbackTimer = t;
-                    return;
-                }
-
-                const x0 = gsap.getProperty(beeWrap, 'x') || rand(margin, vw() - margin);
-                const y0 = gsap.getProperty(beeWrap, 'y') || rand(margin, vh() - margin);
-                const path = randomPathFrom(x0, y0);
-                const dur = rand(6, 12) * (reduceMotion ? 1.2 : 1);
-
-                const tween = gsap.to(beeWrap, {
-                    duration: dur,
+                if (typeof gsap !== 'undefined') {
+                gsap.set(b, { x: startX, y: startY, rotate: Math.random() * 360, transformOrigin: '50% 50%' });
+                const t = gsap.to(b, {
+                    duration: 5 + Math.random() * 4,
+                    x: `+=${dx}`,
+                    y: `+=${dy}`,
+                    rotation: `+=${rot}`,
                     ease: 'sine.inOut',
-                    motionPath: { path, curviness: 1.5, autoRotate: true },
-                    onUpdate: () => trail(beeWrap),
-                    onComplete: () => fly(beeWrap)
+                    yoyo: true,
+                    repeat: -1,
+                    overwrite: 'auto'
                 });
-                beeWrap._tween = tween;
-            }
-
-            for (let i = 0; i < BEE_COUNT; i++) {
-                const scale = rand(0.9, 1.2);
-                const bee = createBeeSVG(scale);
-                bees.push(bee);
-                fly(bee);
-            }
-
-            // ---------- Очистка ----------
-            return () => {
-                if (hasGSAP) {
-                    try { honeyTween && honeyTween.kill(); } catch (e) {}
-                    bees.forEach(b => { try { b._tween && b._tween.kill(); } catch(e){} });
+                tweens.push(t);
                 } else {
-                    bees.forEach(b => { if (b._fallbackTimer) clearTimeout(b._fallbackTimer); });
+                // fallback: без GSAP — простое плавание через CSS transition
+                b.style.transform = `translate(${startX}px, ${startY}px) rotate(${Math.random() * 360}deg)`;
+                b.style.transition = 'transform 6s ease-in-out';
+                let nx = startX, ny = startY, r = 0;
+                const it = setInterval(() => {
+                    nx = Math.max(0, Math.min(vw() - 12, nx + dx));
+                    ny = Math.max(0, Math.min(vh() - 12, ny + dy));
+                    r += rot;
+                    b.style.transform = `translate(${nx}px, ${ny}px) rotate(${r}deg)`;
+                    // меняем направление
+                    dx *= -1; dy *= -1; rot *= -1;
+                }, 6000);
+                tweens.push({ kill: () => clearInterval(it) });
                 }
-                window.removeEventListener('resize', onResize);
+            }
 
-                // Вернём фоновые стили overlay назад
-                glitchOverlay.style.background = prevBg;
-                glitchOverlay.style.backgroundImage = prevBgImg;
-                glitchOverlay.style.animation = prevAnim;
+            for (let i = 0; i < COUNT; i++) spawnBee();
 
+            // Экономия: пауза при скрытии вкладки
+            const onVis = () => {
+                const paused = document.hidden;
+                tweens.forEach(t => t?.paused && t.paused(paused));
+            };
+            document.addEventListener('visibilitychange', onVis);
+
+            return () => {
+                try { tweens.forEach(t => t?.kill && t.kill()); } catch (e) {}
+                bees.forEach(b => { try { b.remove(); } catch (e) {} });
+                document.removeEventListener('visibilitychange', onVis);
+                // вернуть фоновые стили
+                glitchOverlay.style.backgroundImage  = prevImg;
+                glitchOverlay.style.backgroundSize   = prevSize;
+                glitchOverlay.style.backgroundRepeat = prevRep;
                 this._cleanupScope(glitchOverlay, scope, overlayClass);
             };
         },

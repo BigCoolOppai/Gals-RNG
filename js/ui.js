@@ -104,8 +104,29 @@ const UI = (() => {
         htmlRoot = document.getElementById('htmlRoot');
     }
 
+    function injectInventorySearch() {
+        const bar = document.getElementById('inventorySort')?.closest('.d-flex');
+        if (!bar) return;
+        if (document.getElementById('inventorySearchInput')) return;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'ms-2';
+        wrap.innerHTML = `
+            <input id="inventorySearchInput" type="text" class="form-control form-control-sm"
+                placeholder="${L.get('ui.searchCards') || 'Поиск...'}" style="width: 200px;">
+        `;
+        bar.appendChild(wrap);
+
+        let t;
+        document.getElementById('inventorySearchInput').addEventListener('input', () => {
+            clearTimeout(t);
+            t = setTimeout(() => renderInventory(Game.getPlayerData()), 150);
+        });
+    }
+
     function init() {
         cacheDOMElements();
+        injectInventorySearch();
         setupEventListeners();
 
         const initialPlayerData = Game.getPlayerData();
@@ -266,7 +287,7 @@ const UI = (() => {
         const seenRaritiesSet = new Set(playerData.seenRarities || []);
         renderLuckBreakdownUI();
 
-        statsTotalRollsEl && (statsTotalRollsEl.textContent = stats.totalRolls || 0);
+        statsTotalRollsEl && (statsTotalRollsEl.textContent = formatNumber(stats.totalRolls || 0));
 
         if (statsUniqueCardsOpenedEl) {
             const validCardIds = new Set(RARITIES_DATA.map(r => r.id));
@@ -275,7 +296,7 @@ const UI = (() => {
             statsUniqueCardsOpenedEl.textContent = `${openedCount} / ${totalPossibleCards}`;
         }
 
-        statsCurrencyFromDuplicatesEl && (statsCurrencyFromDuplicatesEl.textContent = stats.currencyFromDuplicates || 0);
+        statsCurrencyFromDuplicatesEl && (statsCurrencyFromDuplicatesEl.textContent = formatNumber(stats.currencyFromDuplicates || 0));
         statsTotalRebirthsEl && (statsTotalRebirthsEl.textContent = playerData.prestigeLevel || 0);
         
 
@@ -302,7 +323,7 @@ const UI = (() => {
                 listItem.innerHTML = `
                     ${L.get(rarity.nameKey)}
                     <span class="badge rounded-pill" style="background-color:${rarity.color}; color:${textColor};">
-                        ${count}
+                        ${formatNumber(count)}
                     </span>
                 `;
                 statsByRarityContainerEl.appendChild(listItem);
@@ -661,7 +682,7 @@ const UI = (() => {
 
     // --- Общие апдейты ---
     function updateCurrencyDisplay(currency) {
-        currencyDisplay && (currencyDisplay.textContent = currency);
+        currencyDisplay && (currencyDisplay.textContent = formatNumber(currency));
     }
 
     function updateLuckDisplay() {
@@ -682,6 +703,19 @@ const UI = (() => {
             luckyRollDisplay.textContent = '';
             luckyRollDisplay.style.opacity = '0';
         }
+    }
+
+    function formatNumber(n, decimals = 2) {
+        if (!Number.isFinite(n)) return '∞';
+        const abs = Math.abs(n);
+        const units = [
+            { v: 1e36, s: 'Ud' }, { v: 1e33, s: 'Dc' }, { v: 1e30, s: 'No' },
+            { v: 1e27, s: 'Oc' }, { v: 1e24, s: 'Sp' }, { v: 1e21, s: 'Sx' },
+            { v: 1e18, s: 'Qi' }, { v: 1e15, s: 'Qa' }, { v: 1e12, s: 'T'  },
+            { v: 1e9,  s: 'B'  }, { v: 1e6,  s: 'M'  }, { v: 1e3,  s: 'K'  }
+        ];
+        for (const u of units) if (abs >= u.v) return (n / u.v).toFixed(decimals) + u.s;
+        return n.toLocaleString();
     }
 
     // --- Уведомления ---
@@ -711,6 +745,41 @@ const UI = (() => {
         container.appendChild(alertDiv);
         setTimeout(() => bootstrap.Alert.getOrCreateInstance(alertDiv)?.close(), duration);
     }
+
+    function showMutationToasts(results) {
+        const muts = window.MUTATIONS || {};
+        const sym  = { negative: 'N', gold: '⭐', voided: '◼️' };
+        const nameOf = vid => (muts[vid] ? L.get(muts[vid].nameKey) : vid.toUpperCase());
+
+        const ids = results.map(r => r.variantId).filter(Boolean);
+        if (ids.length === 0) return;
+
+        // одиночный ролл
+        if (results.length === 1) {
+            const v = ids[0];
+            const card = results[0].card?.name || '';
+            const variantName = nameOf(v);
+            const base = (L.get('notifications.mutation_single') || 'Мутация: {variant} на карте «{card}»!')
+            .replace('{variant}', variantName)
+            .replace('{card}', card);
+            const extra = L.get(`notifications.mutation.${v}`) || '';
+            const msg = `${sym[v] || '•'} ${base}${extra ? `<br><small>${extra}</small>` : ''}`;
+            // GOLD — success, остальные — info
+            showNotification(msg, v === 'gold' ? 'success' : 'info', 6000);
+            return;
+        }
+
+        // мульти-ролл
+        const counts = ids.reduce((acc, v) => (acc[v] = (acc[v] || 0) + 1, acc), {});
+        const order  = { gold: 1, voided: 2, negative: 3 };
+        const parts  = Object.keys(counts)
+            .sort((a,b) => (order[a] || 99) - (order[b] || 99))
+            .map(v => `${sym[v] || '•'}×${counts[v]}`);
+        const list = parts.join(' · ');
+        const base = (L.get('notifications.mutation_multi') || 'Мутации в ролле: {list}')
+            .replace('{list}', list);
+        showNotification(base, 'info', 6000);
+        }
 
     // --- Активные бусты ---
     function updateActiveBoostsDisplay() {
@@ -778,7 +847,7 @@ const UI = (() => {
                         <p class="text-warning-emphasis">${L.get('ui.rebirth.warning')}</p>
                         <button id="rebirthButton" class="btn btn-lg btn-danger w-100 mt-3" ${!canAfford ? 'disabled' : ''}>
                             <span>${L.get('ui.rebirth.button')}</span>
-                            <span class="d-block small">${nextCost.toLocaleString()} 💎</span>
+                            <span class="d-block small">${formatNumber(nextCost)} 💎</span>
                         </button>
                     </div>
                 </div>
@@ -943,6 +1012,8 @@ const UI = (() => {
             }
         });
 
+        showMutationToasts(results);
+
         updateAll(Game.getPlayerData());
 
         if (isAutorolling && isTabActive) {
@@ -1086,7 +1157,7 @@ const UI = (() => {
         if (rollResult.duplicateReward > 0) {
             const rewardText = document.createElement('p');
             rewardText.className = 'duplicate-reward-text';
-            rewardText.innerHTML = `${L.get('ui.duplicateReward')}: <span class="currency-icon">💎</span>${rollResult.duplicateReward}`;
+            rewardText.innerHTML = `${L.get('ui.duplicateReward')}: <span class="currency-icon">💎</span>${formatNumber(rollResult.duplicateReward)}`;
             rollResultContainer.appendChild(rewardText);
         }
     }
@@ -1096,7 +1167,7 @@ const UI = (() => {
         if (totalCurrency > 0) {
             const summaryText = document.createElement('p');
             summaryText.className = 'text-center mt-3';
-            summaryText.innerHTML = `${L.get('ui.totalDuplicateReward')}: <span class="currency-icon">💎</span>${totalCurrency}`;
+            summaryText.innerHTML = `${L.get('ui.totalDuplicateReward')}: <span class="currency-icon">💎</span>${formatNumber(totalCurrency)}`;
             rollResultContainer.appendChild(summaryText);
         }
 
@@ -1115,7 +1186,7 @@ const UI = (() => {
             cardMini.appendChild(nameP);
             if (result.duplicateReward > 0) {
                 const rewardP = document.createElement('p');
-                rewardP.innerHTML = `+💎${result.duplicateReward}`;
+                rewardP.innerHTML = `+💎${formatNumber(result.duplicateReward)}`;
                 rewardP.className = 'small text-warning';
                 cardMini.appendChild(rewardP);
             }
@@ -1153,9 +1224,20 @@ const UI = (() => {
                 break;
         }
 
+        const qEl = document.getElementById('inventorySearchInput');
+        const query = (qEl?.value || '').trim().toLowerCase();
+
         const parentCards = sortedRarities.filter(r => !r.displayParentId);
+        const filteredParents = !query ? parentCards : parentCards.filter(parent => {
+        const versions = [parent, ...availableRarities.filter(r => r.displayParentId === parent.id)];
+        return versions.some(v => {
+            const name  = (L.get(v.card.nameKey) || '').toLowerCase();
+            const rname = (L.get(v.nameKey) || '').toLowerCase();
+            return name.includes(query) || rname.includes(query);
+        });
+        });
         
-        parentCards.forEach(rarityData => {
+        filteredParents.forEach(rarityData => {
             const allCardVersions = [rarityData, ...availableRarities.filter(r => r.displayParentId === rarityData.id)];
             
             const openedVersions = allCardVersions.filter(v => playerData.inventory.includes(v.id));
@@ -1274,7 +1356,7 @@ const UI = (() => {
             <div class="card-body text-center">
             <img class="material-icon" src="${m.icon}" alt="${name}">
             <div class="mt-2 fw-bold">${name}</div>
-            <div class="text-info-emphasis">x${e.count}</div>
+            <div class="text-info-emphasis">x${formatNumber(e.count)}</div>
             </div>
         </div>
         `;
@@ -1716,9 +1798,28 @@ const UI = (() => {
                 } else if (isPurchased) {
                     const isDisabled = type === 'equipment' && playerData.equippedItems.length >= Game.getMaxEquippedItems();
                     buttonHtml = `<button class="btn btn-sm btn-outline-primary equip-btn" data-item-id="${item.id}" ${isDisabled ? `disabled title="${L.get('ui.maxEquipment')}"` : ''}>${L.get('ui.equip')}</button>`;
-                } else {
-                    const costHtml = hasDiscount ? `<small><s class="text-muted">${item.cost}</s></small> ${finalCost}` : item.cost;
-                    buttonHtml = `<button class="btn btn-sm btn-success buy-${type}-btn" data-item-id="${item.id}" ${!canAfford ? 'disabled' : ''}>${L.get('ui.buy')} <span class="badge bg-warning text-dark">${costHtml} 💎</span></button>`;
+                }
+                else if (type === 'boost') {
+                    const unit = Game.getDiscountedCost(item.cost);
+                    buttonHtml = `
+                        <div class="d-flex align-items-center gap-2">
+                        <div class="input-group input-group-sm" style="width: 160px;">
+                            <span class="input-group-text">×</span>
+                            <input type="number" class="form-control form-control-sm boost-count-input" value="1" min="1" max="99">
+                        </div>
+                        <button class="btn btn-sm btn-success buy-boost-btn" data-item-id="${item.id}" data-unit="${unit}">
+                            ${L.get('ui.buy')} ×1
+                            <span class="badge bg-warning text-dark">${formatNumber(unit)} 💎</span>
+                        </button>
+                        </div>
+                    `;
+                } 
+                else {
+                    const finalCost = Game.getDiscountedCost(item.cost);
+                    const hasDiscount = finalCost < item.cost;
+                    const orig = hasDiscount ? `<small><s class="text-muted">${formatNumber(item.cost)}</s></small> ` : '';
+                    const costHtml = `${orig}${formatNumber(finalCost)} 💎`;
+                    buttonHtml = `<button class="btn btn-sm btn-success buy-${type}-btn" data-item-id="${item.id}" ${!canAfford ? 'disabled' : ''}>${L.get('ui.buy')} <span class="badge bg-warning text-dark">${costHtml}</span></button>`;
                 }
 
                 return `
@@ -1748,6 +1849,7 @@ const UI = (() => {
             const nextLevelBonus = Game.calculateLuckFromCore(coreLevel + 1) - currentTotalBonus;
 
             const nextCost = Game.getLuckCoreAmplificationCost();
+            const nextCostText = formatNumber(nextCost);
             const canAfford = playerData.currency >= nextCost;
 
             luckCoreSection.innerHTML = `
@@ -1762,7 +1864,7 @@ const UI = (() => {
                         <div id="luckCoreFragmentsDisplay" class="mt-2 small text-warning-emphasis"></div>
                         <button id="amplifyLuckCoreBtn" class="btn btn-lg btn-warning" ${!canAfford ? 'disabled' : ''}>
                             <span>${L.get('shop.luck_core.amplify')}</span> (+${nextLevelBonus.toFixed(3)})<br>
-                            <span class="badge bg-dark">${nextCost.toLocaleString()} 💎</span>
+                            <span class="badge bg-dark">${nextCostText} 💎</span>
                         </button>
                     </div>
                 </div>
@@ -1785,19 +1887,47 @@ const UI = (() => {
     }
 
     function addShopEventListeners() {
+        // Пересчёт цены и текста на кнопке при изменении количества
+        document.querySelectorAll('#boostShop .boost-count-input').forEach(inp => {
+        inp.addEventListener('input', e => {
+            const input = e.currentTarget;
+            let val = Math.max(1, Math.min(99, Number(input.value) || 1));
+            input.value = val;
+            const container = input.closest('.shop-item');
+            const btn = container?.querySelector('.buy-boost-btn');
+            const unit = Number(btn?.dataset.unit) || 0;
+            const total = unit * val;
+            if (btn) {
+            btn.innerHTML = `${L.get('ui.buy')} ×${val} <span class="badge bg-warning text-dark">${formatNumber(total)} 💎</span>`;
+            // доступность по валюте
+            const can = (Game.getPlayerData().currency || 0) >= total;
+            btn.disabled = !can;
+            }
+        });
+        });
+
+        // Покупка ×N
         document.querySelectorAll('.buy-boost-btn, .buy-equipment-btn, .buy-upgrade-btn, .equip-btn').forEach(btn => {
-            btn.addEventListener('click', e => {
-                const itemId = e.currentTarget.dataset.itemId;
-                if (btn.classList.contains('buy-boost-btn')) Game.purchaseShopItem(itemId, 'boost');
-                else if (btn.classList.contains('buy-equipment-btn')) Game.purchaseShopItem(itemId, 'equipment');
-                else if (btn.classList.contains('buy-upgrade-btn')) Game.purchaseShopItem(itemId, 'upgrade');
-                else if (btn.classList.contains('equip-btn')) {
-                    const itemData = SHOP_DATA.equipment.find(eq => eq.id === itemId);
-                    if (itemData) Game.equipItem(itemData);
-                }
-                renderShop();
-                updateEquippedItemsDisplay(Game.getPlayerData().equippedItems);
-            });
+        btn.addEventListener('click', e => {
+            const el = e.currentTarget;
+            const itemId = el.dataset.itemId;
+
+            if (el.classList.contains('buy-boost-btn')) {
+            const container = el.closest('.shop-item');
+            const count = Math.max(1, Math.min(99, Number(container?.querySelector('.boost-count-input')?.value) || 1));
+            Game.purchaseShopItem(itemId, 'boost', count);
+            } else if (el.classList.contains('buy-equipment-btn')) {
+            Game.purchaseShopItem(itemId, 'equipment');
+            } else if (el.classList.contains('buy-upgrade-btn')) {
+            Game.purchaseShopItem(itemId, 'upgrade');
+            } else if (el.classList.contains('equip-btn')) {
+            const itemData = (SHOP_DATA.equipment || []).find(eq => eq.id === itemId);
+            if (itemData) Game.equipItem(itemData);
+            }
+
+            renderShop();
+            updateEquippedItemsDisplay(Game.getPlayerData().equippedItems);
+        });
         });
     }
 
@@ -1868,10 +1998,11 @@ const UI = (() => {
         else if (currency === 0 && newCards > 0) messageKey = 'notifications.afkSummaryNoCurrency';
         else messageKey = 'notifications.afkSummaryRollsOnly';
 
+        const f = (n)=> formatNumber(n);
         const message = L.get(messageKey)
-            .replace('{rolls}', rolls)
-            .replace('{currency}', currency)
-            .replace('{newCards}', newCards);
+            .replace('{rolls}', f(rolls))
+            .replace('{currency}', f(currency))
+            .replace('{newCards}', f(newCards));
 
         showNotification(message, 'info', 8000);
     }
@@ -1894,6 +2025,8 @@ const UI = (() => {
 
         processAfkInChunks(cyclesToPerform);
     }
+
+    let lastNewCardResult = null;
 
     function processAfkInChunks(totalCycles) {
         const playerData = Game.getPlayerData();
@@ -1921,7 +2054,7 @@ const UI = (() => {
                     }
                     if (result.isNew) {
                         newCardsCount++;
-                        newCardQueue.push(result);
+                        lastNewCardResult = result; // покажем одну по завершении
                     }
                 }
             }
@@ -1933,7 +2066,7 @@ const UI = (() => {
             } else {
                 console.log("AFK catch-up finished.");
                 isRolling = false;
-
+                if (lastNewCardResult) showNewCard(lastNewCardResult);
                 updateAll(Game.getPlayerData());
                 showAfkSummaryNotification(totalCycles * rollsPerCycle, totalCurrencyGained, newCardsCount);
 
@@ -1941,7 +2074,7 @@ const UI = (() => {
             }
         }
 
-        requestAnimationFrame(processChunk);
+        setTimeout(processChunk, 0);
     }
 
     

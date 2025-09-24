@@ -67,6 +67,47 @@ const SaveManager = (() => {
         }
     };
 
+    let _throttleTimer = null;
+    let _pendingData = null;
+    const THROTTLE_MS = 700;
+
+    function saveThrottled(playerData) {
+        try {
+            _pendingData = JSON.parse(JSON.stringify(playerData)); // коалесим последнюю версию
+        } catch { _pendingData = playerData; }
+
+        if (_throttleTimer) return;
+        _throttleTimer = setTimeout(() => {
+            try {
+            localStorage.setItem(SAVE_KEY, JSON.stringify(_pendingData));
+            // eslint-disable-next-line no-console
+            console.log('Game data saved (throttled).');
+            } catch (e) {
+            console.error('Error throttled-saving game data:', e);
+            } finally {
+            _throttleTimer = null;
+            _pendingData = null;
+            }
+        }, THROTTLE_MS);
+    }
+
+    function flushSave() {
+        if (_throttleTimer) {
+            clearTimeout(_throttleTimer);
+            _throttleTimer = null;
+        }
+        if (_pendingData) {
+            try {
+            localStorage.setItem(SAVE_KEY, JSON.stringify(_pendingData));
+            console.log('Game data saved (flush).');
+            } catch (e) {
+            console.error('Error flush-saving game data:', e);
+            } finally {
+            _pendingData = null;
+            }
+        }
+    }
+
     const loadPlayerData = () => {
         try {
             const savedData = localStorage.getItem(SAVE_KEY);
@@ -146,6 +187,10 @@ const SaveManager = (() => {
         return getDefaultPlayerData(); // На случай ошибки
     };
 
+    window.addEventListener('beforeunload', () => {
+        try { SaveManager.flushSave && SaveManager.flushSave(); } catch {}
+    });
+
     return {
         savePlayerData,
         loadPlayerData,
@@ -189,6 +234,9 @@ const SaveManager = (() => {
                 reader.onerror = (error) => reject(error);
                 reader.readAsText(file);
             });
-        }
+        },
+        saveThrottled,
+        flushSave
     };
+    
 })();

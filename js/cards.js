@@ -66,6 +66,22 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "gyro",
+        nameKey: "cards.gyro.name",
+        minPrestige: 4,
+        probabilityBase: 1 / 161800000,
+        color: "#2d5c01ff",
+        glowColor: "rgba(0, 204, 4, 1)",
+        cssClass: "rarity-gyro",
+        currencyOnDuplicate: 16180000,
+        card: {
+            name: "Gyro Zeppeli",
+            nameKey: "cards.gyro.cardName",
+            image: "img/cardGyro.png",
+            descriptionKey: "cards.gyro.description"
+        }
+    },
+    {
         id: "choco_peppermint",
         nameKey: "cards.choco_peppermint.name",
         probabilityBase: 1 / 100000000, // 1 / 100 млн
@@ -163,6 +179,22 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "president",
+        nameKey: "cards.president.name",
+        minPrestige: 3,
+        probabilityBase: 1 / 14810000,
+        color: "#9c27b0",
+        glowColor: "#e1bee7",
+        cssClass: "rarity-president",
+        currencyOnDuplicate: 1481000,
+        card: {
+            name: "Funny Valentine",
+            nameKey: "cards.president.cardName",
+            image: "img/cardPresident.png",
+            descriptionKey: "cards.president.description"
+        }
+    },
+        {
         id: "kefla",
         nameKey: "cards.kefla.name",
         minPrestige: 2,
@@ -456,6 +488,21 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "bazil",
+        nameKey: "cards.bazil.name",
+        probabilityBase: 1 / 3700000,
+        color: "#ff9800",
+        glowColor: "#ffe0b2",
+        cssClass: "rarity-bazil",
+        currencyOnDuplicate: 370000,
+        card: {
+            name: "Кот Базилио",
+            nameKey: "cards.bazil.cardName",
+            image: "img/cardBazil.png",
+            descriptionKey: "cards.bazil.description"
+        }
+    },
+    {
         id: "fenek_alt",
         nameKey: "cards.fenek_alt.name",
         displayParentId: "fenek",
@@ -512,6 +559,22 @@ window.RARITIES_DATA = [
             nameKey: "cards.ellen_alt_student.cardName",
             image: "img/altEllen.png",
             descriptionKey: "cards.ellen_alt_student.description"
+        }
+    },
+    {
+        id: "miyabi",
+        nameKey: "cards.miyabi.name",
+        minPrestige: 3,
+        probabilityBase: 1 / 3200000,
+        color: "#2196f3",
+        glowColor: "#bbdefb",
+        cssClass: "rarity-miyabi",
+        currencyOnDuplicate: 320000,
+        card: {
+            name: "Miyabi Hoshino",
+            nameKey: "cards.miyabi.cardName",
+            image: "img/cardMiyabi.png",
+            descriptionKey: "cards.miyabi.description"
         }
     },
     {

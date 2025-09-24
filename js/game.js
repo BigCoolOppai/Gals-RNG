@@ -143,7 +143,7 @@ const Game = (() => {
     }
 
     function saveGame() {
-        SaveManager.savePlayerData(playerData);
+        SaveManager.saveThrottled ? SaveManager.saveThrottled(playerData) : SaveManager.savePlayerData(playerData);
     }
 
     function resetGame() {
@@ -464,6 +464,15 @@ const Game = (() => {
         }
         saveGame();
         if (playerData?.stats) playerData.stats.itemsCrafted = (playerData.stats.itemsCrafted || 0) + 1;
+
+        if (!playerData.stats) playerData.stats = {};
+        playerData.stats.craftedCardsTotal = (playerData.stats.craftedCardsTotal || 0) + (res.type === 'card' ? 1 : 0);
+
+        if (res.type === 'card') {
+        const id = res.rarityId;
+        playerData.stats.craftedById = playerData.stats.craftedById || {};
+        playerData.stats.craftedById[id] = (playerData.stats.craftedById[id] || 0) + 1;
+        }
         // Проверяем ачивки сразу после крафта
         if (typeof checkAchievementsAndCollections === 'function') {
         try { checkAchievementsAndCollections(); } catch (e) { console.warn('Achievements check after craft failed:', e); }
@@ -682,7 +691,19 @@ const Game = (() => {
         const baseCost = 6500;
         const tier = Math.floor(coreLevel / 10);
         const costMultiplier = 1.15 + (tier * 0.02);
-        const originalCost = Math.floor(baseCost * Math.pow(costMultiplier, coreLevel));
+
+        const log = Math.log;
+        const limit = 1e308;
+        const tooBig = (coreLevel * log(costMultiplier) + log(baseCost)) > log(limit);
+        let originalCost;
+
+        if (tooBig) {
+            originalCost = Infinity;
+        } else {
+            const pow = Math.pow(costMultiplier, coreLevel);
+            originalCost = Math.floor(baseCost * pow);
+        }
+        if (!Number.isFinite(originalCost)) return Infinity;
         return getDiscountedCost(originalCost);
     }
 
@@ -1183,72 +1204,92 @@ const Game = (() => {
     }
 
     // --- Магазин ---
-    function purchaseShopItem(itemId, itemType) {
+    function purchaseShopItem(itemId, itemType, count = 1) {
         let itemData;
         switch (itemType) {
-            case 'boost':
-                itemData = SHOP_DATA.boosts.find(b => b.id === itemId);
-                break;
-            case 'equipment':
-                itemData = SHOP_DATA.equipment.find(e => e.id === itemId);
-                break;
-            case 'upgrade':
-                itemData = SHOP_DATA.upgrades.find(u => u.id === itemId);
-                break;
+            case 'boost':      itemData = SHOP_DATA.boosts.find(b => b.id === itemId); break;
+            case 'equipment':  itemData = SHOP_DATA.equipment.find(e => e.id === itemId); break;
+            case 'upgrade':    itemData = SHOP_DATA.upgrades.find(u => u.id === itemId); break;
             default:
-                console.error("Unknown item type:", itemType);
-                return false;
-        }
-
-        if (!itemData) {
-            console.error("Item not found in shop:", itemId, itemType);
+            console.error("Unknown item type:", itemType);
             return false;
         }
+        if (!itemData) { console.error("Item not found in shop:", itemId, itemType); return false; }
 
+        // Ограничение на count для бустов
+        if (itemType === 'boost') {
+            count = Math.max(1, Math.min(99, Number(count) || 1));
+        }
+
+        // Проверки на уже купленное/надетое — как было (equipment/upgrade)
         if (itemType === 'equipment' && playerData.inventory.includes("purchased_" + itemId)) {
-            alert(`${L.get(itemData.nameKey)} ${L.get('notifications.itemPurchased')}`);
-            return false;
+            alert(`${L.get(itemData.nameKey)} ${L.get('notifications.itemPurchased')}`); return false;
         }
         if (itemType === 'upgrade' && playerData.purchasedUpgrades[itemData.targetProperty]) {
-            alert(`${L.get(itemData.nameKey)} ${L.get('notifications.upgradeAlreadyPurchased')}`);
-            return false;
+            alert(`${L.get(itemData.nameKey)} ${L.get('notifications.upgradeAlreadyPurchased')}`); return false;
         }
 
-        const finalCost = getDiscountedCost(itemData.cost);
+        // Стоимость с учётом скидки
+        const unitCost = getDiscountedCost(itemData.cost);
+        const totalCost = (itemType === 'boost') ? unitCost * count : unitCost;
 
-        if (spendCurrency(finalCost)) {
-            console.log(`Purchased ${itemType}: ${itemData.nameKey} for ${finalCost} (original: ${itemData.cost})`);
+        if (spendCurrency(totalCost)) {
+            console.log(`Purchased ${itemType}: ${itemData.nameKey} ×${(itemType === 'boost') ? count : 1} for ${totalCost} (unit: ${unitCost})`);
             if (itemType === 'boost') {
-                activateBoost(itemData);
+            activateBoostN(itemData, count);
             } else if (itemType === 'equipment') {
-                playerData.inventory.push("purchased_" + itemId);
-                if (playerData.equippedItems.length < getMaxEquippedItems()) {
-                    equipItem(itemData);
-                } else {
-                    alert(`${L.get(itemData.nameKey)} ${L.get('notifications.itemPurchased')}`);
-                }
+            playerData.inventory.push("purchased_" + itemId);
+            if (playerData.equippedItems.length < getMaxEquippedItems()) {
+                equipItem(itemData);
+            } else {
+                alert(`${L.get(itemData.nameKey)} ${L.get('notifications.itemPurchased')}`);
+            }
             } else if (itemType === 'upgrade') {
-                playerData.purchasedUpgrades[itemData.targetProperty] = true;
-                if (itemData.targetProperty === 'multiRollX5' && typeof UI !== 'undefined' && UI.toggleMultiRollButton) {
-                    UI.toggleMultiRollButton(true);
-                }
-                if (itemData.targetProperty === 'multiRollX10' && typeof UI !== 'undefined' && UI.toggleMultiRollButton) {
-                    UI.toggleMultiRollButton(true);
-                }
-                if (itemData.targetProperty === 'fastRoll' && typeof UI !== 'undefined' && UI.updateRollSpeed) {
-                    UI.updateRollSpeed(true);
-                }
+            playerData.purchasedUpgrades[itemData.targetProperty] = true;
+            if (itemData.targetProperty === 'multiRollX5' || itemData.targetProperty === 'multiRollX10') {
+                UI.toggleMultiRollButton && UI.toggleMultiRollButton(true);
+            }
+            if (itemData.targetProperty === 'fastRoll') {
+                UI.updateRollSpeed && UI.updateRollSpeed(true);
+            }
             }
             saveGame();
-            if (typeof UI !== 'undefined' && UI.updateAll) {
-                UI.updateAll(playerData);
-            }
+            if (typeof UI !== 'undefined' && UI.updateAll) UI.updateAll(playerData);
             return true;
         }
         return false;
     }
 
     // --- Бусты ---
+    function activateBoostN(boostData, count) {
+        const now = Date.now();
+        const durationMs = Math.floor((boostData.durationSeconds || 0) * 1000 * getBoostDurationMultiplier());
+        const extendMs = durationMs * Math.max(1, count || 1);
+
+        if (!playerData.activeBoosts) playerData.activeBoosts = [];
+        const existingBoost = playerData.activeBoosts.find(b => b.id === boostData.id);
+
+        if (existingBoost) {
+            const remaining = Math.max(0, existingBoost.endTime - now);
+            existingBoost.endTime = now + remaining + extendMs;
+            console.log(`Boost '${L.get(boostData.nameKey)}' extended ×${count}. New end: ${new Date(existingBoost.endTime).toLocaleTimeString()}`);
+        } else {
+            const newBoost = {
+            id: boostData.id,
+            type: boostData.type,
+            name: L.get(boostData.nameKey),
+            endTime: now + extendMs,
+            luckBonus: boostData.luckBonus,
+            multiplier: boostData.multiplier,
+            rolls_reduced: boostData.rolls_reduced
+            };
+            playerData.activeBoosts.push(newBoost);
+            console.log(`Boost '${L.get(boostData.nameKey)}' activated ×${count}. Ends at: ${new Date(newBoost.endTime).toLocaleTimeString()}`);
+        }
+        checkActiveBoosts && checkActiveBoosts();
+        saveGame();
+    }
+
     function activateBoost(boostData) {
     const now = Date.now();
     const existingBoost = (playerData.activeBoosts || []).find(b => b.id === boostData.id);
