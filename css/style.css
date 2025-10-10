@@ -4509,3 +4509,138 @@ html.theme-obsidian {
     from { transform: rotate(0deg);}
     to { transform: rotate(360deg);}
 }
+/* Хэллоуин */
+.alert.halloween-banner {
+  color: #f0e6ff;
+  background:
+    radial-gradient(ellipse at 80% 10%, rgba(255, 106, 0, 0.15) 0%, transparent 50%),
+    linear-gradient(135deg, #1d112b 0%, #2a1a3d 55%, #3c245c 100%);
+  border: 1px solid rgba(123, 31, 162, 0.4);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.4), 0 0 18px rgba(42, 26, 61, 0.5);
+}
+.alert.halloween-banner .alert-heading {
+  color: #ff9800;
+  text-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+  font-family: 'Pirata One', cursive; /* Тематический шрифт */
+  font-size: 1.8rem;
+}
+.alert.halloween-banner p {
+  color: #e0d8f0;
+}
+
+/* <<< НАЧАЛО: ПОЛНАЯ ТЕМА ХЭЛЛОУИН 2025 (V2) >>> */
+html.theme-halloween {
+  --hween-bg-1: #0d0c14;
+  --hween-bg-2: #141120;
+  --hween-bg-3: #191629;
+  --hween-tile: #1c1a29;
+  --hween-ink: #e8e4f5;
+  --hween-muted: #c0b8e0;
+
+  --hween-accent: #ff9800;      /* тыквенный оранжевый */
+  --hween-accent-2: #ffb74d;    /* светлый оранжевый */
+  --hween-accent-3: #e65100;    /* тёмный оранжевый */
+  --hween-border: #332d4a;
+  
+  --hween-purple: #7b1fa2;      /* зловещий фиолетовый */
+  --hween-green: #558b2f;       /* болотный зелёный */
+  --hween-red: #d32f2f;         /* кровавый красный */
+
+  color-scheme: dark;
+}
+
+.theme-halloween body {
+  background-color: var(--hween-bg-1);
+  color: var(--hween-ink);
+}
+.theme-halloween body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    /* SVG летучих мышей */
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 10 C 40 20, 10 20, 0 10 L 25 50 L 0 90 C 10 80, 40 80, 50 90 C 60 80, 90 80, 100 90 L 75 50 L 100 10 C 90 20, 60 20, 50 10 Z" fill="rgba(255, 152, 0, 0.03)"/></svg>') 0 0 / 150px 150px,
+    radial-gradient(ellipse at 15% 85%, rgba(123, 31, 162, 0.09), transparent 50%),
+    radial-gradient(ellipse at 85% 15%, rgba(255, 152, 0, 0.08), transparent 50%),
+    linear-gradient(135deg, var(--hween-bg-1), var(--hween-bg-2) 60%, var(--hween-bg-3));
+}
+.theme-halloween h1, .theme-halloween h2, .theme-halloween h3, .theme-halloween h4 {
+  color: var(--hween-accent);
+  font-family: 'Pirata One', cursive;
+  text-shadow: 0 0 8px rgba(255, 152, 0, 0.35);
+}
+.theme-halloween .tab-content, .theme-halloween .list-group-item, .theme-halloween .card.bg-dark-subtle {
+  background-color: var(--hween-tile) !important;
+  border-color: var(--hween-border) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6), inset 0 0 10px rgba(29, 23, 41, 0.5);
+}
+.theme-halloween .nav-tabs { border-bottom-color: var(--hween-border); }
+.theme-halloween .nav-tabs .nav-link {
+  color: var(--hween-muted);
+  border-bottom-color: var(--hween-border);
+}
+.theme-halloween .nav-tabs .nav-link.active {
+  color: var(--hween-accent);
+  background-color: var(--hween-tile);
+  border-color: var(--hween-border) var(--hween-border) var(--hween-tile);
+  position: relative;
+}
+.theme-halloween .nav-tabs .nav-link.active::after {
+  content: '';
+  position: absolute; left:0; right:0; bottom:-1px; height:3px;
+  background: linear-gradient(90deg, transparent, var(--hween-accent), transparent);
+}
+.theme-halloween .inventory-card:hover {
+  box-shadow: 0 8px 16px rgba(0,0,0,0.6), 0 0 18px var(--rarity-glow-color, #ff9800);
+}
+
+/* Кнопки */
+.theme-halloween .btn {
+  border-radius: 4px;
+  border: 1px solid var(--hween-border);
+  color: var(--hween-ink);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.4);
+  transition: all .15s ease-out;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.theme-halloween .btn:active { transform: translateY(1px); }
+.theme-halloween .btn:focus-visible {
+  outline: 2px solid var(--hween-accent-2); outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(255,152,0,0.25);
+}
+.theme-halloween .btn-primary {
+  background: linear-gradient(145deg, var(--hween-accent), var(--hween-accent-3));
+  border-color: #a13b00; color: #111;
+  box-shadow: 0 3px 12px rgba(255,152,0,0.3);
+}
+.theme-halloween .btn-primary:hover { background: linear-gradient(145deg, var(--hween-accent-2), var(--hween-accent)); }
+.theme-halloween .btn-info { background: linear-gradient(145deg, #4a4166, #332d4a); border-color: #2b263b; }
+.theme-halloween .btn-info:hover { background: linear-gradient(145deg, #5c5280, #3e375c); }
+.theme-halloween .btn-success { background: linear-gradient(145deg, var(--hween-green), #33691e); border-color: #2e5c1a; color: #e8f5e9;}
+.theme-halloween .btn-danger { background: linear-gradient(145deg, var(--hween-red), #8e0000); border-color: #7f0000; color: #ffeaea;}
+.theme-halloween .btn-secondary { background: linear-gradient(145deg, #2c293d, #1c1a29); border-color: var(--hween-border); }
+.theme-halloween .btn-outline-primary { color: var(--hween-accent); border-color: var(--hween-accent); }
+.theme-halloween .btn-outline-primary:hover { background: var(--hween-accent); color: #111; }
+
+/* Бейджи */
+.theme-halloween .badge.bg-primary { background: linear-gradient(145deg, var(--hween-accent), var(--hween-accent-3)); color: #111; }
+.theme-halloween .badge.bg-info { background: linear-gradient(145deg, #4a4166, #332d4a); }
+.theme-halloween .badge.bg-success { background: linear-gradient(145deg, var(--hween-green), #33691e); color: #e8f5e9; }
+.theme-halloween .badge.bg-danger { background: linear-gradient(145deg, var(--hween-red), #8e0000); color: #ffeaea; }
+.theme-halloween .badge.bg-warning { background: linear-gradient(145deg, var(--hween-accent-2), var(--hween-accent)); color: #111; }
+
+/* Модалки и Алерт */
+.theme-halloween .modal-content {
+  background: linear-gradient(135deg, #141120, #191629);
+  border: 1px solid var(--hween-border);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+}
+.theme-halloween .alert { background: linear-gradient(145deg, #191629, #141120); border-color: var(--hween-border); }
+
+/* Скроллбар */
+.theme-halloween ::-webkit-scrollbar { width: 10px; }
+.theme-halloween ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--hween-accent-3), var(--hween-purple)); border: 2px solid #0d0c14; border-radius: 10px; }
+.theme-halloween ::-webkit-scrollbar-track { background: #0d0c14; }
+/* <<< КОНЕЦ: ПОЛНАЯ ТЕМА ХЭЛЛОУИН 2025 (V2) >>> */

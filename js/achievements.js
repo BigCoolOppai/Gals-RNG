@@ -199,6 +199,21 @@ const COLLECTIONS_DATA = {
         themeId: 'theme-choco',
         nameKey: 'collections.chocolate_set.rewardName'
         }
+    },
+    halloween_set_2025: {
+        nameKey: 'collections.halloween_set_2025.name',
+        descriptionKey: 'collections.halloween_set_2025.description',
+        // ID карт заменены на реальные
+        cardIds: [
+            'hween_jack', 'hween_piggy', 'hween_eyeling', 'hween_ghost', 'hween_witch',
+            'hween_ghostface', 'hween_clown', 'hween_mime', 'hween_scarecrow',
+            'hween_nurse', 'hween_sadako'
+        ],
+        reward: {
+            type: 'ui_theme',
+            themeId: 'theme-halloween',
+            nameKey: 'collections.halloween_set_2025.rewardName'
+        }
     }
     // Сюда можно будет добавлять новые коллекции
 };

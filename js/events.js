@@ -70,5 +70,19 @@ const EVENTS_DATA = [
     endDate:   '2025-09-20T00:00:00Z',
     bannerClass: 'choco-banner',
   },
+
+    {
+        id: 'halloween_luck_2025',
+        nameKey: 'events.halloween_2025.name',
+        descriptionKey: 'events.halloween_2025.description',
+        startDate: '2025-10-10T00:00:00Z',
+        endDate:   '2025-11-01T23:59:59Z',
+        bannerClass: 'halloween-banner',
+        effect: {
+            type: 'boost_specific_cards',
+            cardIds: ['devil', 'alastor', 'mythic', 'berserk', 'orochi', 'witchy', 'blackhole', 'error', 'seductress', 'ensnared'],
+            multiplier: 10
+        }
+    },
     // Сюда можно будет добавлять новые эвенты в будущем
 ];

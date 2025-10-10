@@ -263,7 +263,19 @@ window.locales.en = {
             name: "Frosty",
             cardName: "Fox with a Katana",
             description: "A talented and determined girl whose radiance calls toward new heights. Apparently, she has just caught sight of that very summit..."
-        }
+        },
+        hween_jack: { name: "Jack-o'-Lantern", cardName: "Jacky O'Lantern", description: "This girl decided to cosplay the main symbol of Halloween - a pumpkin! Though her costume is a bit too tight." },
+        hween_piggy: { name: "Slaughterer", cardName: "Piggy the Butcher", description: "Her chainsaw is covered in gallons of blood, I'm afraid you won't be able to have a nice chat with her. She's a mad butcher, and she only wants one thing: meat." },
+        hween_eyeling: { name: "Eyeful", cardName: "Eyeling", description: "At first glance, she seems like a simple, sweet girl. But take a closer look at where she lives..." },
+        hween_ghost: { name: "Ghostly", cardName: "Lewd Sydney", description: "Sydney is the spirit of a girl who died within the walls of this university. They say she was quite the libertine in life. She remains so even after death..." },
+        hween_witch: { name: "Coven", cardName: "The Ashburn Witch", description: "Ashburn is the witch they couldn't burn at the stake. Why? Because she'll burn anyone she wants. But she likes you." },
+        hween_ghostface: { name: "Slasher", cardName: "Skullface", description: "Contrary to popular belief, Skullface is a girl. Yes, mentally unstable, yes, maniacal, yes, completely crazy, but still a girl." },
+        hween_clown: { name: "Gory", cardName: "Juzzy the Clown", description: "It seems this clown isn't trying to be funny. Rather, she finds things funny herself, hilariously so. Other people's pain, that is." },
+        hween_mime: { name: "Silent", cardName: "Alona the Mime", description: "Oh, you've met a mime, what luck! What is she gesturing? Oh, it seems she wants to get you alone." },
+        hween_scarecrow: { name: "Scarecrow's", cardName: "The Scarecrow", description: "A scarecrow, forgotten in a field, has taken on an appetizing human form. Her weapon is a scythe, though it's not very practical." },
+        hween_nurse: { name: "Maiming", cardName: "Nurse 0023", description: "You might have thought this nurse was human. She is not. Her body might be incredibly attractive, but let me remind you, she doesn't heal, she maims." },
+        hween_sadako: { name: "Vengeful", cardName: "Spirit of the Well", description: "As soon as you played that cursed tape, she crawled out of the TV screen and started crawling towards you. But it seems she's not thirsty for revenge, but for something else..." },
+        
     },
     // Shop Items
     shop: {
@@ -409,7 +421,8 @@ window.locales.en = {
             'theme-prestige': 'Prestige',
             'theme-shinigami': 'Shinigami',
             'theme-obsidian': 'Obsidian',
-            'theme-choco': 'Chocolate'
+            'theme-choco': 'Chocolate',
+            'theme-halloween': 'Halloween'
         },
         luckCoreFragments: "Core Fragments:",
         effectiveChance: "Effective Chance (with your luck):",
@@ -534,7 +547,11 @@ window.locales.en = {
         chocolate: {
             name: "Chocolate Event",
             description: "Limited chocolate cards are available only during this event. They are extremely rare."
-        }
+        },
+        halloween_2025: {
+            name: "Halloween: Night of Fright",
+            description: "The spookiest night of the year has come! The chance to find themed monster and demon cards is greatly boosted. Plus, new exclusive event cards are scattered about!"
+        },
     },
     achievements: {
         roll_1000: { name: "Novice Player", description: "Perform 1,000 rolls." },
@@ -576,6 +593,11 @@ window.locales.en = {
             name: "Chocolate Set",
             description: "Collect all limited chocolate cards.",
             rewardName: "Chocolate Theme"
+        },
+        halloween_set_2025: {
+            name: "Trick or Treat",
+            description: "Collect all 11 exclusive cards from the Halloween 2025 event.",
+            rewardName: "'Halloween' Theme"
         }
     },
     materials: {
