@@ -66,6 +66,62 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "hween_slender",
+        nameKey: "cards.hween_slender.name",
+        minPrestige: 2,
+        probabilityBase: 1 / 275666666,
+        color: "#E0E0E0", glowColor: "#757575",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 27566666,
+        availability: { type: 'event', eventId: 'halloween_luck_2025' },
+        card: { nameKey: "cards.hween_slender.cardName", image: "img/limited/halloween2025/cardSlender.png", descriptionKey: "cards.hween_slender.description" }
+    },
+    {
+        id: "hween_goth",
+        nameKey: "cards.hween_goth.name",
+        minPrestige: 3,
+        probabilityBase: 1 / 250000000,
+        color: "#6A1B9A", glowColor: "#AB47BC",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 25000000,
+        availability: { type: 'event', eventId: 'halloween_luck_2025' },
+        card: { nameKey: "cards.hween_goth.cardName", image: "img/limited/halloween2025/cardGoth.png", descriptionKey: "cards.hween_goth.description" }
+    },
+    {
+        id: "hween_tar",
+        nameKey: "cards.hween_tar.name",
+        minPrestige: 1,
+        probabilityBase: 1 / 225000000,
+        color: "#212121", glowColor: "#616161",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 22500000,
+        availability: { type: 'event', eventId: 'halloween_luck_2025' },
+        card: { nameKey: "cards.hween_tar.cardName", image: "img/limited/halloween2025/cardTar.png", descriptionKey: "cards.hween_tar.description" }
+    },
+    {
+        id: "hween_jeff",
+        nameKey: "cards.hween_jeff.name",
+        minPrestige: 2,
+        probabilityBase: 1 / 200000000,
+        color: "#ECEFF1", glowColor: "#B0BEC5",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 20000000,
+        availability: { type: 'event', eventId: 'halloween_luck_2025' },
+        card: { nameKey: "cards.hween_jeff.cardName", image: "img/limited/halloween2025/cardJeff.png", descriptionKey: "cards.hween_jeff.description" }
+    },
+    {
+        id: "hween_eyeless",
+        nameKey: "cards.hween_eyeless.name",
+        minPrestige: 2,
+        probabilityBase: 1 / 175000000,
+        color: "#0D47A1", glowColor: "#1976D2",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 17500000,
+        availability: { type: 'event', eventId: 'halloween_luck_2025' },
+        card: { nameKey: "cards.hween_eyeless.cardName", image: "img/limited/halloween2025/cardEyeless.png", descriptionKey: "cards.hween_eyeless.description" }
+    },
+    
+    {
         id: "gyro",
         nameKey: "cards.gyro.name",
         minPrestige: 4,
@@ -80,6 +136,17 @@ window.RARITIES_DATA = [
             image: "img/cardGyro.png",
             descriptionKey: "cards.gyro.description"
         }
+    },
+    {
+        id: "hween_dullahan",
+        nameKey: "cards.hween_dullahan.name",
+        minPrestige: 1,
+        probabilityBase: 1 / 150000000,
+        color: "#4A148C", glowColor: "#9C27B0",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 15000000,
+        availability: { type: 'event', eventId: 'halloween_luck_2025' },
+        card: { nameKey: "cards.hween_dullahan.cardName", image: "img/limited/halloween2025/cardDullahan.png", descriptionKey: "cards.hween_dullahan.description" }
     },
     {
         id: "hween_sadako",
@@ -128,6 +195,29 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 9000000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
         card: { nameKey: "cards.hween_nurse.cardName", image: "img/limited/halloween2025/cardNurse.png", descriptionKey: "cards.hween_nurse.description" }
+    },
+    {
+        id: "hween_furina",
+        nameKey: "cards.hween_furina.name",
+        minPrestige: 4,
+        probabilityBase: 1 / 75000000,
+        color: "#2196F3", glowColor: "#81D4FA",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 7500000,
+        availability: { type: 'event', eventId: 'halloween_luck_2025' },
+        card: { nameKey: "cards.hween_furina.cardName", image: "img/limited/halloween2025/cardHFurina.png", descriptionKey: "cards.hween_furina.description" }
+    },
+    {
+        id: "hween_hybrid",
+        nameKey: "cards.hween_hybrid.name",
+        displayParentId: "hybrid",
+        minPrestige: 4,
+        probabilityBase: 1 / 70000000,
+        color: "#673AB7", glowColor: "#B39DDB",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 7000000,
+        availability: { type: 'event', eventId: 'halloween_luck_2025' },
+        card: { nameKey: "cards.hween_hybrid.cardName", image: "img/limited/halloween2025/cardHHybrid.png", descriptionKey: "cards.hween_hybrid.description" }
     },
     {
         id: "hween_scarecrow",

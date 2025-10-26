@@ -275,6 +275,14 @@ window.locales.en = {
         hween_scarecrow: { name: "Scarecrow's", cardName: "The Scarecrow", description: "A scarecrow, forgotten in a field, has taken on an appetizing human form. Her weapon is a scythe, though it's not very practical." },
         hween_nurse: { name: "Maiming", cardName: "Nurse 0023", description: "You might have thought this nurse was human. She is not. Her body might be incredibly attractive, but let me remind you, she doesn't heal, she maims." },
         hween_sadako: { name: "Vengeful", cardName: "Spirit of the Well", description: "As soon as you played that cursed tape, she crawled out of the TV screen and started crawling towards you. But it seems she's not thirsty for revenge, but for something else..." },
+        hween_dullahan: { name: "Headless", cardName: "Dulla Han", description: "This is, of course, that legendary headless horsewoman... but her armor seems to be slightly... missing." },
+        hween_eyeless: { name: "Eyeless", cardName: "Eyeless Jacky", description: "You can't call her human; she's more of an eyeless... *thing* that devours people's kidneys. There's not a single cute thing about her..." },
+        hween_jeff: { name: "Killer", cardName: "Jefflynn the Killer", description: "She started as an internet joke, but no one is laughing now. Her knife is painfully real, and that white hoodie will haunt your nightmares." },
+        hween_hybrid: { name: "Haunted", cardName: "Haunted Alex", description: "It seems Alex decided to visit a haunted house alone. But the trip turned into a hot night with... a ghost." },
+        hween_furina: { name: "Hydro Pumpkin", cardName: "Hydro Archon", description: "You'd think she's an archon, a goddess, and just a good woman. But even she decided to celebrate Halloween with flair. And in a pumpkin outfit, yes." },
+        hween_tar: { name: "Tar", cardName: "Smolya", description: "Smolya is a work of tar art. Yes, she's frightening, yes, dangerous and scorching, but have you seen how hot she is?" },
+        hween_goth: { name: "Gothic", cardName: "The Abhorrent Queen", description: "She's a Queen in name only; in reality, she's a princess. And something tells me the real queen isn't here 'just stepping out for groceries'... it's much more grim... BWAHAHAHA." },
+        hween_slender: { name: "Slender", cardName: "Slenderwoman", description: "She is the mother of all scary stories, all tales by the campfire. She appears in photographs. In forest. Near you. Interference... Maybe you even like it..."},
         
     },
     // Shop Items
@@ -422,7 +430,8 @@ window.locales.en = {
             'theme-shinigami': 'Shinigami',
             'theme-obsidian': 'Obsidian',
             'theme-choco': 'Chocolate',
-            'theme-halloween': 'Halloween'
+            'theme-halloween': 'Halloween',
+            'theme-creepypasta': 'Creepypasta'
         },
         luckCoreFragments: "Core Fragments:",
         effectiveChance: "Effective Chance (with your luck):",
@@ -598,6 +607,11 @@ window.locales.en = {
             name: "Trick or Treat",
             description: "Collect all 11 exclusive cards from the Halloween 2025 event.",
             rewardName: "'Halloween' Theme"
+        },
+        creepypasta_set: {
+            name: "Creepypasta Archive",
+            description: "Collect the 3 legends of horror.",
+            rewardName: "'Creepypasta' Theme"
         }
     },
     materials: {

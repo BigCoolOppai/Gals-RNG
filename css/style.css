@@ -4644,3 +4644,253 @@ html.theme-halloween {
 .theme-halloween ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--hween-accent-3), var(--hween-purple)); border: 2px solid #0d0c14; border-radius: 10px; }
 .theme-halloween ::-webkit-scrollbar-track { background: #0d0c14; }
 /* <<< КОНЕЦ: ПОЛНАЯ ТЕМА ХЭЛЛОУИН 2025 (V2) >>> */
+
+/* ===================================================================
+   THEME: CREEPYPASTA (FEAR/HORROR/STATIC/BLOOD)
+   =================================================================== */
+
+html.theme-creepypasta {
+  /* Палитра: Черный, Белый шум, Кровь */
+  --creepy-bg-1: #0a0a0a;
+  --creepy-bg-2: #121212;
+  --creepy-bg-3: #1a1a1a;
+  --creepy-tile: #1e1e1e;
+  --creepy-ink: #c0c0c0;      /* Белёсый, "выцветший" текст */
+  --creepy-muted: #777777;
+
+  --creepy-accent-red: #a00000;    /* Тёмная, "засохшая" кровь */
+  --creepy-accent-red-hover: #d32f2f; /* Яркая, "свежая" кровь */
+  --creepy-border: #2a2a2a;
+  
+  --creepy-static-1: rgba(255, 255, 255, 0.03);
+  --creepy-static-2: rgba(255, 255, 255, 0.05);
+
+  color-scheme: dark;
+}
+
+/* Фон: Анимированный "белый шум" (помехи) */
+.theme-creepypasta body {
+  background-color: var(--creepy-bg-1);
+  color: var(--creepy-ink);
+}
+.theme-creepypasta body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    /* Анимированный шум */
+    repeating-linear-gradient(var(--creepy-static-1) 0 1px, transparent 1px 100%),
+    repeating-linear-gradient(90deg, var(--creepy-static-2) 0 1px, transparent 1px 100%);
+  background-size: 100% 3px, 3px 100%;
+  animation: static-flicker 0.15s infinite linear;
+}
+@keyframes static-flicker {
+  0%   { background-position: 0 0, 0 0; }
+  10%  { background-position: 5px 3px, -2px 4px; }
+  20%  { background-position: -3px 6px, 3px -5px; }
+  30%  { background-position: 8px -2px, -7px 2px; }
+  40%  { background-position: -1px 5px, 5px 8px; }
+  50%  { background-position: 4px -4px, -3px -3px; }
+  60%  { background-position: 9px 1px, 2px 5px; }
+  70%  { background-position: -4px 7px, 6px -1px; }
+  80%  { background-position: 2px -3px, -1px 9px; }
+  90%  { background-position: 7px 4px, -5px -4px; }
+  100% { background-position: 0 0, 0 0; }
+}
+
+/* Заголовки: Тревожные, с красным свечением */
+.theme-creepypasta h1, .theme-creepypasta h2, .theme-creepypasta h3, .theme-creepypasta h4 {
+  color: #f0f0f0;
+  text-shadow: 0 0 6px rgba(160, 0, 0, 0.35), 0 0 2px rgba(255, 0, 0, 0.2);
+}
+
+/* Табы: Резкие, с кровавым акцентом */
+.theme-creepypasta .nav-tabs { border-bottom-color: var(--creepy-border); }
+.theme-creepypasta .nav-tabs .nav-link {
+  color: var(--creepy-muted);
+  border-bottom-color: var(--creepy-border);
+  background: transparent;
+  border-radius: 0;
+}
+.theme-creepypasta .nav-tabs .nav-link.active {
+  color: var(--creepy-ink);
+  background-color: var(--creepy-bg-3);
+  border-color: var(--creepy-border) var(--creepy-border) var(--creepy-bg-3);
+  position: relative;
+  box-shadow: inset 0 -3px 0 var(--creepy-accent-red);
+}
+.theme-creepypasta .nav-tabs .nav-link.active::after { content: none; }
+
+/* Контейнеры, списки, карточки: Глубокий черный */
+.theme-creepypasta .tab-content,
+.theme-creepypasta .list-group-item,
+.theme-creepypasta .card.bg-dark-subtle {
+  background-color: var(--creepy-bg-3) !important;
+  border-color: var(--creepy-border) !important;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.12), 0 10px 22px rgba(0,0,0,0.45);
+}
+
+/* Инвентарь: Кровавая рамка при наведении */
+.theme-creepypasta .inventory-card {
+  background: linear-gradient(135deg, #0e0e0e, #141414);
+  border-color: var(--creepy-border);
+}
+.theme-creepypasta .inventory-card-name {
+  background: linear-gradient(180deg, rgba(100,0,0,0.6), rgba(160,0,0,0.8));
+  color: #f2e4d6;
+}
+.theme-creepypasta .inventory-card:hover {
+  box-shadow: 0 10px 20px rgba(0,0,0,0.55), 0 0 18px var(--creepy-accent-red);
+}
+.theme-creepypasta .inventory-card .badge.bg-warning {
+  background: linear-gradient(145deg, var(--creepy-accent-red-hover), var(--creepy-accent-red));
+  color: #ffeaea;
+  border: 1px solid rgba(255,0,0,0.25);
+  box-shadow: 0 0 10px rgba(211,47,47,0.35);
+}
+
+/* --- Кнопки (Стиль "Кровь") --- */
+.theme-creepypasta .btn {
+  border-radius: 6px;
+  border: 1px solid var(--creepy-border);
+  color: var(--creepy-ink);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.35);
+  transition: all .1s ease-out;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.02);
+}
+.theme-creepypasta .btn:active { transform: translateY(1px) scale(0.99); }
+.theme-creepypasta .btn:focus-visible {
+  outline: 2px solid var(--creepy-accent-red-hover);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(211,47,47,0.25);
+}
+
+/* Primary (Roll) — КРОВЬ */
+.theme-creepypasta .btn-primary {
+  background: linear-gradient(145deg, var(--creepy-accent-red) 0%, #6d0000 100%);
+  border-color: #530000;
+  color: #ffeaea;
+  box-shadow: 0 3px 10px rgba(160,0,0,0.35), inset 0 1px 0 rgba(255,100,100,0.15);
+}
+.theme-creepypasta .btn-primary:hover {
+  background: linear-gradient(145deg, var(--creepy-accent-red-hover) 0%, #8e0000 100%);
+  box-shadow: 0 6px 16px rgba(211,47,47,0.45);
+}
+
+/* Info (Multi-Roll) — Мертвый/Серый */
+.theme-creepypasta .btn-info {
+  background: linear-gradient(145deg, #4a4a4a 0%, #303030 100%);
+  border-color: #222222;
+  color: #c0c0c0;
+}
+.theme-creepypasta .btn-info:hover { background: linear-gradient(145deg, #5c5c5c 0%, #3a3a3a 100%); }
+
+/* Success (Autoroll Ready) — Болотный/Гнилой */
+.theme-creepypasta .btn-success {
+  background: linear-gradient(145deg, #556b2f 0%, #334d1a 100%);
+  border-color: #2a3f1a;
+  color: #e8f5e9;
+}
+.theme-creepypasta .btn-success:hover { background: linear-gradient(145deg, #6b8e3a 0%, #4a6b2a 100%); }
+
+/* Danger (Autoroll Stop) — ЯРКАЯ КРОВЬ */
+.theme-creepypasta .btn-danger {
+  background: linear-gradient(145deg, var(--creepy-accent-red-hover) 0%, #a00000 100%);
+  border-color: #7f0000;
+  color: #ffeaea;
+  box-shadow: 0 3px 10px rgba(211,47,47,0.35);
+}
+.theme-creepypasta .btn-danger:hover { background: linear-gradient(145deg, #eb4444 0%, #b50f0f 100%); }
+
+/* Secondary (Default) — Тьма */
+.theme-creepypasta .btn-secondary {
+  background: linear-gradient(145deg, #2a2a2a 0%, #1c1c1c 100%);
+  border-color: var(--creepy-border);
+}
+.theme-creepypasta .btn-secondary:hover { background: linear-gradient(145deg, #3a3a3a 0%, #272727 100%); }
+
+/* Outlines */
+.theme-creepypasta .btn-outline-primary { color: #ffcdd2; border-color: var(--creepy-accent-red); }
+.theme-creepypasta .btn-outline-primary:hover { background: var(--creepy-accent-red); color: #ffeaea; }
+.theme-creepypasta .btn-outline-secondary { color: var(--creepy-ink); border-color: var(--creepy-border); }
+.theme-creepypasta .btn-outline-secondary:hover { background: #2a2a2a; color: var(--creepy-ink); }
+.theme-creepypasta .btn-outline-danger { color: #ffcdd2; border-color: var(--creepy-accent-red-hover); }
+.theme-creepypasta .btn-outline-danger:hover { background: var(--creepy-accent-red-hover); color: #ffeaea; }
+
+/* --- Бейджи и Акценты --- */
+.theme-creepypasta .badge { border: 1px solid rgba(0,0,0,0.18); }
+.theme-creepypasta .badge.bg-primary { background: linear-gradient(145deg, var(--creepy-accent-red), #6d0000); color: #ffeaea; }
+.theme-creepypasta .badge.bg-info { background: linear-gradient(145deg, #4a4a4a, #303030); color: #c0c0c0; }
+.theme-creepypasta .badge.bg-success { background: linear-gradient(145deg, #556b2f, #334d1a); color: #e8f5e9; }
+.theme-creepypasta .badge.bg-danger { background: linear-gradient(145deg, var(--creepy-accent-red-hover), #a00000); color: #ffeaea; }
+.theme-creepypasta .badge.bg-warning { background: linear-gradient(145deg, #e65100, #bf360c); color: #fff3e0; }
+
+.theme-creepypasta .text-info    { color: #9e9e9e !important; }
+.theme-creepypasta .text-primary { color: var(--creepy-accent-red) !important; }
+.theme-creepypasta .text-success { color: #8f9a6d !important; }
+.theme-creepypasta .text-danger  { color: var(--creepy-accent-red-hover) !important; }
+.theme-creepypasta .text-warning { color: #ff9800 !important; }
+
+/* Equipped чипы в магазине */
+.theme-creepypasta .equipped-item-chip {
+  background: linear-gradient(145deg, #4a4a4a, #303030);
+  color: #c0c0c0;
+  border: 1px solid #222222;
+  box-shadow: none;
+}
+.theme-creepypasta .equipped-item-chip .btn-remove-equip { color: #c0c0c0; border-color: #555; }
+.theme-creepypasta .equipped-item-chip .btn-remove-equip:hover { background: rgba(0,0,0,0.2); }
+
+/* Модалки и Баннеры */
+.theme-creepypasta .modal-content {
+  background: linear-gradient(135deg, #121212, #1a1a1a);
+  border: 1px solid var(--creepy-border);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.2), 0 20px 40px rgba(0,0,0,0.65);
+}
+.theme-creepypasta .modal-header { border-bottom-color: var(--creepy-border); }
+.theme-creepypasta .alert { background: linear-gradient(145deg, #1e1e1e, #141414); border-color: var(--creepy-border); }
+.theme-creepypasta .alert.halloween-banner { /* Перекрашиваем баннер Хэллоуина, если он активен */
+  background: linear-gradient(135deg, #1e1e1e, #141414);
+  border-color: var(--creepy-accent-red);
+}
+.theme-creepypasta .alert.halloween-banner .alert-heading { color: var(--creepy-accent-red); }
+
+/* Слайдер и Скроллбар */
+.theme-creepypasta .form-range::-webkit-slider-runnable-track { background: #333; }
+.theme-creepypasta .form-range::-webkit-slider-thumb {
+  background: radial-gradient(circle at 30% 30%, #ffcdd2, var(--creepy-accent-red) 60%, #6d0000);
+  border: 1px solid rgba(0,0,0,0.35);
+  box-shadow: 0 0 8px rgba(160,0,0,0.55);
+}
+.theme-creepypasta ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #4a4a4a, #303030); border: 2px solid #0a0a0a; }
+.theme-creepypasta ::-webkit-scrollbar-track { background: #0a0a0a; }
+
+/* Ролл-строка */
+.theme-creepypasta .roll-animation-container {
+  background: linear-gradient(180deg, #000, #0a0a0a);
+  border-color: var(--creepy-border);
+  box-shadow: inset 0 0 12px rgba(0,0,0,0.8);
+}
+.theme-creepypasta .roll-slot { text-shadow: 1px 1px 0 rgba(0,0,0,0.5); }
+.theme-creepypasta .received-card { border-color: var(--creepy-accent-red); }
+
+/* Ачивки */
+.theme-creepypasta #achievements .list-group-item.bg-success-subtle {
+  background: linear-gradient(145deg, #1f1f1f, #2a2a2a);
+  border-color: var(--creepy-border) !important;
+  border-left: 4px solid var(--creepy-accent-red);
+}
+.theme-creepypasta #achievements .list-group-item.bg-success-subtle strong { color: #ffcdd2; }
+.theme-creepypasta #achievements .list-group-item.bg-dark-subtle {
+  background: linear-gradient(145deg, #101010, #161616);
+  border-color: #222 !important;
+  border-left: 4px solid rgba(160,0,0,0.25);
+}
+.theme-creepypasta #achievements .list-group-item.bg-dark-subtle strong { color: var(--creepy-ink); opacity: .85; }
+.theme-creepypasta #achievements .list-group-item.bg-dark-subtle small  { color: var(--creepy-muted); opacity: .9; }
+.theme-creepypasta #achievements .list-group-item.new-version::after {
+  background: var(--creepy-accent-red);
+  box-shadow: 0 0 8px rgba(160,0,0,0.5);
+}

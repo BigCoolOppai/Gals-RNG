@@ -203,7 +203,6 @@ const COLLECTIONS_DATA = {
     halloween_set_2025: {
         nameKey: 'collections.halloween_set_2025.name',
         descriptionKey: 'collections.halloween_set_2025.description',
-        // ID карт заменены на реальные
         cardIds: [
             'hween_jack', 'hween_piggy', 'hween_eyeling', 'hween_ghost', 'hween_witch',
             'hween_ghostface', 'hween_clown', 'hween_mime', 'hween_scarecrow',
@@ -213,6 +212,18 @@ const COLLECTIONS_DATA = {
             type: 'ui_theme',
             themeId: 'theme-halloween',
             nameKey: 'collections.halloween_set_2025.rewardName'
+        }
+    },
+    creepypasta_set: {
+        nameKey: 'collections.creepypasta_set.name',
+        descriptionKey: 'collections.creepypasta_set.description',
+        // ID карт, которые нужно собрать. 
+        // Убедитесь, что у вас есть карты с ID: 'cardJeff', 'cardEyeless', 'cardSlender'
+        cardIds: ['hween_jeff', 'hween_eyeless', 'hween_slender'], 
+        reward: { 
+            type: 'ui_theme', 
+            themeId: 'theme-creepypasta',
+            nameKey: 'collections.creepypasta_set.rewardName'
         }
     }
     // Сюда можно будет добавлять новые коллекции
