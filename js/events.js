@@ -76,7 +76,7 @@ const EVENTS_DATA = [
         nameKey: 'events.halloween_2025.name',
         descriptionKey: 'events.halloween_2025.description',
         startDate: '2025-10-10T00:00:00Z',
-        endDate:   '2025-11-01T23:59:59Z',
+        endDate:   '2025-11-04T23:59:59Z',
         bannerClass: 'halloween-banner',
         effect: {
             type: 'boost_specific_cards',
