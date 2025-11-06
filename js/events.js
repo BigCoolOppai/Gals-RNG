@@ -76,12 +76,12 @@ const EVENTS_DATA = [
         nameKey: 'events.halloween_2025.name',
         descriptionKey: 'events.halloween_2025.description',
         startDate: '2025-10-10T00:00:00Z',
-        endDate:   '2025-11-04T23:59:59Z',
+        endDate:   '2025-11-09T23:59:59Z',
         bannerClass: 'halloween-banner',
         effect: {
             type: 'boost_specific_cards',
-            cardIds: ['devil', 'alastor', 'mythic', 'berserk', 'orochi', 'witchy', 'blackhole', 'error', 'seductress', 'ensnared'],
-            multiplier: 10
+            cardIds: ['hween_slender', 'hween_goth', 'hween_tar', 'hween_jeff', 'hween_eyeless', 'hween_dullahan', 'hween_sadako', 'hween_nurse', 'hween_furina', 'hween_hybrid', 'hween_scarecrow', 'hween_mime', 'hween_clown', 'hween_ghostface', 'hween_witch', 'hween_ghost', 'hween_eyeling', 'hween_piggy', 'hween_jack'],
+            multiplier: 2
         }
     },
     // Сюда можно будет добавлять новые эвенты в будущем
