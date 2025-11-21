@@ -792,7 +792,7 @@ const Game = (() => {
 
         if (playerData.activeMechanicalEffect === 'motivation') {
             playerData.motivationStacks++;
-            console.log(`Motivation stack increased to: ${playerData.motivationStacks}`);
+        //    console.log(`Motivation stack increased to: ${playerData.motivationStacks}`);
         } else {
             playerData.motivationStacks = 0;
         }
@@ -878,7 +878,7 @@ const Game = (() => {
             finalEffectiveLuck *= eventLuckMultiplier;
         }
 
-        console.log(`Performing roll. BaseLuck: ${baseEffectiveLuck}, LuckyMultiplier: ${currentLuckMultiplier}, EventLuckMultiplier: ${eventLuckMultiplier}, Jackpot: ${jackpotTriggeredThisRoll}, FinalEffectiveLuck: ${finalEffectiveLuck}`);
+        // console.log(`Performing roll. BaseLuck: ${baseEffectiveLuck}, LuckyMultiplier: ${currentLuckMultiplier}, EventLuckMultiplier: ${eventLuckMultiplier}, Jackpot: ${jackpotTriggeredThisRoll}, FinalEffectiveLuck: ${finalEffectiveLuck}`);
 
         let determinedRarityId = null;
 
@@ -1041,7 +1041,7 @@ const Game = (() => {
                 if (!playerData.duplicateCounts) playerData.duplicateCounts = {};
                 if (!playerData.duplicateCounts.blackhole) playerData.duplicateCounts.blackhole = 0;
                 playerData.duplicateCounts.blackhole++;
-                console.log(`Blackhole duplicate count is now: ${playerData.duplicateCounts.blackhole}`);
+            //    console.log(`Blackhole duplicate count is now: ${playerData.duplicateCounts.blackhole}`);
             }
         }
 
@@ -1088,7 +1088,7 @@ const Game = (() => {
         if (totalBonusPercent > 0 && baseDuplicateReward > 0) {
             const bonusAmount = Math.ceil(baseDuplicateReward * totalBonusPercent);
             finalDuplicateReward += bonusAmount;
-            console.log(`Greed Bonus: Original: ${baseDuplicateReward}, Bonus: +${bonusAmount} (${(totalBonusPercent * 100).toFixed(0)}%), New: ${finalDuplicateReward}`);
+        //    console.log(`Greed Bonus: Original: ${baseDuplicateReward}, Bonus: +${bonusAmount} (${(totalBonusPercent * 100).toFixed(0)}%), New: ${finalDuplicateReward}`);
         }
 
         // Эвент-множитель на валюту за дубли
@@ -1097,7 +1097,7 @@ const Game = (() => {
             const multiplier = activeEvent.effect.multiplier;
             const eventBonus = Math.ceil(finalDuplicateReward * multiplier) - finalDuplicateReward;
             finalDuplicateReward += eventBonus;
-            console.log(`Event Bonus: Original: ${finalDuplicateReward - eventBonus}, Multiplier: x${multiplier}, New: ${finalDuplicateReward}`);
+        //    console.log(`Event Bonus: Original: ${finalDuplicateReward - eventBonus}, Multiplier: x${multiplier}, New: ${finalDuplicateReward}`);
         }
 
 
@@ -1130,10 +1130,10 @@ const Game = (() => {
                 if (handEffectData.maxStacks && playerData.misfortuneStacks > handEffectData.maxStacks) {
                     playerData.misfortuneStacks = handEffectData.maxStacks;
                 }
-                console.log(`Hand of Misfortune: Stacked to ${playerData.misfortuneStacks} on ${rarityData.name}. Bonus luck: +${(playerData.misfortuneStacks * handEffectData.bonusPerStack).toFixed(2)}`);
+            //    console.log(`Hand of Misfortune: Stacked to ${playerData.misfortuneStacks} on ${rarityData.name}. Bonus luck: +${(playerData.misfortuneStacks * handEffectData.bonusPerStack).toFixed(2)}`);
             } else {
                 if (playerData.misfortuneStacks > 0) {
-                    console.log(`Hand of Misfortune: Stacks reset from ${playerData.misfortuneStacks} due to ${rarityData.name}`);
+                //    console.log(`Hand of Misfortune: Stacks reset from ${playerData.misfortuneStacks} due to ${rarityData.name}`);
                 }
                 playerData.misfortuneStacks = 0;
             }

@@ -934,7 +934,7 @@ const UI = (() => {
                     }
                 }
 
-                console.log(`--- Roll Animation End (Flash) --- (Landed: ${targetRarity.name})`);
+            //    console.log(`--- Roll Animation End (Flash) --- (Landed: ${targetRarity.name})`);
                 slotElement.dataset.animationActive = 'false';
                 slotElement.clearPreviousAnimation = null;
                 onCompleteCallback && onCompleteCallback();
@@ -952,7 +952,7 @@ const UI = (() => {
             const timeoutId = setTimeout(animateTick, currentTickDuration);
             animationTimeouts.push(timeoutId);
         }
-        console.log(`--- Roll Animation Start (Flash) --- (Target: ${targetRarity.name}, FastRoll: ${isFastRollActive})`);
+    //    console.log(`--- Roll Animation Start (Flash) --- (Target: ${targetRarity.name}, FastRoll: ${isFastRollActive})`);
         animateTick();
         return clearMyTimeouts;
     }
@@ -1195,16 +1195,15 @@ const UI = (() => {
         rollResultContainer.appendChild(multiResultsDisplay);
     }
 
+    
     // --- Инвентарь ---
     function renderInventory(playerData) {
         if (!inventoryGrid || !inventoryCounterElement) return;
 
+        // 1. Подготовка данных и сортировка (как раньше)
         const sortOrder = localStorage.getItem('inventorySortOrder') || 'rarity_desc';
         if (inventorySortSelect) inventorySortSelect.value = sortOrder;
 
-        inventoryGrid.innerHTML = '';
-
-        // Доступные карты для игрока
         const availableRarities = RARITIES_DATA.filter(r =>
             Game.isCardAvailableNow(r, playerData) || playerData.inventory.includes(r.id)
         );
@@ -1224,108 +1223,166 @@ const UI = (() => {
                 break;
         }
 
+        // 2. Фильтрация поиска
         const qEl = document.getElementById('inventorySearchInput');
         const query = (qEl?.value || '').trim().toLowerCase();
 
         const parentCards = sortedRarities.filter(r => !r.displayParentId);
         const filteredParents = !query ? parentCards : parentCards.filter(parent => {
-        const versions = [parent, ...availableRarities.filter(r => r.displayParentId === parent.id)];
-        return versions.some(v => {
-            const name  = (L.get(v.card.nameKey) || '').toLowerCase();
-            const rname = (L.get(v.nameKey) || '').toLowerCase();
-            return name.includes(query) || rname.includes(query);
+            const versions = [parent, ...availableRarities.filter(r => r.displayParentId === parent.id)];
+            return versions.some(v => {
+                const name = (L.get(v.card.nameKey) || '').toLowerCase();
+                const rname = (L.get(v.nameKey) || '').toLowerCase();
+                return name.includes(query) || rname.includes(query);
+            });
         });
+
+        // 3. Создаем Map существующих элементов для быстрого доступа
+        // Ключ: rarityId, Значение: DOM-элемент колонки (.col)
+        const existingNodes = new Map();
+        Array.from(inventoryGrid.children).forEach(col => {
+            const card = col.querySelector('.inventory-card');
+            if (card && card.dataset.rarityId) {
+                existingNodes.set(card.dataset.rarityId, col);
+            }
         });
-        
+
+        // 4. Проходимся по отфильтрованному списку и обновляем/создаем элементы
         filteredParents.forEach(rarityData => {
             const allCardVersions = [rarityData, ...availableRarities.filter(r => r.displayParentId === rarityData.id)];
-            
             const openedVersions = allCardVersions.filter(v => playerData.inventory.includes(v.id));
             const isAnyVersionOpened = openedVersions.length > 0;
+            const hasUnseenVersion = allCardVersions.some(v => playerData.unseenCardIds.includes(v.id));
 
+            // Определяем активный скин и варианты
             const activeSkinId = playerData.activeSkins[rarityData.id] || rarityData.id;
-
-            const vView = (playerData.variantView || {})[activeSkinId];              // 'negative' | null
-            const hasNeg = ((playerData.ownedVariants || {})[activeSkinId]?.negative || 0) > 0;
-
             const chosenVariant = (playerData.variantView || {})[activeSkinId] || null;
             const hasChosenVariant = !!(chosenVariant && (playerData.ownedVariants || {})[activeSkinId]?.[chosenVariant] > 0);
 
-            const hasUnseenVersion = allCardVersions.some(v => playerData.unseenCardIds.includes(v.id));
+            // Попытка найти существующий элемент
+            let col = existingNodes.get(rarityData.id);
+            let cardDiv, img, nameDiv, variantChip, limitedBadge;
 
-            const col = document.createElement('div');
-            col.className = 'col';
-            const cardDiv = document.createElement('div');
-            cardDiv.className = 'inventory-card';
+            if (!col) {
+                // СОЗДАНИЕ: Если элемента нет, создаем структуру
+                col = document.createElement('div');
+                col.className = 'col';
+                
+                cardDiv = document.createElement('div');
+                cardDiv.className = 'inventory-card';
+                cardDiv.dataset.rarityId = rarityData.id;
 
+                img = document.createElement('img');
+                img.className = 'inventory-card-image';
+                
+                nameDiv = document.createElement('div');
+                nameDiv.className = 'inventory-card-name';
+
+                // Создаем контейнеры для чипов сразу, скрываем их по умолчанию
+                variantChip = document.createElement('div');
+                variantChip.className = 'variant-chip position-absolute';
+                variantChip.style.cssText = 'right:6px; top:6px; z-index:3; display:none;';
+                
+                limitedBadge = document.createElement('div');
+                limitedBadge.className = 'badge bg-warning text-dark position-absolute m-1';
+                limitedBadge.style.cssText = 'left:6px; top:6px; z-index:2; display:none;';
+                limitedBadge.textContent = 'LIMITED';
+
+                cardDiv.appendChild(img);
+                cardDiv.appendChild(nameDiv);
+                cardDiv.appendChild(variantChip);
+                cardDiv.appendChild(limitedBadge);
+                col.appendChild(cardDiv);
+            } else {
+                // ОБНОВЛЕНИЕ: Элемент есть, берем ссылки
+                cardDiv = col.querySelector('.inventory-card');
+                img = cardDiv.querySelector('.inventory-card-image');
+                nameDiv = cardDiv.querySelector('.inventory-card-name');
+                variantChip = cardDiv.querySelector('.variant-chip');
+                limitedBadge = cardDiv.querySelector('.badge.bg-warning'); // LIMITED бейдж
+                
+                // Удаляем его из Map, чтобы в конце удалить те, что остались в Map (не попали в фильтр)
+                existingNodes.delete(rarityData.id);
+            }
+
+            // 5. Обновление состояния (классы, стили, контент)
+            
+            // Сброс классов вариантов
+            cardDiv.className = 'inventory-card'; 
             if (hasChosenVariant) cardDiv.classList.add(`variant-${chosenVariant}`);
-
-
-            const img = document.createElement('img');
-            img.className = 'inventory-card-image';
-            const nameDiv = document.createElement('div');
-            nameDiv.className = 'inventory-card-name';
-            
             if (hasUnseenVersion) cardDiv.classList.add('new-card');
-            cardDiv.dataset.rarityId = rarityData.id;
-
-            
 
             if (isAnyVersionOpened) {
-                const activeSkinId = playerData.activeSkins[rarityData.id] || rarityData.id;
                 const activeSkinData = getRarityDataById(activeSkinId, playerData) || getRarityDataById(rarityData.id, playerData);
-
-                img.src = activeSkinData.card.image;
+                
+                // Проверка: обновляем src только если он изменился (избегает мерцания)
+                if (img.getAttribute('src') !== activeSkinData.card.image) {
+                    img.src = activeSkinData.card.image;
+                }
+                
                 nameDiv.textContent = L.get(activeSkinData.card.nameKey);
-                cardDiv.classList.add(`border-${activeSkinData.id}`);
+                
+                // Стилизация из JS (Этап 1)
+                cardDiv.style.borderColor = activeSkinData.color;
                 cardDiv.style.setProperty('--rarity-glow-color', activeSkinData.glowColor);
+                
+                // Сохраняем класс редкости для специфичных CSS оверрайдов (если есть)
+                cardDiv.classList.add(`rarity-${activeSkinData.id}`);
+                cardDiv.classList.remove('locked');
 
+                // Важно: используем onclick вместо addEventListener для предотвращения дублей при ре-рендере
                 const allPossibleVersions = [rarityData, ...RARITIES_DATA.filter(r => r.displayParentId === rarityData.id)];
-                cardDiv.addEventListener('click', () => showCardModal(rarityData.id, allPossibleVersions));
+                cardDiv.onclick = () => showCardModal(rarityData.id, allPossibleVersions);
             } else {
                 cardDiv.classList.add('locked');
-                img.src = "img/silhouette_placeholder.png";
+                cardDiv.style.borderColor = ''; // Сброс инлайн стиля
+                cardDiv.style.removeProperty('--rarity-glow-color');
+                
+                if (img.getAttribute('src') !== "img/silhouette_placeholder.png") {
+                    img.src = "img/silhouette_placeholder.png";
+                }
                 nameDiv.textContent = "?????";
+                cardDiv.onclick = null;
             }
 
-            cardDiv.appendChild(img);
-            cardDiv.appendChild(nameDiv);
-
-            // ВАРИАНТ-ЧИП (N/G/V) — после img/name, с z-index
-            if (hasChosenVariant) {
-            const chip = document.createElement('div');
-            chip.className = 'variant-chip position-absolute';
-            chip.style.right = '6px';
-            chip.style.top   = '6px';
-            chip.style.zIndex = '3';
-            const sym = { negative: 'N', gold: 'G', voided: 'V' }[chosenVariant] || '•';
-            chip.textContent = sym;
-            cardDiv.appendChild(chip);
+            // Обновление чипов
+            if (variantChip) {
+                if (hasChosenVariant) {
+                    const sym = { negative: 'N', gold: 'G', voided: 'V' }[chosenVariant] || '•';
+                    variantChip.textContent = sym;
+                    variantChip.style.display = 'flex'; // variant-chip имеет display:inline-flex в CSS
+                } else {
+                    variantChip.style.display = 'none';
+                }
             }
 
-            // LIMITED — тоже после img/name, с z-index
-            if (rarityData.availability?.type === 'event') {
-            const badge = document.createElement('div');
-            badge.className = 'badge bg-warning text-dark position-absolute m-1';
-            badge.style.left = '6px';
-            badge.style.top = '6px';
-            badge.style.zIndex = '2';
-            badge.textContent = 'LIMITED';
-            cardDiv.appendChild(badge);
+            // Обновление LIMITED бейджа
+            if (limitedBadge) {
+                if (rarityData.availability?.type === 'event') {
+                    limitedBadge.style.display = 'inline-block';
+                } else {
+                    limitedBadge.style.display = 'none';
+                }
             }
 
-            col.appendChild(cardDiv);
+            // 6. Вставка в DOM (appendChild перемещает существующий узел в конец, тем самым сортируя их)
             inventoryGrid.appendChild(col);
         });
 
-        
+        // 7. Удаление элементов, которые не попали в текущий фильтр/список
+        // (Все, что осталось в existingNodes — это карточки, которые были на экране, но теперь отфильтрованы)
+        existingNodes.forEach(col => col.remove());
 
-        // Счётчики (скрываем diamond для не-саппортера)
+        // Обновление счетчиков
         const viewableRarities = availableRarities.filter(r => !(r.id === 'diamond' && !playerData.isSupporter));
         const uniqueOpenedCount = new Set(playerData.inventory.filter(id => id !== 'garbage' && viewableRarities.some(r => r.id === id))).size;
         const totalPossibleCount = viewableRarities.filter(r => r.id !== 'garbage').length;
+        
         const inventoryTabButton = document.getElementById('inventory-tab');
-        inventoryTabButton?.classList.toggle('new-version', (playerData.unseenCardIds?.length || 0) > 0);
+        // Проверка на наличие .new-version класса на кнопке таба
+        if (inventoryTabButton) {
+             inventoryTabButton.classList.toggle('new-version', (playerData.unseenCardIds?.length || 0) > 0);
+        }
 
         inventoryCounterElement.textContent = `${L.get('ui.opened')}: ${uniqueOpenedCount} / ${totalPossibleCount}`;
     }

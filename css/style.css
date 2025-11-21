@@ -157,10 +157,7 @@ h1, h2, h3, h4, h5, h6 {
     text-shadow: 0 0 5px #fff, 0 0 10px #d1c4e9, 0 0 15px #7e57c2;
     box-shadow: inset 0 0 10px rgba(206, 147, 216, 0.3); /* Легкое внутреннее свечение */
 }
-.inventory-card.border-unbound {
-    border-color: #8e24aa; 
-    --rarity-glow-color: #c386ed; /* Светлый фиолетовый для свечения рамки */
-}
+
 /* Стили для Uranium */
 .roll-slot.rarity-uranium {
     color: #002000; /* Очень темный зеленый, почти черный текст для контраста */
@@ -168,10 +165,7 @@ h1, h2, h3, h4, h5, h6 {
     text-shadow: 0 0 3px #fff, 0 0 6px #c6ff00, 0 0 9px #76ff03;
     border: 1px solid rgba(255,255,255,0.2); /* Легкая рамка для четкости */
 }
-.inventory-card.border-uranium {
-    border-color: #64dd17; 
-    --rarity-glow-color: #b0ff57; /* Светло-зеленый для свечения рамки */
-}
+
 
 #gameWrapper {
   /* Задаем значения по умолчанию (нет фильтра) */
@@ -255,10 +249,6 @@ h1, h2, h3, h4, h5, h6 {
     100% { clip-path: polygon(0 10%, 100% 10%, 100% 35%, 0 35%); }
 }
 
-.inventory-card.border-error {
-    border-color: #ff3d00; 
-    --rarity-glow-color: #ff6e40;
-}
 
 /* Стили для Devil (Макима) */
 .roll-slot.rarity-devil {
@@ -270,10 +260,7 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Georgia', 'Times New Roman', serif; /* Элегантный, но строгий шрифт */
     letter-spacing: 0.05em;
 }
-.inventory-card.border-devil {
-    border-color: #a01c1c; 
-    --rarity-glow-color: #d73a3a;
-}
+
 
 /* Стили для Jackpot (Хакари) */
 .roll-slot.rarity-jackpot {
@@ -297,10 +284,6 @@ h1, h2, h3, h4, h5, h6 {
         text-shadow: 0 0 8px rgba(255,255,255,1), 0 0 18px #fff9c4, 0 0 25px #ffecb3;
         box-shadow: inset 0 0 25px #fff176, 0 0 15px #ffd54f;
     }
-}
-.inventory-card.border-jackpot {
-    border-color: #ffb300; 
-    --rarity-glow-color: #ffe54c;
 }
 
 /* Стили для Timestop (Дио) */
@@ -337,10 +320,6 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes timestop-bg-scroll {
     0% { background-position: 0 0; }
     100% { background-position: -400px 400px; } /* Значения для прокрутки фона */
-}
-.inventory-card.border-timestop {
-    border-color: #FBC02D; 
-    --rarity-glow-color: #FFF59D;
 }
 
 /* Мигающая анимация для Exalted или подобных очень редких */
@@ -485,13 +464,7 @@ h1, h2, h3, h4, h5, h6 {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-/* Границы для карточек инвентаря по редкости */
-.inventory-card.border-garbage { border-color: #795548; --rarity-glow-color: #795548;}
-.inventory-card.border-common { border-color: #9e9e9e; --rarity-glow-color: #9e9e9e;}
-.inventory-card.border-rare { border-color: #2196f3; --rarity-glow-color: #2196f3;}
-.inventory-card.border-epic { border-color: #9c27b0; --rarity-glow-color: #9c27b0;}
-.inventory-card.border-legendary { border-color: #ff9800; --rarity-glow-color: #ff9800;}
-.inventory-card.border-mythic { border-color: #f44336; --rarity-glow-color: #f44336;}
+
 
 /* Магазин - стили для купленных/надетых предметов */
 .shop-item.purchased .btn, .shop-item.equipped .btn {
@@ -843,25 +816,6 @@ body.visual-effect-uranium::before {
 }
 .roll-slot.rarity-space > span { position: relative; z-index: 1; }
 
-.inventory-card.border-cosmic {
-    border-color: #311b92; 
-    --rarity-glow-color: #7e57c2; 
-}
-
-.inventory-card.border-motivation {
-    border-color: #0d47a1;
-    --rarity-glow-color: #64b5f6;
-}
-
-.inventory-card.border-smokinsexystyle { /* или border-sss */
-    border-color: #b71c1c;
-    --rarity-glow-color: #ef9a9a;
-}
-
-.inventory-card.border-space {
-    border-color: #0097a7;
-    --rarity-glow-color: #80deea;
-}
 
 
 /* Стили для Berserk (Яростная) */
@@ -882,10 +836,6 @@ body.visual-effect-uranium::before {
     text-transform: uppercase;
     border: 1px solid #8e0000;
 }
-.inventory-card.border-berserk {
-    border-color: #c62828; 
-    --rarity-glow-color: #ff8a80;
-}
 
 
 /* Стили для Bee (Жужжащая) */
@@ -902,10 +852,6 @@ body.visual-effect-uranium::before {
     border: 2px solid #ffb300;
     font-weight: bold;
 }
-.inventory-card.border-bee {
-    border-color: #ffb300; 
-    --rarity-glow-color: #ffd54f;
-}
 
 
 /* Стили для Russian (Родная) */
@@ -915,10 +861,6 @@ body.visual-effect-uranium::before {
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.4), 1px 1px 3px rgba(0,0,0,0.7);
     border: 1px solid rgba(255,255,255,0.2);
     font-family: 'Playfair Display SC', serif;
-}
-.inventory-card.border-russian {
-    border-color: #B71C1C; 
-    --rarity-glow-color: #f5f5f5;
 }
 
 /* Стили для Blackhole (Сверхмассивная) - ОБНОВЛЕНО */
@@ -942,10 +884,6 @@ body.visual-effect-uranium::before {
     }
 }
 
-.inventory-card.border-blackhole {
-    border-color: #E65100; 
-    --rarity-glow-color: #ffca28;
-}
 
 /* --- DEBUG PANEL STYLES --- */
 #debugPanel {
@@ -1097,10 +1035,7 @@ body.visual-effect-uranium::before {
     border: 1px solid #8e24aa;
     font-family: 'Orbitron', sans-serif;
 }
-.inventory-card.border-hybrid {
-    border-color: #6a1b9a; 
-    --rarity-glow-color: #64ffda;
-}
+
 
 /* Стили для Platinum (Благородная) */
 .roll-slot.rarity-platinum {
@@ -1110,10 +1045,6 @@ body.visual-effect-uranium::before {
     border: 1px solid #b0bec5;
     font-family: 'Playfair Display SC', serif;
     font-weight: bold;
-}
-.inventory-card.border-platinum {
-    border-color: #78909c; 
-    --rarity-glow-color: #ffffff;
 }
 
 /* Стили для Alt Error */
@@ -1133,10 +1064,6 @@ body.visual-effect-uranium::before {
     to { background-position: 20px 20px; }
 }
 
-.inventory-card.border-error_alt_1 {
-    border-color: #ff6d00;
-    --rarity-glow-color: #ff9e80;
-}
 
 /* --- Witchy Rarity Styles --- */
 
@@ -1194,10 +1121,6 @@ body.visual-effect-uranium::before {
 }
 
 
-.inventory-card.border-witchy {
-    border-color: #fafafa;
-    --rarity-glow-color: #7b1fa2;
-}
 
 /* Alt Blackhole (Singularity) */
 .roll-slot.rarity-blackhole-alt {
@@ -1207,10 +1130,6 @@ body.visual-effect-uranium::before {
     border: 1px solid #ff3d00;
     font-family: 'Orbitron', sans-serif;
     animation: blackhole-orange-pulse 3s infinite alternate;
-}
-.inventory-card.border-blackhole_alt_1 {
-    border-color: #ff3d00;
-    --rarity-glow-color: #ff9e80;
 }
 
 /* Alt Uranium (Unstable) */
@@ -1229,10 +1148,6 @@ body.visual-effect-uranium::before {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.95; }
 }
-.inventory-card.border-uranium_alt_1 {
-    border-color: #1b5e20;
-    --rarity-glow-color: #a5d6a7;
-}
 
 /* Alt Unbound (Unchained) */
 .roll-slot.rarity-unbound-alt {
@@ -1248,10 +1163,6 @@ body.visual-effect-uranium::before {
     from { box-shadow: inset 0 0 20px #8f230a; }
     to { box-shadow: inset 0 0 35px #d95d1e; }
 }
-.inventory-card.border-unbound_alt_1 {
-    border-color: #e65100;
-    --rarity-glow-color: #ffcc80;
-}
 
 /* Alt Space (Primordial) */
 .roll-slot.rarity-space-alt {
@@ -1260,10 +1171,6 @@ body.visual-effect-uranium::before {
     text-shadow: 0 0 10px #fff, 0 0 20px #b3e5fc;
     border: 1px solid #90caf9;
     font-family: 'Playfair Display SC', serif;
-}
-.inventory-card.border-space_alt_1 {
-    border-color: #80deea;
-    --rarity-glow-color: #ffffff;
 }
 
 /* --- New Alternative Card Styles --- */
@@ -1283,10 +1190,6 @@ body.visual-effect-uranium::before {
 @keyframes gentle-pulse {
     0%, 100% { box-shadow: inset 0 0 15px rgba(255,255,255,0.5); }
     50% { box-shadow: inset 0 0 25px rgba(200,200,200,0.5); }
-}
-.inventory-card.border-common_alt_1 {
-    border-color: #f5f5f5;
-    --rarity-glow-color: #ffffff;
 }
 
 
@@ -1314,10 +1217,6 @@ body.visual-effect-uranium::before {
 @keyframes speed-streak {
     0% { left: -100%; }
     100% { left: 100%; }
-}
-.inventory-card.border-epic_alt_1 {
-    border-color: #448aff;
-    --rarity-glow-color: #bbdefb;
 }
 
 
@@ -1349,10 +1248,6 @@ body.visual-effect-uranium::before {
   80% { transform: translate(-1px, -1px) rotate(1deg); }
   90% { transform: translate(1px, 2px) rotate(0deg); }
   100% { transform: translate(1px, -2px) rotate(-1deg); }
-}
-.inventory-card.border-legendary_alt_1 {
-    border-color: #ff4081;
-    --rarity-glow-color: #f8bbd0;
 }
 
 /* --- New Visual Effects Styles --- */
@@ -1526,12 +1421,6 @@ body.visual-effect-uranium::before {
     }
 }
 
-.inventory-card.border-garbage_alt_1 {
-    border-color: #ff9800;
-    --rarity-glow-color: #2196f3;
-}
-
-
 /* Alt Rare (Mila, the Crimson Tear) */
 .roll-slot.rarity-rare-alt {
     /* Глубокий, тревожный кроваво-красный фон */
@@ -1558,11 +1447,6 @@ body.visual-effect-uranium::before {
         box-shadow: inset 0 0 25px rgba(0,0,0,0.8);
         letter-spacing: 0.05em;
     }
-}
-
-.inventory-card.border-rare_alt_1 {
-    border-color: #b71c1c;
-    --rarity-glow-color: #e57373;
 }
 
 /* --- Эффект для Berserk (Стаг) --- */
@@ -1657,10 +1541,6 @@ body.visual-effect-uranium::before {
     from { box-shadow: inset 0 0 20px #ffcc80; }
     to { box-shadow: inset 0 0 30px #ffe0b2; }
 }
-.inventory-card.border-berserk_alt_1 {
-    border-color: #ffb74d;
-    --rarity-glow-color: #ffe0b2;
-}
 
 /* Alt Timestop (S.A.K.U.Y.A.) */
 .roll-slot.rarity-timestop-alt {
@@ -1688,35 +1568,23 @@ body.visual-effect-uranium::before {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
-.inventory-card.border-timestop_alt_1 {
-    border-color: #b0bec5;
-    --rarity-glow-color: #80deea;
-}
 
 /* --- Элементарные Карты 0.1.6 --- */
 .roll-slot.rarity-tungsten { background: linear-gradient(145deg, #CFD8DC, #78909c); color: #263238; border: 1px solid #90A4AE; }
-.inventory-card.border-tungsten { border-color: #B0BEC5; --rarity-glow-color: #ECEFF1; }
 
 .roll-slot.rarity-gold { background: linear-gradient(145deg, #FFF176, #FFD700); color: #422B00; border: 1px solid #FBC02D; animation: jackpot-pulse-glow 1.5s infinite alternate; }
-.inventory-card.border-gold { border-color: #FFD700; --rarity-glow-color: #FFF9C4; }
 
 .roll-slot.rarity-neon { background: #111; color: #FF1744; text-shadow: 0 0 5px #FF8A80, 0 0 10px #FF1744, 0 0 15px #D50000; border: 1px solid #FF5252; }
-.inventory-card.border-neon { border-color: #FF1744; --rarity-glow-color: #FF8A80; }
 
 .roll-slot.rarity-chlorine { background: linear-gradient(45deg, #C6FF00, #8BC34A); color: #33691E; border: 1px solid #AED581; }
-.inventory-card.border-chlorine { border-color: #8BC34A; --rarity-glow-color: #FFF176; }
 
 .roll-slot.rarity-carbon { background: #424242; color: #FAFAFA; border: 1px solid #757575; }
-.inventory-card.border-carbon { border-color: #424242; --rarity-glow-color: #9E9E9E; }
 
 .roll-slot.rarity-coal { background: linear-gradient(180deg, #212121, #000); color: #FF9800; text-shadow: 0 0 8px #E65100; border: 1px solid #424242; }
-.inventory-card.border-coal { border-color: #212121; --rarity-glow-color: #FF9800; }
 
 .roll-slot.rarity-graphite { background: linear-gradient(160deg, #757575, #424242); color: #ECEFF1; border: 1px solid #9E9E9E; }
-.inventory-card.border-graphite { border-color: #616161; --rarity-glow-color: #CFD8DC; }
 
 .roll-slot.rarity-diamond { background: radial-gradient(ellipse at center, #E0F7FA 0%, #B2EBF2 100%); color: #006064; text-shadow: 0 0 10px #fff, 0 0 20px #E0F7FA; border: 1px solid #80DEEA; }
-.inventory-card.border-diamond { border-color: #B2EBF2; --rarity-glow-color: #FFFFFF; }
 
 /* Seductress (Совращающая) */
 .roll-slot.rarity-seductress {
@@ -2337,10 +2205,6 @@ html.theme-classic {
     font-family: 'Cinzel Decorative', cursive;
     font-weight: bold;
 }
-.inventory-card.border-gal {
-    border-color: #000000;
-    --rarity-glow-color: #f0f0f0;
-}
 
 /* Натрий (Кристальная) */
 .roll-slot.rarity-sodium {
@@ -2349,10 +2213,6 @@ html.theme-classic {
     border: 1px solid #d1c4e9;
     text-shadow: 0 0 8px rgba(255,255,255,0.8);
 }
-.inventory-card.border-sodium {
-    border-color: #f8f8ff;
-    --rarity-glow-color: #d1c4e9;
-}
 
 /* Обсидиан (Остывшая) */
 .roll-slot.rarity-obsidian {
@@ -2360,10 +2220,6 @@ html.theme-classic {
     color: #FFCDD2;
     border: 1px solid #424242;
     text-shadow: 0 0 8px #E53935;
-}
-.inventory-card.border-obsidian {
-    border-color: #212121;
-    --rarity-glow-color: #E53935;
 }
 
 /* Лава (Расплавленная) */
@@ -2374,10 +2230,6 @@ html.theme-classic {
     text-shadow: 0 0 10px #FFCC80, 1px 1px 2px #000;
     animation: fire-pulse 2.5s infinite ease-in-out;
 }
-.inventory-card.border-lava {
-    border-color: #E64A19;
-    --rarity-glow-color: #FFCC80;
-}
 
 /* Гоблин Альт (Удовлетворённая) */
 .roll-slot.rarity-goblin-alt {
@@ -2386,10 +2238,6 @@ html.theme-classic {
     border: 1px solid #9CCC65;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
-.inventory-card.border-goblin_alt_1 {
-    border-color: #9CCC65;
-    --rarity-glow-color: #C5E1A5;
-}
 
 /* Соль (Солёная) */
 .roll-slot.rarity-salt {
@@ -2397,10 +2245,6 @@ html.theme-classic {
     color: #616161;
     border: 2px solid #E0E0E0;
     font-weight: bold;
-}
-.inventory-card.border-salt {
-    border-color: #FFFFFF;
-    --rarity-glow-color: #B0BEC5;
 }
 
 html.theme-salt {
@@ -2790,27 +2634,21 @@ html.theme-prestige {
 
 /* Aizen */
 .roll-slot.rarity-aizen { background: linear-gradient(145deg, #4A148C, #311B92); color: #E0E0E0; border: 1px solid #7E57C2; }
-.inventory-card.border-aizen { border-color: #4A148C; --rarity-glow-color: #D1C4E9; }
 
 /* Aizen Traitor */
 .roll-slot.rarity-aizen-traitor { background: linear-gradient(145deg, #ECEFF1, #B0BEC5); color: #212121; border: 1px solid #CFD8DC; text-shadow: 0 0 10px #80DEEA; }
-.inventory-card.border-aizen-traitor { border-color: #FFFFFF; --rarity-glow-color: #80DEEA; }
 
 /* Russian USSR */
 .roll-slot.rarity-russian-ussr { background: #CC0000; color: #FFD700; border: 1px solid #FFD700; text-shadow: 1px 1px 2px #000; font-family: 'Impact', sans-serif; }
-.inventory-card.border-russian_alt_ussr { border-color: #CC0000; --rarity-glow-color: #FFD700; }
 
 /* SSS DT */
 .roll-slot.rarity-sss-dt { background: linear-gradient(160deg, #6A1B9A, #4A148C); color: #F48FB1; border: 1px solid #AB47BC; text-shadow: 0 0 8px #FF80AB; }
-.inventory-card.border-sss_dt { border-color: #7B1FA2; --rarity-glow-color: #FF4081; }
 
 /* Silken Sushi */
 .roll-slot.rarity-silken-sushi { background: linear-gradient(135deg, #FFCDD2, #E57373); color: #212121; border: 1px solid #EF9A9A; }
-.inventory-card.border-silken_alt_sushi { border-color: #E57373; --rarity-glow-color: #FFF9C4; }
 
 /* Russian USA */
 .roll-slot.rarity-russian-usa { background: linear-gradient(135deg, #B22234, #3C3B6E); color: #FFFFFF; border: 1px solid #FFF; text-shadow: 0 0 5px #fff; }
-.inventory-card.border-russian_alt_usa { border-color: #3C3B6E; --rarity-glow-color: #B22234; }
 
 /* Индикатор новой карты в инвентаре */
 .inventory-card.new-card::after {
@@ -2875,10 +2713,6 @@ html.theme-prestige {
     border: 1px solid #D7CCC8;
     font-family: 'Georgia', serif;
 }
-.inventory-card.border-alt_maternal {
-    border-color: #FFFDE7; 
-    --rarity-glow-color: #FFFFFF;
-}
 
 /* Alt Witchy (Верховная) */
 .roll-slot.rarity-alt-witchy {
@@ -2889,10 +2723,6 @@ html.theme-prestige {
     font-family: 'Cinzel Decorative', cursive;
     text-transform: uppercase;
 }
-.inventory-card.border-alt_witchy {
-    border-color: #7B1FA2; 
-    --rarity-glow-color: #CE93D8;
-}
 
 /* Dionysia (Пьянящая) */
 .roll-slot.rarity-dionysia {
@@ -2901,10 +2731,6 @@ html.theme-prestige {
     text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
     border: 1px solid #8E24AA;
     font-family: 'Playfair Display SC', serif;
-}
-.inventory-card.border-dionysia {
-    border-color: #6A1B9A; 
-    --rarity-glow-color: #AED581;
 }
 
 /* Alt Mythic (Алая Королева) */
@@ -2915,10 +2741,6 @@ html.theme-prestige {
     border: 1px solid #D32F2F;
     text-transform: uppercase;
     animation: error-text-glitch 0.2s infinite alternate;
-}
-.inventory-card.border-alt_mythic {
-    border-color: #B71C1C; 
-    --rarity-glow-color: #ff5252;
 }
 
 /* Gojo (Безграничная) */
@@ -2938,10 +2760,6 @@ html.theme-prestige {
     background: radial-gradient(circle at center, rgba(129, 212, 250, 0.2) 0%, transparent 60%);
     animation: cosmic-vortex-spin 10s linear infinite;
 }
-.inventory-card.border-gojo {
-    border-color: #0288D1; 
-    --rarity-glow-color: #81D4FA;
-}
 
 /* Kefla (Извергающаяся) */
 .roll-slot.rarity-kefla {
@@ -2953,10 +2771,6 @@ html.theme-prestige {
     text-transform: uppercase;
     animation: screen-shake 0.1s infinite;
 }
-.inventory-card.border-kefla {
-    border-color: #8BC34A; 
-    --rarity-glow-color: #DCEDC8;
-}
 
 /* Naruko (Обольстительная) */
 .roll-slot.rarity-naruko {
@@ -2966,10 +2780,6 @@ html.theme-prestige {
     border: 1px solid #FF9800;
     font-family: 'Quicksand', sans-serif;
     font-weight: bold;
-}
-.inventory-card.border-naruko {
-    border-color: #FF9800; 
-    --rarity-glow-color: #FFCC80;
 }
 
 /* Smoke (Дымчатая) */
@@ -2985,10 +2795,6 @@ html.theme-prestige {
 }
 @keyframes smoke-text-fade {
     from { opacity: 0.7; } to { opacity: 1; }
-}
-.inventory-card.border-smoke {
-    border-color: #616161; 
-    --rarity-glow-color: #BDBDBD;
 }
 
 /* Лэйаут */
@@ -3034,10 +2840,6 @@ border: 2px solid #ff6a00;
 text-shadow: 0 0 8px #ff6a00, 0 0 16px rgba(255,106,0,0.6);
 font-family: 'Orbitron', sans-serif;
 }
-.inventory-card.border-bleached {
-border-color: #ff6a00;
---rarity-glow-color: #ff6a00;
-}
 
 
 .roll-slot.rarity-afro {
@@ -3048,10 +2850,6 @@ linear-gradient(160deg, #4a148c 0%, #7b1fa2 100%);
 border: 1px solid #ce93d8;
 text-shadow: 0 0 10px #ce93d8, 0 0 5px #ffffff;
 font-family: 'Orbitron', sans-serif;
-}
-.inventory-card.border-afro {
-border-color: #ce93d8;
---rarity-glow-color: #ce93d8;
 }
 
 /* Theme: Shinigami (черный/белый/оранжевый) */
@@ -3077,10 +2875,6 @@ html.theme-shinigami {
   border: 1px solid #BCAAA4;
   text-shadow: 0 0 8px rgba(188,170,164,0.6), 0 0 3px #000;
   font-family: 'Orbitron', sans-serif;
-}
-.inventory-card.border-scrap_golem {
-  border-color: #BCAAA4;
-  --rarity-glow-color: #BCAAA4;
 }
 
 /* Theme: Obsidian (тёмный базальт + оранжево-лавовый акцент) */
@@ -3225,10 +3019,6 @@ color: #1b1d20;
   border: 1px solid #9e9e9e;
   text-shadow: 0 0 8px rgba(255,255,255,0.15);
 }
-.inventory-card.border-orochi {
-  border-color: #9e9e9e;
-  --rarity-glow-color: #bdbdbd;
-}
 
 /* Western — песок/солнце/золото */
 .roll-slot.rarity-western {
@@ -3238,10 +3028,6 @@ color: #1b1d20;
     linear-gradient(160deg, #795548 0%, #5d4037 100%);
   border: 1px solid #ffca28;
   text-shadow: 0 0 8px rgba(255,202,40,0.6), 0 0 2px rgba(0,0,0,0.4);
-}
-.inventory-card.border-western {
-  border-color: #ffca28;
-  --rarity-glow-color: #ffca28;
 }
 
 /* Jade — кислотный изумруд */
@@ -3253,10 +3039,6 @@ color: #1b1d20;
   border: 1px solid #00e676;
   text-shadow: 0 0 10px rgba(0,230,118,0.6);
 }
-.inventory-card.border-jade {
-  border-color: #00e676;
-  --rarity-glow-color: #66ffa6;
-}
 
 /* Gamer — фиолет/неон */
 .roll-slot.rarity-gamer {
@@ -3266,10 +3048,6 @@ color: #1b1d20;
     repeating-linear-gradient( 45deg, rgba(255,255,255,0.04) 0 6px, transparent 6px 12px);
   border: 1px solid #7e57c2;
   text-shadow: 0 0 10px #7e57c2;
-}
-.inventory-card.border-gamer {
-  border-color: #7e57c2;
-  --rarity-glow-color: #b39ddb;
 }
 
 /* Fenek — тёплый песок */
@@ -3281,10 +3059,6 @@ color: #1b1d20;
   border: 1px solid #ffe0b2;
   text-shadow: 0 0 6px rgba(255,224,178,0.7);
 }
-.inventory-card.border-fenek {
-  border-color: #ffe0b2;
-  --rarity-glow-color: #ffe0b2;
-}
 
 /* Slime — «кубическая» слизь */
 .roll-slot.rarity-slime {
@@ -3295,38 +3069,27 @@ color: #1b1d20;
   border: 1px solid #a5d6a7;
   text-shadow: 0 0 8px rgba(165,214,167,0.7);
 }
-.inventory-card.border-slime {
-  border-color: #a5d6a7;
-  --rarity-glow-color: #a5d6a7;
-}
 
 /* Зловещая (Альт Годжо) */
 .roll-slot.rarity-malevolent { background: linear-gradient(160deg, #1A237E, #000); color: #E8EAF6; border: 1px solid #3F51B5; text-shadow: 0 0 10px #E91E63; }
-.inventory-card.border-gojo_alt { border-color: #1A237E; --rarity-glow-color: #E91E63; }
 
 /* Бобовая */
 .roll-slot.rarity-bean { background: linear-gradient(145deg, #66BB6A, #388E3C); color: #E8F5E9; border: 1px solid #81C784; }
-.inventory-card.border-bean { border-color: #4CAF50; --rarity-glow-color: #AED581; }
 
 /* Брейнрот */
 .roll-slot.rarity-brainrot { background: linear-gradient(145deg, #A1887F, #795548); color: #EFEBE9; border: 1px solid #BCAAA4; }
-.inventory-card.border-brainrot { border-color: #A1887F; --rarity-glow-color: #D7CCC8; }
 
 /* Лисья (Альт Фенек) */
 .roll-slot.rarity-fenek-alt { background: linear-gradient(145deg, #FFB74D, #FB8C00); color: #FFF3E0; border: 1px solid #FFCC80; }
-.inventory-card.border-fenek_alt { border-color: #FFB74D; --rarity-glow-color: #FFE0B2; }
 
 /* Студенческая (Альт Акула) */
 .roll-slot.rarity-student { background: linear-gradient(145deg, #B0BEC5, #78909c); color: #263238; border: 1px solid #CFD8DC; }
-.inventory-card.border-ellen_alt_student { border-color: #90A4AE; --rarity-glow-color: #E0F7FA; }
 
 /* Акулья */
 .roll-slot.rarity-shark { background: linear-gradient(145deg, #42A5F5, #1976D2); color: #E3F2FD; border: 1px solid #64B5F6; }
-.inventory-card.border-ellen { border-color: #2196F3; --rarity-glow-color: #81D4FA; }
 
 /* Деловая */
 .roll-slot.rarity-business { background: linear-gradient(145deg, #757575, #424242); color: #FAFAFA; border: 1px solid #9E9E9E; }
-.inventory-card.border-nicole { border-color: #616161; --rarity-glow-color: #BDBDBD; }
 
 /* --- Chocolate Event: Limited cards --- */
 
@@ -3337,10 +3100,6 @@ color: #1b1d20;
   text-shadow: 0 0 6px rgba(255,224,194,0.6), 0 0 2px #000;
   border: 1px solid rgba(255,224,194,0.25);
 }
-.inventory-card.border-choco_missy {
-  border-color: #C17F5F;
-  --rarity-glow-color: #ffd7a1;
-}
 
 /* Crema — карамельно-сливочная */
 .roll-slot.rarity-choco_crema {
@@ -3348,10 +3107,6 @@ color: #1b1d20;
   background: linear-gradient(145deg, #a87446 0%, #d6a162 100%);
   text-shadow: 0 0 6px rgba(255,243,224,0.6), 0 0 2px #000;
   border: 1px solid rgba(214,161,98,0.25);
-}
-.inventory-card.border-choco_crema {
-  border-color: #d9ac77;
-  --rarity-glow-color: #ffe0b2;
 }
 
 /* Насыщенная (Ева в шоколаде) — плотный какао */
@@ -3361,10 +3116,6 @@ color: #1b1d20;
   text-shadow: 0 0 6px rgba(255,215,181,0.5), 0 0 2px #000;
   border: 1px solid rgba(139,90,59,0.25);
 }
-.inventory-card.border-choco_common {
-  border-color: #8d5a3b;
-  --rarity-glow-color: #ffcc99;
-}
 
 /* Шоколадная (Шоколадка) — сбалансированная */
 .roll-slot.rarity-choco {
@@ -3372,10 +3123,6 @@ color: #1b1d20;
   background: linear-gradient(145deg, #6b3e2b 0%, #8e5a3c 100%);
   text-shadow: 0 0 6px rgba(255,230,204,0.6), 0 0 2px #000;
   border: 1px solid rgba(160,107,79,0.25);
-}
-.inventory-card.border-choco {
-  border-color: #a06b4f;
-  --rarity-glow-color: #ffd7a1;
 }
 
 /* Горькая (Эспрессо) — очень тёмная */
@@ -3385,10 +3132,6 @@ color: #1b1d20;
   text-shadow: 0 0 6px rgba(199,160,123,0.6), 0 0 2px #000;
   border: 1px solid rgba(89,60,43,0.35);
 }
-.inventory-card.border-choco_espresso {
-  border-color: #5c3b2a;
-  --rarity-glow-color: #b68a6a;
-}
 
 /* Белая (Белый шоколад) — светлая, сливочная */
 .roll-slot.rarity-choco_white {
@@ -3396,10 +3139,6 @@ color: #1b1d20;
   background: linear-gradient(145deg, #fff3e0 0%, #f6e7c9 100%);
   text-shadow: 0 0 6px rgba(255,255,255,0.65);
   border: 1px solid rgba(243,229,171,0.4);
-}
-.inventory-card.border-choco_white {
-  border-color: #f3e5ab;
-  --rarity-glow-color: #fff2c4;
 }
 
 /* Формованная (Шоколадная пусечка) — тёмный шоколад с розовым свечением */
@@ -3411,10 +3150,6 @@ color: #1b1d20;
   text-shadow: 0 0 8px rgba(255,179,198,0.75), 0 0 2px #000;
   border: 1px solid rgba(204,122,138,0.35);
 }
-.inventory-card.border-choco_lewd {
-  border-color: #cc7a8a;
-  --rarity-glow-color: #ffb3c6;
-}
 
 /* Мятная (Мисс Мята Перчинова) — холодный ментол */
 .roll-slot.rarity-choco_peppermint {
@@ -3422,10 +3157,6 @@ color: #1b1d20;
   background: linear-gradient(160deg, #274036 0%, #1d2e27 100%);
   text-shadow: 0 0 8px rgba(179,255,204,0.7), 0 0 2px #000;
   border: 1px solid rgba(127,209,168,0.35);
-}
-.inventory-card.border-choco_peppermint {
-  border-color: #7fd1a8;
-  --rarity-glow-color: #b3ffcc;
 }
 
 /* --- Шоколадный баннер --- */
@@ -3930,10 +3661,6 @@ html.theme-choco {
     repeating-linear-gradient(45deg, rgba(198,40,40,0.08) 0 8px, transparent 8px 16px);
   text-shadow: 0 0 6px rgba(255,255,255,0.6), 0 0 2px rgba(0,0,0,0.3);
   border: 1px solid rgba(198,40,40,0.45);
-}
-.inventory-card.border-hornet {
-  border-color: #c62828;
-  --rarity-glow-color: #ffcdd2;
 }
 
 /* Achievements — CHOCO: различать выполненные и невыполненные */

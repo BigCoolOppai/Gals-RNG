@@ -283,6 +283,32 @@ window.locales.en = {
         hween_tar: { name: "Tar", cardName: "Smolya", description: "Smolya is a work of tar art. Yes, she's frightening, yes, dangerous and scorching, but have you seen how hot she is?" },
         hween_goth: { name: "Gothic", cardName: "The Abhorrent Queen", description: "She's a Queen in name only; in reality, she's a princess. And something tells me the real queen isn't here 'just stepping out for groceries'... it's much more grim... BWAHAHAHA." },
         hween_slender: { name: "Slender", cardName: "Slenderwoman", description: "She is the mother of all scary stories, all tales by the campfire. She appears in photographs. In forest. Near you. Interference... Maybe you even like it..."},
+        hween_hybrid_safe: { name: "Spooked", cardName: "Haunted House Alex", description: "Alex went to the haunted house. She didn't find any ghosts, but she found a cute costume and lots of candy!" },
+        empty: { name: "Pure", cardName: "Empty", description: "A girl pure of any emotion. She is always deadly serious and cold." },
+        empty_angry: { name: "Angry", cardName: "Rage", description: "An angered incarnation. Pure fury is concentrated within her. Better not stay close, or you might get hit." },
+        empty_sad: { name: "Sad", cardName: "Sorrow", description: "A sorrowful incarnation. A complete concentration of sadness. You can try to comfort her, but it's unlikely to work." },
+        empty_happy: { name: "Happy", cardName: "Joy", description: "A joyful incarnation. She embodies all the brightest emotions. Being near her is always pleasant; a warm aura radiates from her." },
+        empty_scared: { name: "Scared", cardName: "Fear", description: "A frightened incarnation. A concentration of dread and panic. If a phobia exists, she owns it. She's afraid of you too." },
+        death: { 
+            name: "Pale", 
+            cardName: "Mistress Death", 
+            description: "The final destination. She has an icy gaze and absolute power. Rumor has it she doesn't mind lingering in the living world if you treat her to something tasty (and pay with your soul)." 
+        },
+        famine: { 
+            name: "Emaciated", 
+            cardName: "Famine", 
+            description: "She is always hungry. Your fridge (and life force) is in danger. She looks fragile, but her appetite can consume nations." 
+        },
+        war: { 
+            name: "Belligerent", 
+            cardName: "War Rider", 
+            description: "She lives for battle. Her sword burns with eternal fire, and her temper is hotter than magma. Better not argue with her... unless you like it rough." 
+        },
+        pestilence: { 
+            name: "Plagued", 
+            cardName: "Plague Maiden", 
+            description: "Her touch is toxic, her breath poisonous. She brings sickness, yet you can't look away. Is it love, or just a fever?" 
+        },
         
     },
     // Shop Items

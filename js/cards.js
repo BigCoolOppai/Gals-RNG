@@ -216,7 +216,19 @@ window.RARITIES_DATA = [
         color: "#673AB7", glowColor: "#B39DDB",
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 7000000,
+        tags: ["futanari", "ghost", "halloween", "costume"], // Добавим теги сразу (см. пункт 4)
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
+        // --- ДОБАВЛЕНО: Safe Version ---
+        safeVersion: {
+            nameKey: "cards.hween_hybrid_safe.name",
+            card: {
+                name: "Haunted Alex (Safe)", // Фолбэк имя
+                nameKey: "cards.hween_hybrid_safe.cardName",
+                image: "img/limited/halloween2025/cardHHybrid_safe.png",
+                descriptionKey: "cards.hween_hybrid_safe.description"
+            }
+        },
+        // -------------------------------
         card: { nameKey: "cards.hween_hybrid.cardName", image: "img/limited/halloween2025/cardHHybrid.png", descriptionKey: "cards.hween_hybrid.description" }
     },
     {
@@ -375,6 +387,21 @@ window.RARITIES_DATA = [
             descriptionKey: "cards.president.description"
         }
     },
+    {
+        id: "death",
+        nameKey: "cards.death.name",
+        minPrestige: 2,
+        probabilityBase: 1 / 13666000, // 13 (смерть) + 666 (ад)
+        color: "#B0BEC5", // Бледно-серый
+        glowColor: "#00E5FF", // Призрачный циан
+        cssClass: "rarity-legendary", // Используем существующий класс для базы
+        currencyOnDuplicate: 1366600,
+        card: {
+            nameKey: "cards.death.cardName",
+            image: "img/cardDeath.png",
+            descriptionKey: "cards.death.description"
+        }
+    },
         {
         id: "kefla",
         nameKey: "cards.kefla.name",
@@ -389,6 +416,52 @@ window.RARITIES_DATA = [
             nameKey: "cards.kefla.cardName",
             image: "img/cardKefla.png",
             descriptionKey: "cards.kefla.description"
+        }
+    },
+    
+    {
+        id: "famine",
+        nameKey: "cards.famine.name",
+        minPrestige: 2,
+        probabilityBase: 1 / 12606006, // Отсылка к Откровению 6:6
+        color: "#8D6E63", // Изможденный коричневый
+        glowColor: "#FFCC80", // Сухой желтый
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 1260600,
+        card: {
+            nameKey: "cards.famine.cardName",
+            image: "img/cardFamine.png",
+            descriptionKey: "cards.famine.description"
+        }
+    },
+    {
+        id: "war",
+        nameKey: "cards.war.name",
+        minPrestige: 2,
+        probabilityBase: 1 / 12500000,
+        color: "#D32F2F", 
+        glowColor: "#FF5252", // Огненный красный
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 1250000,
+        card: {
+            nameKey: "cards.war.cardName",
+            image: "img/cardWar.png", // Обрати внимание на расширение .jpg
+            descriptionKey: "cards.war.description"
+        }
+    },
+    {
+        id: "pestilence",
+        nameKey: "cards.pestilence.name",
+        minPrestige: 2,
+        probabilityBase: 1 / 12400000,
+        color: "#388E3C", 
+        glowColor: "#76FF03", // Ядовитый зеленый
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 1240000,
+        card: {
+            nameKey: "cards.pestilence.cardName",
+            image: "img/cardPestilence.png", // Обрати внимание на расширение .jpg
+            descriptionKey: "cards.pestilence.description"
         }
     },
     {
@@ -903,6 +976,80 @@ window.RARITIES_DATA = [
             nameKey: "cards.western.cardName",
             image: "img/cardWestern.png",
             descriptionKey: "cards.western.description"
+        }
+    },
+    {
+        id: "empty",
+        nameKey: "cards.empty.name",
+        probabilityBase: 1 / 1600000,
+        color: "#CFD8DC", // Холодный светло-серый
+        glowColor: "#ECEFF1",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 160000,
+        card: {
+            nameKey: "cards.empty.cardName",
+            image: "img/cardEmpty.png",
+            descriptionKey: "cards.empty.description"
+        }
+    },
+    {
+        id: "empty_angry",
+        nameKey: "cards.empty_angry.name",
+        displayParentId: "empty",
+        probabilityBase: 1 / 1600000,
+        color: "#D32F2F", // Агрессивный красный
+        glowColor: "#FF5252",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 160000,
+        card: {
+            nameKey: "cards.empty_angry.cardName",
+            image: "img/cardEmptyA.png",
+            descriptionKey: "cards.empty_angry.description"
+        }
+    },
+    {
+        id: "empty_sad",
+        nameKey: "cards.empty_sad.name",
+        displayParentId: "empty",
+        probabilityBase: 1 / 1600000,
+        color: "#1976D2", // Глубокий синий
+        glowColor: "#448AFF",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 160000,
+        card: {
+            nameKey: "cards.empty_sad.cardName",
+            image: "img/cardEmptyS.png",
+            descriptionKey: "cards.empty_sad.description"
+        }
+    },
+    {
+        id: "empty_happy",
+        nameKey: "cards.empty_happy.name",
+        displayParentId: "empty",
+        probabilityBase: 1 / 1600000,
+        color: "#FBC02D", // Яркий желтый
+        glowColor: "#FFF176",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 160000,
+        card: {
+            nameKey: "cards.empty_happy.cardName",
+            image: "img/cardEmptyH.png",
+            descriptionKey: "cards.empty_happy.description"
+        }
+    },
+    {
+        id: "empty_scared",
+        nameKey: "cards.empty_scared.name",
+        displayParentId: "empty",
+        probabilityBase: 1 / 1600000,
+        color: "#7B1FA2", // Тревожный фиолетовый
+        glowColor: "#E040FB",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 160000,
+        card: {
+            nameKey: "cards.empty_scared.cardName",
+            image: "img/cardEmptyF.png",
+            descriptionKey: "cards.empty_scared.description"
         }
     },
     {
@@ -2254,14 +2401,22 @@ const SHOP_DATA = {
 // Прочие константы
 const ROLL_ANIMATION_ITEMS_COUNT = 50;
 
+// --- ОПТИМИЗАЦИЯ: Создаем Map для мгновенного поиска (O(1)) ---
+// Это избавляет от необходимости использовать .find() каждый раз
+window.RARITY_MAP = new Map(window.RARITIES_DATA.map(r => [r.id, r]));
+
 /**
  * Получает данные о редкости с учётом настроек игрока (safe-версия).
+ * Оптимизировано через Map.
  * @param {string} id - ID редкости.
- * @param {object|null} [playerData] - Объект данных игрока (если не передан, попробуем взять из Game).
+ * @param {object|null} [playerData] - Объект данных игрока.
  * @returns {object|null}
  */
 function getRarityDataById(id, playerData = (typeof Game !== 'undefined' ? Game.getPlayerData() : null)) {
-    const originalData = RARITIES_DATA.find(r => r.id === id);
+    // БЫЛО: const originalData = RARITIES_DATA.find(r => r.id === id);
+    // СТАЛО: Мгновенный доступ
+    const originalData = window.RARITY_MAP.get(id);
+    
     if (!originalData) return null;
 
     const specialContentEnabled = playerData ? !!playerData.specialContentEnabled : true;
@@ -2270,10 +2425,7 @@ function getRarityDataById(id, playerData = (typeof Game !== 'undefined' ? Game.
         return originalData;
     }
 
-    // Собираем safe-версию поверх оригинала (поверхностное слияние достаточно)
-    const safeData = {
-        ...originalData,
-        ...originalData.safeVersion
-    };
-    return safeData;
+    // Собираем safe-версию поверх оригинала
+    // Используем Object.assign для небольшой оптимизации по сравнению со спредом, но это микро-оптимизация
+    return Object.assign({}, originalData, originalData.safeVersion);
 }
