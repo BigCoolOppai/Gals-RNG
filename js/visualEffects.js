@@ -1665,6 +1665,396 @@ const VisualEffects = {
             this._cleanupScope(glitchOverlay, scope, overlayClass);
         };
         },
+        // --- 1. GAL: Divine Light (Переработано: мягче и атмосфернее) ---
+        gal(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const scope = this._createScope(glitchOverlay, 'active-effect-gal');
+
+            // Мягкий золотистый свет сверху
+            const lightSource = document.createElement('div');
+            Object.assign(lightSource.style, {
+                position: 'absolute', top: '-20%', left: '0', right: '0', height: '80%',
+                background: 'radial-gradient(ellipse at top, rgba(255, 255, 220, 0.4) 0%, rgba(255, 215, 0, 0.1) 40%, transparent 80%)',
+                pointerEvents: 'none', mixBlendMode: 'screen'
+            });
+            scope.appendChild(lightSource);
+
+            // Частицы пыльцы (божественные искры)
+            const particles = [];
+            const count = 30;
+            for(let i=0; i<count; i++) {
+                const p = document.createElement('div');
+                const size = Math.random() * 4 + 2;
+                Object.assign(p.style, {
+                    position: 'absolute', width: size+'px', height: size+'px',
+                    background: 'white', borderRadius: '50%',
+                    boxShadow: '0 0 10px #FFF700', opacity: 0,
+                    left: Math.random()*100 + '%', top: Math.random()*100 + '%'
+                });
+                scope.appendChild(p);
+                
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(p, {
+                        y: -100 - Math.random() * 100,
+                        opacity: Math.random() * 0.7 + 0.3,
+                        duration: Math.random() * 3 + 2,
+                        repeat: -1, yoyo: true, ease: 'sine.inOut',
+                        delay: Math.random() * 2
+                    });
+                }
+            }
+
+            // Мягкая пульсация света
+            if (typeof gsap !== 'undefined') {
+                gsap.fromTo(lightSource, { opacity: 0.5 }, { opacity: 0.8, duration: 4, yoyo: true, repeat: -1, ease: "sine.inOut" });
+            }
+
+            return () => this._cleanupScope(glitchOverlay, scope, 'active-effect-gal');
+        },
+
+        // --- 2. WAR: Battlefield (Больше кинематографичности) ---
+        war(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const scope = this._createScope(glitchOverlay, 'active-effect-war');
+
+            // 1. Оранжевое марево снизу (огонь войны)
+            const fireGlow = document.createElement('div');
+            Object.assign(fireGlow.style, {
+                position: 'absolute', bottom: 0, left: 0, width: '100%', height: '40%',
+                background: 'linear-gradient(to top, rgba(255, 69, 0, 0.4), transparent)',
+                mixBlendMode: 'screen', pointerEvents: 'none'
+            });
+            scope.appendChild(fireGlow);
+
+            // 2. Дым/Пепел (темные пятна)
+            const smokeContainer = document.createElement('div');
+            Object.assign(smokeContainer.style, { position: 'absolute', inset: 0, overflow: 'hidden' });
+            scope.appendChild(smokeContainer);
+
+            // Спавнер искр (быстрые, резкие)
+            const spawnEmber = () => {
+                if(!scope.isConnected) return;
+                const e = document.createElement('div');
+                const w = Math.random() * 30 + 5; // Длинные искры (треки)
+                Object.assign(e.style, {
+                    position: 'absolute', width: w + 'px', height: '2px', background: 'linear-gradient(90deg, #FFC107, transparent)',
+                    left: Math.random() * 120 - 10 + 'vw', top: Math.random() * 100 + 'vh',
+                    transform: 'rotate(-45deg)', opacity: 0.8, boxShadow: '0 0 5px #FF5722'
+                });
+                scope.appendChild(e);
+
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(e, {
+                        x: Math.random() * 200 + 100,
+                        y: -Math.random() * 200 - 100,
+                        opacity: 0,
+                        duration: Math.random() * 0.5 + 0.5, // Очень быстро
+                        ease: 'power1.out',
+                        onComplete: () => e.remove()
+                    });
+                }
+            };
+            const interval = setInterval(spawnEmber, 80);
+
+            return () => {
+                clearInterval(interval);
+                this._cleanupScope(glitchOverlay, scope, 'active-effect-war');
+            };
+        },
+
+        // --- 3. FAMINE: Swarm (Без изменений, пользователю понравилось) ---
+        famine(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const scope = this._createScope(glitchOverlay, 'active-effect-famine');
+            scope.style.backgroundColor = 'rgba(60, 50, 30, 0.15)';
+            scope.style.backdropFilter = 'sepia(40%) contrast(1.1)';
+
+            const count = 35;
+            for(let i=0; i<count; i++) {
+                const fly = document.createElement('div');
+                Object.assign(fly.style, {
+                    position: 'absolute', width: '2px', height: '2px', background: '#1a1a00', borderRadius: '50%',
+                    left: '50%', top: '50%', pointerEvents: 'none'
+                });
+                scope.appendChild(fly);
+                
+                if (typeof gsap !== 'undefined') {
+                    const animateFly = () => {
+                        if (!fly.isConnected) return;
+                        gsap.to(fly, {
+                            x: Math.random() * window.innerWidth,
+                            y: Math.random() * window.innerHeight,
+                            duration: Math.random() * 1.5 + 0.5, // Быстрее и хаотичнее
+                            ease: 'power1.inOut',
+                            onComplete: animateFly
+                        });
+                    };
+                    gsap.set(fly, { x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight });
+                    animateFly();
+                }
+            }
+            return () => this._cleanupScope(glitchOverlay, scope, 'active-effect-famine');
+        },
+
+        // --- 4. DEATH: Grim Mist (Улучшен туман) ---
+        death(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const scope = this._createScope(glitchOverlay, 'active-effect-death');
+
+            // Слоеный туман (через CSS анимацию градиента)
+            const fog = document.createElement('div');
+            Object.assign(fog.style, {
+                position: 'absolute', bottom: '-20%', left: '-50%', width: '200%', height: '70%',
+                background: 'radial-gradient(ellipse at center, rgba(200,230,255,0.15) 0%, transparent 70%)',
+                filter: 'blur(30px)', opacity: 0.6,
+                transform: 'translate3d(0,0,0)' // GPU accel
+            });
+            scope.appendChild(fog);
+
+            // Холодный фильтр
+            const chillOverlay = document.createElement('div');
+            Object.assign(chillOverlay.style, {
+                position: 'absolute', inset: 0, background: 'rgba(0, 50, 100, 0.1)', mixBlendMode: 'overlay', pointerEvents: 'none'
+            });
+            scope.appendChild(chillOverlay);
+
+            if (typeof gsap !== 'undefined') {
+                gsap.to(fog, { x: '10%', duration: 10, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+                gsap.to(fog, { opacity: 0.3, duration: 5, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+            }
+
+            return () => this._cleanupScope(glitchOverlay, scope, 'active-effect-death');
+        },
+
+        // --- 5. PESTILENCE: Miasma (Ок) ---
+        pestilence(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const scope = this._createScope(glitchOverlay, 'active-effect-pestilence');
+
+            const createBubble = () => {
+                if (!scope.isConnected) return;
+                const b = document.createElement('div');
+                const size = Math.random() * 20 + 5;
+                Object.assign(b.style, {
+                    position: 'absolute', width: size + 'px', height: size + 'px',
+                    border: '1px solid rgba(100, 255, 50, 0.4)', borderRadius: '50%',
+                    background: 'radial-gradient(circle, rgba(100,255,50,0.1), transparent)',
+                    bottom: '-30px', left: Math.random() * 100 + 'vw'
+                });
+                scope.appendChild(b);
+
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(b, {
+                        y: -window.innerHeight - 50,
+                        x: `+=${Math.random() * 50 - 25}`,
+                        duration: Math.random() * 8 + 4,
+                        ease: 'linear',
+                        onComplete: () => b.remove()
+                    });
+                }
+            };
+            const interval = setInterval(createBubble, 250);
+            return () => { clearInterval(interval); this._cleanupScope(glitchOverlay, scope, 'active-effect-pestilence'); };
+        },
+
+        // --- 6. SODIUM: Volatile (Фикс: теперь это электрические разряды) ---
+        sodium(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const scope = this._createScope(glitchOverlay, 'active-effect-sodium');
+
+            const spawnZap = () => {
+                if (!scope.isConnected) return;
+                const zap = document.createElement('div');
+                
+                // Используем clip-path для создания "молнии" или ломаной линии
+                const w = Math.random() * 150 + 50;
+                Object.assign(zap.style, {
+                    position: 'absolute', width: w + 'px', height: '4px', background: '#fff',
+                    boxShadow: '0 0 8px #00E5FF, 0 0 15px #FFF', 
+                    left: Math.random() * 80 + 10 + 'vw', top: Math.random() * 80 + 10 + 'vh',
+                    transform: `rotate(${Math.random() * 360}deg)`,
+                    clipPath: 'polygon(0% 40%, 30% 0%, 60% 100%, 100% 40%, 70% 80%, 40% 10%)', // Зигзаг
+                    opacity: 0
+                });
+                scope.appendChild(zap);
+
+                if (typeof gsap !== 'undefined') {
+                    // Резкая вспышка и исчезновение
+                    const tl = gsap.timeline({ onComplete: () => zap.remove() });
+                    tl.to(zap, { opacity: 1, duration: 0.05 })
+                      .to(zap, { opacity: 0, duration: 0.1, delay: 0.05 });
+                }
+            };
+            const interval = setInterval(spawnZap, 120); // Чуть реже, но заметнее
+
+            return () => { clearInterval(interval); this._cleanupScope(glitchOverlay, scope, 'active-effect-sodium'); };
+        },
+
+        // --- 7. HWEEN_SADAKO: Cursed Tape (VHS + Jumpscare) ---
+        hween_sadako(targets) {
+            const { glitchOverlay } = targets || {};
+            const gameWrapper = document.getElementById('gameWrapper'); // Исправлено: берем wrapper
+            if (!glitchOverlay || !gameWrapper) return null;
+            
+            const scope = this._createScope(glitchOverlay, 'active-effect-sadako');
+
+            // 1. VHS Scanlines
+            const scanlines = document.createElement('div');
+            Object.assign(scanlines.style, {
+                position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10,
+                background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%)',
+                backgroundSize: '100% 4px',
+                mixBlendMode: 'overlay'
+            });
+            scope.appendChild(scanlines);
+
+            // 2. Рыбий глаз (виньетка + радиальный градиент)
+            const fisheye = document.createElement('div');
+            Object.assign(fisheye.style, {
+                position: 'absolute', inset: 0, pointerEvents: 'none',
+                background: 'radial-gradient(circle, transparent 50%, black 140%)',
+                boxShadow: 'inset 0 0 100px rgba(0,0,0,0.8)'
+            });
+            scope.appendChild(fisheye);
+
+            // 3. Скример (Процедурный)
+            const jumpscareText = document.createElement('div');
+            jumpscareText.textContent = "LOOK BEHIND";
+            Object.assign(jumpscareText.style, {
+                position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                fontFamily: 'Courier New, monospace', fontSize: '5rem', color: 'red', fontWeight: 'bold',
+                textShadow: '5px 0 0 black', opacity: 0, pointerEvents: 'none', zIndex: 20
+            });
+            scope.appendChild(jumpscareText);
+
+            let glitchInterval;
+            if (typeof gsap !== 'undefined') {
+                const doGlitch = () => {
+                    // RGB Split эффект через text-shadow wrapper-а (эмуляция)
+                    // Тряска wrapper-а (ВАЖНО: не body!)
+                    gsap.to(gameWrapper, { x: 5, duration: 0.05, yoyo: true, repeat: 5 });
+                    gsap.to(gameWrapper, { filter: 'grayscale(100%) contrast(2) hue-rotate(90deg)', duration: 0.1, yoyo: true, repeat: 1 });
+                    
+                    // Редкий скример (10% шанс при глитче)
+                    if (Math.random() < 0.1) {
+                        gsap.to(jumpscareText, { opacity: 1, duration: 0.05, yoyo: true, repeat: 3 });
+                    }
+                };
+                glitchInterval = setInterval(() => {
+                    if(Math.random() > 0.6) doGlitch();
+                }, 1200);
+            }
+
+            return () => {
+                clearInterval(glitchInterval);
+                // Сбрасываем стили с враппера
+                if(gameWrapper) { 
+                    gameWrapper.style.transform = ''; 
+                    gameWrapper.style.filter = ''; 
+                }
+                this._cleanupScope(glitchOverlay, scope, 'active-effect-sadako');
+            };
+        },
+
+        // --- 8. METALHEAD: Bass Drop (Фикс бага) ---
+        metalhead(targets) {
+            // ВАЖНО: Анимируем gameWrapper, а не body!
+            const gameWrapper = document.getElementById('gameWrapper'); 
+            if (!gameWrapper) return null;
+            
+            let beatInterval;
+            if (typeof gsap !== 'undefined') {
+                const beat = () => {
+                    // Пульсация
+                    gsap.to(gameWrapper, { scale: 1.02, duration: 0.05, ease: 'power1.out', yoyo: true, repeat: 1 });
+                    // Хроматическая аберрация (через text-shadow body или фильтр)
+                    gsap.to(gameWrapper, { filter: 'brightness(1.2)', duration: 0.05, yoyo: true, repeat: 1 });
+                };
+                beatInterval = setInterval(beat, 500); // 120 BPM
+            }
+
+            return () => {
+                clearInterval(beatInterval);
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(gameWrapper, { scale: 1, filter: '', duration: 0.1 });
+                }
+            };
+        },
+
+        // --- 9. EMPTY_SCARED: Panic (Фикс бага) ---
+        empty_scared(targets) {
+            const { glitchOverlay } = targets || {};
+            const gameWrapper = document.getElementById('gameWrapper');
+            if (!glitchOverlay || !gameWrapper) return null;
+            
+            const scope = this._createScope(glitchOverlay, 'active-effect-panic');
+
+            // Сильная черная виньетка
+            const vignette = document.createElement('div');
+            Object.assign(vignette.style, {
+                position: 'absolute', inset: 0,
+                background: 'radial-gradient(circle, transparent 40%, black 120%)',
+                pointerEvents: 'none'
+            });
+            scope.appendChild(vignette);
+
+            if (typeof gsap !== 'undefined') {
+                // Дыхание виньетки
+                gsap.to(vignette, { background: 'radial-gradient(circle, transparent 30%, black 150%)', duration: 0.3, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+                // Мелкая дрожь камеры (Wrapper!)
+                gsap.to(gameWrapper, { x: 2, y: 2, duration: 0.05, yoyo: true, repeat: -1, ease: 'linear' });
+            }
+
+            return () => {
+                if(gameWrapper) {
+                    gsap.killTweensOf(gameWrapper);
+                    gsap.set(gameWrapper, { x: 0, y: 0 });
+                }
+                this._cleanupScope(glitchOverlay, scope, 'active-effect-panic');
+            };
+        },
+
+        // --- 10. WESTERN: Dust Bowl (Фикс бага) ---
+        western(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const scope = this._createScope(glitchOverlay, 'active-effect-western');
+
+            const spawnSand = () => {
+                if (!scope.isConnected) return;
+                const s = document.createElement('div');
+                const w = Math.random() * 5 + 2;
+                Object.assign(s.style, {
+                    position: 'absolute', width: w + 'px', height: '2px', background: '#d2b48c',
+                    left: '-20px', top: Math.random() * 100 + 'vh', opacity: 0.7,
+                    boxShadow: '0 0 2px #8B4513'
+                });
+                scope.appendChild(s);
+
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(s, {
+                        x: window.innerWidth + 50,
+                        y: `+=${Math.random() * 100 - 50}`, // Снос ветром
+                        rotation: Math.random() * 360,
+                        duration: Math.random() * 1 + 0.5, // Быстро
+                        ease: 'linear',
+                        onComplete: () => s.remove()
+                    });
+                }
+            };
+            const interval = setInterval(spawnSand, 30); // Плотный поток
+
+            return () => {
+                clearInterval(interval);
+                this._cleanupScope(glitchOverlay, scope, 'active-effect-western');
+            };
+        },
             
     }
 };

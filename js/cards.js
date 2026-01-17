@@ -356,6 +356,21 @@ window.RARITIES_DATA = [
         card: { nameKey: "cards.hween_eyeling.cardName", image: "img/limited/halloween2025/cardEyeling.png", descriptionKey: "cards.hween_eyeling.description" }
     },
     {
+        id: "zeus",
+        nameKey: "cards.zeus.name",
+        minPrestige: 5, // <--- Добавлено
+        probabilityBase: 1 / 15000030,
+        color: "#00B0FF", 
+        glowColor: "#FFFFFF",
+        cssClass: "rarity-godly",
+        currencyOnDuplicate: 1500000,
+        card: {
+            nameKey: "cards.zeus.cardName",
+            image: "img/cardZeus.png",
+            descriptionKey: "cards.zeus.description"
+        }
+    },
+    {
         id: "gojo",
         nameKey: "cards.gojo.name",
         minPrestige: 3, // Доступна после 3 ребёрнов
@@ -557,7 +572,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 987654,
         mechanicalEffect: {
             type: "duplicate_collector",
-            luckBonusPerDuplicate: 0.01 // унифицировано с логикой игры
+            luckBonusPerDuplicate: 0.01 
         },
         card: {
             name: "FY-3741 alpha",
@@ -566,6 +581,21 @@ window.RARITIES_DATA = [
             descriptionKey: "cards.blackhole.description"
         }
     },
+    {
+        id: "pulchra",
+        nameKey: "cards.pulchra.name",
+        probabilityBase: 1 / 7777777, 
+        color: "#E91E63", 
+        glowColor: "#F48FB1",
+        cssClass: "rarity-mythic", 
+        currencyOnDuplicate: 777777,
+        card: {
+            nameKey: "cards.pulchra.cardName",
+            image: "img/cardPulchra.png",
+            descriptionKey: "cards.pulchra.description"
+        }
+    },
+    
     {
         id: "obsidian",
         nameKey: "cards.obsidian.name",
@@ -613,6 +643,20 @@ window.RARITIES_DATA = [
             nameKey: "cards.altShroom.cardName",
             image: "img/altShroom.png",
             descriptionKey: "cards.altShroom.description"
+        }
+    },
+    {
+        id: "demo",
+        nameKey: "cards.demo.name",
+        probabilityBase: 1 / 6666666, 
+        color: "#880E4F", 
+        glowColor: "#FF5252",
+        cssClass: "rarity-mythic",
+        currencyOnDuplicate: 666666,
+        card: {
+            nameKey: "cards.demo.cardName",
+            image: "img/cardDemo.png",
+            descriptionKey: "cards.demo.description"
         }
     },
     {
@@ -700,6 +744,21 @@ window.RARITIES_DATA = [
             nameKey: "cards.raven.cardName",
             image: "img/altAmy.png",
             descriptionKey: "cards.raven.description"
+        }
+    },
+    {
+        id: "anubis",
+        nameKey: "cards.anubis.name",
+        minPrestige: 5, 
+        probabilityBase: 1 / 4500000,
+        color: "#FFD700", 
+        glowColor: "#212121",
+        cssClass: "rarity-mythic",
+        currencyOnDuplicate: 450000,
+        card: {
+            nameKey: "cards.anubis.cardName",
+            image: "img/cardAnubis.png",
+            descriptionKey: "cards.anubis.description"
         }
     },
     {
@@ -852,6 +911,22 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "alt_midday",
+        nameKey: "cards.alt_midday.name",
+        displayParentId: "midday",
+        minPrestige: 5, 
+        probabilityBase: 1 / 3000986,
+        color: "#FF3D00", 
+        glowColor: "#FFAB40",
+        cssClass: "rarity-mythic",
+        currencyOnDuplicate: 300000,
+        card: {
+            nameKey: "cards.alt_midday.cardName",
+            image: "img/altMidday.png",
+            descriptionKey: "cards.alt_midday.description"
+        }
+    },
+    {
         id: "ellen",
         nameKey: "cards.ellen.name",
         minPrestige: 2,
@@ -899,6 +974,21 @@ window.RARITIES_DATA = [
             nameKey: "cards.alt_maternal.cardName",
             image: "img/altGoat.png",
             descriptionKey: "cards.alt_maternal.description"
+        }
+    },
+    {
+        id: "yaga",
+        nameKey: "cards.yaga.name",
+        minPrestige: 5, 
+        probabilityBase: 1 / 2000333,
+        color: "#9C27B0", 
+        glowColor: "#E040FB",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 200000,
+        card: {
+            nameKey: "cards.yaga.cardName",
+            image: "img/cardYaga.png",
+            descriptionKey: "cards.yaga.description"
         }
     },
     {
@@ -1084,6 +1174,21 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "midday",
+        nameKey: "cards.midday.name",
+        minPrestige: 5, 
+        probabilityBase: 1 / 1500505,
+        color: "#FFF9C4", 
+        glowColor: "#FFFF00",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 150000,
+        card: {
+            nameKey: "cards.midday.cardName",
+            image: "img/cardMidday.png",
+            descriptionKey: "cards.midday.description"
+        }
+    },
+    {
         id: "vacation",
         nameKey: "cards.vacation.name",
         minPrestige: 1,
@@ -1165,6 +1270,21 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "harpy",
+        nameKey: "cards.harpy.name",
+        minPrestige: 5, // <--- Добавлено
+        probabilityBase: 1 / 1100000,
+        color: "#42A5F5", 
+        glowColor: "#E3F2FD",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 110000,
+        card: {
+            nameKey: "cards.harpy.cardName",
+            image: "img/cardHarpy.png",
+            descriptionKey: "cards.harpy.description"
+        }
+    },
+    {
         id: "choco_missy",
         nameKey: "cards.choco_missy.name",
         probabilityBase: 1 / 1000001, // 1 / 1 млн
@@ -1207,6 +1327,21 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "leshy",
+        nameKey: "cards.leshy.name",
+        minPrestige: 5, 
+        probabilityBase: 1 / 900000,
+        color: "#33691E", 
+        glowColor: "#8BC34A",
+        cssClass: "rarity-epic",
+        currencyOnDuplicate: 90000,
+        card: {
+            nameKey: "cards.leshy.cardName",
+            image: "img/cardLeshy.png",
+            descriptionKey: "cards.leshy.description"
+        }
+    },
+    {
         id: "silken_alt_sushi",
         nameKey: "cards.silken_alt_sushi.name",
         displayParentId: "silken",
@@ -1221,6 +1356,21 @@ window.RARITIES_DATA = [
             nameKey: "cards.silken_alt_sushi.cardName",
             image: "img/altAsian.png",
             descriptionKey: "cards.silken_alt_sushi.description"
+        }
+    },
+    {
+        id: "frog_princess",
+        nameKey: "cards.frog_princess.name",
+        minPrestige: 5, 
+        probabilityBase: 1 / 750000,
+        color: "#76FF03", 
+        glowColor: "#CCFF90",
+        cssClass: "rarity-epic",
+        currencyOnDuplicate: 75000,
+        card: {
+            nameKey: "cards.frog_princess.cardName",
+            image: "img/cardFrogPrincess.png",
+            descriptionKey: "cards.frog_princess.description"
         }
     },
     {
@@ -1290,6 +1440,21 @@ window.RARITIES_DATA = [
             nameKey: "cards.diamond.cardName",
             image: "img/altDiamond.png",
             descriptionKey: "cards.diamond.description"
+        }
+    },
+    {
+        id: "domovoi",
+        nameKey: "cards.domovoi.name",
+        minPrestige: 5,
+        probabilityBase: 1 / 500000,
+        color: "#795548", 
+        glowColor: "#D7CCC8",
+        cssClass: "rarity-epic",
+        currencyOnDuplicate: 50000,
+        card: {
+            nameKey: "cards.domovoi.cardName",
+            image: "img/cardDomovoi.png",
+            descriptionKey: "cards.domovoi.description"
         }
     },
     {

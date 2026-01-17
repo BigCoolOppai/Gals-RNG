@@ -309,6 +309,61 @@ window.locales.en = {
             cardName: "Plague Maiden", 
             description: "Her touch is toxic, her breath poisonous. She brings sickness, yet you can't look away. Is it love, or just a fever?" 
         },
+        pulchra: { 
+            name: "Calydonian", 
+            cardName: "Daughter of Calydon", 
+            description: "Graceful, dangerous, and incredibly flexible. She can steal your wallet, your heart, and possibly your luck. Best not to argue with her when she's wearing a swimsuit like that." 
+        },
+        demo: { 
+            name: "Strange", 
+            cardName: "The Grey Thing", 
+            description: "The experiment went out of control, but the result is... intriguing. She's tied to the bed for a reason. Careful, she bites (and more)." 
+        },
+        zeus: { 
+            name: "Thunderous", 
+            cardName: "Lady Zeus", 
+            description: "She is the current Queen of Olympus. After overthrowing her mother, she started leading a rather... open divine life. And who would object?" 
+        },
+        anubis: { 
+            name: "Afterlife", 
+            cardName: "Anput", 
+            description: "Guide of souls to the other side. Stern, silent, with perfect posture. She will weigh your heart, and let's hope it turns out lighter than a feather." 
+        },
+        harpy: { 
+            name: "Feathered", 
+            cardName: "Pachi", 
+            description: "Don't think that such a light and small girl can't drag you up into the sky. She can. And she'll be very happy to do so." 
+        },
+        yaga: { 
+            name: "Bony", 
+            cardName: "Lady Yaga", 
+            description: "Don't call her a hag! She is an experienced woman in her prime. She has gone through many fine lads; yet here she is, and the lads are gone. Where could they be?" 
+        },
+        midday: { 
+            name: "Noon", 
+            cardName: "Lady Midday", 
+            description: "A girl in a light dress in the middle of a field. She is the spirit of a girl who died in the fields, so I wouldn't advise approaching her. If you see her, you'd better run." 
+        },
+        alt_midday: { 
+            name: "Sultry", 
+            cardName: "High Noon", 
+            description: "The sun is at its zenith, the air is melting. She shed some layers to avoid overheating. Apparently, death isn't the only thing you need to fear right now." 
+        },
+        leshy: { 
+            name: "Forest", 
+            cardName: "Leshy Girl", 
+            description: "She has merged with nature. Sitting on branches, watching. If you don't litter in her forest, she might show you her... secret paths." 
+        },
+        frog_princess: { 
+            name: "Swamp", 
+            cardName: "Frog Princess", 
+            description: "A bit slippery, but very cute. She's still waiting for that special kiss. Will you risk it? Worst case, you get warts; best case, a princess. Although she's pretty great as is." 
+        },
+        domovoi: { 
+            name: "Household", 
+            cardName: "Domovushka", 
+            description: "Small guardian of the hearth. Wears rags but keeps the house in order. Leave her a saucer of milk and a cookie, and she'll be kind to you." 
+        },
         
     },
     // Shop Items

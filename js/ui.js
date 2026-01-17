@@ -1288,10 +1288,16 @@ const UI = (() => {
                 limitedBadge.style.cssText = 'left:6px; top:6px; z-index:2; display:none;';
                 limitedBadge.textContent = 'LIMITED';
 
+                mechBadge = document.createElement('div');
+                mechBadge.className = 'mech-badge position-absolute';
+                mechBadge.textContent = '⚙️'; 
+                mechBadge.style.cssText = 'left:6px; top:30px; z-index:4; font-size:16px; display:none; cursor:help; filter:drop-shadow(0 0 2px black);';
+
                 cardDiv.appendChild(img);
                 cardDiv.appendChild(nameDiv);
                 cardDiv.appendChild(variantChip);
                 cardDiv.appendChild(limitedBadge);
+                cardDiv.appendChild(mechBadge);
                 col.appendChild(cardDiv);
             } else {
                 // ОБНОВЛЕНИЕ: Элемент есть, берем ссылки
@@ -1300,6 +1306,15 @@ const UI = (() => {
                 nameDiv = cardDiv.querySelector('.inventory-card-name');
                 variantChip = cardDiv.querySelector('.variant-chip');
                 limitedBadge = cardDiv.querySelector('.badge.bg-warning'); // LIMITED бейдж
+                mechBadge = cardDiv.querySelector('.mech-badge');
+                // Защита: если это старая ячейка, где бейджа еще нет - создадим
+                if (!mechBadge) {
+                    mechBadge = document.createElement('div');
+                    mechBadge.className = 'mech-badge position-absolute';
+                    mechBadge.textContent = '⚙️';
+                    mechBadge.style.cssText = 'left:6px; top:30px; z-index:4; font-size:16px; display:none; cursor:help; filter:drop-shadow(0 0 2px black);';
+                    cardDiv.appendChild(mechBadge);
+                }
                 
                 // Удаляем его из Map, чтобы в конце удалить те, что остались в Map (не попали в фильтр)
                 existingNodes.delete(rarityData.id);
@@ -1321,6 +1336,35 @@ const UI = (() => {
                 }
                 
                 nameDiv.textContent = L.get(activeSkinData.card.nameKey);
+
+                const hasMechanic = activeSkinData.mechanicalEffect || activeSkinData.passiveEffect || activeSkinData.mechanic;
+
+                if (mechBadge) {
+                    if (hasMechanic) {
+                        mechBadge.style.display = 'block';
+                        // Пытаемся сформировать тултип
+                        let tooltip = 'Mechanic';
+                        if (activeSkinData.mechanic && activeSkinData.mechanic.description) {
+                            tooltip = activeSkinData.mechanic.description;
+                        } else if (activeSkinData.mechanicalEffect) {
+                             // Если есть ключ локализации, пробуем его, иначе тип
+                             tooltip = L.get(`mechanical_effects.${activeSkinData.mechanicalEffect.type}`) || 'Active Effect';
+                        } else if (activeSkinData.passiveEffect) {
+                             tooltip = L.get(`passive_effects.${activeSkinData.passiveEffect.type}`) || 'Passive Effect';
+                        }
+                        mechBadge.title = tooltip;
+                        
+                        // Если есть LIMITED, сдвинем шестеренку чуть ниже, иначе вернем наверх (опциональная красота)
+                        if (limitedBadge && limitedBadge.style.display !== 'none') {
+                             mechBadge.style.top = '32px'; 
+                        } else {
+                             mechBadge.style.top = '6px';
+                        }
+
+                    } else {
+                        mechBadge.style.display = 'none';
+                    }
+                }
                 
                 // Стилизация из JS (Этап 1)
                 cardDiv.style.borderColor = activeSkinData.color;
@@ -1337,7 +1381,7 @@ const UI = (() => {
                 cardDiv.classList.add('locked');
                 cardDiv.style.borderColor = ''; // Сброс инлайн стиля
                 cardDiv.style.removeProperty('--rarity-glow-color');
-                
+                if (mechBadge) mechBadge.style.display = 'none';
                 if (img.getAttribute('src') !== "img/silhouette_placeholder.png") {
                     img.src = "img/silhouette_placeholder.png";
                 }

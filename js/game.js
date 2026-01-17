@@ -173,8 +173,16 @@ const Game = (() => {
         if (r.rollable === false) return false;
         if (r.id === 'diamond' && !p.isSupporter) return false;
         if (r.id === 'salt' && !p.completedAchievements.includes('unlock_salt_card')) return false;
-        // ЛИМИТКИ: доступны к роллу только во время своего ивента
+
+        // ЛИМИТКИ: доступны к роллу во время ивента ИЛИ если игрок их уже получил
         if (r.availability?.type === 'event') {
+            // 1. Проверка: есть ли карта уже в инвентаре?
+            // (inventory хранит массив ID, например ['hween_jack', ...])
+            if (p.inventory.includes(r.id)) {
+                return true; 
+            }
+
+            // 2. Если карты нет, проверяем, идет ли сейчас ивент
             const ev = getActiveEvent();
             return !!ev && ev.id === r.availability.eventId;
         }
