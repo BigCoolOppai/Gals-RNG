@@ -364,6 +364,8 @@ window.locales.en = {
             cardName: "Domovushka", 
             description: "Small guardian of the hearth. Wears rags but keeps the house in order. Leave her a saucer of milk and a cookie, and she'll be kind to you." 
         },
+        celestial_being: { name: "Celestial", cardName: "Celestial Being", description: "She dwells in the celestial golden garden, governing the world's various subtle structures. Her divine nature makes your presence here no surprise to her." },
+        cyber_demon: { name: "Cybersulfuric", cardName: "Cyber-Demon", description: "She is not just a demoness. She is a cyber-demoness. Her implants enhance both basic physical attributes and \"special\" functions..." },
         
     },
     // Shop Items
@@ -395,7 +397,11 @@ window.locales.en = {
             equip_afro_pick:     { name: "Afro Pick", description: "Cumulative luck from common streaks: +0.03/stack (max 12). Available via crafting." },
             equip_catalyst_lens:  { name: "Catalyst Lens", description: "+50% card mutation chance (additive)." },
             equip_refiner_gloves: { name: "Refiner Gloves", description: "+25% material drop chance." },
-            equip_boost_capacitor:{ name: "Boost Capacitor", description: "×1.5 duration for temporary boosts." }
+            equip_boost_capacitor:{ name: "Boost Capacitor", description: "×1.5 duration for temporary boosts." },
+            equip_queens_crown: { name: "Queen's Crown", description: "The ultimate item for earning. +40% duplicate currency." },
+            equip_cyber_implant: { name: "Cyber-Implant 'Synthesis'", description: "Cybernetic acceleration. Reduces the Lucky Roll threshold by 4." },
+            equip_void_amulet: { name: "Void Amulet", description: "Distorts reality. +150% chance for mutations to appear (Variant Chance)." },
+            equip_ouroboros_ring: { name: "Ouroboros Ring", description: "A cycle of eternal misfortune. Accumulates up to 25 luck stacks (+0.06 each) from low-tier cards." },
         },
         upgrades: {
             upgrade_fast_roll: { name: "Fast Roll", description: "Reduces roll animation time to ~0.75 sec." },
@@ -734,7 +740,11 @@ window.locales.en = {
     card_scrap_golem: {
         name: "Card: Scrap Golem (exclusive)",
         description: "150 scrap and a pinch of graphite—shape the heap and wake the metal."
-    }
+    },
+    card_cyber_demon: { name: "Cyber-Demon", description: "A ritual of fusing steel and brimstone. Creates the unique Cyber-Demon card." },
+    card_celestial_being: { name: "Celestial Being", description: "A synthesis of pure souls and starlight. Creates the unique Celestial Being card." },
+    theme_synthwave: { name: "Theme: Synthwave", description: "Neon lights and 80s retro vibes for your interface." },
+    theme_cosmic_deep: { name: "Theme: Deep Space", description: "The silent majesty of the universe. A dark theme with stardust effects." },
     },
     mutations: { 
         negative: { name: "Negative" },

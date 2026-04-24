@@ -1665,52 +1665,189 @@ const VisualEffects = {
             this._cleanupScope(glitchOverlay, scope, overlayClass);
         };
         },
-        // --- 1. GAL: Divine Light (Переработано: мягче и атмосфернее) ---
+        // --- 1. GAL: Божественная Аура (Ультимативный Ambient Эффект) ---
         gal(targets) {
             const { glitchOverlay } = targets || {};
             if (!glitchOverlay) return null;
-            const scope = this._createScope(glitchOverlay, 'active-effect-gal');
+            
+            const overlayClass = 'active-effect-gal-ambient';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
 
-            // Мягкий золотистый свет сверху
-            const lightSource = document.createElement('div');
-            Object.assign(lightSource.style, {
-                position: 'absolute', top: '-20%', left: '0', right: '0', height: '80%',
-                background: 'radial-gradient(ellipse at top, rgba(255, 255, 220, 0.4) 0%, rgba(255, 215, 0, 0.1) 40%, transparent 80%)',
-                pointerEvents: 'none', mixBlendMode: 'screen'
+            const hasGSAP = typeof gsap !== 'undefined';
+            const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches || false;
+
+            // Задаем контейнеру фиксированное положение на фоне
+            Object.assign(scope.style, {
+                position: 'absolute', inset: '0', pointerEvents: 'none', overflow: 'hidden', zIndex: '0'
             });
-            scope.appendChild(lightSource);
 
-            // Частицы пыльцы (божественные искры)
-            const particles = [];
-            const count = 30;
-            for(let i=0; i<count; i++) {
-                const p = document.createElement('div');
-                const size = Math.random() * 4 + 2;
-                Object.assign(p.style, {
-                    position: 'absolute', width: size+'px', height: size+'px',
-                    background: 'white', borderRadius: '50%',
-                    boxShadow: '0 0 10px #FFF700', opacity: 0,
-                    left: Math.random()*100 + '%', top: Math.random()*100 + '%'
-                });
-                scope.appendChild(p);
-                
-                if (typeof gsap !== 'undefined') {
-                    gsap.to(p, {
-                        y: -100 - Math.random() * 100,
-                        opacity: Math.random() * 0.7 + 0.3,
-                        duration: Math.random() * 3 + 2,
-                        repeat: -1, yoyo: true, ease: 'sine.inOut',
-                        delay: Math.random() * 2
-                    });
+            // --- МАГИЯ CSS ---
+            const styleEl = document.createElement('style');
+            styleEl.textContent = `
+                /* Мягкое базовое свечение в центре */
+                .gal-ambient-core {
+                    position: absolute; inset: 0;
+                    background: radial-gradient(circle at 50% 40%, rgba(255, 215, 0, 0.15) 0%, rgba(255, 255, 255, 0.05) 40%, transparent 75%);
+                    mix-blend-mode: screen;
                 }
+                
+                /* Колесо лучей: 1 элемент вместо 20. Работает за счет conic-gradient и маски! */
+                .gal-ambient-rays {
+                    position: absolute; top: 40%; left: 50%;
+                    width: 200vmax; height: 200vmax;
+                    margin-top: -100vmax; margin-left: -100vmax;
+                    background: repeating-conic-gradient(
+                        from 0deg,
+                        rgba(255, 230, 150, 0.08) 0deg 4deg,
+                        transparent 4deg 12deg
+                    );
+                    /* Маска плавно растворяет лучи к краям и к самому центру */
+                    mask-image: radial-gradient(circle, transparent 5%, black 20%, transparent 60%);
+                    -webkit-mask-image: radial-gradient(circle, transparent 5%, black 20%, transparent 60%);
+                    mix-blend-mode: screen;
+                    will-change: transform;
+                }
+
+                /* Святые кольца-пульсары */
+                .gal-ambient-ring {
+                    position: absolute; top: 40%; left: 50%;
+                    border-radius: 50%;
+                    border: 1px solid rgba(255, 220, 100, 0.4);
+                    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2), inset 0 0 20px rgba(255, 215, 0, 0.2);
+                    transform: translate(-50%, -50%) scale(0);
+                    will-change: transform, opacity;
+                }
+
+                /* Божественные частицы (Motes) */
+                .gal-ambient-mote {
+                    position: absolute;
+                    border-radius: 50%;
+                    background: #fff;
+                    box-shadow: 0 0 8px #FFD700, 0 0 15px rgba(255, 215, 0, 0.6);
+                    will-change: transform, opacity;
+                }
+            `;
+            scope.appendChild(styleEl);
+
+            // --- СОЗДАНИЕ СТАТИЧНЫХ ЭЛЕМЕНТОВ ---
+            const coreGlow = document.createElement('div');
+            coreGlow.className = 'gal-ambient-core';
+            scope.appendChild(coreGlow);
+
+            const rayWheel = document.createElement('div');
+            rayWheel.className = 'gal-ambient-rays';
+            scope.appendChild(rayWheel);
+
+            const tweens = [];
+            const timers = [];
+
+            if (hasGSAP) {
+                // Плавное появление фона
+                tweens.push(gsap.fromTo(coreGlow, { opacity: 0 }, { opacity: 1, duration: 2, ease: 'power1.inOut' }));
+                tweens.push(gsap.fromTo(rayWheel, { opacity: 0 }, { opacity: 1, duration: 3, ease: 'power1.inOut' }));
+
+                // Дыхание свечения
+                tweens.push(gsap.to(coreGlow, { opacity: 0.6, duration: 4, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
+                
+                // Бесконечное, очень медленное и величественное вращение лучей
+                tweens.push(gsap.to(rayWheel, { rotation: 360, duration: 120, repeat: -1, ease: 'none' }));
             }
 
-            // Мягкая пульсация света
-            if (typeof gsap !== 'undefined') {
-                gsap.fromTo(lightSource, { opacity: 0.5 }, { opacity: 0.8, duration: 4, yoyo: true, repeat: -1, ease: "sine.inOut" });
+            // --- СПАВНЕР КОЛЕЦ (Холодная пульсация) ---
+            const spawnRing = () => {
+                if (!scope.isConnected) return;
+                const ring = document.createElement('div');
+                ring.className = 'gal-ambient-ring';
+                
+                // Начальный размер 0, конечный размер - почти во весь экран
+                const maxSize = Math.max(window.innerWidth, window.innerHeight) * 1.2;
+                ring.style.width = maxSize + 'px';
+                ring.style.height = maxSize + 'px';
+                
+                scope.appendChild(ring);
+
+                if (hasGSAP) {
+                    const tl = gsap.timeline({ onComplete: () => ring.remove() });
+                    // Кольцо медленно расширяется и растворяется
+                    tl.fromTo(ring, 
+                        { scale: 0.05, opacity: 0 }, 
+                        { scale: 1, opacity: 0, duration: 10, ease: 'power1.out' }
+                    );
+                    // Пик яркости где-то на 20% пути
+                    tl.to(ring, { opacity: 1, duration: 2, ease: 'power1.inOut' }, 0)
+                      .to(ring, { opacity: 0, duration: 8, ease: 'power1.inOut' }, 2);
+                      
+                    tweens.push(tl);
+                } else {
+                    setTimeout(() => ring.remove(), 1000);
+                }
+            };
+
+            // Запускаем кольца каждые 4 секунды
+            if (!reduceMotion) {
+                timers.push(setInterval(spawnRing, 4000));
+                spawnRing(); // Первый сразу
             }
 
-            return () => this._cleanupScope(glitchOverlay, scope, 'active-effect-gal');
+            // --- СПАВНЕР ЧАСТИЦ (Motes) ---
+            const motes = [];
+            const spawnMote = () => {
+                if (!scope.isConnected) return;
+                const mote = document.createElement('div');
+                mote.className = 'gal-ambient-mote';
+                
+                // Размер от 2 до 5 пикселей
+                const size = Math.random() * 3 + 2;
+                mote.style.width = size + 'px';
+                mote.style.height = size + 'px';
+                
+                // Появляются в нижней полусфере экрана и летят вверх
+                const startX = Math.random() * window.innerWidth;
+                const startY = window.innerHeight * 0.6 + Math.random() * (window.innerHeight * 0.6);
+                mote.style.left = startX + 'px';
+                mote.style.top = startY + 'px';
+                
+                scope.appendChild(mote);
+                motes.push(mote);
+
+                if (hasGSAP) {
+                    const dur = Math.random() * 8 + 6; // Плывут медленно (6-14 сек)
+                    const endX = startX + (Math.random() * 100 - 50); // Легкий снос в сторону
+                    const endY = startY - (Math.random() * 300 + 200); // Поднимаются вверх
+                    
+                    const tl = gsap.timeline({ onComplete: () => { mote.remove(); motes.splice(motes.indexOf(mote), 1); } });
+                    
+                    tl.fromTo(mote, { x: 0, y: 0, opacity: 0 }, { x: endX - startX, y: endY - startY, duration: dur, ease: 'sine.inOut' }, 0)
+                      // Плавно появляются и исчезают
+                      .to(mote, { opacity: Math.random() * 0.5 + 0.3, duration: dur * 0.3, ease: 'power1.inOut' }, 0)
+                      .to(mote, { opacity: 0, duration: dur * 0.4, ease: 'power1.inOut' }, dur * 0.6);
+                      
+                    tweens.push(tl);
+                } else {
+                    setTimeout(() => mote.remove(), 1000);
+                }
+            };
+
+            // Количество частиц
+            const particleInterval = reduceMotion ? 1000 : 300;
+            timers.push(setInterval(spawnMote, particleInterval));
+            
+            // Спавним стартовый пак частиц, чтобы экран не был пустым в начале
+            for(let i=0; i < (reduceMotion ? 5 : 15); i++) {
+                setTimeout(spawnMote, Math.random() * 2000);
+            }
+
+            // --- ОЧИСТКА ---
+            return () => {
+                timers.forEach(id => clearInterval(id));
+                if (hasGSAP) {
+                    tweens.forEach(t => { try { t.kill(); } catch(e){} });
+                }
+                motes.forEach(m => { try { m.remove(); } catch(e){} });
+                try { styleEl.remove(); } catch(e){}
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
+            };
         },
 
         // --- 2. WAR: Battlefield (Больше кинематографичности) ---

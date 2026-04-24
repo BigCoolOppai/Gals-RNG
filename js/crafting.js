@@ -65,7 +65,6 @@ window.MATERIAL_DROPS = {
 
 // Рецепты крафта
 window.CRAFT_RECIPES = [
-  // Прежние примеры (оставим их)
   {
     id: 'theme_obsidian_forge',
     nameKey: 'craft.theme_obsidian_forge.name',
@@ -122,4 +121,60 @@ window.CRAFT_RECIPES = [
   cost: { gold_leaf: 2, neon_tube: 1, crystal_shard: 1 },
   result: { type: 'equipment', itemId: 'equip_boost_capacitor' }
 },
+{
+    id: 'equip_queens_crown_recipe',
+    nameKey: 'shop.equipment.equip_queens_crown.name',
+    descriptionKey: 'shop.equipment.equip_queens_crown.description',
+    cost: { bee_royal_jelly: 5, shroom_spores: 10, gold_leaf: 2 },
+    result: { type: 'equipment', itemId: 'equip_queens_crown' }
+  },
+  {
+    id: 'equip_cyber_implant_recipe',
+    nameKey: 'shop.equipment.equip_cyber_implant.name',
+    descriptionKey: 'shop.equipment.equip_cyber_implant.description',
+    cost: { neon_tube: 15, steel_ingot: 5, carbon_shard: 50 },
+    result: { type: 'equipment', itemId: 'equip_cyber_implant' }
+  },
+  {
+    id: 'equip_void_amulet_recipe',
+    nameKey: 'shop.equipment.equip_void_amulet.name',
+    descriptionKey: 'shop.equipment.equip_void_amulet.description',
+    cost: { moon_tears: 5, hollow_mask: 3, crystal_shard: 5 },
+    result: { type: 'equipment', itemId: 'equip_void_amulet' }
+  },
+  {
+    id: 'equip_ouroboros_ring_recipe',
+    nameKey: 'shop.equipment.equip_ouroboros_ring.name',
+    descriptionKey: 'shop.equipment.equip_ouroboros_ring.description',
+    cost: { devil_chain_link: 25, lava_core: 15, soul_shard: 2 },
+    result: { type: 'equipment', itemId: 'equip_ouroboros_ring' }
+  },
+  {
+    id: 'card_cyber_demon_recipe',
+    nameKey: 'craft.card_cyber_demon.name',
+    descriptionKey: 'craft.card_cyber_demon.description',
+    cost: { devil_chain_link: 15, steel_ingot: 10, neon_tube: 10 },
+    result: { type: 'card', rarityId: 'cyber_demon' } 
+  },
+  {
+    id: 'card_celestial_being_recipe',
+    nameKey: 'craft.card_celestial_being.name',
+    descriptionKey: 'craft.card_celestial_being.description',
+    cost: { soul_shard: 5, moon_tears: 5, gold_leaf: 5 },
+    result: { type: 'card', rarityId: 'celestial_being' } 
+  },
+  {
+    id: 'theme_synthwave_recipe',
+    nameKey: 'craft.theme_synthwave.name',
+    descriptionKey: 'craft.theme_synthwave.description',
+    cost: { neon_tube: 10, vinyl_chip: 10, afro_fiber: 5 },
+    result: { type: 'ui_theme', themeId: 'theme-synthwave' }
+  },
+  {
+    id: 'theme_cosmic_deep_recipe',
+    nameKey: 'craft.theme_cosmic_deep.name',
+    descriptionKey: 'craft.theme_cosmic_deep.description',
+    cost: { cosmic_dust: 20, moon_tears: 10, obsidian_shard: 30 },
+    result: { type: 'ui_theme', themeId: 'theme-cosmic-deep' }
+  }
 ];

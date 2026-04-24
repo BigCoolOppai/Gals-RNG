@@ -4621,3 +4621,352 @@ html.theme-creepypasta {
   background: var(--creepy-accent-red);
   box-shadow: 0 0 8px rgba(160,0,0,0.5);
 }
+
+
+/* Cyber-Demon - Агрессивный красный неон с эффектом пульсации */
+.rarity-cyber-demon {
+    color: #ff1744 !important;
+    text-shadow: 0 0 10px #d50000, 0 0 20px #ff1744;
+    font-family: 'Orbitron', sans-serif;
+    animation: cyber-pulse 2s infinite alternate;
+}
+
+@keyframes cyber-pulse {
+    from { filter: drop-shadow(0 0 5px #d50000); }
+    to { filter: drop-shadow(0 0 15px #ff1744) brightness(1.2); }
+}
+
+/* Celestial Being - Мягкое золотисто-белое сияние */
+.rarity-celestial-being {
+    color: #FFF9C4 !important;
+    text-shadow: 0 0 10px #FFF59D, 0 0 20px #ffffff;
+    font-style: italic;
+    animation: celestial-glow 3s infinite ease-in-out;
+}
+
+@keyframes celestial-glow {
+    0%, 100% { opacity: 0.8; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.02); filter: brightness(1.3); }
+}
+
+/* =========================================
+   УЛЬТИМАТИВНЫЙ SYNTHWAVE (RETROWAVE) V2
+   ========================================= */
+html.theme-synthwave {
+    --sw-bg: #0b0213;
+    --sw-horizon: #2b003a;
+    --sw-neon-pink: #ff00ff;
+    --sw-neon-cyan: #00ffff;
+    --sw-neon-yellow: #ffea00;
+    --sw-text: #e0fbfc;
+    --sw-border: #ff00ff88;
+    --sw-panel: rgba(11, 2, 19, 0.85);
+    color-scheme: dark;
+}
+
+.theme-synthwave body {
+    background-color: var(--sw-bg);
+    color: var(--sw-text);
+    overflow-x: hidden;
+}
+
+/* Ретро-солнце и градиент неба */
+.theme-synthwave body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: 
+        /* Солнце (с полосками) */
+        repeating-linear-gradient(to bottom, transparent 0%, transparent 2%, var(--sw-bg) 2%, var(--sw-bg) 3%),
+        radial-gradient(circle at 50% 50%, var(--sw-neon-yellow) 0%, #ff0055 20%, transparent 22%),
+        /* Небо */
+        linear-gradient(to bottom, var(--sw-bg) 0%, var(--sw-horizon) 50%, var(--sw-bg) 50%);
+    z-index: -3;
+    pointer-events: none;
+}
+
+/* Трехмерная уходящая сетка */
+.theme-synthwave body::after {
+    content: "";
+    position: fixed;
+    top: 50%; left: -50%; width: 200%; height: 100%;
+    background-image: 
+        linear-gradient(var(--sw-neon-pink) 1px, transparent 1px),
+        linear-gradient(90deg, var(--sw-neon-cyan) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: perspective(400px) rotateX(75deg);
+    transform-origin: top center;
+    animation: sw-grid-drive 1.5s linear infinite;
+    z-index: -2;
+    box-shadow: inset 0 100px 100px var(--sw-bg); /* Затенение у горизонта */
+    pointer-events: none;
+}
+
+@keyframes sw-grid-drive {
+    0% { transform: perspective(400px) rotateX(75deg) translateY(0); }
+    100% { transform: perspective(400px) rotateX(75deg) translateY(40px); }
+}
+
+/* CRT Эффект (Скан-линии) - поверх всего окна */
+#globalGlitchOverlay.theme-synthwave-crt {
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
+    background-size: 100% 4px;
+    z-index: 9998;
+    pointer-events: none;
+    display: block !important;
+}
+
+/* --- Контейнеры и Карточки --- */
+.theme-synthwave .tab-content,
+.theme-synthwave .list-group-item,
+.theme-synthwave .card.bg-dark-subtle {
+    background: var(--sw-panel) !important;
+    border: 1px solid var(--sw-border) !important;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.15), inset 0 0 20px rgba(0, 255, 255, 0.05);
+    backdrop-filter: blur(4px);
+    color: var(--sw-text);
+}
+
+.theme-synthwave h1, .theme-synthwave h2, .theme-synthwave h3, .theme-synthwave h4 {
+    font-family: 'Orbitron', sans-serif;
+    color: #fff;
+    text-shadow: 0 0 5px var(--sw-neon-pink), 0 0 10px var(--sw-neon-pink), 2px 2px 0px var(--sw-neon-cyan);
+    letter-spacing: 1px;
+}
+
+/* --- Вкладки (Неоновые вывески) --- */
+.theme-synthwave .nav-tabs { border-bottom-color: var(--sw-neon-pink); }
+.theme-synthwave .nav-tabs .nav-link {
+    color: #888;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    border-color: transparent;
+    transition: all 0.3s;
+}
+.theme-synthwave .nav-tabs .nav-link:hover { color: var(--sw-neon-cyan); }
+.theme-synthwave .nav-tabs .nav-link.active {
+    background: transparent;
+    color: #fff;
+    border: 1px solid var(--sw-neon-pink);
+    border-bottom: 2px solid var(--sw-bg);
+    box-shadow: 0 -5px 15px rgba(255, 0, 255, 0.3) inset;
+    text-shadow: 0 0 8px var(--sw-neon-cyan);
+}
+
+/* --- Кнопки (Кибер-аркада) --- */
+.theme-synthwave .btn {
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    font-weight: bold;
+    border-radius: 0;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+}
+
+.theme-synthwave .btn-primary {
+    background: rgba(0, 255, 255, 0.1);
+    color: var(--sw-neon-cyan);
+    border: 2px solid var(--sw-neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.4), inset 0 0 10px rgba(0, 255, 255, 0.2);
+}
+.theme-synthwave .btn-primary:hover {
+    background: var(--sw-neon-cyan);
+    color: #000;
+    box-shadow: 0 0 20px var(--sw-neon-cyan), 0 0 40px var(--sw-neon-cyan);
+}
+
+.theme-synthwave .btn-info {
+    background: rgba(255, 0, 255, 0.1);
+    color: var(--sw-neon-pink);
+    border: 2px solid var(--sw-neon-pink);
+    box-shadow: 0 0 10px rgba(255, 0, 255, 0.4);
+}
+.theme-synthwave .btn-info:hover {
+    background: var(--sw-neon-pink);
+    color: #000;
+    box-shadow: 0 0 20px var(--sw-neon-pink);
+}
+
+.theme-synthwave .btn-success { background: transparent; color: #0f0; border: 2px solid #0f0; }
+.theme-synthwave .btn-success:hover { background: #0f0; color: #000; box-shadow: 0 0 15px #0f0; }
+.theme-synthwave .btn-danger { background: transparent; color: #f00; border: 2px solid #f00; }
+.theme-synthwave .btn-danger:hover { background: #f00; color: #000; box-shadow: 0 0 15px #f00; }
+
+/* --- Инвентарь --- */
+.theme-synthwave .inventory-card {
+    background: var(--sw-panel);
+    border: 1px solid var(--sw-neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+    transition: 0.3s;
+}
+.theme-synthwave .inventory-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    border-color: var(--sw-neon-pink);
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.6), inset 0 0 15px rgba(255, 0, 255, 0.3);
+}
+
+/* Модалка */
+.theme-synthwave .modal-content {
+    background: rgba(11, 2, 19, 0.95);
+    border: 2px solid var(--sw-neon-pink);
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.4);
+}
+.theme-synthwave .modal-header { border-bottom: 1px solid var(--sw-neon-cyan); }
+
+/* =========================================
+   COSMIC DEEP V2 (УЛЬТИМАТИВНЫЙ КОСМОС)
+   ========================================= */
+html.theme-cosmic-deep {
+    --co-bg: #02040a;
+    --co-panel: rgba(10, 14, 25, 0.65);
+    --co-text: #e2e8f0;
+    --co-accent: #38bdf8; /* Звездный голубой */
+    --co-accent-2: #8b5cf6; /* Туманный пурпурный */
+    --co-border: rgba(56, 189, 248, 0.25);
+    color-scheme: dark;
+}
+
+.theme-cosmic-deep body {
+    background-color: var(--co-bg);
+    color: var(--co-text);
+}
+
+/* Эффект туманности (Nebula) */
+.theme-cosmic-deep body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: 
+        radial-gradient(circle at 15% 25%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 75% 65%, rgba(139, 92, 246, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+    z-index: -3;
+    pointer-events: none;
+}
+
+/* 3-Слойный Параллакс Звезд (чистый CSS, без тормозящего SVG) */
+.theme-cosmic-deep body::after {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background-image: 
+        radial-gradient(1px 1px at 10% 10%, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 20% 50%, rgba(255,255,255,0.8), transparent),
+        radial-gradient(2px 2px at 80% 30%, #38bdf8, transparent),
+        radial-gradient(1px 1px at 60% 80%, #8b5cf6, transparent),
+        radial-gradient(2.5px 2.5px at 40% 90%, #fff, transparent);
+    background-size: 150px 150px, 250px 250px, 350px 350px, 100px 100px, 400px 400px;
+    animation: co-stars-parallax 120s linear infinite;
+    z-index: -2;
+    pointer-events: none;
+}
+
+@keyframes co-stars-parallax {
+    0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; }
+    100% { background-position: -150px 150px, -250px 250px, -350px 350px, -100px 100px, -400px 400px; }
+}
+
+/* --- Sharp Glassmorphism (Стекломорфизм) --- */
+.theme-cosmic-deep .tab-content,
+.theme-cosmic-deep .list-group-item,
+.theme-cosmic-deep .card.bg-dark-subtle {
+    background: var(--co-panel) !important;
+    border: 1px solid var(--co-border) !important;
+    backdrop-filter: blur(12px) saturate(120%);
+    -webkit-backdrop-filter: blur(12px) saturate(120%);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: var(--co-text);
+}
+
+.theme-cosmic-deep h1, .theme-cosmic-deep h2, .theme-cosmic-deep h3, .theme-cosmic-deep h4 {
+    color: #fff;
+    font-weight: 300;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+/* --- Вкладки (Орбитальные линии) --- */
+.theme-cosmic-deep .nav-tabs { border-bottom-color: rgba(255,255,255,0.1); }
+.theme-cosmic-deep .nav-tabs .nav-link {
+    color: #94a3b8;
+    border: none;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+}
+.theme-cosmic-deep .nav-tabs .nav-link:hover { color: #fff; border-bottom-color: rgba(255,255,255,0.3); }
+.theme-cosmic-deep .nav-tabs .nav-link.active {
+    color: var(--co-accent);
+    background: linear-gradient(to top, rgba(56, 189, 248, 0.1), transparent);
+    border-bottom: 2px solid var(--co-accent);
+    box-shadow: 0 -10px 15px -10px rgba(56, 189, 248, 0.3) inset;
+}
+
+/* --- Кнопки (Пульсары) --- */
+.theme-cosmic-deep .btn {
+    border-radius: 50px; /* Круглые, космические */
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+}
+
+.theme-cosmic-deep .btn-primary {
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.8), rgba(15, 23, 42, 0.9));
+    color: #fff;
+    box-shadow: 0 0 15px rgba(2, 132, 199, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.theme-cosmic-deep .btn-primary:hover {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.9), rgba(2, 132, 199, 0.9));
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(56, 189, 248, 0.6), inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+.theme-cosmic-deep .btn-info {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.8), rgba(15, 23, 42, 0.9));
+    color: #fff;
+    box-shadow: 0 0 15px rgba(124, 58, 237, 0.4);
+}
+.theme-cosmic-deep .btn-info:hover {
+    box-shadow: 0 5px 20px rgba(139, 92, 246, 0.6);
+    transform: translateY(-2px);
+}
+
+/* --- Инвентарь (Карточки созвездий) --- */
+.theme-cosmic-deep .inventory-card {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.theme-cosmic-deep .inventory-card:hover {
+    transform: translateY(-8px) scale(1.03);
+    border-color: rgba(56, 189, 248, 0.5);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.6), 0 0 20px rgba(56, 189, 248, 0.3);
+}
+
+.theme-cosmic-deep .inventory-card-name {
+    background: rgba(2, 6, 23, 0.8);
+    backdrop-filter: blur(4px);
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Модалка */
+.theme-cosmic-deep .modal-content {
+    background: rgba(10, 14, 25, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    box-shadow: 0 0 50px rgba(0,0,0,0.8), 0 0 20px rgba(56, 189, 248, 0.1) inset;
+    border-radius: 16px;
+}
+.theme-cosmic-deep .modal-header { border-bottom: 1px solid rgba(255,255,255,0.1); }
+
+/* Бейджи (Астероиды) */
+.theme-cosmic-deep .badge {
+    background-color: rgba(30, 41, 59, 0.8) !important;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: var(--co-text) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+}

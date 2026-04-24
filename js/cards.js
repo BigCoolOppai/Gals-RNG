@@ -1327,6 +1327,38 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "cyber_demon",
+        nameKey: "cards.cyber_demon.name",
+        rollable: false,
+        probabilityBase: 1 / 999999,
+        color: "#d50000",
+        glowColor: "#ff1744",
+        cssClass: "rarity-cyber-demon",
+        currencyOnDuplicate: 15000,
+        card: {
+            name: "Cyber-Demon",
+            nameKey: "cards.cyber_demon.cardName",
+            image: "img/cardCyberDemon.png",
+            descriptionKey: "cards.cyber_demon.description"
+        }
+    },
+    {
+        id: "celestial_being",
+        nameKey: "cards.celestial_being.name",
+        rollable: false,
+        probabilityBase: 1 / 999999,
+        color: "#FFF59D",
+        glowColor: "#FFFDE7",
+        cssClass: "rarity-celestial-being",
+        currencyOnDuplicate: 25000,
+        card: {
+            name: "Celestial Being",
+            nameKey: "cards.celestial_being.cardName",
+            image: "img/cardCelestial.png",
+            descriptionKey: "cards.celestial_being.description"
+        }
+    },
+    {
         id: "leshy",
         nameKey: "cards.leshy.name",
         minPrestige: 5, 
@@ -2552,6 +2584,39 @@ const SHOP_DATA = {
         type: "equipment",
         craftOnly: true,
         effect: { type: "boost_duration_multiplier", value: 1.5 } // ×1.5 к длительности бустов
+        },
+        {
+            id: "equip_queens_crown",
+            nameKey: "shop.equipment.equip_queens_crown.name",
+            descriptionKey: "shop.equipment.equip_queens_crown.description",
+            type: "equipment",
+            craftOnly: true,
+            effect: { type: "duplicate_currency_bonus_percent", value: 0.40 }
+        },
+        {
+            id: "equip_cyber_implant",
+            nameKey: "shop.equipment.equip_cyber_implant.name",
+            descriptionKey: "shop.equipment.equip_cyber_implant.description",
+            type: "equipment",
+            craftOnly: true,
+            effect: { type: "lucky_roll_accelerator", rolls_reduced: 4 }
+        },
+        {
+            id: "equip_void_amulet",
+            nameKey: "shop.equipment.equip_void_amulet.name",
+            descriptionKey: "shop.equipment.equip_void_amulet.description",
+            type: "equipment",
+            craftOnly: true,
+            luckBonus: 0.5,
+            effect: { type: "variant_chance_bonus", value: 1.5 }
+        },
+        {
+            id: "equip_ouroboros_ring",
+            nameKey: "shop.equipment.equip_ouroboros_ring.name",
+            descriptionKey: "shop.equipment.equip_ouroboros_ring.description",
+            type: "equipment",
+            craftOnly: true,
+            effect: { type: "cumulative_luck_on_low_rolls", bonusPerStack: 0.06, maxStacks: 25, triggerRarities: bottomFeederRarities }
         }
     ],
     upgrades: [
