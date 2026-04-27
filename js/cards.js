@@ -50,6 +50,22 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "kasane_teto",
+        nameKey: "cards.kasane_teto.name",
+        minPrestige: 6,
+        probabilityBase: 1 / 401040104,
+        color: "#d32f2f", 
+        glowColor: "#ff8a80",
+        cssClass: "rarity-mythic", 
+        currencyOnDuplicate: 40104010,
+        card: {
+            name: "Kasane Teto",
+            nameKey: "cards.kasane_teto.cardName",
+            image: "img/cardTeto.jpg",
+            descriptionKey: "cards.kasane_teto.description"
+        }
+    },
+    {
         id: "time_eternal",
         nameKey: "cards.time_eternal.name",
         minPrestige: 2,
@@ -195,6 +211,22 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 9000000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
         card: { nameKey: "cards.hween_nurse.cardName", image: "img/limited/halloween2025/cardNurse.png", descriptionKey: "cards.hween_nurse.description" }
+    },
+    {
+        id: "caramella",
+        nameKey: "cards.caramella.name",
+        minPrestige: 4,
+        probabilityBase: 1 / 77777777,
+        color: "#e040fb", 
+        glowColor: "#ffff00",
+        cssClass: "rarity-legendary-alt",
+        currencyOnDuplicate: 7777777,
+        card: {
+            name: "Caramella Jester",
+            nameKey: "cards.caramella.cardName",
+            image: "img/cardCaramellaJester.jpg",
+            descriptionKey: "cards.caramella.description"
+        }
     },
     {
         id: "hween_furina",
@@ -1621,6 +1653,23 @@ window.RARITIES_DATA = [
             descriptionKey: "cards.berserk_alt_1.description"
         }
     },
+    {
+        id: "drow_alt",
+        nameKey: "cards.drow_alt.name",
+        displayParentId: "drow",
+        minPrestige: 2,
+        probabilityBase: 1 / 280000,
+        color: "#311b92",
+        glowColor: "#f50057",
+        cssClass: "rarity-epic",
+        currencyOnDuplicate: 28000,
+        card: {
+            name: "Drow Ranger (Unbound)",
+            nameKey: "cards.drow_alt.cardName",
+            image: "img/altDrow.jpg",
+            descriptionKey: "cards.drow_alt.description"
+        }
+    },
     
     {
         id: "mechanic",
@@ -1900,6 +1949,21 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "drow",
+        nameKey: "cards.drow.name",
+        probabilityBase: 1 / 40000,
+        color: "#4a148c",
+        glowColor: "#b39ddb",
+        cssClass: "rarity-rare",
+        currencyOnDuplicate: 4000,
+        card: {
+            name: "Drow Ranger",
+            nameKey: "cards.drow.cardName",
+            image: "img/cardDrow.jpg",
+            descriptionKey: "cards.drow.description"
+        }
+    },
+    {
         id: "berserk",
         nameKey: "cards.berserk.name",
         probabilityBase: 1 / 30000,
@@ -2096,6 +2160,21 @@ window.RARITIES_DATA = [
             nameKey: "cards.platinum.cardName",
             image: "img/cardPlatinum.png",
             descriptionKey: "cards.platinum.description"
+        }
+    },
+    {
+        id: "elf",
+        nameKey: "cards.elf.name",
+        probabilityBase: 1 / 5500,
+        color: "#33691e",
+        glowColor: "#aed581",
+        cssClass: "rarity-common",
+        currencyOnDuplicate: 550,
+        card: {
+            name: "Aristocrat Elf",
+            nameKey: "cards.elf.cardName",
+            image: "img/cardElf.jpg",
+            descriptionKey: "cards.elf.description"
         }
     },
     {

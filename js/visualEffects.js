@@ -16,8 +16,8 @@ const VisualEffects = {
         timestop: "audio/timestop-sfx.mp3",
         motivation: "audio/motivation-sfx.mp3",
         smokinsexystyle: "audio/smokinsexystyle-sfx.mp3",
-        uranium_alt_1: "audio/altUranium-sfx.mp3"
-        // при необходимости добавляйте новые
+        uranium_alt_1: "audio/altUranium-sfx.mp3",
+        caramella: "audio/CaramellaJester.wav" 
     },
 
     // Воспроизведение трека (без автозапуска при volume=0 или ручной паузе)
@@ -2190,6 +2190,242 @@ const VisualEffects = {
             return () => {
                 clearInterval(interval);
                 this._cleanupScope(glitchOverlay, scope, 'active-effect-western');
+            };
+        },
+        // --- DROW (Следопыт Дроу) - Мороз и Кровь ---
+        drow(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const overlayClass = 'active-effect-drow';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
+
+            const hasGSAP = typeof gsap !== 'undefined';
+            const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches || false;
+
+            // Блокируем клики по эффекту
+            Object.assign(scope.style, { position: 'absolute', inset: '0', pointerEvents: 'none', overflow: 'hidden' });
+
+            const styleEl = document.createElement('style');
+            styleEl.textContent = `
+                /* Морозная виньетка + кровавый оттенок снизу */
+                .drow-frost-vignette {
+                    position: absolute; inset: 0;
+                    box-shadow: inset 0 0 150px 20px rgba(0, 150, 255, 0.15), 
+                                inset 0 -100px 150px 20px rgba(180, 0, 30, 0.2);
+                    mix-blend-mode: screen;
+                    pointer-events: none;
+                }
+                /* Кровавый туман */
+                .drow-blood-mist {
+                    position: absolute; bottom: -20%; left: -20%; width: 140%; height: 60%;
+                    background: radial-gradient(ellipse at top, rgba(180, 0, 30, 0.25) 0%, transparent 70%);
+                    filter: blur(20px); mix-blend-mode: overlay;
+                    will-change: transform, opacity;
+                }
+                /* Ледяные осколки */
+                .drow-ice-shard {
+                    position: absolute; background: #e0ffff;
+                    box-shadow: 0 0 10px #00e5ff, 0 0 20px #00bfff;
+                    clip-path: polygon(0 50%, 100% 0, 80% 100%);
+                    opacity: 0.8; will-change: transform;
+                }
+                /* Снежная пыль */
+                .drow-snow {
+                    position: absolute; background: #fff; border-radius: 50%;
+                    box-shadow: 0 0 5px #fff; opacity: 0; will-change: transform, opacity;
+                }
+            `;
+            scope.appendChild(styleEl);
+
+            // Создаем статические слои
+            const vignette = document.createElement('div'); vignette.className = 'drow-frost-vignette'; scope.appendChild(vignette);
+            const mist = document.createElement('div'); mist.className = 'drow-blood-mist'; scope.appendChild(mist);
+
+            const tweens = [];
+            const timers = [];
+
+            if (hasGSAP) {
+                // Дыхание тумана
+                tweens.push(gsap.to(mist, { y: 30, opacity: 0.5, duration: 4, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
+                tweens.push(gsap.to(mist, { x: 50, duration: 7, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
+            }
+
+            // Функция спавна ледяных осколков (летят по диагонали)
+            const spawnShard = () => {
+                if (!scope.isConnected) return;
+                const shard = document.createElement('div');
+                shard.className = 'drow-ice-shard';
+                
+                const w = Math.random() * 40 + 10;
+                shard.style.width = w + 'px';
+                shard.style.height = (w * 0.15) + 'px';
+                
+                const startY = Math.random() * window.innerHeight;
+                shard.style.left = window.innerWidth + 50 + 'px';
+                shard.style.top = startY + 'px';
+                
+                scope.appendChild(shard);
+
+                if (hasGSAP) {
+                    const dur = Math.random() * 1.5 + 0.5; // Очень быстрые
+                    const tl = gsap.timeline({ onComplete: () => shard.remove() });
+                    tl.to(shard, { 
+                        x: -window.innerWidth - 200, 
+                        y: `+=${Math.random() * 200 - 100}`, 
+                        rotation: Math.random() * 360, 
+                        duration: dur, 
+                        ease: 'none' 
+                    });
+                    tweens.push(tl);
+                } else {
+                    setTimeout(() => shard.remove(), 1000);
+                }
+            };
+
+            // Спавн кровавого снега
+            const spawnSnow = () => {
+                if (!scope.isConnected) return;
+                const snow = document.createElement('div');
+                snow.className = 'drow-snow';
+                const size = Math.random() * 3 + 1;
+                snow.style.width = size + 'px'; snow.style.height = size + 'px';
+                
+                // Изредка снег багровый
+                if (Math.random() > 0.8) {
+                    snow.style.background = '#ff1744';
+                    snow.style.boxShadow = '0 0 5px #d50000';
+                }
+
+                const startX = Math.random() * window.innerWidth;
+                snow.style.left = startX + 'px';
+                snow.style.top = '-20px';
+                scope.appendChild(snow);
+
+                if (hasGSAP) {
+                    const dur = Math.random() * 5 + 3;
+                    const tl = gsap.timeline({ onComplete: () => snow.remove() });
+                    tl.to(snow, { y: window.innerHeight + 50, x: `+=${Math.random() * 200 - 100}`, duration: dur, ease: 'none' }, 0)
+                      .to(snow, { opacity: Math.random() * 0.5 + 0.3, duration: dur * 0.2 }, 0)
+                      .to(snow, { opacity: 0, duration: dur * 0.3 }, dur * 0.7);
+                    tweens.push(tl);
+                } else {
+                    setTimeout(() => snow.remove(), 3000);
+                }
+            };
+
+            const shardInterval = reduceMotion ? 800 : 300;
+            const snowInterval = reduceMotion ? 300 : 100;
+            
+            timers.push(setInterval(spawnShard, shardInterval));
+            timers.push(setInterval(spawnSnow, snowInterval));
+
+            return () => {
+                timers.forEach(id => clearInterval(id));
+                if (hasGSAP) tweens.forEach(t => { try { t.kill(); } catch(e){} });
+                try { styleEl.remove(); } catch(e){}
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
+            };
+        },
+
+        // --- CARAMELLA JESTER - Черно-белый цирк, Неон и Искажение ---
+        caramella(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const overlayClass = 'active-effect-caramella';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
+
+            const hasGSAP = typeof gsap !== 'undefined';
+            const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches || false;
+
+            Object.assign(scope.style, { position: 'absolute', inset: '0', pointerEvents: 'none', overflow: 'hidden', perspective: '800px' });
+
+            const styleEl = document.createElement('style');
+            styleEl.textContent = `
+                /* Искаженный шахматный пол Джестера */
+                .cara-checkerboard {
+                    position: absolute; inset: -50%;
+                    background-image: 
+                        linear-gradient(45deg, rgba(0,0,0,0.4) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.4) 75%, rgba(0,0,0,0.4)), 
+                        linear-gradient(45deg, rgba(0,0,0,0.4) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.4) 75%, rgba(0,0,0,0.4));
+                    background-size: 100px 100px;
+                    background-position: 0 0, 50px 50px;
+                    background-color: rgba(255,255,255,0.1);
+                    mix-blend-mode: overlay;
+                    mask-image: radial-gradient(circle at center, transparent 30%, black 100%);
+                    -webkit-mask-image: radial-gradient(circle at center, transparent 30%, black 100%);
+                    will-change: transform;
+                }
+                /* Фиолетовая аура */
+                .cara-aura {
+                    position: absolute; inset: 0;
+                    box-shadow: inset 0 0 150px 30px rgba(138, 43, 226, 0.3);
+                    mix-blend-mode: screen; pointer-events: none;
+                }
+                /* Летающие ромбы */
+                .cara-diamond {
+                    position: absolute; width: 40px; height: 40px;
+                    transform: rotate(45deg);
+                    will-change: transform, opacity;
+                }
+                .cara-blue { background: #00ffff; box-shadow: 0 0 15px #00ffff; }
+                .cara-pink { background: #ff00ff; box-shadow: 0 0 15px #ff00ff; }
+            `;
+            scope.appendChild(styleEl);
+
+            const board = document.createElement('div'); board.className = 'cara-checkerboard'; scope.appendChild(board);
+            const aura = document.createElement('div'); aura.className = 'cara-aura'; scope.appendChild(aura);
+
+            const tweens = [];
+            const timers = [];
+
+            if (hasGSAP) {
+                // Плавное вращение циркового пола
+                tweens.push(gsap.to(board, { rotation: 360, duration: 150, repeat: -1, ease: 'none' }));
+                // Эффект дыхания/искажения (Cause and Effect manipulation)
+                tweens.push(gsap.to(board, { scale: 1.2, duration: 5, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
+            }
+
+            const spawnDiamond = () => {
+                if (!scope.isConnected) return;
+                const d = document.createElement('div');
+                // Случайный цвет: синий или розовый
+                d.className = `cara-diamond ${Math.random() > 0.5 ? 'cara-blue' : 'cara-pink'}`;
+                
+                // Случайный размер
+                const scale = Math.random() * 1.5 + 0.5;
+                
+                // Случайная позиция (летят из глубины экрана на нас)
+                d.style.left = Math.random() * window.innerWidth + 'px';
+                d.style.top = Math.random() * window.innerHeight + 'px';
+                
+                scope.appendChild(d);
+
+                if (hasGSAP) {
+                    const dur = Math.random() * 4 + 3;
+                    const tl = gsap.timeline({ onComplete: () => d.remove() });
+                    
+                    // Анимация: Ромб летит на камеру (scale), вращается и растворяется
+                    tl.fromTo(d, { scale: 0, opacity: 0, rotationZ: 45, rotationY: 0 }, 
+                                 { scale: scale * 2, opacity: 0.8, rotationZ: 135, rotationY: 360, duration: dur * 0.5, ease: 'power1.inOut' })
+                      .to(d, { scale: scale * 4, opacity: 0, rotationZ: 225, duration: dur * 0.5, ease: 'power1.in' });
+                      
+                    tweens.push(tl);
+                } else {
+                    setTimeout(() => d.remove(), 2000);
+                }
+            };
+
+            const diamondCount = reduceMotion ? 1000 : 400;
+            timers.push(setInterval(spawnDiamond, diamondCount));
+            for(let i=0; i<5; i++) spawnDiamond(); // Начальные ромбы
+
+            return () => {
+                timers.forEach(id => clearInterval(id));
+                if (hasGSAP) tweens.forEach(t => { try { t.kill(); } catch(e){} });
+                try { styleEl.remove(); } catch(e){}
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
             };
         },
             

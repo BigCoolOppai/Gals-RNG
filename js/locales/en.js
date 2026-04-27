@@ -366,6 +366,11 @@ window.locales.en = {
         },
         celestial_being: { name: "Celestial", cardName: "Celestial Being", description: "She dwells in the celestial golden garden, governing the world's various subtle structures. Her divine nature makes your presence here no surprise to her." },
         cyber_demon: { name: "Cybersulfuric", cardName: "Cyber-Demon", description: "She is not just a demoness. She is a cyber-demoness. Her implants enhance both basic physical attributes and \"special\" functions..." },
+        kasane_teto: { name: "Chimera", cardName: "Kasane Teto", description: "A legendary diva born from an April Fool's joke, but who became a true icon. Baguettes and twin-drills are her specialty. The blessing of a myriad of coins brought her into this world." },
+        caramella: { name: "Caramel", cardName: "Caramella Jester", description: "She literally does whatever she wants, because the whole world is her toy. Her powers even include manipulating cause and effect, and she uses them just to play a prank." },
+        drow_alt: { name: "Thawed", cardName: "Unbound Ranger", description: "Apparently, killing you wasn't part of her plans, so she slightly changed her image right before your eyes. Still just as dangerous, but a no less sweet sight." },
+        drow: { name: "Frosty", cardName: "Drow Ranger", description: "Her huge crossbow and frost magic have killed thousands. Her cold gaze is the last thing they saw before death. Will you see it?" },
+        elf: { name: "Disgusted", cardName: "Aristocrat Elf", description: "No matter how beautiful and aesthetic this race is, they still remain closed-off beings. Even now, upon seeing a human, her face shows nothing but disgust and disdain." },
         
     },
     // Shop Items
