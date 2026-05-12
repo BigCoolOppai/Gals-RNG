@@ -371,6 +371,11 @@ window.locales.en = {
         drow_alt: { name: "Thawed", cardName: "Unbound Ranger", description: "Apparently, killing you wasn't part of her plans, so she slightly changed her image right before your eyes. Still just as dangerous, but a no less sweet sight." },
         drow: { name: "Frosty", cardName: "Drow Ranger", description: "Her huge crossbow and frost magic have killed thousands. Her cold gaze is the last thing they saw before death. Will you see it?" },
         elf: { name: "Disgusted", cardName: "Aristocrat Elf", description: "No matter how beautiful and aesthetic this race is, they still remain closed-off beings. Even now, upon seeing a human, her face shows nothing but disgust and disdain." },
+        krampus: { name: "Stealing", cardName: "Krampus", description: "She's the one who stole Christmas from all of us. Some might be outraged by this fact, but just look at this goat-mommy! I think it's even better this way..." },
+        christmas_elf: { name: "Bound", cardName: "Christmas Elf", description: "Krampus decided to have a little fun before her main event. This is the result of her handiwork." },
+        easter_bunny: { name: "Easter", cardName: "Easter Bunny", description: "She's a liiiittle bit late, but she still brought two big Easter joys with her! Yes, her eyes are beautiful." },
+        alice: { name: "Mature", cardName: "Aunt Alice", description: "Aunt Alice is a very kind woman. She'll pour you tea, feed you delicious pasta, and even ease a man's burden." },
+        alice_alt_night: { name: "Nocturnal", cardName: "Night Alice", description: "Our beloved aunt turns into a sexy beast at night, after all, her sexual desire only grows and grows throughout the day..." },
         
     },
     // Shop Items

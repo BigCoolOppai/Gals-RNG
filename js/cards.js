@@ -213,6 +213,22 @@ window.RARITIES_DATA = [
         card: { nameKey: "cards.hween_nurse.cardName", image: "img/limited/halloween2025/cardNurse.png", descriptionKey: "cards.hween_nurse.description" }
     },
     {
+        id: "krampus",
+        nameKey: "cards.krampus.name",
+        minPrestige: 4,
+        probabilityBase: 1 / 85000000,
+        color: "#b71c1c", 
+        glowColor: "#ff5252",
+        cssClass: "rarity-mythic",
+        currencyOnDuplicate: 8500000,
+        card: {
+            name: "Krampus",
+            nameKey: "cards.krampus.cardName",
+            image: "img/cardKrampus.jpg",
+            descriptionKey: "cards.krampus.description"
+        }
+    },
+    {
         id: "caramella",
         nameKey: "cards.caramella.name",
         minPrestige: 4,
@@ -273,6 +289,7 @@ window.RARITIES_DATA = [
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
         card: { nameKey: "cards.hween_scarecrow.cardName", image: "img/limited/halloween2025/cardScarecrow.png", descriptionKey: "cards.hween_scarecrow.description" }
     },
+    
     {
         id: "hween_mime",
         nameKey: "cards.hween_mime.name",
@@ -611,6 +628,22 @@ window.RARITIES_DATA = [
             nameKey: "cards.blackhole.cardName",
             image: "img/cardBlackHole.png",
             descriptionKey: "cards.blackhole.description"
+        }
+    },
+    {
+        id: "easter_bunny",
+        nameKey: "cards.easter_bunny.name",
+        minPrestige: 2,
+        probabilityBase: 1 / 8000000,
+        color: "#f48fb1", 
+        glowColor: "#fce4ec",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 800000,
+        card: {
+            name: "Easter Bunny",
+            nameKey: "cards.easter_bunny.cardName",
+            image: "img/cardEasterBunny.jpg",
+            descriptionKey: "cards.easter_bunny.description"
         }
     },
     {
@@ -1406,6 +1439,23 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "alice_alt_night",
+        nameKey: "cards.alice_alt_night.name",
+        displayParentId: "alice",
+        minPrestige: 1,
+        probabilityBase: 1 / 850000,
+        color: "#311b92", 
+        glowColor: "#b39ddb",
+        cssClass: "rarity-epic",
+        currencyOnDuplicate: 85000,
+        card: {
+            name: "Night Alice",
+            nameKey: "cards.alice_alt_night.cardName",
+            image: "img/altAlice.jpg",
+            descriptionKey: "cards.alice_alt_night.description"
+        }
+    },
+    {
         id: "silken_alt_sushi",
         nameKey: "cards.silken_alt_sushi.name",
         displayParentId: "silken",
@@ -1786,6 +1836,21 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "alice",
+        nameKey: "cards.alice.name",
+        probabilityBase: 1 / 150000,
+        color: "#d81b60", 
+        glowColor: "#f8bbd0",
+        cssClass: "rarity-rare",
+        currencyOnDuplicate: 15000,
+        card: {
+            name: "Aunt Alice",
+            nameKey: "cards.alice.cardName",
+            image: "img/cardAlice.jpg",
+            descriptionKey: "cards.alice.description"
+        }
+    },
+    {
         id: "space_alt_2",
         nameKey: "cards.space_alt_2.name",
         displayParentId: "space",
@@ -1931,6 +1996,21 @@ window.RARITIES_DATA = [
             nameKey: "cards.altDevil.cardName",
             image: "img/altDevil.png",
             descriptionKey: "cards.altDevil.description"
+        }
+    },
+    {
+        id: "christmas_elf",
+        nameKey: "cards.christmas_elf.name",
+        probabilityBase: 1 / 65000,
+        color: "#2e7d32", 
+        glowColor: "#81c784",
+        cssClass: "rarity-rare",
+        currencyOnDuplicate: 6500,
+        card: {
+            name: "Christmas Elf",
+            nameKey: "cards.christmas_elf.cardName",
+            image: "img/cardChristmasElf.jpg",
+            descriptionKey: "cards.christmas_elf.description"
         }
     },
     {
