@@ -612,6 +612,22 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "marika",
+        nameKey: "cards.marika.name",
+        minPrestige: 3,
+        probabilityBase: 1 / 9999999, // 1 шанс из почти 10 миллионов
+        color: "#FFD700", // Золотой
+        glowColor: "#FFF8E7", // Светящийся белый/кремовый
+        cssClass: "rarity-godly", // Или rarity-mythic
+        currencyOnDuplicate: 999999,
+        card: {
+            name: "Eternal Queen",
+            nameKey: "cards.marika.cardName",
+            image: "img/cardMarika.jpg",
+            descriptionKey: "cards.marika.description"
+        }
+    },
+    {
         id: "blackhole",
         nameKey: "cards.blackhole.name",
         probabilityBase: 1 / 9876543,

@@ -376,6 +376,7 @@ window.locales.en = {
         easter_bunny: { name: "Easter", cardName: "Easter Bunny", description: "She's a liiiittle bit late, but she still brought two big Easter joys with her! Yes, her eyes are beautiful." },
         alice: { name: "Mature", cardName: "Aunt Alice", description: "Aunt Alice is a very kind woman. She'll pour you tea, feed you delicious pasta, and even ease a man's burden." },
         alice_alt_night: { name: "Nocturnal", cardName: "Night Alice", description: "Our beloved aunt turns into a sexy beast at night, after all, her sexual desire only grows and grows throughout the day..." },
+        marika: { name: "Eternal", cardName: "Eternal Queen", description: "This woman became a goddess in the flesh, acting as a vessel for the laws of the universe. But by defying those very laws, she doomed the entire world to a slow decay." },
         
     },
     // Shop Items
