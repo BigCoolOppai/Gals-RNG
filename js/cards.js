@@ -34,6 +34,26 @@ window.MUTATION_BASE_CHANCE = 0.02; // 2%
 // Важно: порядок должен быть от САМОЙ РЕДКОЙ к САМОЙ ЧАСТОЙ (для апгрейдов по индексам)!
 window.RARITIES_DATA = [
     {
+        id: "dogma",
+        nameKey: "cards.dogma.name", // Пока без локалей, но ключи оставляем для структуры
+        minPrestige: 6, // Требует высокого престижа для встречи
+        probabilityBase: 1 / 1010101010, // 1 шанс из 1,010,101,010
+        color: "#ffffff", 
+        glowColor: "#ffffff", 
+        cssClass: "rarity-dogma", 
+        currencyOnDuplicate: 101010101, // 100 лямов осколков за дубликат
+        mechanicalEffect: {
+            type: "variant_chance_bonus",
+            value: 3.0 // +300% к шансу мутации
+        },
+        card: {
+            name: "BLASPHEMY AGAINST THE HOLY SPIRIT", // Отсылка к тексту из айзека
+            nameKey: "cards.dogma.cardName",
+            image: "img/cardDogma.webp", // ТВОЙ АНИМИРОВАННЫЙ ФАЙЛ
+            descriptionKey: "cards.dogma.description"
+        }
+    },
+    {
         id: "gal",
         nameKey: "cards.gal.name",
         minPrestige: 6, // Требует 6-го перерождения

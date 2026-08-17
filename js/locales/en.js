@@ -377,7 +377,8 @@ window.locales.en = {
         alice: { name: "Mature", cardName: "Aunt Alice", description: "Aunt Alice is a very kind woman. She'll pour you tea, feed you delicious pasta, and even ease a man's burden." },
         alice_alt_night: { name: "Nocturnal", cardName: "Night Alice", description: "Our beloved aunt turns into a sexy beast at night, after all, her sexual desire only grows and grows throughout the day..." },
         marika: { name: "Eternal", cardName: "Eternal Queen", description: "This woman became a goddess in the flesh, acting as a vessel for the laws of the universe. But by defying those very laws, she doomed the entire world to a slow decay." },
-        
+        dogma: { name: "Static", cardName: "Dogma", description: "THE ANGER OF GOD IS COMING! PRIDE! GREED! WRATH! ENVY! LUST! GLUTTONY AND SLOTH! BLASPHEMY AGAINST THE HOLY SPIRIT!" },
+
     },
     // Shop Items
     shop: {
@@ -529,7 +530,8 @@ window.locales.en = {
             'theme-obsidian': 'Obsidian',
             'theme-choco': 'Chocolate',
             'theme-halloween': 'Halloween',
-            'theme-creepypasta': 'Creepypasta'
+            'theme-creepypasta': 'Creepypasta',
+            'theme-dogma': 'Static',
         },
         luckCoreFragments: "Core Fragments:",
         effectiveChance: "Effective Chance (with your luck):",
@@ -625,7 +627,8 @@ window.locales.en = {
         no_effect: "This card has no mechanical effect.",
         equip_button: "Equip Effect",
         unequip_button: "Unequip Effect",
-        equipped_label: "(Equipped)"
+        equipped_label: "(Equipped)",
+        variant_chance_bonus: "The entity distorts reality. The chance of mutations for all cards is increased by 300%.",
     },
     passive_effects: {
         description_title: "Passive Effect:",
@@ -687,7 +690,8 @@ window.locales.en = {
         gold_999_purity: {
             name: "999 Fineness",
             description: "Get a Golden mutation on the 'Goldy' card.",
-        }
+        },
+        get_dogma_card: { name: "Blasphemy", description: "Obtain the 'Dogma' card.", rewardName: "Theme 'Static'" },
 
     },
     collections: {

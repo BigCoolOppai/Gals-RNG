@@ -1600,7 +1600,13 @@ const UI = (() => {
             modalCardRarity.textContent = `${L.get('ui.rarity')}: ${L.get(versionData.nameKey)}`;
             modalCardDescription.textContent = L.get(versionData.card.descriptionKey);
             modalCardRarity.style.color = versionData.color;
-
+            // Если это Догма — делаем текст редкости шумным
+            if (versionData.id === 'dogma') {
+                modalCardRarity.classList.add('text-noise-animated');
+            } else {
+                modalCardRarity.classList.remove('text-noise-animated');
+            }
+            
             if (versionData.probabilityBase >= 1) {
                 modalCardChance.textContent = L.get('ui.guaranteed');
             } else {

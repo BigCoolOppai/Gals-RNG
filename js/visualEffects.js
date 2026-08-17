@@ -2428,6 +2428,46 @@ const VisualEffects = {
                 this._cleanupScope(glitchOverlay, scope, overlayClass);
             };
         },
+        // --- DOGMA: Real White Noise ---
+        dogma(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const overlayClass = 'active-effect-dogma';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
+
+            // Блокируем клики по слою, чтобы игра работала
+            Object.assign(scope.style, { position: 'absolute', inset: '0', pointerEvents: 'none', overflow: 'hidden' });
+
+            const styleEl = document.createElement('style');
+            styleEl.textContent = `
+                @keyframes dogma-overlay-noise {
+                    0%, 19% { background-image: url('img/effects/noise1.webp'); }
+                    20%, 39% { background-image: url('img/effects/noise2.webp'); }
+                    40%, 59% { background-image: url('img/effects/noise3.webp'); }
+                    60%, 79% { background-image: url('img/effects/noise4.webp'); }
+                    80%, 100% { background-image: url('img/effects/noise5.webp'); }
+                }
+                .dogma-real-static {
+                    position: absolute; 
+                    inset: 0;
+                    animation: dogma-overlay-noise 0.2s infinite;
+                    opacity: 0.1; /* Прозрачность шума ПОВЕРХ ИГРЫ (20%) */
+                    mix-blend-mode: screen; 
+                    pointer-events: none;
+                }
+            `;
+            scope.appendChild(styleEl);
+
+            const noise = document.createElement('div'); 
+            noise.className = 'dogma-real-static'; 
+            scope.appendChild(noise);
+
+            return () => {
+                try { styleEl.remove(); } catch(e){}
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
+            };
+        },
             
     }
 };

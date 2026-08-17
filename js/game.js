@@ -668,6 +668,12 @@ const Game = (() => {
 
     function getVariantChanceBonusGlobal() {
         let sum = getVariantChanceBonusFromEquipment(); // +50% от линзы
+        if (playerData.activeMechanicalEffect === 'dogma') {
+            const dogmaData = getRarityDataById('dogma', playerData);
+            if (dogmaData && dogmaData.mechanicalEffect && dogmaData.mechanicalEffect.type === 'variant_chance_bonus') {
+                sum += dogmaData.mechanicalEffect.value; // Добавляем 3.0 (+300%)
+            }
+        }
         const ev = getActiveEvent();
         if (ev?.effect?.type === 'variant_chance_multiplier') sum += (ev.effect.multiplier - 1);
         // будущие бусты:

@@ -169,6 +169,16 @@ const ACHIEVEMENTS_DATA = {
         condition: (p) => (p.ownedVariants?.gold?.gold || 0) > 0, // карта id: 'gold', мутация: 'gold'
         reward: { type: 'currency', amount: 5000000 } // ПОМЕНЯТЬ НАГРАДУ НА ТЕМУ В БУДУЩЕМ
     },
+    'get_dogma_card': { 
+        nameKey: 'achievements.get_dogma_card.name', // "BLASPHEMY"
+        descriptionKey: 'achievements.get_dogma_card.description',
+        condition: (playerData) => playerData.inventory.includes('dogma'),
+        reward: { 
+            type: 'ui_theme', 
+            themeId: 'theme-dogma',
+            nameKey: 'achievements.get_dogma_card.rewardName' // "Theme 'Static'"
+        }
+    },
 
     
 };
