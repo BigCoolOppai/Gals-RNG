@@ -50,17 +50,9 @@ for f in img/card*.png img/card*.jpg img/alt*.png img/alt*.jpg img/alt2*.png \
     [ -f "$f" ] && convert_img "$f"
 done
 
-# PWA-иконки генерируются ТОЛЬКО из официального лого игры (img/logo.png).
-# ВНИМАНИЕ: img/effects/brand.png — это игровое артефакт-изображение
-# (метка берсерка, используется эффектом карты Стаг), НЕ лого игры.
-if [ -f img/logo.png ]; then
-    echo "==> PWA-иконки из img/logo.png"
-    convert img/logo.png -resize 512x512 -quality 85 icon-512.png
-    convert img/logo.png -resize 192x192 -quality 85 icon-192.png
-    convert img/logo.png -resize 64x64  -quality 85 favicon.png
-else
-    echo "==> img/logo.png не найден — PWA-иконки не генерируются (положи лого игры в img/logo.png)"
-fi
+# PWA-иконки НЕ генерируются: itch.io сам ставит иконку проекта.
+# (Если когда-нибудь понадобится PWA для другого хостинга — вернуть блок
+#  генерации из img/logo.png.)
 
 echo "Готово. Итоговые размеры:"
-du -sh img/webp icon-192.png icon-512.png favicon.png 2>/dev/null || true
+du -sh img/webp 2>/dev/null || true
