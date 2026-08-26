@@ -84,5 +84,37 @@ const EVENTS_DATA = [
             multiplier: 2
         }
     },
+
+    // Ретро-ивент «Ретро Взгляд»: витрина старых лимиток для новых игроков.
+    // 10 карт (4 из шоколадного, 6 из хэллоуинского ивентов) выпадают с x2,
+    // не открывая целиком ни один из прошлых ивентов. Наград нет — это
+    // демонстрация: «периодически проходят ивенты».
+    // Даты: 27.08.2026 00:00 (UTC+5) -> 26.09.2026 00:00 (UTC+5), 1 месяц.
+    {
+        id: 'retro_gaze_2026',
+        nameKey: 'events.retro_gaze.name',
+        descriptionKey: 'events.retro_gaze.description',
+        startDate: '2026-08-26T19:00:00Z',
+        endDate:   '2026-09-26T19:00:00Z',
+        bannerClass: 'retro-banner',
+        effect: {
+            type: 'boost_specific_cards',
+            cardIds: [
+                // Шоколадный ивент (4 из 8)
+                'choco', 'choco_espresso', 'choco_white', 'choco_peppermint',
+                // Хэллоуин 2025 (6 из 19)
+                'hween_ghost', 'hween_ghostface', 'hween_clown',
+                'hween_scarecrow', 'hween_sadako', 'hween_slender'
+            ],
+            multiplier: 2
+        },
+        // Эти лимитки доступны к роллу во время ретро-ивента (см. isCardAvailableNow)
+        retroCards: [
+            'choco', 'choco_espresso', 'choco_white', 'choco_peppermint',
+            'hween_ghost', 'hween_ghostface', 'hween_clown',
+            'hween_scarecrow', 'hween_sadako', 'hween_slender'
+        ]
+    },
+
     // Сюда можно будет добавлять новые эвенты в будущем
 ];

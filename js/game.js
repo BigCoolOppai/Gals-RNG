@@ -202,17 +202,17 @@ const Game = (() => {
         if (r.id === 'diamond' && !p.isSupporter) return false;
         if (r.id === 'salt' && !p.completedAchievements.includes('unlock_salt_card')) return false;
 
-        // ЛИМИТКИ: доступны к роллу во время ивента ИЛИ если игрок их уже получил
+        // ЛИМИТКИ: доступны к роллу, если:
+        //  1. карта уже получена (остается в пуле — фарм дублей),
+        //  2. сейчас идёт ЕЁ ивент,
+        //  3. сейчас идёт ретро-ивент, где карта указана в retroCards
+        //     (витрина старых лимиток, например «Ретро Взгляд»).
         if (r.availability?.type === 'event') {
-            // 1. Проверка: есть ли карта уже в инвентаре?
-            // (inventory хранит массив ID, например ['hween_jack', ...])
-            // Полученная лимитка остаётся в пуле — её можно фармить на дубли
             if (p.inventory.includes(r.id)) {
                 return true;
             }
-
-            // 2. Если карты нет — проверяем, идёт ли её ивент (любой из активных)
-            return getActiveEvents().some(ev => ev.id === r.availability.eventId);
+            return getActiveEvents().some(ev =>
+                ev.id === r.availability.eventId || (ev.retroCards || []).includes(r.id));
         }
         return true;
     }
@@ -245,6 +245,19 @@ const Game = (() => {
             if (rarityData && rarityData.passiveEffect && rarityData.passiveEffect.type === bonusType) {
                 totalValue += rarityData.passiveEffect.value;
             }
+        }
+        return totalValue;
+    }
+
+    // Пассивный бонус за полные коллекции (COLLECTIONS_DATA.passiveEffect).
+    // Суммирует только те коллекции, что уже выполнены игроком.
+    function getCollectionBonusValue(bonusType) {
+        if (typeof COLLECTIONS_DATA === 'undefined') return 0;
+        let totalValue = 0;
+        for (const colId in COLLECTIONS_DATA) {
+            if (!playerData.completedAchievements.includes(colId)) continue;
+            const pe = COLLECTIONS_DATA[colId].passiveEffect;
+            if (pe && pe.type === bonusType) totalValue += pe.value;
         }
         return totalValue;
     }
@@ -597,6 +610,8 @@ const Game = (() => {
         // Ядро и престиж
         luck += calculateLuckFromCore(playerData.luckCoreLevel || 0);
         luck += calculateRebirthBonus(playerData);
+        // Пассивки за полные коллекции
+        luck += getCollectionBonusValue('luck_flat');
 
         // Бонус от дубликатов "blackhole" (если есть механика)
         const bhBonusPerDup = getRarityDataById('blackhole', playerData)?.mechanicalEffect?.luckBonusPerDuplicate ?? 0.01;
@@ -696,6 +711,8 @@ const Game = (() => {
         (getActiveEvents() || []).forEach(ev => {
             if (ev.effect?.type === 'variant_chance_multiplier') sum += (ev.effect.multiplier - 1);
         });
+        // Пассивки за полные коллекции (например, хэллоуин-сет +10%)
+        sum += getCollectionBonusValue('variant_chance_bonus');
         // будущие бусты:
         (playerData.activeBoosts || []).forEach(b => {
             if (b.type === 'variant_chance_multiplier') sum += (b.multiplier - 1);
@@ -779,6 +796,8 @@ const Game = (() => {
                 sum += ((b.multiplier || 1) - 1);
             }
         });
+        // Пассивки за полные коллекции (например, крипипаста +5%)
+        sum += getCollectionBonusValue('material_drop_bonus_percent');
         return sum; // возвращаем долю, не проценты
     }
 
@@ -1128,6 +1147,7 @@ const Game = (() => {
             }
         });
         totalBonusPercent += getPassiveBonusValue('duplicate_currency_bonus_percent');
+        totalBonusPercent += getCollectionBonusValue('duplicate_currency_bonus_percent');
 
         if (totalBonusPercent > 0 && baseDuplicateReward > 0) {
             const bonusAmount = Math.ceil(baseDuplicateReward * totalBonusPercent);
@@ -1532,6 +1552,8 @@ const Game = (() => {
 
         const core = calculateLuckFromCore(p.luckCoreLevel || 0);
         const prestige = calculateRebirthBonus(p);
+        // Пассивки за полные коллекции (плоская добавка к удаче)
+        const collections = getCollectionBonusValue('luck_flat');
 
         // blackhole duplicates
         const bhPerDup = getRarityDataById('blackhole', p)?.mechanicalEffect?.luckBonusPerDuplicate ?? 0.01;
@@ -1575,7 +1597,7 @@ const Game = (() => {
         const eventMultiplier = (getActiveEvents() || []).reduce((m, ev) =>
             (ev.effect?.type === 'global_luck_multiplier') ? m * ev.effect.multiplier : m, 1);
 
-        const total = (base + core + prestige + bhDup + equipFlat + misfortune + motivation + (boostSum * catalystMult)) * eventMultiplier;
+        const total = (base + core + prestige + collections + bhDup + equipFlat + misfortune + motivation + (boostSum * catalystMult)) * eventMultiplier;
 
         return {
             total,
@@ -1584,6 +1606,7 @@ const Game = (() => {
             { key:'base',       label:'Base',               type:'flat', value: base },
             { key:'core',       label:'Luck Core',          type:'flat', value: core },
             { key:'prestige',   label:'Prestige',           type:'flat', value: prestige },
+            { key:'collections',label:'Collections',        type:'flat', value: collections },
             { key:'blackhole',  label:'Blackhole Dupes',    type:'flat', value: bhDup },
             { key:'equip',      label:'Equipment (flat)',   type:'flat', value: equipFlat },
             { key:'misfortune', label:'Misfortune stacks',  type:'flat', value: misfortune },
@@ -1630,6 +1653,6 @@ const Game = (() => {
         setActiveTheme,
         calculateRebirthBonus,
         craftItem, addMaterials, hasMaterials, spendMaterials, getLuckBreakdown, isCardAvailableNow,
-        getActiveEvents, getMaterialDropBonusPercent, getVariantChanceBonusGlobal,
+        getActiveEvents, getMaterialDropBonusPercent, getVariantChanceBonusGlobal, getCollectionBonusValue,
     };
 })();

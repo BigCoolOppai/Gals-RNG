@@ -498,6 +498,25 @@ window.locales.en = {
             rarity_asc: "Rarity (asc)",
             name_asc: "Name (A-Z)"
         },
+        filter: {
+            shown: "Shown",
+            new: "🆕 New",
+            limited: "🏷 LIMITED",
+            mutation: "🧬 Variants",
+            effect: "⚙️ Effects",
+            alts: "🃏 With alts",
+            rarityLabel: "Rarity:",
+            reset: "reset",
+            rarity: {
+                all: "all",
+                le1k: "≤ 1/1K",
+                k1_10: "1/1K–1/10K",
+                k10_100: "1/10K–1/100K",
+                m100_1: "1/100K–1/1M",
+                m1_100: "1/1M–1/100M",
+                g100: "> 1/100M"
+            }
+        },
         newCardNotification: {
             title: "✨ NEW CARD! ✨",
             closeBtn: "Awesome!"
@@ -528,7 +547,8 @@ window.locales.en = {
             title: "Achievements",
             collectionsTitle: "Collections",
             themesTitle: "UI Themes",
-            reward: "Reward"
+            reward: "Reward",
+            collectionBonus: "Bonus:"
         },
         themes: {
             'default': 'Default',
@@ -559,6 +579,7 @@ window.locales.en = {
             base: "Base",
             core: "Luck Core",
             prestige: "Prestige",
+            collections: "Collections",
             blackhole: "Blackhole dupes",
             equip: "Equipment (flat)",
             misfortune: "Misfortune stacks",
@@ -572,6 +593,27 @@ window.locales.en = {
         timeShort: {
             days: "d",
             hours: "h"
+        },
+        effectWidget: {
+            title: "Active mechanical effect (click to change)",
+            none: "Effect: —",
+            nothing: "None",
+            jackpotCost: "−{cost}💎/roll",
+            types: {
+                high_risk_high_reward: "Jackpot",
+                universal_upgrade: "Upgrade",
+                duplicate_collector: "Collector",
+                boost_catalyst: "Catalyst",
+                quality_guarantor: "Guarantor",
+                sword_path: "Sword Path",
+                variant_chance_bonus: "Variants"
+            }
+        },
+        collectionBonus: {
+            luck: "+{v} Luck",
+            duplicates: "+{v}% on duplicates",
+            mutations: "+{v}% to variants",
+            materials: "+{v}% to materials"
         }
     },
     // Notifications
@@ -681,6 +723,10 @@ window.locales.en = {
         halloween_2025: {
             name: "Halloween: Night of Fright",
             description: "The spookiest night of the year has come! The chance to find themed monster and demon cards is greatly boosted. Plus, new exclusive event cards are scattered about!"
+        },
+        retro_gaze: {
+            name: "Retro Gaze",
+            description: "Look, echoes of the past drift in the air."
         },
     },
     achievements: {

@@ -5144,3 +5144,117 @@ html.theme-dogma {
     letter-spacing: 0.05em;
 }
 
+
+/* ============================================================
+   0.2.15 — Виджет активного механического эффекта (шапка)
+   ============================================================ */
+.effect-widget {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border: 1px solid #444a5e;
+    border-radius: 20px;
+    background: rgba(20, 22, 34, 0.8);
+    color: #adb5bd;
+    font-size: 0.85rem;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color .15s, box-shadow .15s, color .15s;
+}
+.effect-widget:hover {
+    border-color: #6c757d;
+    color: #e9ecef;
+}
+.effect-widget-active {
+    color: #f8f9fa;
+}
+.effect-jackpot-cost {
+    color: #ffd54f;
+    font-weight: 600;
+    animation: effect-jackpot-pulse 1.2s infinite;
+}
+@keyframes effect-jackpot-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+}
+.effect-widget-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 1050;
+    min-width: 240px;
+    max-height: 320px;
+    overflow-y: auto;
+    background: #1f2233;
+    border: 1px solid #3a3f55;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    padding: 4px;
+}
+.effect-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #ced4da;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+.effect-menu-item:hover {
+    background: #2c3150;
+    color: #fff;
+}
+.effect-menu-item img {
+    width: 20px;
+    height: 26px;
+    object-fit: cover;
+    border-radius: 3px;
+    border: 1px solid #444a5e;
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   0.2.15 — Фильтры инвентаря
+   ============================================================ */
+.inv-filter-chip.active {
+    background-color: #3d6dd8 !important;
+    border-color: #3d6dd8 !important;
+    color: #fff !important;
+}
+.inv-filter-rarity {
+    width: auto;
+    max-width: 180px;
+}
+.inv-filter-rarity-label {
+    margin-right: 4px;
+    font-size: 0.8rem;
+    color: #adb5bd;
+}
+.inv-filter-reset {
+    font-size: 0.75rem;
+    padding: 0 4px;
+}
+
+/* ============================================================
+   0.2.15 — Баннер ретро-ивента «Ретро Взгляд»
+   ============================================================ */
+.retro-banner {
+    background: linear-gradient(90deg, #1a1025 0%, #0d1b2a 50%, #1a1025 100%);
+    border: 1px solid #8a2be2;
+    box-shadow: 0 0 12px rgba(138, 43, 226, 0.45), inset 0 0 18px rgba(0, 240, 255, 0.08);
+    border-radius: 8px;
+}
+.retro-banner .alert-heading {
+    color: #e0b3ff;
+    text-shadow: 0 0 8px rgba(224, 179, 255, 0.6), 2px 0 0 rgba(0, 240, 255, 0.35), -2px 0 0 rgba(255, 0, 200, 0.35);
+    letter-spacing: 0.06em;
+}
+.retro-banner p {
+    color: #b8c7d4;
+    font-style: italic;
+    margin-bottom: 0;
+}
