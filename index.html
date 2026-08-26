@@ -441,6 +441,25 @@
         </div>
     </div>
     <!-- END DEBUG PANEL -->
+     <!-- 18+ Age Disclaimer Modal -->
+    <div class="modal fade" id="ageDisclaimerModal" tabindex="-1" aria-labelledby="ageDisclaimerModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-light border-danger shadow-lg">
+                <div class="modal-header border-danger">
+                    <h5 class="modal-title text-danger" id="ageDisclaimerModalLabel" data-i18n="ui.ageDisclaimer.title">⚠️ Предупреждение 18+</h5>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <p class="fs-5 mb-0" data-i18n="ui.ageDisclaimer.message" data-i18n-target="innerHTML">
+                        Эта игра предназначена для взрослой аудитории и содержит взрослый контент.<br><br><strong>Вам есть 18+ лет?</strong>
+                    </p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center gap-3 pb-4">
+                    <button type="button" class="btn btn-outline-secondary px-4" id="ageDeclineBtn" data-i18n="ui.ageDisclaimer.declineBtn">Нет, покинуть</button>
+                    <button type="button" class="btn btn-danger px-4 font-weight-bold" id="ageConfirmBtn" data-i18n="ui.ageDisclaimer.confirmBtn">Да, мне есть 18+</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- New Card Notification Modal -->
     <div class="modal fade" id="newCardModal" tabindex="-1" aria-labelledby="newCardModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">

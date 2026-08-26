@@ -35,21 +35,21 @@ window.MUTATION_BASE_CHANCE = 0.02; // 2%
 window.RARITIES_DATA = [
     {
         id: "dogma",
-        nameKey: "cards.dogma.name", // Пока без локалей, но ключи оставляем для структуры
-        minPrestige: 6, // Требует высокого престижа для встречи
-        probabilityBase: 1 / 1010101010, // 1 шанс из 1,010,101,010
+        nameKey: "cards.dogma.name",
+        minPrestige: 6, 
+        probabilityBase: 1 / 1010101010, 
         color: "#ffffff", 
         glowColor: "#ffffff", 
         cssClass: "rarity-dogma", 
-        currencyOnDuplicate: 101010101, // 100 лямов осколков за дубликат
+        currencyOnDuplicate: 101010101, 
         mechanicalEffect: {
             type: "variant_chance_bonus",
             value: 3.0 // +300% к шансу мутации
         },
         card: {
-            name: "BLASPHEMY AGAINST THE HOLY SPIRIT", // Отсылка к тексту из айзека
+            name: "BLASPHEMY AGAINST THE HOLY SPIRIT", 
             nameKey: "cards.dogma.cardName",
-            image: "img/cardDogma.webp", // ТВОЙ АНИМИРОВАННЫЙ ФАЙЛ
+            image: "img/cardDogma.webp", 
             descriptionKey: "cards.dogma.description"
         }
     },
@@ -156,7 +156,22 @@ window.RARITIES_DATA = [
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
         card: { nameKey: "cards.hween_eyeless.cardName", image: "img/limited/halloween2025/cardEyeless.png", descriptionKey: "cards.hween_eyeless.description" }
     },
-    
+    {
+        id: "space_marine",
+        nameKey: "cards.space_marine.name",
+        minPrestige: 3,
+        probabilityBase: 1 / 17000000,
+        color: "#1565C0", // Ультрамариновый синий
+        glowColor: "#FFD700", // Золотой акцент (аквила/декор брони)
+        cssClass: "rarity-zealous",
+        currencyOnDuplicate: 1700000,
+        card: {
+            name: "Inimica Anima",
+            nameKey: "cards.space_marine.cardName",
+            image: "img/cardSpaceMarine.png",
+            descriptionKey: "cards.space_marine.description"
+        }
+    },
     {
         id: "gyro",
         nameKey: "cards.gyro.name",
@@ -412,6 +427,23 @@ window.RARITIES_DATA = [
             nameKey: "cards.seductress.cardName",
             image: "img/altVacation.png",
             descriptionKey: "cards.seductress.description"
+        }
+    },
+    {
+        id: "lucy_alt",
+        nameKey: "cards.lucy_alt.name",
+        displayParentId: "lucy",
+        minPrestige: 3,
+        probabilityBase: 1 / 16000000,
+        color: "#8E24AA", // Фиолетово-руинный оттенок
+        glowColor: "#CE93D8",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 1600000,
+        card: {
+            name: "Amelia",
+            nameKey: "cards.lucy_alt.cardName",
+            image: "img/altLucy.jpg",
+            descriptionKey: "cards.lucy_alt.description"
         }
     },
     {
@@ -1167,6 +1199,21 @@ window.RARITIES_DATA = [
             nameKey: "cards.western.cardName",
             image: "img/cardWestern.png",
             descriptionKey: "cards.western.description"
+        }
+    },
+    {
+        id: "lucy",
+        nameKey: "cards.lucy.name",
+        probabilityBase: 1 / 1700000,
+        color: "#E65100", // Теплый рыжий/офисный цвет
+        glowColor: "#FFCC80",
+        cssClass: "rarity-legendary",
+        currencyOnDuplicate: 170000,
+        card: {
+            name: "Lucy",
+            nameKey: "cards.lucy.cardName",
+            image: "img/cardLucy.jpg",
+            descriptionKey: "cards.lucy.description"
         }
     },
     {

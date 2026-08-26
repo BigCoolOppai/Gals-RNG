@@ -128,6 +128,7 @@ const UI = (() => {
         cacheDOMElements();
         injectInventorySearch();
         setupEventListeners();
+        checkAgeDisclaimer();
 
         const initialPlayerData = Game.getPlayerData();
         updateAll(initialPlayerData);
@@ -163,6 +164,26 @@ const UI = (() => {
         // Тултипы Bootstrap
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+    }
+
+    function checkAgeDisclaimer() {
+        const isConfirmed = localStorage.getItem('ageDisclaimerConfirmed') === 'true';
+        if (isConfirmed) return;
+
+        const modalEl = document.getElementById('ageDisclaimerModal');
+        if (!modalEl) return;
+
+        const ageModal = new bootstrap.Modal(modalEl);
+        ageModal.show();
+
+        document.getElementById('ageConfirmBtn')?.addEventListener('click', () => {
+            localStorage.setItem('ageDisclaimerConfirmed', 'true');
+            ageModal.hide();
+        });
+
+        document.getElementById('ageDeclineBtn')?.addEventListener('click', () => {
+            window.location.href = 'https://www.google.com';
+        });
     }
 
     function setupEventListeners() {

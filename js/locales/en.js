@@ -378,6 +378,9 @@ window.locales.en = {
         alice_alt_night: { name: "Nocturnal", cardName: "Night Alice", description: "Our beloved aunt turns into a sexy beast at night, after all, her sexual desire only grows and grows throughout the day..." },
         marika: { name: "Eternal", cardName: "Eternal Queen", description: "This woman became a goddess in the flesh, acting as a vessel for the laws of the universe. But by defying those very laws, she doomed the entire world to a slow decay." },
         dogma: { name: "Static", cardName: "Dogma", description: "THE ANGER OF GOD IS COMING! PRIDE! GREED! WRATH! ENVY! LUST! GLUTTONY AND SLOTH! BLASPHEMY AGAINST THE HOLY SPIRIT!" },
+        space_marine: { name: "Zealous", cardName: "Inimica Anima", description: "She annihilates the enemies of mankind in His name. Anyone who does not look human will be cut down by her massive sword, only fueling her battle-fury even more." },
+        lucy: { name: "Office", cardName: "Lucy", description: "This red-haired girl works as a secretary in the most ordinary office of the most ordinary company. Did you believe her resume? Well, I didn't either. Things just can't be that ordinary here..." },
+        lucy_alt: { name: "Runaway", cardName: "Amelia", description: "Lucy's daughter who ran away under the cover of night into a massive ruin complex. Coming of age, she decided to split her life into 'before' and 'after'. Oddly enough, how on earth does she manage to keep her body so impeccably clean... in the middle of ruins?" },
 
     },
     // Shop Items
@@ -431,6 +434,12 @@ window.locales.en = {
     },
     // UI Elements
     ui: {
+        ageDisclaimer: {
+            title: "⚠️ 18+ Warning",
+            message: "This game is intended for a mature audience and contains adult content.<br><br><strong>Are you 18 years of age or older?</strong>",
+            confirmBtn: "Yes, I am 18+",
+            declineBtn: "No, leave"
+        },
         searchCards: "Search...",
         variant: { normal: "Normal"},
         noVariants: "No variants owned for this card.",
