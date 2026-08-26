@@ -190,7 +190,7 @@ const UI = (() => {
         });
 
         const selWrap = document.createElement('span');
-        selWrap.innerHTML = `<label class="inv-filter-rarity-label mb-0">${L.get('ui.filter.rarity')}</label>`;
+        selWrap.innerHTML = `<label class="inv-filter-rarity-label mb-0">${L.get('ui.filter.rarityLabel')}</label>`;
         const sel = document.createElement('select');
         sel.id = 'inventoryRarityFilter';
         sel.className = 'form-select form-select-sm inv-filter-rarity';
