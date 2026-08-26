@@ -2683,6 +2683,17 @@ html.theme-prestige {
     position: relative;
     overflow: visible;
 }
+/* ВАЖНО: позиция relative, чтобы absolutely-позитционированный бейдж
+   «прицеплялся» к самой вкладке, а не к ближайшему предку (раньше он
+   «висел» в правом верхнем углу страницы) */
+.nav-tabs .nav-link {
+    position: relative;
+}
+/* Страховка: и родитель вкладок тоже позиционирован — бейдж не сможет
+   «отлететь» в угол страницы ни при каких изменениях тем */
+.nav-tabs .nav-item {
+    position: relative;
+}
 .version-switcher-btn.new-version::after,
 .nav-tabs .nav-link.new-version::after { /* <-- ДОБАВИЛИ СЕЛЕКТОР ДЛЯ ВКЛАДОК */
     content: '!';
@@ -2704,6 +2715,9 @@ html.theme-prestige {
     box-shadow: 0 0 8px #dc3545; /* <-- Добавили тень */
     animation: new-card-pulse 1.5s infinite; /* <-- Добавили пульсацию */
 }
+
+/* Nicole (Охотница с кейсом) */
+.roll-slot.rarity-nicole { background: linear-gradient(160deg, #2c3e50, #1a252f); color: #f1c40f; border: 1px solid #f1c40f; text-shadow: 0 0 8px rgba(241, 196, 15, 0.6); }
 
 /* Alt Maternal (Кормящая) */
 .roll-slot.rarity-alt-maternal {

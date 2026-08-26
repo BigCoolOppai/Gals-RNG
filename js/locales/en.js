@@ -540,6 +540,8 @@ window.locales.en = {
             'theme-choco': 'Chocolate',
             'theme-halloween': 'Halloween',
             'theme-creepypasta': 'Creepypasta',
+            'theme-synthwave': 'Synthwave',
+            'theme-cosmic-deep': 'Deep Cosmos',
             'theme-dogma': 'Static',
         },
         luckCoreFragments: "Core Fragments:",
@@ -564,11 +566,20 @@ window.locales.en = {
             boosts: "Boosts",
             multiplier: "multiplier",
             noBoosts: "No active boosts",
+            event: "Event multiplier",
             total: "Total"
-        }  
+        },
+        timeShort: {
+            days: "d",
+            hours: "h"
+        }
     },
     // Notifications
     notifications: {
+        starterPotion: {
+            name: "Starter Potion",
+            granted: "🧪 Starter Potion! +1.0 Luck for 10 minutes. Good luck!"
+        },
         luckyRollTriggered: "✨ Lucky Roll! Luck multiplied! ✨",
         notEnoughCurrency: "Not enough Prismatic Shards!",
         itemPurchased: "purchased, but there's no space to equip it. Free up a slot.",

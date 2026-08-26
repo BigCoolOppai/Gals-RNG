@@ -312,7 +312,7 @@
         <footer class="text-center mt-5 mb-3">
             <hr>
             <p class="text-muted small">
-                Gal's RNG - Version 0.2.13 "Something"
+                Gal's RNG - <span id="versionLabel">Version 0.2.15 "Tightrope"</span>
             </p>
             <!-- Можно добавить еще что-то, например, копирайт или ссылку на вас -->
             <p class="text-muted small">© 2026 BigCoolOppai</p>
@@ -354,22 +354,14 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Flip.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/MotionPathPlugin.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrambleTextPlugin.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/TextPlugin.min.js"></script>
-
-    <!-- RoughEase, ExpoScaleEase and SlowMo are all included in the EasePack file -->    
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/EasePack.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
-    <!-- CustomBounce requires CustomEase -->
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomBounce.min.js"></script>
-    <!-- CustomWiggle requires CustomEase -->
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomWiggle.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.x/dist/pixi.min.js"></script>
+    <!-- GSAP: используем только ядро (gsap.to/fromTo/set/timeline/utils);
+         неиспользуемые плагины (Flip, MotionPath, ScrambleText, SplitText,
+         TextPlugin, EasePack, CustomEase, CustomBounce, CustomWiggle) удалены -->
+
     <!-- Game Scripts -->
+    <script src="js/version.js"></script>
     <script src="js/cards.js"></script>
     <script src="js/events.js"></script> <!-- <<< НОВЫЙ ФАЙЛ -->
     <script src="js/achievements.js"></script> <!-- <<< НОВЫЙ ФАЙЛ -->

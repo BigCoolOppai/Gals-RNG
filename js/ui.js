@@ -41,6 +41,12 @@ const UI = (() => {
     // --- Утилиты ---
     const hasAnyMulti = (pd) => !!(pd?.purchasedUpgrades?.multiRollX10 || pd?.purchasedUpgrades?.multiRollX5);
 
+    // Миниатюра для грида/списков: img/webp/cardGal.webp -> img/webp/cardGal-thumb.webp.
+    // Полный размер (без -thumb) используется только в модалке карты.
+    function thumbOf(imagePath) {
+        return String(imagePath || '').replace(/\.webp$/, '-thumb.webp');
+    }
+
     function cacheDOMElements() {
         currencyDisplay = document.getElementById('currencyDisplay');
         luckDisplay = document.getElementById('luckDisplay');
@@ -207,6 +213,24 @@ const UI = (() => {
         // Вкладка достижений
         document.getElementById('achievements-tab')?.addEventListener('shown.bs.tab', () => {
             renderAchievements();
+        });
+
+        // Тяжёлые вкладки: рендерим при открытии (и при смене данных — из updateAll/updateHud)
+        const pdOnShow = () => Game.getPlayerData();
+        document.getElementById('shop-tab')?.addEventListener('shown.bs.tab', () => {
+            renderShop();
+            updateEquippedItemsDisplay(pdOnShow().equippedItems);
+        });
+        document.getElementById('workshop-tab')?.addEventListener('shown.bs.tab', () => {
+            renderWorkshop(pdOnShow());
+        });
+        document.getElementById('backpack-tab')?.addEventListener('shown.bs.tab', () => {
+            const pd = pdOnShow();
+            renderMaterials(pd);
+            renderOwnedEquipment(pd);
+        });
+        document.getElementById('rebirth-tab-button')?.addEventListener('shown.bs.tab', () => {
+            renderRebirthSection();
         });
 
         // Сортировка инвентаря
@@ -400,6 +424,11 @@ const UI = (() => {
         const multBadge = compBoosts.mult && compBoosts.mult !== 1
             ? `<span class="badge bg-warning text-dark ms-2">×${compBoosts.mult.toFixed(2)}</span>` : '';
 
+        // Глобальный множитель удачи от активных ивентов (если есть)
+        const eventLine = (lb.eventMultiplier && lb.eventMultiplier !== 1)
+            ? `<div class="small text-warning">${t('event')}: ×${lb.eventMultiplier.toFixed(2)}</div>`
+            : '';
+
         box.innerHTML = `
             <div class="card bg-dark-subtle">
             <div class="card-body">
@@ -413,6 +442,7 @@ const UI = (() => {
                     <strong>${t('boosts')}</strong> ${multBadge}
                     </div>
                     ${boostLines}
+                    ${eventLine}
                     <hr class="my-2">
                     <div class="d-flex justify-content-between">
                     <span><strong>${t('total')}</strong></span>
@@ -437,7 +467,7 @@ const UI = (() => {
         isShowingNewCard = true;
         const result = newCardQueue.shift();
 
-        newCardModalImage.src = result.card.image;
+        newCardModalImage.src = thumbOf(result.card.image);
         newCardModalName.textContent = result.card.name;
         newCardModalRarity.textContent = `${L.get('ui.rarity')}: ${result.rarity.name}`;
         newCardModalRarity.style.color = result.rarity.color;
@@ -589,31 +619,81 @@ const UI = (() => {
         }
     }
 
-    // --- Баннер события ---
+    // Лёгкое обновление для авторолла/AFK-догона: только то, что видно постоянно
+    // (валюта, удача, бусты, баннер, lucky roll, инвентарь) + открытая вкладка.
+    function updateHud(playerData) {
+        if (!playerData) return;
+
+        playerIdDisplay && (playerIdDisplay.value = playerData.playerId || '');
+        updateCurrencyDisplay(playerData.currency);
+        updateLuckDisplay();
+        updateActiveBoostsDisplay();
+        renderEventBanner();
+        renderInventory(playerData);
+
+        if (typeof playerData.luckyRollCounter !== 'undefined') {
+            const currentThreshold = playerData.luckyRollThreshold || 11;
+            updateLuckyRollDisplay(playerData.luckyRollCounter, currentThreshold);
+        }
+
+        renderVisibleExpensiveTabs(playerData);
+    }
+
+    // Тяжёлые вкладки (магазин, мастерская, рюкзак, статы, ребирт) рендерим
+    // только если они сейчас открыты — иначе авторолл их зря перерисовывает.
+    function renderVisibleExpensiveTabs(playerData) {
+        const activeLink = document.querySelector('#mainTabs .nav-link.active');
+        const target = activeLink && activeLink.getAttribute('data-bs-target');
+        const id = target ? target.replace('#', '') : null;
+        if (!id) return;
+
+        if (id === 'shop') {
+            renderShop();
+            updateEquippedItemsDisplay(playerData.equippedItems);
+        } else if (id === 'workshop') {
+            renderWorkshop(playerData);
+        } else if (id === 'backpack') {
+            renderMaterials(playerData);
+            renderOwnedEquipment(playerData);
+        } else if (id === 'stats') {
+            renderStats(playerData);
+        } else if (id === 'rebirth') {
+            renderRebirthSection();
+        }
+    }
+
+    // --- Баннер событий (все активные ивенты) ---
     function renderEventBanner() {
         if (!eventBanner) return;
-        const activeEvent = Game.getActiveEvent();
-        if (activeEvent) {
-            const endDate = new Date(activeEvent.endDate);
-            const now = new Date();
-            const timeLeft = endDate - now;
+        const activeEvents = (typeof Game.getActiveEvents === 'function')
+            ? Game.getActiveEvents()
+            : (Game.getActiveEvent() ? [Game.getActiveEvent()] : []);
 
-            let timerHtml = '';
-            if (timeLeft > 0) {
-                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                timerHtml = `<small class="d-block">${L.get('events.timeLeft')}: ${days}д ${hours}ч</small>`;
-            }
+        if (activeEvents.length > 0) {
+            eventBanner.innerHTML = activeEvents.map(activeEvent => {
+                const endDate = new Date(activeEvent.endDate);
+                const now = new Date();
+                const timeLeft = endDate - now;
 
-            const extraClass = activeEvent.bannerClass || '';
+                let timerHtml = '';
+                if (timeLeft > 0) {
+                    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const dSuffix = L.get('ui.timeShort.days');
+                    const hSuffix = L.get('ui.timeShort.hours');
+                    timerHtml = `<small class="d-block">${L.get('events.timeLeft')}: ${days}${dSuffix} ${hours}${hSuffix}</small>`;
+                }
 
-            eventBanner.innerHTML = `
+                const extraClass = activeEvent.bannerClass || '';
+
+                return `
                 <div class="alert alert-info ${extraClass}" role="alert">
                     <h5 class="alert-heading">🎉 ${L.get(activeEvent.nameKey)}</h5>
                     <p>${L.get(activeEvent.descriptionKey)}</p>
                     ${timerHtml}
                 </div>
             `;
+            }).join('');
             eventBanner.style.display = 'block';
         } else {
             eventBanner.innerHTML = '';
@@ -1035,7 +1115,14 @@ const UI = (() => {
 
         showMutationToasts(results);
 
-        updateAll(Game.getPlayerData());
+        // Авторолл: обновляем только HUD (валюту, удачу, инвентарь, видимые вкладки).
+        // Полный updateAll на каждый тик перерисовывал ВСЕ вкладки (магазин, мастерская,
+        // рюкзак, ребирт, статы) — при AFK-догоне это был главный источник фриза.
+        if (isAutorolling) {
+            updateHud(Game.getPlayerData());
+        } else {
+            updateAll(Game.getPlayerData());
+        }
 
         if (isAutorolling && isTabActive) {
             clearTimeout(autorollTimer);
@@ -1139,7 +1226,7 @@ const UI = (() => {
         cardWrapper.className = 'received-card-animation-wrapper';
         const cardElement = document.createElement('div');
         cardElement.className = 'received-card';
-        cardElement.style.backgroundImage = `url('${rollResult.card.image}')`;
+        cardElement.style.backgroundImage = `url('${thumbOf(rollResult.card.image)}')`;
         cardElement.style.borderColor = rollResult.rarity.color;
         cardElement.style.setProperty('--rarity-glow-color', rollResult.rarity.glowColor);
         cardElement.setAttribute('title', `${L.get('ui.rarity')}: ${rollResult.rarity.name}`);
@@ -1198,7 +1285,7 @@ const UI = (() => {
             const cardMini = document.createElement('div');
             cardMini.style.textAlign = 'center';
             const img = document.createElement('img');
-            Object.assign(img, { src: result.card.image, alt: result.card.name });
+            Object.assign(img, { src: thumbOf(result.card.image), alt: result.card.name });
             Object.assign(img.style, { width: '60px', aspectRatio: '1024 / 1360', border: `2px solid ${result.rarity.color}`, borderRadius: '4px' });
             cardMini.appendChild(img);
             const nameP = document.createElement('p');
@@ -1282,7 +1369,7 @@ const UI = (() => {
 
             // Попытка найти существующий элемент
             let col = existingNodes.get(rarityData.id);
-            let cardDiv, img, nameDiv, variantChip, limitedBadge;
+            let cardDiv, img, nameDiv, variantChip, limitedBadge, mechBadge;
 
             if (!col) {
                 // СОЗДАНИЕ: Если элемента нет, создаем структуру
@@ -1351,9 +1438,11 @@ const UI = (() => {
             if (isAnyVersionOpened) {
                 const activeSkinData = getRarityDataById(activeSkinId, playerData) || getRarityDataById(rarityData.id, playerData);
                 
-                // Проверка: обновляем src только если он изменился (избегает мерцания)
-                if (img.getAttribute('src') !== activeSkinData.card.image) {
-                    img.src = activeSkinData.card.image;
+                // Проверка: обновляем src только если он изменился (избегает мерцания).
+                // В гриде — миниатюра (~50 КБ), полный арт грузится только в модалке.
+                const gridSrc = thumbOf(activeSkinData.card.image);
+                if (img.getAttribute('src') !== gridSrc) {
+                    img.src = gridSrc;
                 }
                 
                 nameDiv.textContent = L.get(activeSkinData.card.nameKey);
@@ -1403,8 +1492,9 @@ const UI = (() => {
                 cardDiv.style.borderColor = ''; // Сброс инлайн стиля
                 cardDiv.style.removeProperty('--rarity-glow-color');
                 if (mechBadge) mechBadge.style.display = 'none';
-                if (img.getAttribute('src') !== "img/silhouette_placeholder.png") {
-                    img.src = "img/silhouette_placeholder.png";
+                const silhouetteSrc = "img/webp/silhouette_placeholder-thumb.webp";
+                if (img.getAttribute('src') !== silhouetteSrc) {
+                    img.src = silhouetteSrc;
                 }
                 nameDiv.textContent = "?????";
                 cardDiv.onclick = null;
@@ -2092,13 +2182,6 @@ const UI = (() => {
         equippedItemsDisplay.innerHTML = chips.join('');
         // обработчики снятия
         equippedItemsDisplay.querySelectorAll('.btn-remove-equip').forEach(btn => {
-        btn.addEventListener('click', () => {
-        Game.unequipItem(btn.dataset.itemId);
-        UI.updateAll(Game.getPlayerData());
-        });
-        });
-
-        equippedItemsDisplay.querySelectorAll('.btn-remove-equip').forEach(btn => {
             btn.addEventListener('click', () => {
                 Game.unequipItem(btn.dataset.itemId);
                 UI.updateAll(Game.getPlayerData());
@@ -2195,7 +2278,9 @@ const UI = (() => {
                 console.log("AFK catch-up finished.");
                 isRolling = false;
                 if (lastNewCardResult) showNewCard(lastNewCardResult);
-                updateAll(Game.getPlayerData());
+                // updateHud, а не updateAll: полный перерендер всех вкладок после
+                // десятков тысяч роллов догона — лишний фриз.
+                updateHud(Game.getPlayerData());
                 showAfkSummaryNotification(totalCycles * rollsPerCycle, totalCurrencyGained, newCardsCount);
 
                 performNextAutoroll();

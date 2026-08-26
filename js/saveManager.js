@@ -3,8 +3,17 @@
 const SaveManager = (() => {
     const SAVE_KEY = 'rngCardGameSaveData';
 
+    // Логи сохранений — только при Debug.verbose = true (иначе каждый ролл
+    // во время авторолла/AFK-догона спамит консоль и ест FPS)
+    const logSave = (msg) => {
+        try {
+            if (window.Debug && window.Debug.verbose) console.log(msg);
+        } catch (e) { /* ignore */ }
+    };
+
     const getDefaultPlayerData = () => ({
-        version: "0.1.5", // Версия для возможной миграции данных в будущем
+        // Версия подтягивается из js/version.js (единый источник).
+        version: (typeof window !== 'undefined' && window.GAME_VERSION) || "0.2.12", // для возможной миграции в будущем
         prestigeLevel: 0,
         luckCoreLevel: 0,
         currency: 0, // Призматические осколки
@@ -60,7 +69,7 @@ const SaveManager = (() => {
         try {
             playerData.lastPlayed = new Date().toISOString();
             localStorage.setItem(SAVE_KEY, JSON.stringify(playerData));
-            console.log("Game data saved.");
+            logSave("Game data saved.");
         } catch (error) {
             console.error("Error saving game data:", error);
             // Можно добавить уведомление для пользователя, если сохранение не удалось
@@ -80,8 +89,7 @@ const SaveManager = (() => {
         _throttleTimer = setTimeout(() => {
             try {
             localStorage.setItem(SAVE_KEY, JSON.stringify(_pendingData));
-            // eslint-disable-next-line no-console
-            console.log('Game data saved (throttled).');
+            logSave('Game data saved (throttled).');
             } catch (e) {
             console.error('Error throttled-saving game data:', e);
             } finally {
@@ -99,7 +107,7 @@ const SaveManager = (() => {
         if (_pendingData) {
             try {
             localStorage.setItem(SAVE_KEY, JSON.stringify(_pendingData));
-            console.log('Game data saved (flush).');
+            logSave('Game data saved (flush).');
             } catch (e) {
             console.error('Error flush-saving game data:', e);
             } finally {

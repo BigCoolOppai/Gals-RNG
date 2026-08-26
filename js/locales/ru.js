@@ -509,11 +509,20 @@ window.locales.ru = {
             boosts: "Бусты",
             multiplier: "множитель",
             noBoosts: "Нет активных бустов",
+            event: "Ивент-множитель",
             total: "Итого"
+        },
+        timeShort: {
+            days: "д",
+            hours: "ч"
         }
     },
     // Уведомления
     notifications: {
+        starterPotion: {
+            name: "Стартовое зелье",
+            granted: "🧪 Стартовое зелье! +1.0 к удаче на 10 минут. Удачи!"
+        },
         luckyRollTriggered: "✨ Lucky Roll! Удача умножена! ✨",
         notEnoughCurrency: "Недостаточно Призматических осколков!",
         itemPurchased: "куплен, но нет места для экипировки. Освободите слот.",

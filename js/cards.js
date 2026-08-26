@@ -22,7 +22,6 @@ window.MUTATIONS = {
     cssClass: 'variant-voided',
     baseChance: 0.004,                // 0.4%
     duplicateMultiplier: 0.0,         // дубль = 0 валюты
-    grantMaterial: { id: 'soul_shard', min: 1, max: 2 }, // можно поменять на другой материал
     forceMaterialDrop: true,          // гарантия дропа
     materialMultiplier: 3             // x3 к количеству
   }
@@ -49,7 +48,7 @@ window.RARITIES_DATA = [
         card: {
             name: "BLASPHEMY AGAINST THE HOLY SPIRIT", 
             nameKey: "cards.dogma.cardName",
-            image: "img/cardDogma.webp", 
+            image: "img/webp/cardDogma.webp",
             descriptionKey: "cards.dogma.description"
         }
     },
@@ -65,7 +64,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Gal, the Creator",
             nameKey: "cards.gal.cardName",
-            image: "img/cardGal.png",
+            image: "img/webp/cardGal.webp",
             descriptionKey: "cards.gal.description"
         }
     },
@@ -81,7 +80,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Kasane Teto",
             nameKey: "cards.kasane_teto.cardName",
-            image: "img/cardTeto.jpg",
+            image: "img/webp/cardTeto.webp",
             descriptionKey: "cards.kasane_teto.description"
         }
     },
@@ -97,7 +96,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Ananke Chrona",
             nameKey: "cards.time_eternal.cardName",
-            image: "img/cardTime.png",
+            image: "img/webp/cardTime.webp",
             descriptionKey: "cards.time_eternal.description"
         }
     },
@@ -110,7 +109,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 27566666,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_slender.cardName", image: "img/limited/halloween2025/cardSlender.png", descriptionKey: "cards.hween_slender.description" }
+        card: { nameKey: "cards.hween_slender.cardName", image: "img/webp/limited/halloween2025/cardSlender.webp", descriptionKey: "cards.hween_slender.description" }
     },
     {
         id: "hween_goth",
@@ -121,7 +120,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 25000000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_goth.cardName", image: "img/limited/halloween2025/cardGoth.png", descriptionKey: "cards.hween_goth.description" }
+        card: { nameKey: "cards.hween_goth.cardName", image: "img/webp/limited/halloween2025/cardGoth.webp", descriptionKey: "cards.hween_goth.description" }
     },
     {
         id: "hween_tar",
@@ -132,7 +131,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 22500000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_tar.cardName", image: "img/limited/halloween2025/cardTar.png", descriptionKey: "cards.hween_tar.description" }
+        card: { nameKey: "cards.hween_tar.cardName", image: "img/webp/limited/halloween2025/cardTar.webp", descriptionKey: "cards.hween_tar.description" }
     },
     {
         id: "hween_jeff",
@@ -143,7 +142,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 20000000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_jeff.cardName", image: "img/limited/halloween2025/cardJeff.png", descriptionKey: "cards.hween_jeff.description" }
+        card: { nameKey: "cards.hween_jeff.cardName", image: "img/webp/limited/halloween2025/cardJeff.webp", descriptionKey: "cards.hween_jeff.description" }
     },
     {
         id: "hween_eyeless",
@@ -154,23 +153,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 17500000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_eyeless.cardName", image: "img/limited/halloween2025/cardEyeless.png", descriptionKey: "cards.hween_eyeless.description" }
-    },
-    {
-        id: "space_marine",
-        nameKey: "cards.space_marine.name",
-        minPrestige: 3,
-        probabilityBase: 1 / 17000000,
-        color: "#1565C0", // Ультрамариновый синий
-        glowColor: "#FFD700", // Золотой акцент (аквила/декор брони)
-        cssClass: "rarity-zealous",
-        currencyOnDuplicate: 1700000,
-        card: {
-            name: "Inimica Anima",
-            nameKey: "cards.space_marine.cardName",
-            image: "img/cardSpaceMarine.png",
-            descriptionKey: "cards.space_marine.description"
-        }
+        card: { nameKey: "cards.hween_eyeless.cardName", image: "img/webp/limited/halloween2025/cardEyeless.webp", descriptionKey: "cards.hween_eyeless.description" }
     },
     {
         id: "gyro",
@@ -184,7 +167,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Gyro Zeppeli",
             nameKey: "cards.gyro.cardName",
-            image: "img/cardGyro.png",
+            image: "img/webp/cardGyro.webp",
             descriptionKey: "cards.gyro.description"
         }
     },
@@ -197,7 +180,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 15000000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_dullahan.cardName", image: "img/limited/halloween2025/cardDullahan.png", descriptionKey: "cards.hween_dullahan.description" }
+        card: { nameKey: "cards.hween_dullahan.cardName", image: "img/webp/limited/halloween2025/cardDullahan.webp", descriptionKey: "cards.hween_dullahan.description" }
     },
     {
         id: "hween_sadako",
@@ -208,7 +191,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 11000000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_sadako.cardName", image: "img/limited/halloween2025/cardSadako.png", descriptionKey: "cards.hween_sadako.description" }
+        card: { nameKey: "cards.hween_sadako.cardName", image: "img/webp/limited/halloween2025/cardSadako.webp", descriptionKey: "cards.hween_sadako.description" }
     },
     {
         id: "choco_peppermint",
@@ -218,7 +201,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 10000000,
         availability: { type: 'event', eventId: 'choco_2025' },
-        card: { nameKey: "cards.choco_peppermint.cardName", image: "img/limited/chocolateEvent/cardPeppermint.png", descriptionKey: "cards.choco_peppermint.description" }
+        card: { nameKey: "cards.choco_peppermint.cardName", image: "img/webp/limited/chocolateEvent/cardPeppermint.webp", descriptionKey: "cards.choco_peppermint.description" }
         },
     {
         id: "blackhole_alt_1",
@@ -233,7 +216,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Event Horizon",
             nameKey: "cards.blackhole_alt_1.cardName",
-            image: "img/altBlackhole.png",
+            image: "img/webp/altBlackhole.webp",
             descriptionKey: "cards.blackhole_alt_1.description"
         }
     },
@@ -245,7 +228,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 9000000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_nurse.cardName", image: "img/limited/halloween2025/cardNurse.png", descriptionKey: "cards.hween_nurse.description" }
+        card: { nameKey: "cards.hween_nurse.cardName", image: "img/webp/limited/halloween2025/cardNurse.webp", descriptionKey: "cards.hween_nurse.description" }
     },
     {
         id: "krampus",
@@ -259,7 +242,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Krampus",
             nameKey: "cards.krampus.cardName",
-            image: "img/cardKrampus.jpg",
+            image: "img/webp/cardKrampus.webp",
             descriptionKey: "cards.krampus.description"
         }
     },
@@ -275,7 +258,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Caramella Jester",
             nameKey: "cards.caramella.cardName",
-            image: "img/cardCaramellaJester.jpg",
+            image: "img/webp/cardCaramellaJester.webp",
             descriptionKey: "cards.caramella.description"
         }
     },
@@ -288,7 +271,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 7500000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_furina.cardName", image: "img/limited/halloween2025/cardHFurina.png", descriptionKey: "cards.hween_furina.description" }
+        card: { nameKey: "cards.hween_furina.cardName", image: "img/webp/limited/halloween2025/cardHFurina.webp", descriptionKey: "cards.hween_furina.description" }
     },
     {
         id: "hween_hybrid",
@@ -307,12 +290,12 @@ window.RARITIES_DATA = [
             card: {
                 name: "Haunted Alex (Safe)", // Фолбэк имя
                 nameKey: "cards.hween_hybrid_safe.cardName",
-                image: "img/limited/halloween2025/cardHHybrid_safe.png",
+                image: "img/webp/limited/halloween2025/cardHHybrid_safe.webp",
                 descriptionKey: "cards.hween_hybrid_safe.description"
             }
         },
         // -------------------------------
-        card: { nameKey: "cards.hween_hybrid.cardName", image: "img/limited/halloween2025/cardHHybrid.png", descriptionKey: "cards.hween_hybrid.description" }
+        card: { nameKey: "cards.hween_hybrid.cardName", image: "img/webp/limited/halloween2025/cardHHybrid.webp", descriptionKey: "cards.hween_hybrid.description" }
     },
     {
         id: "hween_scarecrow",
@@ -322,7 +305,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 6500000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_scarecrow.cardName", image: "img/limited/halloween2025/cardScarecrow.png", descriptionKey: "cards.hween_scarecrow.description" }
+        card: { nameKey: "cards.hween_scarecrow.cardName", image: "img/webp/limited/halloween2025/cardScarecrow.webp", descriptionKey: "cards.hween_scarecrow.description" }
     },
     
     {
@@ -333,7 +316,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 5000000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_mime.cardName", image: "img/limited/halloween2025/cardMime.png", descriptionKey: "cards.hween_mime.description" }
+        card: { nameKey: "cards.hween_mime.cardName", image: "img/webp/limited/halloween2025/cardMime.webp", descriptionKey: "cards.hween_mime.description" }
     },
     {
         id: "choco_lewd",
@@ -343,7 +326,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 5000000,
         availability: { type: 'event', eventId: 'choco_2025' },
-        card: { nameKey: "cards.choco_lewd.cardName", image: "img/limited/chocolateEvent/cardChocoPussy.png", descriptionKey: "cards.choco_lewd.description" }
+        card: { nameKey: "cards.choco_lewd.cardName", image: "img/webp/limited/chocolateEvent/cardChocoPussy.webp", descriptionKey: "cards.choco_lewd.description" }
     },
     {
         id: "gojo_alt", 
@@ -358,7 +341,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Queen of Curses", 
             nameKey: "cards.gojo_alt.cardName",
-            image: "img/altGojo.png",
+            image: "img/webp/altGojo.webp",
             descriptionKey: "cards.gojo_alt.description"
         }
     },
@@ -370,7 +353,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 3500000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_clown.cardName", image: "img/limited/halloween2025/cardClown.png", descriptionKey: "cards.hween_clown.description" }
+        card: { nameKey: "cards.hween_clown.cardName", image: "img/webp/limited/halloween2025/cardClown.webp", descriptionKey: "cards.hween_clown.description" }
     },
     {
         id: "hween_ghostface",
@@ -380,7 +363,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 3000000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_ghostface.cardName", image: "img/limited/halloween2025/cardGhostface.png", descriptionKey: "cards.hween_ghostface.description" }
+        card: { nameKey: "cards.hween_ghostface.cardName", image: "img/webp/limited/halloween2025/cardGhostface.webp", descriptionKey: "cards.hween_ghostface.description" }
     },
     {
         id: "hween_witch",
@@ -390,7 +373,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-legendary",
         currencyOnDuplicate: 2500000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_witch.cardName", image: "img/limited/halloween2025/cardWitch.png", descriptionKey: "cards.hween_witch.description" }
+        card: { nameKey: "cards.hween_witch.cardName", image: "img/webp/limited/halloween2025/cardWitch.webp", descriptionKey: "cards.hween_witch.description" }
     },
     {
         id: "hween_ghost",
@@ -400,7 +383,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-epic",
         currencyOnDuplicate: 2000000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_ghost.cardName", image: "img/limited/halloween2025/cardGhost.png", descriptionKey: "cards.hween_ghost.description" }
+        card: { nameKey: "cards.hween_ghost.cardName", image: "img/webp/limited/halloween2025/cardGhost.webp", descriptionKey: "cards.hween_ghost.description" }
     },
     {
         id: "choco_white",
@@ -410,7 +393,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-epic",
         currencyOnDuplicate: 2000000,
         availability: { type: 'event', eventId: 'choco_2025' },
-        card: { nameKey: "cards.choco_white.cardName", image: "img/limited/chocolateEvent/cardWhiteChoco.png", descriptionKey: "cards.choco_white.description" }
+        card: { nameKey: "cards.choco_white.cardName", image: "img/webp/limited/chocolateEvent/cardWhiteChoco.webp", descriptionKey: "cards.choco_white.description" }
     },
     {
         id: "seductress",
@@ -425,8 +408,24 @@ window.RARITIES_DATA = [
         card: {
             name: "Surie",
             nameKey: "cards.seductress.cardName",
-            image: "img/altVacation.png",
+            image: "img/webp/altVacation.webp",
             descriptionKey: "cards.seductress.description"
+        }
+    },
+    {
+        id: "space_marine",
+        nameKey: "cards.space_marine.name",
+        minPrestige: 3,
+        probabilityBase: 1 / 17000000,
+        color: "#1565C0", // Ультрамариновый синий
+        glowColor: "#FFD700", // Золотой акцент (аквила/декор брони)
+        cssClass: "rarity-zealous",
+        currencyOnDuplicate: 1700000,
+        card: {
+            name: "Inimica Anima",
+            nameKey: "cards.space_marine.cardName",
+            image: "img/webp/cardSpaceMarine.webp",
+            descriptionKey: "cards.space_marine.description"
         }
     },
     {
@@ -442,7 +441,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Amelia",
             nameKey: "cards.lucy_alt.cardName",
-            image: "img/altLucy.jpg",
+            image: "img/webp/altLucy.webp",
             descriptionKey: "cards.lucy_alt.description"
         }
     },
@@ -454,7 +453,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-epic",
         currencyOnDuplicate: 1500000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_eyeling.cardName", image: "img/limited/halloween2025/cardEyeling.png", descriptionKey: "cards.hween_eyeling.description" }
+        card: { nameKey: "cards.hween_eyeling.cardName", image: "img/webp/limited/halloween2025/cardEyeling.webp", descriptionKey: "cards.hween_eyeling.description" }
     },
     {
         id: "zeus",
@@ -467,7 +466,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 1500000,
         card: {
             nameKey: "cards.zeus.cardName",
-            image: "img/cardZeus.png",
+            image: "img/webp/cardZeus.webp",
             descriptionKey: "cards.zeus.description"
         }
     },
@@ -483,7 +482,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Satsuki Gojo",
             nameKey: "cards.gojo.cardName",
-            image: "img/cardGojo.png",
+            image: "img/webp/cardGojo.webp",
             descriptionKey: "cards.gojo.description"
         }
     },
@@ -499,7 +498,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Funny Valentine",
             nameKey: "cards.president.cardName",
-            image: "img/cardPresident.png",
+            image: "img/webp/cardPresident.webp",
             descriptionKey: "cards.president.description"
         }
     },
@@ -514,7 +513,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 1366600,
         card: {
             nameKey: "cards.death.cardName",
-            image: "img/cardDeath.png",
+            image: "img/webp/cardDeath.webp",
             descriptionKey: "cards.death.description"
         }
     },
@@ -530,7 +529,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Kefla",
             nameKey: "cards.kefla.cardName",
-            image: "img/cardKefla.png",
+            image: "img/webp/cardKefla.webp",
             descriptionKey: "cards.kefla.description"
         }
     },
@@ -546,7 +545,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 1260600,
         card: {
             nameKey: "cards.famine.cardName",
-            image: "img/cardFamine.png",
+            image: "img/webp/cardFamine.webp",
             descriptionKey: "cards.famine.description"
         }
     },
@@ -561,7 +560,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 1250000,
         card: {
             nameKey: "cards.war.cardName",
-            image: "img/cardWar.png", // Обрати внимание на расширение .jpg
+            image: "img/webp/cardWar.webp", // Обрати внимание на расширение .jpg
             descriptionKey: "cards.war.description"
         }
     },
@@ -576,7 +575,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 1240000,
         card: {
             nameKey: "cards.pestilence.cardName",
-            image: "img/cardPestilence.png", // Обрати внимание на расширение .jpg
+            image: "img/webp/cardPestilence.webp", // Обрати внимание на расширение .jpg
             descriptionKey: "cards.pestilence.description"
         }
     },
@@ -593,7 +592,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Vicious Scholar",
             nameKey: "cards.altLibrarian.cardName",
-            image: "img/altLibrarian.png",
+            image: "img/webp/altLibrarian.webp",
             descriptionKey: "cards.altLibrarian.description"
         }
     },
@@ -609,7 +608,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Dionysia",
             nameKey: "cards.dionysia.cardName",
-            image: "img/cardDionysia.png",
+            image: "img/webp/cardDionysia.webp",
             descriptionKey: "cards.dionysia.description"
         }
     },
@@ -621,7 +620,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-epic",
         currencyOnDuplicate: 1000000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_piggy.cardName", image: "img/limited/halloween2025/cardPiggy.png", descriptionKey: "cards.hween_piggy.description" }
+        card: { nameKey: "cards.hween_piggy.cardName", image: "img/webp/limited/halloween2025/cardPiggy.webp", descriptionKey: "cards.hween_piggy.description" }
     },
     {
         id: "choco_espresso",
@@ -631,7 +630,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-epic",
         currencyOnDuplicate: 1000000,
         availability: { type: 'event', eventId: 'choco_2025' },
-        card: { nameKey: "cards.choco_espresso.cardName", image: "img/limited/chocolateEvent/cardEspresso.png", descriptionKey: "cards.choco_espresso.description" }
+        card: { nameKey: "cards.choco_espresso.cardName", image: "img/webp/limited/chocolateEvent/cardEspresso.webp", descriptionKey: "cards.choco_espresso.description" }
     },
     {
         id: "bean", 
@@ -644,7 +643,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Green Bean", 
             nameKey: "cards.bean.cardName",
-            image: "img/cardBean.png",
+            image: "img/webp/cardBean.webp",
             descriptionKey: "cards.bean.description"
         }
     },
@@ -659,7 +658,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Bub Bub Bub Sahur", 
             nameKey: "cards.brainrot.cardName",
-            image: "img/cardSahur.png",
+            image: "img/webp/cardSahur.webp",
             descriptionKey: "cards.brainrot.description"
         }
     },
@@ -675,7 +674,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Eternal Queen",
             nameKey: "cards.marika.cardName",
-            image: "img/cardMarika.jpg",
+            image: "img/webp/cardMarika.webp",
             descriptionKey: "cards.marika.description"
         }
     },
@@ -694,7 +693,7 @@ window.RARITIES_DATA = [
         card: {
             name: "FY-3741 alpha",
             nameKey: "cards.blackhole.cardName",
-            image: "img/cardBlackHole.png",
+            image: "img/webp/cardBlackHole.webp",
             descriptionKey: "cards.blackhole.description"
         }
     },
@@ -710,7 +709,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Easter Bunny",
             nameKey: "cards.easter_bunny.cardName",
-            image: "img/cardEasterBunny.jpg",
+            image: "img/webp/cardEasterBunny.webp",
             descriptionKey: "cards.easter_bunny.description"
         }
     },
@@ -724,7 +723,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 777777,
         card: {
             nameKey: "cards.pulchra.cardName",
-            image: "img/cardPulchra.png",
+            image: "img/webp/cardPulchra.webp",
             descriptionKey: "cards.pulchra.description"
         }
     },
@@ -742,7 +741,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Obsidiana",
             nameKey: "cards.obsidian.cardName",
-            image: "img/altLava.png",
+            image: "img/webp/altLava.webp",
             descriptionKey: "cards.obsidian.description"
         }
     },
@@ -757,7 +756,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 730000,
         card: {
             nameKey: "cards.hornet.cardName",
-            image: "img/cardHornet.png",
+            image: "img/webp/cardHornet.webp",
             descriptionKey: "cards.hornet.description"
         }
     },
@@ -774,7 +773,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Boletus",
             nameKey: "cards.altShroom.cardName",
-            image: "img/altShroom.png",
+            image: "img/webp/altShroom.webp",
             descriptionKey: "cards.altShroom.description"
         }
     },
@@ -788,7 +787,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 666666,
         card: {
             nameKey: "cards.demo.cardName",
-            image: "img/cardDemo.png",
+            image: "img/webp/cardDemo.webp",
             descriptionKey: "cards.demo.description"
         }
     },
@@ -805,7 +804,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Elf in a Trap",
             nameKey: "cards.ensnared.cardName",
-            image: "img/altFrieren.png",
+            image: "img/webp/altFrieren.webp",
             descriptionKey: "cards.ensnared.description"
         }
     },
@@ -817,7 +816,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-epic",
         currencyOnDuplicate: 500000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
-        card: { nameKey: "cards.hween_jack.cardName", image: "img/limited/halloween2025/cardJack.png", descriptionKey: "cards.hween_jack.description" }
+        card: { nameKey: "cards.hween_jack.cardName", image: "img/webp/limited/halloween2025/cardJack.webp", descriptionKey: "cards.hween_jack.description" }
     },
     {
         id: "goblin_alt_1",
@@ -832,7 +831,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Satisfied Tur'gata",
             nameKey: "cards.goblin_alt_1.cardName",
-            image: "img/altGoblin.png",
+            image: "img/webp/altGoblin.webp",
             descriptionKey: "cards.goblin_alt_1.description"
         }
     },
@@ -844,7 +843,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-epic",
         currencyOnDuplicate: 500000,
         availability: { type: 'event', eventId: 'choco_2025' },
-        card: { nameKey: "cards.choco.cardName", image: "img/limited/chocolateEvent/cardChoco.png", descriptionKey: "cards.choco.description" }
+        card: { nameKey: "cards.choco.cardName", image: "img/webp/limited/chocolateEvent/cardChoco.webp", descriptionKey: "cards.choco.description" }
     },
     {
         id: "tamer",
@@ -858,7 +857,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Nufka & Syaba",
             nameKey: "cards.tamer.cardName",
-            image: "img/cardTamer.png",
+            image: "img/webp/cardTamer.webp",
             descriptionKey: "cards.tamer.description"
         }
     },
@@ -875,7 +874,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Raven",
             nameKey: "cards.raven.cardName",
-            image: "img/altAmy.png",
+            image: "img/webp/altAmy.webp",
             descriptionKey: "cards.raven.description"
         }
     },
@@ -890,7 +889,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 450000,
         card: {
             nameKey: "cards.anubis.cardName",
-            image: "img/cardAnubis.png",
+            image: "img/webp/cardAnubis.webp",
             descriptionKey: "cards.anubis.description"
         }
     },
@@ -907,7 +906,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Traitor Aizen",
             nameKey: "cards.aizen_traitor.cardName",
-            image: "img/altCaptain.png",
+            image: "img/webp/altCaptain.webp",
             descriptionKey: "cards.aizen_traitor.description"
         }
     },
@@ -932,7 +931,7 @@ window.RARITIES_DATA = [
         card: {
             name: "ERROR, Corrupted Core",
             nameKey: "cards.error_alt_1.cardName",
-            image: "img/altError.png",
+            image: "img/webp/altError.webp",
             descriptionKey: "cards.error_alt_1.description"
         }
     },
@@ -949,7 +948,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Orochi",
             nameKey: "cards.orochi.cardName",
-            image: "img/cardOrochi.png",
+            image: "img/webp/cardOrochi.webp",
             descriptionKey: "cards.orochi.description"
         }
     },
@@ -964,7 +963,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Кот Базилио",
             nameKey: "cards.bazil.cardName",
-            image: "img/cardBazil.png",
+            image: "img/webp/cardBazil.webp",
             descriptionKey: "cards.bazil.description"
         }
     },
@@ -981,7 +980,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Fox Face", 
             nameKey: "cards.fenek_alt.cardName",
-            image: "img/altFenek.png",
+            image: "img/webp/altFenek.webp",
             descriptionKey: "cards.fenek_alt.description"
         }
     },
@@ -996,7 +995,7 @@ window.RARITIES_DATA = [
         card: {
             name: "NaCl-chan",
             nameKey: "cards.salt.cardName",
-            image: "img/cardSalt.png",
+            image: "img/webp/cardSalt.webp",
             descriptionKey: "cards.salt.description"
         }
     },
@@ -1008,7 +1007,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-rare",
         currencyOnDuplicate: 350000,
         availability: { type: 'event', eventId: 'choco_2025' },
-        card: { nameKey: "cards.choco_common.cardName", image: "img/limited/chocolateEvent/cardCommonChocolate.png", descriptionKey: "cards.choco_common.description" }
+        card: { nameKey: "cards.choco_common.cardName", image: "img/webp/limited/chocolateEvent/cardCommonChocolate.webp", descriptionKey: "cards.choco_common.description" }
     },
     {
         id: "ellen_alt_student", 
@@ -1023,7 +1022,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Student Maid", 
             nameKey: "cards.ellen_alt_student.cardName",
-            image: "img/altEllen.png",
+            image: "img/webp/altEllen.webp",
             descriptionKey: "cards.ellen_alt_student.description"
         }
     },
@@ -1039,7 +1038,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Miyabi Hoshino",
             nameKey: "cards.miyabi.cardName",
-            image: "img/cardMiyabi.png",
+            image: "img/webp/cardMiyabi.webp",
             descriptionKey: "cards.miyabi.description"
         }
     },
@@ -1055,7 +1054,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 300000,
         card: {
             nameKey: "cards.alt_midday.cardName",
-            image: "img/altMidday.png",
+            image: "img/webp/altMidday.webp",
             descriptionKey: "cards.alt_midday.description"
         }
     },
@@ -1071,7 +1070,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Shark Maid", 
             nameKey: "cards.ellen.cardName",
-            image: "img/cardEllen.png",
+            image: "img/webp/cardEllen.webp",
             descriptionKey: "cards.ellen.description"
         }
     },
@@ -1088,7 +1087,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Arch-Cummoner",
             nameKey: "cards.alt_witchy.cardName",
-            image: "img/altWitchy.png",
+            image: "img/webp/altWitchy.webp",
             descriptionKey: "cards.alt_witchy.description"
         }
     },
@@ -1105,7 +1104,7 @@ window.RARITIES_DATA = [
         card: {
             name: "The Wet Nurse",
             nameKey: "cards.alt_maternal.cardName",
-            image: "img/altGoat.png",
+            image: "img/webp/altGoat.webp",
             descriptionKey: "cards.alt_maternal.description"
         }
     },
@@ -1120,7 +1119,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 200000,
         card: {
             nameKey: "cards.yaga.cardName",
-            image: "img/cardYaga.png",
+            image: "img/webp/cardYaga.webp",
             descriptionKey: "cards.yaga.description"
         }
     },
@@ -1132,7 +1131,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-rare",
         currencyOnDuplicate: 200000,
         availability: { type: 'event', eventId: 'choco_2025' },
-        card: { nameKey: "cards.choco_crema.cardName", image: "img/limited/chocolateEvent/cardCrema.png", descriptionKey: "cards.choco_crema.description" }
+        card: { nameKey: "cards.choco_crema.cardName", image: "img/webp/limited/chocolateEvent/cardCrema.webp", descriptionKey: "cards.choco_crema.description" }
     },
     {
         id: "shy_princess",
@@ -1147,7 +1146,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Sofia",
             nameKey: "cards.shy_princess.cardName",
-            image: "img/altDarkPrincess.png",
+            image: "img/webp/altDarkPrincess.webp",
             descriptionKey: "cards.shy_princess.description"
         }
     },
@@ -1163,7 +1162,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Roxie",
             nameKey: "cards.dark_princess.cardName",
-            image: "img/cardDarkPrincess.png",
+            image: "img/webp/cardDarkPrincess.webp",
             descriptionKey: "cards.dark_princess.description"
         }
     },
@@ -1180,7 +1179,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Comrade Medvedeva",
             nameKey: "cards.russian_alt_ussr.cardName",
-            image: "img/alt2Russian.png",
+            image: "img/webp/alt2Russian.webp",
             descriptionKey: "cards.russian_alt_ussr.description"
         }
     },
@@ -1197,7 +1196,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Jessie",
             nameKey: "cards.western.cardName",
-            image: "img/cardWestern.png",
+            image: "img/webp/cardWestern.webp",
             descriptionKey: "cards.western.description"
         }
     },
@@ -1212,7 +1211,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Lucy",
             nameKey: "cards.lucy.cardName",
-            image: "img/cardLucy.jpg",
+            image: "img/webp/cardLucy.webp",
             descriptionKey: "cards.lucy.description"
         }
     },
@@ -1226,7 +1225,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 160000,
         card: {
             nameKey: "cards.empty.cardName",
-            image: "img/cardEmpty.png",
+            image: "img/webp/cardEmpty.webp",
             descriptionKey: "cards.empty.description"
         }
     },
@@ -1241,7 +1240,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 160000,
         card: {
             nameKey: "cards.empty_angry.cardName",
-            image: "img/cardEmptyA.png",
+            image: "img/webp/cardEmptyA.webp",
             descriptionKey: "cards.empty_angry.description"
         }
     },
@@ -1256,7 +1255,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 160000,
         card: {
             nameKey: "cards.empty_sad.cardName",
-            image: "img/cardEmptyS.png",
+            image: "img/webp/cardEmptyS.webp",
             descriptionKey: "cards.empty_sad.description"
         }
     },
@@ -1271,7 +1270,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 160000,
         card: {
             nameKey: "cards.empty_happy.cardName",
-            image: "img/cardEmptyH.png",
+            image: "img/webp/cardEmptyH.webp",
             descriptionKey: "cards.empty_happy.description"
         }
     },
@@ -1286,7 +1285,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 160000,
         card: {
             nameKey: "cards.empty_scared.cardName",
-            image: "img/cardEmptyF.png",
+            image: "img/webp/cardEmptyF.webp",
             descriptionKey: "cards.empty_scared.description"
         }
     },
@@ -1302,7 +1301,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Tutoriel",
             nameKey: "cards.maternal.cardName",
-            image: "img/cardGoat.png",
+            image: "img/webp/cardGoat.webp",
             descriptionKey: "cards.maternal.description"
         }
     },
@@ -1317,7 +1316,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Natria",
             nameKey: "cards.sodium.cardName",
-            image: "img/cardSodium.png",
+            image: "img/webp/cardSodium.webp",
             descriptionKey: "cards.sodium.description"
         }
     },
@@ -1332,7 +1331,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 150000,
         card: {
             nameKey: "cards.midday.cardName",
-            image: "img/cardMidday.png",
+            image: "img/webp/cardMidday.webp",
             descriptionKey: "cards.midday.description"
         }
     },
@@ -1348,7 +1347,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Zia",
             nameKey: "cards.vacation.cardName",
-            image: "img/cardVacation.png",
+            image: "img/webp/cardVacation.webp",
             descriptionKey: "cards.vacation.description"
         }
     },
@@ -1364,7 +1363,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Captain Aizen",
             nameKey: "cards.aizen.cardName",
-            image: "img/cardCaptain.png",
+            image: "img/webp/cardCaptain.webp",
             descriptionKey: "cards.aizen.description"
         }
     },
@@ -1380,7 +1379,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Radio Demoness",
             nameKey: "cards.alastor.cardName",
-            image: "img/cardRadio.png",
+            image: "img/webp/cardRadio.webp",
             descriptionKey: "cards.alastor.description"
         }
     },
@@ -1396,7 +1395,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Substitute",
             nameKey: "cards.bleached.cardName",
-            image: "img/cardBleached.png",
+            image: "img/webp/cardBleached.webp",
             descriptionKey: "cards.bleached.description"
         }
     },
@@ -1413,7 +1412,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Emerald",
             nameKey: "cards.jade.cardName",
-            image: "img/cardJade.png",
+            image: "img/webp/cardJade.webp",
             descriptionKey: "cards.jade.description"
         }
     },
@@ -1428,7 +1427,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 110000,
         card: {
             nameKey: "cards.harpy.cardName",
-            image: "img/cardHarpy.png",
+            image: "img/webp/cardHarpy.webp",
             descriptionKey: "cards.harpy.description"
         }
     },
@@ -1440,7 +1439,7 @@ window.RARITIES_DATA = [
         cssClass: "rarity-rare",
         currencyOnDuplicate: 100000,
         availability: { type: 'event', eventId: 'choco_2025' },
-        card: { nameKey: "cards.choco_missy.cardName", image: "img/limited/chocolateEvent/cardMissy.png", descriptionKey: "cards.choco_missy.description" }
+        card: { nameKey: "cards.choco_missy.cardName", image: "img/webp/limited/chocolateEvent/cardMissy.webp", descriptionKey: "cards.choco_missy.description" }
     },
     {
         id: "garbage_alt_1",
@@ -1454,7 +1453,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Shining Idol",
             nameKey: "cards.garbage_alt_1.cardName",
-            image: "img/altGarbage.png",
+            image: "img/webp/altGarbage.webp",
             descriptionKey: "cards.garbage_alt_1.description"
         }
     },
@@ -1470,7 +1469,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Scrap Golem",
             nameKey: "cards.scrap_golem.cardName",
-            image: "img/cardScrapGolem.png", // положи файл позже; временно можно любую картинку
+            image: "img/webp/cardScrapGolem.webp", // положи файл позже; временно можно любую картинку
             descriptionKey: "cards.scrap_golem.description"
         }
     },
@@ -1486,7 +1485,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Cyber-Demon",
             nameKey: "cards.cyber_demon.cardName",
-            image: "img/cardCyberDemon.png",
+            image: "img/webp/cardCyberDemon.webp",
             descriptionKey: "cards.cyber_demon.description"
         }
     },
@@ -1502,7 +1501,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Celestial Being",
             nameKey: "cards.celestial_being.cardName",
-            image: "img/cardCelestial.png",
+            image: "img/webp/cardCelestial.webp",
             descriptionKey: "cards.celestial_being.description"
         }
     },
@@ -1517,7 +1516,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 90000,
         card: {
             nameKey: "cards.leshy.cardName",
-            image: "img/cardLeshy.png",
+            image: "img/webp/cardLeshy.webp",
             descriptionKey: "cards.leshy.description"
         }
     },
@@ -1534,7 +1533,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Night Alice",
             nameKey: "cards.alice_alt_night.cardName",
-            image: "img/altAlice.jpg",
+            image: "img/webp/altAlice.webp",
             descriptionKey: "cards.alice_alt_night.description"
         }
     },
@@ -1551,7 +1550,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Hana Akano (Omakase)",
             nameKey: "cards.silken_alt_sushi.cardName",
-            image: "img/altAsian.png",
+            image: "img/webp/altAsian.webp",
             descriptionKey: "cards.silken_alt_sushi.description"
         }
     },
@@ -1566,7 +1565,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 75000,
         card: {
             nameKey: "cards.frog_princess.cardName",
-            image: "img/cardFrogPrincess.png",
+            image: "img/webp/cardFrogPrincess.webp",
             descriptionKey: "cards.frog_princess.description"
         }
     },
@@ -1583,7 +1582,7 @@ window.RARITIES_DATA = [
         card: {
             name: "@Nagibator2001",
             nameKey: "cards.gamer.cardName",
-            image: "img/cardGamer.png",
+            image: "img/webp/cardGamer.webp",
             descriptionKey: "cards.gamer.description"
         }
     },
@@ -1600,7 +1599,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Girlycard",
             nameKey: "cards.alt_mythic.cardName",
-            image: "img/altMythic.png",
+            image: "img/webp/altMythic.webp",
             descriptionKey: "cards.alt_mythic.description"
         }
     },
@@ -1615,7 +1614,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Mysterious Elf",
             nameKey: "cards.guide.cardName",
-            image: "img/cardFrieren.png",
+            image: "img/webp/cardFrieren.webp",
             descriptionKey: "cards.guide.description"
         }
     },
@@ -1635,7 +1634,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Dime",
             nameKey: "cards.diamond.cardName",
-            image: "img/altDiamond.png",
+            image: "img/webp/altDiamond.webp",
             descriptionKey: "cards.diamond.description"
         }
     },
@@ -1650,7 +1649,7 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 50000,
         card: {
             nameKey: "cards.domovoi.cardName",
-            image: "img/cardDomovoi.png",
+            image: "img/webp/cardDomovoi.webp",
             descriptionKey: "cards.domovoi.description"
         }
     },
@@ -1665,7 +1664,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Amy",
             nameKey: "cards.amy.cardName",
-            image: "img/cardAmy.png",
+            image: "img/webp/cardAmy.webp",
             descriptionKey: "cards.amy.description"
         }
     },
@@ -1680,7 +1679,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Kori Bennington",
             nameKey: "cards.metalhead.cardName",
-            image: "img/cardMetal.png",
+            image: "img/webp/cardMetal.webp",
             descriptionKey: "cards.metalhead.description"
         }
     },
@@ -1699,7 +1698,7 @@ window.RARITIES_DATA = [
         card: {
             name: "ER-RR_R_DATA",
             nameKey: "cards.error.cardName",
-            image: "img/cardError.png",
+            image: "img/webp/cardError.webp",
             descriptionKey: "cards.error.description"
         }
     },
@@ -1714,7 +1713,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Selena",
             nameKey: "cards.moon.cardName",
-            image: "img/cardMoon.png",
+            image: "img/webp/cardMoon.webp",
             descriptionKey: "cards.moon.description"
         }
     },
@@ -1733,7 +1732,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Goldy",
             nameKey: "cards.gold.cardName",
-            image: "img/cardGold.png",
+            image: "img/webp/cardGold.webp",
             descriptionKey: "cards.gold.description"
         }
     },
@@ -1750,7 +1749,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Fluffy",
             nameKey: "cards.fenek.cardName",
-            image: "img/cardFenek.png",
+            image: "img/webp/cardFenek.webp",
             descriptionKey: "cards.fenek.description"
         }
     },
@@ -1765,8 +1764,23 @@ window.RARITIES_DATA = [
         card: {
             name: "Afro Queen",
             nameKey: "cards.afro.cardName",
-            image: "img/cardAfro.png",
+            image: "img/webp/cardAfro.webp",
             descriptionKey: "cards.afro.description"
+        }
+    },
+    {
+        id: "nicole",
+        nameKey: "cards.nicole.name",
+        minPrestige: 1, // с первого перерождения
+        probabilityBase: 1 / 320000,
+        color: "#2c3e50",
+        glowColor: "#f1c40f",
+        cssClass: "rarity-nicole",
+        currencyOnDuplicate: 32000,
+        card: {
+            nameKey: "cards.nicole.cardName",
+            image: "img/webp/cardNicole.webp",
+            descriptionKey: "cards.nicole.description"
         }
     },
     {
@@ -1782,7 +1796,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Stug, at Peace",
             nameKey: "cards.berserk_alt_1.cardName",
-            image: "img/altBerserk.png",
+            image: "img/webp/altBerserk.webp",
             descriptionKey: "cards.berserk_alt_1.description"
         }
     },
@@ -1799,7 +1813,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Drow Ranger (Unbound)",
             nameKey: "cards.drow_alt.cardName",
-            image: "img/altDrow.jpg",
+            image: "img/webp/altDrow.webp",
             descriptionKey: "cards.drow_alt.description"
         }
     },
@@ -1816,7 +1830,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Jena",
             nameKey: "cards.mechanic.cardName",
-            image: "img/cardMechanic.png",
+            image: "img/webp/cardMechanic.webp",
             descriptionKey: "cards.mechanic.description"
         }
     },
@@ -1833,7 +1847,7 @@ window.RARITIES_DATA = [
         card: {
             name: "CubeSlime",
             nameKey: "cards.slime.cardName",
-            image: "img/cardSlime.png",
+            image: "img/webp/cardSlime.webp",
             descriptionKey: "cards.slime.description"
         }
     },
@@ -1850,7 +1864,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Uranium-235",
             nameKey: "cards.uranium_alt_1.cardName",
-            image: "img/altUranium.png",
+            image: "img/webp/altUranium.webp",
             descriptionKey: "cards.uranium_alt_1.description"
         }
     },
@@ -1867,7 +1881,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Devil Trigger",
             nameKey: "cards.sss_dt.cardName",
-            image: "img/altSmokinSexyStyle.png",
+            image: "img/webp/altSmokinSexyStyle.webp",
             descriptionKey: "cards.sss_dt.description"
         }
     },
@@ -1882,7 +1896,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Tina",
             nameKey: "cards.doctor.cardName",
-            image: "img/cardDoctor.png",
+            image: "img/webp/cardDoctor.webp",
             descriptionKey: "cards.doctor.description"
         }
     },
@@ -1897,7 +1911,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Tung Stenn",
             nameKey: "cards.tungsten.cardName",
-            image: "img/cardTungsten.png",
+            image: "img/webp/cardTungsten.webp",
             descriptionKey: "cards.tungsten.description"
         }
     },
@@ -1914,7 +1928,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Miss Klyukva Liberty",
             nameKey: "cards.russian_alt_usa.cardName",
-            image: "img/altRussian.png",
+            image: "img/webp/altRussian.webp",
             descriptionKey: "cards.russian_alt_usa.description"
         }
     },
@@ -1929,7 +1943,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Aunt Alice",
             nameKey: "cards.alice.cardName",
-            image: "img/cardAlice.jpg",
+            image: "img/webp/cardAlice.webp",
             descriptionKey: "cards.alice.description"
         }
     },
@@ -1950,7 +1964,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Reality Weaver",
             nameKey: "cards.space_alt_2.cardName",
-            image: "img/alt2Space.png",
+            image: "img/webp/alt2Space.webp",
             descriptionKey: "cards.space_alt_2.description"
         }
     },
@@ -1966,7 +1980,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Libra",
             nameKey: "cards.librarian.cardName",
-            image: "img/cardLibrarian.png",
+            image: "img/webp/cardLibrarian.webp",
             descriptionKey: "cards.librarian.description"
         }
     },
@@ -1983,7 +1997,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Reality Weaver",
             nameKey: "cards.space_alt_1.cardName",
-            image: "img/altSpace.png",
+            image: "img/webp/altSpace.webp",
             descriptionKey: "cards.space_alt_1.description"
         }
     },
@@ -2000,7 +2014,7 @@ window.RARITIES_DATA = [
         card: {
             name: "S.A.K.U.Y.A.",
             nameKey: "cards.timestop_alt_1.cardName",
-            image: "img/altTimestop.png",
+            image: "img/webp/altTimestop.webp",
             descriptionKey: "cards.timestop_alt_1.description"
         }
     },
@@ -2015,7 +2029,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Crimson Duchess",
             nameKey: "cards.rias.cardName",
-            image: "img/cardCrimson.png",
+            image: "img/webp/cardCrimson.webp",
             descriptionKey: "cards.rias.description"
         }
     },
@@ -2030,7 +2044,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Hana Akano",
             nameKey: "cards.silken.cardName",
-            image: "img/cardAsian.jpg",
+            image: "img/webp/cardAsian.webp",
             descriptionKey: "cards.silken.description"
         }
     },
@@ -2045,7 +2059,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Magmalina",
             nameKey: "cards.lava.cardName",
-            image: "img/cardLava.png",
+            image: "img/webp/cardLava.webp",
             descriptionKey: "cards.lava.description"
         }
     },
@@ -2060,7 +2074,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Amanita",
             nameKey: "cards.shroom.cardName",
-            image: "img/cardShroom.png",
+            image: "img/webp/cardShroom.webp",
             descriptionKey: "cards.shroom.description"
         }
     },
@@ -2077,7 +2091,7 @@ window.RARITIES_DATA = [
         card: {
             name: "The Controlled",
             nameKey: "cards.altDevil.cardName",
-            image: "img/altDevil.png",
+            image: "img/webp/altDevil.webp",
             descriptionKey: "cards.altDevil.description"
         }
     },
@@ -2092,7 +2106,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Christmas Elf",
             nameKey: "cards.christmas_elf.cardName",
-            image: "img/cardChristmasElf.jpg",
+            image: "img/webp/cardChristmasElf.webp",
             descriptionKey: "cards.christmas_elf.description"
         }
     },
@@ -2107,7 +2121,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Tur'gata",
             nameKey: "cards.goblin.cardName",
-            image: "img/cardGoblin.png",
+            image: "img/webp/cardGoblin.webp",
             descriptionKey: "cards.goblin.description"
         }
     },
@@ -2122,7 +2136,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Drow Ranger",
             nameKey: "cards.drow.cardName",
-            image: "img/cardDrow.jpg",
+            image: "img/webp/cardDrow.webp",
             descriptionKey: "cards.drow.description"
         }
     },
@@ -2137,7 +2151,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Stug",
             nameKey: "cards.berserk.cardName",
-            image: "img/cardBerserker.png",
+            image: "img/webp/cardBerserker.webp",
             descriptionKey: "cards.berserk.description"
         }
     },
@@ -2153,7 +2167,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Jizzy, the Cummoner",
             nameKey: "cards.witchy.cardName",
-            image: "img/cardWitchy.png",
+            image: "img/webp/cardWitchy.webp",
             descriptionKey: "cards.witchy.description"
         }
     },
@@ -2168,7 +2182,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Neonia",
             nameKey: "cards.neon.cardName",
-            image: "img/cardNeon.png",
+            image: "img/webp/cardNeon.webp",
             descriptionKey: "cards.neon.description"
         }
     },
@@ -2186,14 +2200,14 @@ window.RARITIES_DATA = [
             card: {
                 name: "Alex (Vanilla)",
                 nameKey: "cards.hybrid_safe.cardName",
-                image: "img/cardHybrid_safe.png",
+                image: "img/webp/cardHybrid_safe.webp",
                 descriptionKey: "cards.hybrid_safe.description"
             }
         },
         card: {
             name: "Alex",
             nameKey: "cards.hybrid.cardName",
-            image: "img/cardHybrid.png",
+            image: "img/webp/cardHybrid.webp",
             descriptionKey: "cards.hybrid.description"
         }
     },
@@ -2208,7 +2222,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Chloretta",
             nameKey: "cards.chlorine.cardName",
-            image: "img/cardChlorine.png",
+            image: "img/webp/cardChlorine.webp",
             descriptionKey: "cards.chlorine.description"
         }
     },
@@ -2224,7 +2238,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Naruko",
             nameKey: "cards.naruko.cardName",
-            image: "img/cardNaruto.png",
+            image: "img/webp/cardNaruto.webp",
             descriptionKey: "cards.naruko.description"
         }
     },
@@ -2239,7 +2253,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Queen Bee",
             nameKey: "cards.bee.cardName",
-            image: "img/cardQueenBee.png",
+            image: "img/webp/cardQueenBee.webp",
             descriptionKey: "cards.bee.description"
         }
     },
@@ -2254,7 +2268,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Fuma",
             nameKey: "cards.smoke.cardName",
-            image: "img/cardSmoke.png",
+            image: "img/webp/cardSmoke.webp",
             descriptionKey: "cards.smoke.description"
         }
     },
@@ -2271,7 +2285,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Sketchy",
             nameKey: "cards.graphite.cardName",
-            image: "img/altGraphite.png",
+            image: "img/webp/altGraphite.webp",
             descriptionKey: "cards.graphite.description"
         }
     },
@@ -2288,7 +2302,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Hanma, Awakened",
             nameKey: "cards.unbound_alt_1.cardName",
-            image: "img/altUnbound.png",
+            image: "img/webp/altUnbound.webp",
             descriptionKey: "cards.unbound_alt_1.description"
         }
     },
@@ -2303,7 +2317,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Klyukva Medvedeva",
             nameKey: "cards.russian.cardName",
-            image: "img/cardRussian.png",
+            image: "img/webp/cardRussian.webp",
             descriptionKey: "cards.russian.description"
         }
     },
@@ -2321,7 +2335,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Platina",
             nameKey: "cards.platinum.cardName",
-            image: "img/cardPlatinum.png",
+            image: "img/webp/cardPlatinum.webp",
             descriptionKey: "cards.platinum.description"
         }
     },
@@ -2336,7 +2350,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Aristocrat Elf",
             nameKey: "cards.elf.cardName",
-            image: "img/cardElf.jpg",
+            image: "img/webp/cardElf.webp",
             descriptionKey: "cards.elf.description"
         }
     },
@@ -2353,7 +2367,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Misa, the Party Clown",
             nameKey: "cards.legendary_alt_1.cardName",
-            image: "img/altLegendary.png",
+            image: "img/webp/altLegendary.webp",
             descriptionKey: "cards.legendary_alt_1.description"
         }
     },
@@ -2374,7 +2388,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Alpha and Omega",
             nameKey: "cards.motivation.cardName",
-            image: "img/cardMotivation.png",
+            image: "img/webp/cardMotivation.webp",
             descriptionKey: "cards.motivation.description"
         }
     },
@@ -2389,7 +2403,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Subhuman",
             nameKey: "cards.smokinsexystyle.cardName",
-            image: "img/cardSmokinSexyStyle.png",
+            image: "img/webp/cardSmokinSexyStyle.webp",
             descriptionKey: "cards.smokinsexystyle.description"
         }
     },
@@ -2404,7 +2418,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Star Elf",
             nameKey: "cards.cosmic.cardName",
-            image: "img/cardCosmic.png",
+            image: "img/webp/cardCosmic.webp",
             descriptionKey: "cards.cosmic.description"
         }
     },
@@ -2421,7 +2435,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Gael, the Blue Streak",
             nameKey: "cards.epic_alt_1.cardName",
-            image: "img/altEpic.png",
+            image: "img/webp/altEpic.webp",
             descriptionKey: "cards.epic_alt_1.description"
         }
     },
@@ -2436,7 +2450,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Nebula Weaver",
             nameKey: "cards.space.cardName",
-            image: "img/cardSpace.png",
+            image: "img/webp/cardSpace.webp",
             descriptionKey: "cards.space.description"
         }
     },
@@ -2451,7 +2465,7 @@ window.RARITIES_DATA = [
         card: {
             name: "D.I.O.N.A.",
             nameKey: "cards.timestop.cardName",
-            image: "img/cardTimestop.png",
+            image: "img/webp/cardTimestop.webp",
             descriptionKey: "cards.timestop.description"
         }
     },
@@ -2468,7 +2482,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Ember",
             nameKey: "cards.coal.cardName",
-            image: "img/altCoal.png",
+            image: "img/webp/altCoal.webp",
             descriptionKey: "cards.coal.description"
         }
     },
@@ -2485,7 +2499,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Mila, the Crimson Tear",
             nameKey: "cards.rare_alt_1.cardName",
-            image: "img/altRare.png",
+            image: "img/webp/altRare.webp",
             descriptionKey: "cards.rare_alt_1.description"
         }
     },
@@ -2506,7 +2520,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Hakaria",
             nameKey: "cards.jackpot.cardName",
-            image: "img/cardJackpot.png",
+            image: "img/webp/cardJackpot.webp",
             descriptionKey: "cards.jackpot.description"
         }
     },
@@ -2521,7 +2535,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Makima, Demon of Control",
             nameKey: "cards.devil.cardName",
-            image: "img/cardDevil.png",
+            image: "img/webp/cardDevil.webp",
             descriptionKey: "cards.devil.description"
         }
     },
@@ -2538,7 +2552,7 @@ window.RARITIES_DATA = [
         card: {
             name: "GYATT",
             nameKey: "cards.common_alt_1.cardName",
-            image: "img/altCommon.png",
+            image: "img/webp/altCommon.webp",
             descriptionKey: "cards.common_alt_1.description"
         }
     },
@@ -2553,7 +2567,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Uranium-chan",
             nameKey: "cards.uranium.cardName",
-            image: "img/cardUranium.png",
+            image: "img/webp/cardUranium.webp",
             descriptionKey: "cards.uranium.description"
         }
     },
@@ -2568,7 +2582,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Hanma",
             nameKey: "cards.unbound.cardName",
-            image: "img/cardUnbound.png",
+            image: "img/webp/cardUnbound.webp",
             descriptionKey: "cards.unbound.description"
         }
     },
@@ -2583,7 +2597,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Carmilla",
             nameKey: "cards.mythic.cardName",
-            image: "img/cardMythic.png",
+            image: "img/webp/cardMythic.webp",
             descriptionKey: "cards.mythic.description"
         }
     },
@@ -2594,11 +2608,11 @@ window.RARITIES_DATA = [
         color: "#ff9800",
         glowColor: "#ffeb3b",
         cssClass: "rarity-legendary",
-        currencyOnDuplicate: 10,
+        currencyOnDuplicate: 20, // 0.2.12: 10 -> 20 (дубли классики x2, Этап 3)
         card: {
             name: "Misa",
             nameKey: "cards.legendary.cardName",
-            image: "img/cardLegendary.png",
+            image: "img/webp/cardLegendary.webp",
             descriptionKey: "cards.legendary.description"
         }
     },
@@ -2609,11 +2623,11 @@ window.RARITIES_DATA = [
         color: "#9c27b0",
         glowColor: "#ba68c8",
         cssClass: "rarity-epic",
-        currencyOnDuplicate: 7,
+        currencyOnDuplicate: 14, // 0.2.12: 7 -> 14 (дубли классики x2, Этап 3)
         card: {
             name: "Gael",
             nameKey: "cards.epic.cardName",
-            image: "img/cardEpic.png",
+            image: "img/webp/cardEpic.webp",
             descriptionKey: "cards.epic.description"
         }
     },
@@ -2628,7 +2642,7 @@ window.RARITIES_DATA = [
         card: {
             name: "Life-Giver",
             nameKey: "cards.carbon.cardName",
-            image: "img/cardCarbon.png",
+            image: "img/webp/cardCarbon.webp",
             descriptionKey: "cards.carbon.description"
         }
     },
@@ -2639,11 +2653,11 @@ window.RARITIES_DATA = [
         color: "#2196f3",
         glowColor: "#64b5f6",
         cssClass: "rarity-rare",
-        currencyOnDuplicate: 5,
+        currencyOnDuplicate: 10, // 0.2.12: 5 -> 10 (дубли классики x2, Этап 3)
         card: {
             name: "Mila",
             nameKey: "cards.rare.cardName",
-            image: "img/cardRare.png",
+            image: "img/webp/cardRare.webp",
             descriptionKey: "cards.rare.description"
         }
     },
@@ -2654,11 +2668,11 @@ window.RARITIES_DATA = [
         color: "#9e9e9e",
         glowColor: "#bdbdbd",
         cssClass: "rarity-common",
-        currencyOnDuplicate: 2,
+        currencyOnDuplicate: 4, // 0.2.12: 2 -> 4 (дубли классики x2, Этап 3)
         card: {
             name: "Eve",
             nameKey: "cards.common.cardName",
-            image: "img/cardCommon.png",
+            image: "img/webp/cardCommon.webp",
             descriptionKey: "cards.common.description"
         }
     },
@@ -2669,11 +2683,14 @@ window.RARITIES_DATA = [
         color: "#795548",
         glowColor: "#8d6e63",
         cssClass: "rarity-garbage",
-        currencyOnDuplicate: 0,
+        // 0.2.12: мусор-дубль даёт 1 💎 — «trickle»-доход закрывает стартовую
+        // долину (на удаче 1 мусор = ~53% роллов; на поздней удаче вклад
+        // тает сам, так что поздней игры это незаметные 1–2%)
+        currencyOnDuplicate: 1,
         card: {
             name: "Garbage Idol",
             nameKey: "cards.garbage.cardName",
-            image: "img/cardGarbage.png",
+            image: "img/webp/cardGarbage.webp",
             descriptionKey: "cards.garbage.description"
         }
     }
@@ -2869,9 +2886,6 @@ const SHOP_DATA = {
         { id: "upgrade_probability_analyzer", nameKey: "shop.upgrades.upgrade_probability_analyzer.name", descriptionKey: "shop.upgrades.upgrade_probability_analyzer.description", cost: 100000, type: "permanent_upgrade", targetProperty: "probabilityAnalyzer" }
     ]
 };
-
-// Прочие константы
-const ROLL_ANIMATION_ITEMS_COUNT = 50;
 
 // --- ОПТИМИЗАЦИЯ: Создаем Map для мгновенного поиска (O(1)) ---
 // Это избавляет от необходимости использовать .find() каждый раз
