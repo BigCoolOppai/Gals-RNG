@@ -40,7 +40,11 @@ convert_img() {
     fi
     if [ ! -f "$thumb" ] || [ "$src" -nt "$thumb" ]; then
         echo "  thumb : $thumb"
-        convert "$src" -resize "${THUMB_W}x" -quality "$THUMB_Q" "$thumb"
+        # Миниатюра всегда из ПЕРВОГО кадра: если арт анимированный (как Догма),
+        # ImageMagick ломает флаги webp-анимации в миниатюре, и браузер
+        # мерцает/«ломает» отображение. Для грида нужен статичный кадр,
+        # анимация живёт в полном размере (модалка). Для статичных картинок [0] не меняет ничего.
+        convert "${src}[0]" -resize "${THUMB_W}x" -quality "$THUMB_Q" "$thumb"
     fi
 }
 
