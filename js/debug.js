@@ -169,10 +169,17 @@ const Debug = (() => {
     function init() {
         cacheDOMElements();
         populateSelects();
-        injectMaterialsSection(); 
+        injectMaterialsSection();
         bindEvents();
-        console.log("Debug Panel Initialized. Call Debug.show() to open.");
+        console.log("Debug Panel Initialized. Call Debug.show() to open. Set Debug.verbose = true for detailed per-roll logs.");
     }
 
-    return { init, show, hide };
+    return {
+        init,
+        show,
+        hide,
+        // Подробные per-roll логи игры. Включить из консоли: Debug.verbose = true
+        // (по умолчанию false — экономит консоль и FPS при авторолле/AFK)
+        verbose: false
+    };
 })();

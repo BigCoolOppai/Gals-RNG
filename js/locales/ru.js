@@ -441,6 +441,25 @@ window.locales.ru = {
             rarity_asc: "По редкости (возр.)",
             name_asc: "По имени (А-Я)"
         },
+        filter: {
+            shown: "Показано",
+            new: "🆕 Новые",
+            limited: "🏷 LIMITED",
+            mutation: "🧬 Мутации",
+            effect: "⚙️ Эффекты",
+            alts: "🃏 С альтами",
+            rarityLabel: "Редкость:",
+            reset: "сбросить",
+            rarity: {
+                all: "все",
+                le1k: "≤ 1/1K",
+                k1_10: "1/1K–1/10K",
+                k10_100: "1/10K–1/100K",
+                m100_1: "1/100K–1/1M",
+                m1_100: "1/1M–1/100M",
+                g100: "> 1/100M"
+            }
+        },
         newCardNotification: {
             title: "✨ НОВАЯ КАРТА! ✨",
             closeBtn: "Отлично!"
@@ -471,7 +490,8 @@ window.locales.ru = {
             title: "Достижения",
             collectionsTitle: "Коллекции",
             themesTitle: "Темы оформления",
-            reward: "Награда"
+            reward: "Награда",
+            collectionBonus: "Бонус:"
         },
         themes: {
             'default': 'По умолчанию',
@@ -502,6 +522,7 @@ window.locales.ru = {
             base: "База",
             core: "Ядро удачи",
             prestige: "Престиж",
+            collections: "Коллекции",
             blackhole: "Дубли Blackhole",
             equip: "Экипировка (плоско)",
             misfortune: "Рука несчастья",
@@ -509,11 +530,41 @@ window.locales.ru = {
             boosts: "Бусты",
             multiplier: "множитель",
             noBoosts: "Нет активных бустов",
+            event: "Ивент-множитель",
             total: "Итого"
+        },
+        timeShort: {
+            days: "д",
+            hours: "ч"
+        },
+        effectWidget: {
+            title: "Активный механический эффект (клик — сменить)",
+            none: "Эффект: —",
+            nothing: "Ничего",
+            jackpotCost: "−{cost}💎/ролл",
+            types: {
+                high_risk_high_reward: "Джекпот",
+                universal_upgrade: "Апгрейд",
+                duplicate_collector: "Коллекционер",
+                boost_catalyst: "Катализатор",
+                quality_guarantor: "Гарант",
+                sword_path: "Путь меча",
+                variant_chance_bonus: "Мутации"
+            }
+        },
+        collectionBonus: {
+            luck: "+{v} к удаче",
+            duplicates: "+{v}% за дубли",
+            mutations: "+{v}% к мутациям",
+            materials: "+{v}% к материалам"
         }
     },
     // Уведомления
     notifications: {
+        starterPotion: {
+            name: "Стартовое зелье",
+            granted: "🧪 Стартовое зелье! +1.0 к удаче на 10 минут. Удачи!"
+        },
         luckyRollTriggered: "✨ Lucky Roll! Удача умножена! ✨",
         notEnoughCurrency: "Недостаточно Призматических осколков!",
         itemPurchased: "куплен, но нет места для экипировки. Освободите слот.",
@@ -614,6 +665,10 @@ window.locales.ru = {
         halloween_2025: {
             name: "Хэллоуин: Ночь Ужасов",
             description: "Настала самая жуткая ночь в году! Шанс найти тематические карты монстров и демонов сильно повышен. А по округе разбросаны новые, эксклюзивные карты события!"
+        },
+        retro_gaze: {
+            name: "Ретро Взгляд",
+            description: "Смотри, отголоски прошлого витают в воздухе."
         },
     },
     achievements: {

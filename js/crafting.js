@@ -18,7 +18,7 @@ window.MATERIALS_DATA = {
   gold_leaf:       { id: 'gold_leaf',        nameKey: 'materials.gold_leaf.name',       icon: 'img/materials/gl.jpg',       color: '#FFD700' },
   steel_ingot:     { id: 'steel_ingot',      nameKey: 'materials.steel_ingot.name',     icon: 'img/materials/si.jpg',           color: '#90a4ae' },
   vinyl_chip:      { id: 'vinyl_chip',       nameKey: 'materials.vinyl_chip.name',      icon: 'img/materials/vc.jpg',           color: '#ff4081' },
-  crystal_shard:   { id: 'crystal_shard',    nameKey: 'materials.crystal_shard.name',   icon: 'img/materials/crs.jpg',         color: '#bbdefb' },
+  crystal_shard:   { id: 'crystal_shard',   nameKey: 'materials.crystal_shard.name',   icon: 'img/materials/crc.jpg',         color: '#bbdefb' },
   graphite_powder: { id: 'graphite_powder',  nameKey: 'materials.graphite_powder.name', icon: 'img/materials/gd.jpg', color: '#616161' },
   bee_royal_jelly: { id: 'bee_royal_jelly',  nameKey: 'materials.bee_royal_jelly.name', icon: 'img/materials/rj.jpg',           color: '#ffb300' },
   shroom_spores:   { id: 'shroom_spores',    nameKey: 'materials.shroom_spores.name',   icon: 'img/materials/shs.jpg',          color: '#8bc34a' },

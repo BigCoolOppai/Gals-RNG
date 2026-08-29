@@ -51,6 +51,14 @@ const Game = (() => {
         }
     }
 
+    // Логи "на каждый ролл" идут за Debug.verbose (по умолчанию выключены),
+    // чтобы не засорять консоль и не тормозить авторолл/AFK-догон.
+    function log(...args) {
+        if (typeof window !== 'undefined' && window.Debug && window.Debug.verbose) {
+            console.log(...args);
+        }
+    }
+
     function ensurePlayerDataDefaults(data) {
         const defaults = SaveManager.getDefaultPlayerData ? SaveManager.getDefaultPlayerData() : {};
         const d = data || {};
@@ -86,6 +94,8 @@ const Game = (() => {
         d.motivationStacks = Number.isFinite(d.motivationStacks) ? d.motivationStacks : 0;
 
         d.musicVolume = Number.isFinite(d.musicVolume) ? d.musicVolume : 0;
+
+        d.starterPotionUsed = !!d.starterPotionUsed; // 0.2.12: выдано ли стартовое зелье
 
         d.lastRollTimestamp = Number.isFinite(d.lastRollTimestamp) ? d.lastRollTimestamp : 0;
 
@@ -134,6 +144,21 @@ const Game = (() => {
             .catch(err => console.warn('Supporter check on init failed:', err));
 
         checkActiveBoosts();
+
+        // 0.2.12: Стартовое зелье — бесплатный титанический буст (+1.0 удачи, 10 мин)
+        // для совершенно нового игрока (ещё ни одного ролла). Удержание на старте.
+        if (!playerData.starterPotionUsed && (playerData.stats && playerData.stats.totalRolls || 0) === 0) {
+            playerData.starterPotionUsed = true;
+            playerData.activeBoosts.push({
+                id: 'starter_potion',
+                type: 'luck_boost',
+                name: L.get('notifications.starterPotion.name'),
+                endTime: Date.now() + 600 * 1000,
+                luckBonus: 1.0
+            });
+            notify(L.get('notifications.starterPotion.granted'), 'success', 8000);
+        }
+
         // UI.updateAll — вызывается из основного скрипта после Game.init() и UI.init()
     }
 
@@ -162,7 +187,10 @@ const Game = (() => {
     }
 
     function getRebirthCost() {
-        const baseCost = 1000000;
+        // 0.2.12: базовая стоимость 1 000 000 -> 250 000 (Этап 3: удержание новых
+        // игроков; симуляция tools/econ-sim.js: первый престиж ~25ч -> ~7ч).
+        // Рост x3.5 за каждый следующий уровень сохранён.
+        const baseCost = 250000;
         const multiplier = 3.5;
         const originalCost = Math.floor(baseCost * Math.pow(multiplier, playerData.prestigeLevel));
         return getDiscountedCost(originalCost);
@@ -174,17 +202,17 @@ const Game = (() => {
         if (r.id === 'diamond' && !p.isSupporter) return false;
         if (r.id === 'salt' && !p.completedAchievements.includes('unlock_salt_card')) return false;
 
-        // ЛИМИТКИ: доступны к роллу во время ивента ИЛИ если игрок их уже получил
+        // ЛИМИТКИ: доступны к роллу, если:
+        //  1. карта уже получена (остается в пуле — фарм дублей),
+        //  2. сейчас идёт ЕЁ ивент,
+        //  3. сейчас идёт ретро-ивент, где карта указана в retroCards
+        //     (витрина старых лимиток, например «Ретро Взгляд»).
         if (r.availability?.type === 'event') {
-            // 1. Проверка: есть ли карта уже в инвентаре?
-            // (inventory хранит массив ID, например ['hween_jack', ...])
             if (p.inventory.includes(r.id)) {
-                return true; 
+                return true;
             }
-
-            // 2. Если карты нет, проверяем, идет ли сейчас ивент
-            const ev = getActiveEvent();
-            return !!ev && ev.id === r.availability.eventId;
+            return getActiveEvents().some(ev =>
+                ev.id === r.availability.eventId || (ev.retroCards || []).includes(r.id));
         }
         return true;
     }
@@ -205,7 +233,7 @@ const Game = (() => {
         });
 
         playerData.activePassives = newActivePassives;
-        console.log("Active passives updated:", playerData.activePassives);
+        log("Active passives updated:", playerData.activePassives);
     }
 
     function getPassiveBonusValue(bonusType) {
@@ -217,6 +245,19 @@ const Game = (() => {
             if (rarityData && rarityData.passiveEffect && rarityData.passiveEffect.type === bonusType) {
                 totalValue += rarityData.passiveEffect.value;
             }
+        }
+        return totalValue;
+    }
+
+    // Пассивный бонус за полные коллекции (COLLECTIONS_DATA.passiveEffect).
+    // Суммирует только те коллекции, что уже выполнены игроком.
+    function getCollectionBonusValue(bonusType) {
+        if (typeof COLLECTIONS_DATA === 'undefined') return 0;
+        let totalValue = 0;
+        for (const colId in COLLECTIONS_DATA) {
+            if (!playerData.completedAchievements.includes(colId)) continue;
+            const pe = COLLECTIONS_DATA[colId].passiveEffect;
+            if (pe && pe.type === bonusType) totalValue += pe.value;
         }
         return totalValue;
     }
@@ -339,10 +380,12 @@ const Game = (() => {
     function addCurrency(amount) {
         if (amount <= 0) return;
         playerData.currency += amount;
-        console.log(`Added ${amount} currency. Total: ${playerData.currency}`);
-        if (typeof UI !== 'undefined' && UI.updateAll) {
-            UI.updateAll(getPlayerData());
-        }
+        log(`Added ${amount} currency. Total: ${playerData.currency}`);
+        // Внимание: здесь сознательно НЕ вызывается UI.updateAll.
+        // Полный перерендер всех вкладок на каждый ролл (а это почти каждый авторолл-тик)
+        // был главной причиной лагов. Обновление UI делают сами владельцы сценариев:
+        // onRollsCompleted (ui.js) — после анимации ролла, UI.updateHud — в AFK-догоне,
+        // а явные действия (покупка/крафт/ребирт) вызывают updateAll сами.
         saveGame();
     }
 
@@ -429,19 +472,6 @@ const Game = (() => {
         playerData.materials[id] -= need;
         }
         return true;
-        }
-
-        function getMaterialDropBonusPercent() {
-            let sum = 0;
-            (playerData.equippedItems || []).forEach(item => {
-                if (item?.effect?.type === 'material_drop_bonus_percent') sum += (item.effect.value || 0);
-            });
-            const ev = getActiveEvent && getActiveEvent();
-            if (ev && ev.effect?.type === 'material_drop_multiplier') sum += (ev.effect.multiplier - 1);
-            (playerData.activeBoosts || []).forEach(b => {
-                if (b.type === 'material_drop_multiplier') sum += ((b.multiplier || 1) - 1);
-            });
-            return sum;
         }
 
         function craftItem(recipeId) {
@@ -580,6 +610,8 @@ const Game = (() => {
         // Ядро и престиж
         luck += calculateLuckFromCore(playerData.luckCoreLevel || 0);
         luck += calculateRebirthBonus(playerData);
+        // Пассивки за полные коллекции
+        luck += getCollectionBonusValue('luck_flat');
 
         // Бонус от дубликатов "blackhole" (если есть механика)
         const bhBonusPerDup = getRarityDataById('blackhole', playerData)?.mechanicalEffect?.luckBonusPerDuplicate ?? 0.01;
@@ -668,14 +700,19 @@ const Game = (() => {
 
     function getVariantChanceBonusGlobal() {
         let sum = getVariantChanceBonusFromEquipment(); // +50% от линзы
+        // Догма: +300% к шансу мутаций (механический эффект)
         if (playerData.activeMechanicalEffect === 'dogma') {
             const dogmaData = getRarityDataById('dogma', playerData);
             if (dogmaData && dogmaData.mechanicalEffect && dogmaData.mechanicalEffect.type === 'variant_chance_bonus') {
                 sum += dogmaData.mechanicalEffect.value; // Добавляем 3.0 (+300%)
             }
         }
-        const ev = getActiveEvent();
-        if (ev?.effect?.type === 'variant_chance_multiplier') sum += (ev.effect.multiplier - 1);
+        // Ивенты (все активные): множители суммируются аддитивно
+        (getActiveEvents() || []).forEach(ev => {
+            if (ev.effect?.type === 'variant_chance_multiplier') sum += (ev.effect.multiplier - 1);
+        });
+        // Пассивки за полные коллекции (например, хэллоуин-сет +10%)
+        sum += getCollectionBonusValue('variant_chance_bonus');
         // будущие бусты:
         (playerData.activeBoosts || []).forEach(b => {
             if (b.type === 'variant_chance_multiplier') sum += (b.multiplier - 1);
@@ -736,20 +773,32 @@ const Game = (() => {
         }
     }
 
-    // --- NEW: бонус к шансу материалов из экипировки/ивента (аддитивный) ---
+    // Бонус к шансу материалов: экипировка + ивенты (все активные) + бусты.
+    // Всё аддитивно, возвращается доля (0.25 => +25%).
+    // (Объединено: раньше была мёртвая копия без учёта бустов, которая
+    //  «перезаписывала» рабочую — буст «Сборщик материалов» молча не работал.)
     function getMaterialDropBonusPercent() {
-    let sum = 0;
-    (playerData.equippedItems || []).forEach(item => {
-        if (item?.effect?.type === 'material_drop_bonus_percent') {
-        sum += (item.effect.value || 0); // 0.25 => +25%
-        }
-    });
-    // Ивент (если активен): множитель переводим в добавку
-    const ev = getActiveEvent && getActiveEvent();
-    if (ev && ev.effect?.type === 'material_drop_multiplier') {
-        sum += (ev.effect.multiplier - 1); // 1.5 => +0.5
-    }
-    return sum; // возвращаем долю, не проценты
+        let sum = 0;
+        (playerData.equippedItems || []).forEach(item => {
+            if (item?.effect?.type === 'material_drop_bonus_percent') {
+                sum += (item.effect.value || 0); // 0.25 => +25%
+            }
+        });
+        // Ивенты (все активные): множитель переводим в добавку
+        (getActiveEvents() || []).forEach(ev => {
+            if (ev.effect?.type === 'material_drop_multiplier') {
+                sum += (ev.effect.multiplier - 1); // 1.5 => +0.5
+            }
+        });
+        // Временные бусты из магазина
+        (playerData.activeBoosts || []).forEach(b => {
+            if (b.type === 'material_drop_multiplier') {
+                sum += ((b.multiplier || 1) - 1);
+            }
+        });
+        // Пассивки за полные коллекции (например, крипипаста +5%)
+        sum += getCollectionBonusValue('material_drop_bonus_percent');
+        return sum; // возвращаем долю, не проценты
     }
 
     // --- NEW: применить дроп материалов для данной карты ---
@@ -773,7 +822,7 @@ const Game = (() => {
             let amt = entry.min + Math.floor(Math.random() * (entry.max - entry.min + 1));
             amt = Math.max(1, Math.round(amt * mult));
             addMaterials(entry.materialId, amt);
-            console.log(`Materials: +${amt} ${entry.materialId} from ${rarityId} (p=${(chance*100).toFixed(1)}%, x${mult})`);
+            log(`Materials: +${amt} ${entry.materialId} from ${rarityId} (p=${(chance*100).toFixed(1)}%, x${mult})`);
             }
         });
     }
@@ -839,7 +888,7 @@ const Game = (() => {
             const baseMultiplier = playerData.purchasedUpgrades.empoweredLuckyRoll ? 2.5 : 2.0;
             currentLuckMultiplier = baseMultiplier;
             isLuckyRollActiveThisRoll = true;
-            console.log(`✨ LUCKY ROLL TRIGGERED! Luck x${currentLuckMultiplier}. Counter reset.`);
+            log(`✨ LUCKY ROLL TRIGGERED! Luck x${currentLuckMultiplier}. Counter reset.`);
             playerData.luckyRollCounter = 0;
             if (typeof UI !== 'undefined' && UI.showNotification) {
                 notify(L.get('notifications.luckyRollTriggered'), "success");
@@ -885,10 +934,15 @@ const Game = (() => {
         finalEffectiveLuck *= currentLuckMultiplier;
         finalEffectiveLuck = parseFloat(finalEffectiveLuck.toFixed(2));
 
-        const activeEvent = getActiveEvent();
+        // Ивенты: несколько активных сразу; глобальные множители удачи перемножаются
+        const activeEvents = getActiveEvents();
         let eventLuckMultiplier = 1;
-        if (activeEvent && activeEvent.effect?.type === 'global_luck_multiplier') {
-            eventLuckMultiplier = activeEvent.effect.multiplier;
+        activeEvents.forEach(ev => {
+            if (ev.effect?.type === 'global_luck_multiplier') {
+                eventLuckMultiplier *= ev.effect.multiplier;
+            }
+        });
+        if (eventLuckMultiplier !== 1) {
             finalEffectiveLuck *= eventLuckMultiplier;
         }
 
@@ -903,10 +957,12 @@ const Game = (() => {
             for (const rarity of availableRarities) {
                 if (rarity.id === 'garbage') continue;
 
-                // Эвент-множитель для конкретных карт
+                // Ивент-множитель для конкретных карт (все активные ивенты)
                 let eventMultiplier = 1;
-                if (activeEvent && activeEvent.effect?.type === 'boost_specific_cards' && activeEvent.effect.cardIds.includes(rarity.id)) {
-                    eventMultiplier = activeEvent.effect.multiplier;
+                for (const ev of activeEvents) {
+                    if (ev.effect?.type === 'boost_specific_cards' && ev.effect.cardIds.includes(rarity.id)) {
+                        eventMultiplier *= ev.effect.multiplier;
+                    }
                 }
 
                 const P_base = rarity.probabilityBase;
@@ -1006,13 +1062,6 @@ const Game = (() => {
             }
         }
 
-        // История последних роллов
-        if (!playerData.lastRollsHistory) playerData.lastRollsHistory = [];
-        playerData.lastRollsHistory.push(determinedRarityId);
-        if (playerData.lastRollsHistory.length > 10) {
-            playerData.lastRollsHistory.shift();
-        }
-
         return processRollResult(determinedRarityId, rollMeta);
     }
 
@@ -1098,6 +1147,7 @@ const Game = (() => {
             }
         });
         totalBonusPercent += getPassiveBonusValue('duplicate_currency_bonus_percent');
+        totalBonusPercent += getCollectionBonusValue('duplicate_currency_bonus_percent');
 
         if (totalBonusPercent > 0 && baseDuplicateReward > 0) {
             const bonusAmount = Math.ceil(baseDuplicateReward * totalBonusPercent);
@@ -1105,13 +1155,15 @@ const Game = (() => {
         //    console.log(`Greed Bonus: Original: ${baseDuplicateReward}, Bonus: +${bonusAmount} (${(totalBonusPercent * 100).toFixed(0)}%), New: ${finalDuplicateReward}`);
         }
 
-        // Эвент-множитель на валюту за дубли
-        const activeEvent = getActiveEvent();
-        if (activeEvent && activeEvent.effect?.type === 'duplicate_currency_multiplier' && finalDuplicateReward > 0) {
-            const multiplier = activeEvent.effect.multiplier;
-            const eventBonus = Math.ceil(finalDuplicateReward * multiplier) - finalDuplicateReward;
-            finalDuplicateReward += eventBonus;
-        //    console.log(`Event Bonus: Original: ${finalDuplicateReward - eventBonus}, Multiplier: x${multiplier}, New: ${finalDuplicateReward}`);
+        // Ивент-множитель на валюту за дубли (все активные ивенты, перемножаются)
+        let eventDupMultiplier = 1;
+        (getActiveEvents() || []).forEach(ev => {
+            if (ev.effect?.type === 'duplicate_currency_multiplier') {
+                eventDupMultiplier *= ev.effect.multiplier;
+            }
+        });
+        if (eventDupMultiplier !== 1 && finalDuplicateReward > 0) {
+            finalDuplicateReward = Math.ceil(finalDuplicateReward * eventDupMultiplier);
         }
 
 
@@ -1237,10 +1289,10 @@ const Game = (() => {
 
         // Проверки на уже купленное/надетое — как было (equipment/upgrade)
         if (itemType === 'equipment' && playerData.inventory.includes("purchased_" + itemId)) {
-            alert(`${L.get(itemData.nameKey)} ${L.get('notifications.itemPurchased')}`); return false;
+            notify(`${L.get(itemData.nameKey)} ${L.get('notifications.alreadyPurchased')}`, 'warning'); return false;
         }
         if (itemType === 'upgrade' && playerData.purchasedUpgrades[itemData.targetProperty]) {
-            alert(`${L.get(itemData.nameKey)} ${L.get('notifications.upgradeAlreadyPurchased')}`); return false;
+            notify(`${L.get(itemData.nameKey)} ${L.get('notifications.upgradeAlreadyPurchased')}`, 'warning'); return false;
         }
 
         // Стоимость с учётом скидки
@@ -1256,7 +1308,7 @@ const Game = (() => {
             if (playerData.equippedItems.length < getMaxEquippedItems()) {
                 equipItem(itemData);
             } else {
-                alert(`${L.get(itemData.nameKey)} ${L.get('notifications.itemPurchased')}`);
+                notify(`${L.get(itemData.nameKey)} ${L.get('notifications.itemPurchased')}`, 'warning');
             }
             } else if (itemType === 'upgrade') {
             playerData.purchasedUpgrades[itemData.targetProperty] = true;
@@ -1302,36 +1354,6 @@ const Game = (() => {
         }
         checkActiveBoosts && checkActiveBoosts();
         saveGame();
-    }
-
-    function activateBoost(boostData) {
-    const now = Date.now();
-    const existingBoost = (playerData.activeBoosts || []).find(b => b.id === boostData.id);
-
-    // Учтём мультипликатор длительности (экипировка)
-    const durationMs = Math.floor((boostData.durationSeconds || 0) * 1000 * getBoostDurationMultiplier());
-
-    if (existingBoost) {
-        const remainingTime = Math.max(0, existingBoost.endTime - now);
-        existingBoost.endTime = now + remainingTime + durationMs;
-        console.log(`Boost '${L.get(boostData.nameKey)}' duration extended. New end: ${new Date(existingBoost.endTime).toLocaleTimeString()}`);
-    } else {
-        const newBoost = {
-            id: boostData.id,
-            type: boostData.type,
-            name: L.get(boostData.nameKey),
-            endTime: now + durationMs,
-            // универсальные поля (чтобы логика могла их читать)
-            luckBonus: boostData.luckBonus,
-            multiplier: boostData.multiplier,
-            rolls_reduced: boostData.rolls_reduced
-        };
-        playerData.activeBoosts.push(newBoost);
-        console.log(`Boost activated: ${L.get(boostData.nameKey)}. Ends at: ${new Date(newBoost.endTime).toLocaleTimeString()}`);
-    }
-
-    checkActiveBoosts && checkActiveBoosts();
-    saveGame();
     }
 
     let boostCheckInterval = null;
@@ -1448,14 +1470,21 @@ const Game = (() => {
     }
 
     // --- Эвенты, Ачивки, Коллекции ---
-    function getActiveEvent() {
+    // ВСЕ активные ивенты (их может быть несколько одновременно).
+    // Эффекты разных ивентов суммируются/перемножаются по правилам каждого эффекта.
+    function getActiveEvents() {
         const now = Date.now();
-        if (!Array.isArray(EVENTS_DATA)) return null;
-        return EVENTS_DATA.find(event => {
+        if (!Array.isArray(EVENTS_DATA)) return [];
+        return EVENTS_DATA.filter(event => {
             const start = event.startDate ? new Date(event.startDate).getTime() : -Infinity;
             const end = event.endDate ? new Date(event.endDate).getTime() : Infinity;
             return now >= start && now <= end;
-        }) || null;
+        });
+    }
+
+    // Совместимость со старым API: первый активный ивент.
+    function getActiveEvent() {
+        return getActiveEvents()[0] || null;
     }
 
     function checkAchievementsAndCollections() {
@@ -1523,6 +1552,8 @@ const Game = (() => {
 
         const core = calculateLuckFromCore(p.luckCoreLevel || 0);
         const prestige = calculateRebirthBonus(p);
+        // Пассивки за полные коллекции (плоская добавка к удаче)
+        const collections = getCollectionBonusValue('luck_flat');
 
         // blackhole duplicates
         const bhPerDup = getRarityDataById('blackhole', p)?.mechanicalEffect?.luckBonusPerDuplicate ?? 0.01;
@@ -1561,19 +1592,27 @@ const Game = (() => {
             }
         }
 
-        const total = base + core + prestige + bhDup + equipFlat + misfortune + motivation + (boostSum * catalystMult);
+        // Глобальный множитель удачи от активных ивентов
+        // (в performRoll применяется к итоговой удаче; здесь — для честного «Состава удачи»)
+        const eventMultiplier = (getActiveEvents() || []).reduce((m, ev) =>
+            (ev.effect?.type === 'global_luck_multiplier') ? m * ev.effect.multiplier : m, 1);
+
+        const total = (base + core + prestige + collections + bhDup + equipFlat + misfortune + motivation + (boostSum * catalystMult)) * eventMultiplier;
 
         return {
             total,
+            eventMultiplier,
             components: [
             { key:'base',       label:'Base',               type:'flat', value: base },
             { key:'core',       label:'Luck Core',          type:'flat', value: core },
             { key:'prestige',   label:'Prestige',           type:'flat', value: prestige },
+            { key:'collections',label:'Collections',        type:'flat', value: collections },
             { key:'blackhole',  label:'Blackhole Dupes',    type:'flat', value: bhDup },
             { key:'equip',      label:'Equipment (flat)',   type:'flat', value: equipFlat },
             { key:'misfortune', label:'Misfortune stacks',  type:'flat', value: misfortune },
             { key:'motivation', label:'Sword Path',         type:'flat', value: motivation },
-            { key:'boosts',     label:'Boosts sum',         type:'flat', value: boostSum, mult: catalystMult, list: boosts }
+            { key:'boosts',     label:'Boosts sum',         type:'flat', value: boostSum, mult: catalystMult, list: boosts },
+            { key:'event',      label:'Event',              type:'mult', value: eventMultiplier }
             ]
         };
     }
@@ -1614,5 +1653,6 @@ const Game = (() => {
         setActiveTheme,
         calculateRebirthBonus,
         craftItem, addMaterials, hasMaterials, spendMaterials, getLuckBreakdown, isCardAvailableNow,
+        getActiveEvents, getMaterialDropBonusPercent, getVariantChanceBonusGlobal, getCollectionBonusValue,
     };
 })();

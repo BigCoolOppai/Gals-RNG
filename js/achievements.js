@@ -183,6 +183,12 @@ const ACHIEVEMENTS_DATA = {
     
 };
 
+// Пассивный бонус за ПОЛНУЮ коллекцию (постоянный, применяется сразу при
+// выполнении). Типы совпадают с существующими системами бонусов:
+//   luck_flat                    — плоская добавка к удаче
+//   duplicate_currency_bonus_percent — % к осколкам за дубли
+//   variant_chance_bonus         — добавка к шансу мутаций (доля, 0.1 = +10%)
+//   material_drop_bonus_percent  — % к шансу материалов
 const COLLECTIONS_DATA = {
     'classic_set': {
         nameKey: 'collections.classic_set.name',
@@ -194,7 +200,8 @@ const COLLECTIONS_DATA = {
             type: 'ui_theme', 
             themeId: 'theme-classic',
             nameKey: 'collections.classic_set.rewardName'
-        }
+        },
+        passiveEffect: { type: 'luck_flat', value: 0.05 }
     },
     chocolate_set: {
         nameKey: 'collections.chocolate_set.name',
@@ -208,7 +215,8 @@ const COLLECTIONS_DATA = {
         type: 'ui_theme',
         themeId: 'theme-choco',
         nameKey: 'collections.chocolate_set.rewardName'
-        }
+        },
+        passiveEffect: { type: 'duplicate_currency_bonus_percent', value: 0.05 }
     },
     halloween_set_2025: {
         nameKey: 'collections.halloween_set_2025.name',
@@ -222,7 +230,8 @@ const COLLECTIONS_DATA = {
             type: 'ui_theme',
             themeId: 'theme-halloween',
             nameKey: 'collections.halloween_set_2025.rewardName'
-        }
+        },
+        passiveEffect: { type: 'variant_chance_bonus', value: 0.1 }
     },
     creepypasta_set: {
         nameKey: 'collections.creepypasta_set.name',
@@ -234,7 +243,8 @@ const COLLECTIONS_DATA = {
             type: 'ui_theme', 
             themeId: 'theme-creepypasta',
             nameKey: 'collections.creepypasta_set.rewardName'
-        }
+        },
+        passiveEffect: { type: 'material_drop_bonus_percent', value: 0.05 }
     }
     // Сюда можно будет добавлять новые коллекции
 };

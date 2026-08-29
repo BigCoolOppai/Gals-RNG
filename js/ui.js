@@ -41,6 +41,12 @@ const UI = (() => {
     // --- Утилиты ---
     const hasAnyMulti = (pd) => !!(pd?.purchasedUpgrades?.multiRollX10 || pd?.purchasedUpgrades?.multiRollX5);
 
+    // Миниатюра для грида/списков: img/webp/cardGal.webp -> img/webp/cardGal-thumb.webp.
+    // Полный размер (без -thumb) используется только в модалке карты.
+    function thumbOf(imagePath) {
+        return String(imagePath || '').replace(/\.webp$/, '-thumb.webp');
+    }
+
     function cacheDOMElements() {
         currencyDisplay = document.getElementById('currencyDisplay');
         luckDisplay = document.getElementById('luckDisplay');
@@ -124,9 +130,106 @@ const UI = (() => {
         });
     }
 
+    // --- Состояние фильтров инвентаря (localStorage, как сортировка) ---
+    const FILTER_DEFAULTS = { new: false, limited: false, mutation: false, effect: false, alts: false, rarity: 'all' };
+    function getInvFilterState() {
+        try {
+            const saved = JSON.parse(localStorage.getItem('inventoryFilters') || '{}');
+            return Object.assign({}, FILTER_DEFAULTS, saved);
+        } catch (e) {
+            return Object.assign({}, FILTER_DEFAULTS);
+        }
+    }
+    function saveInvFilterState(state) {
+        localStorage.setItem('inventoryFilters', JSON.stringify(state));
+    }
+    function isAnyInvFilterActive(state) {
+        return state.new || state.limited || state.mutation || state.effect || state.alts || state.rarity !== 'all';
+    }
+
+    function injectInventoryFilters() {
+        const grid = document.getElementById('inventoryGrid');
+        if (!grid || document.getElementById('inventoryFilters')) return;
+
+        const state = getInvFilterState();
+        const chips = [
+            { key: 'new',      cls: 'filter-new',      label: L.get('ui.filter.new') },
+            { key: 'limited',  cls: 'filter-limited',  label: L.get('ui.filter.limited') },
+            { key: 'mutation', cls: 'filter-mutation', label: L.get('ui.filter.mutation') },
+            { key: 'effect',   cls: 'filter-effect',   label: L.get('ui.filter.effect') },
+            { key: 'alts',     cls: 'filter-alts',     label: L.get('ui.filter.alts') }
+        ];
+        const rarityOptions = [
+            ['all',     L.get('ui.filter.rarity.all')],
+            ['le1k',    L.get('ui.filter.rarity.le1k')],
+            ['k1_10',   L.get('ui.filter.rarity.k1_10')],
+            ['k10_100', L.get('ui.filter.rarity.k10_100')],
+            ['m100_1',  L.get('ui.filter.rarity.m100_1')],
+            ['m1_100',  L.get('ui.filter.rarity.m1_100')],
+            ['g100',    L.get('ui.filter.rarity.g100')]
+        ];
+
+        const row = document.createElement('div');
+        row.id = 'inventoryFilters';
+        row.className = 'd-flex flex-wrap align-items-center gap-2 mb-2';
+
+        chips.forEach(c => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'btn btn-sm btn-outline-secondary inv-filter-chip ' + c.cls;
+            b.textContent = c.label;
+            if (state[c.key]) b.classList.add('active');
+            b.addEventListener('click', () => {
+                b.classList.toggle('active');
+                const s = getInvFilterState();
+                s[c.key] = b.classList.contains('active');
+                saveInvFilterState(s);
+                renderInventory(Game.getPlayerData());
+            });
+            row.appendChild(b);
+        });
+
+        const selWrap = document.createElement('span');
+        selWrap.innerHTML = `<label class="inv-filter-rarity-label mb-0">${L.get('ui.filter.rarityLabel')}</label>`;
+        const sel = document.createElement('select');
+        sel.id = 'inventoryRarityFilter';
+        sel.className = 'form-select form-select-sm inv-filter-rarity';
+        rarityOptions.forEach(([val, label]) => {
+            const o = document.createElement('option');
+            o.value = val;
+            o.textContent = label;
+            if (val === state.rarity) o.selected = true;
+            sel.appendChild(o);
+        });
+        sel.addEventListener('change', () => {
+            const s = getInvFilterState();
+            s.rarity = sel.value;
+            saveInvFilterState(s);
+            renderInventory(Game.getPlayerData());
+        });
+        selWrap.appendChild(sel);
+        row.appendChild(selWrap);
+
+        const reset = document.createElement('button');
+        reset.type = 'button';
+        reset.className = 'btn btn-sm btn-link inv-filter-reset';
+        reset.textContent = L.get('ui.filter.reset');
+        reset.addEventListener('click', () => {
+            saveInvFilterState(Object.assign({}, FILTER_DEFAULTS));
+            row.querySelectorAll('.inv-filter-chip.active').forEach(b => b.classList.remove('active'));
+            sel.value = 'all';
+            renderInventory(Game.getPlayerData());
+        });
+        row.appendChild(reset);
+
+        grid.parentElement.insertBefore(row, grid);
+    }
+
     function init() {
         cacheDOMElements();
         injectInventorySearch();
+        injectInventoryFilters();
+        injectEffectWidget();
         setupEventListeners();
         checkAgeDisclaimer();
 
@@ -207,6 +310,24 @@ const UI = (() => {
         // Вкладка достижений
         document.getElementById('achievements-tab')?.addEventListener('shown.bs.tab', () => {
             renderAchievements();
+        });
+
+        // Тяжёлые вкладки: рендерим при открытии (и при смене данных — из updateAll/updateHud)
+        const pdOnShow = () => Game.getPlayerData();
+        document.getElementById('shop-tab')?.addEventListener('shown.bs.tab', () => {
+            renderShop();
+            updateEquippedItemsDisplay(pdOnShow().equippedItems);
+        });
+        document.getElementById('workshop-tab')?.addEventListener('shown.bs.tab', () => {
+            renderWorkshop(pdOnShow());
+        });
+        document.getElementById('backpack-tab')?.addEventListener('shown.bs.tab', () => {
+            const pd = pdOnShow();
+            renderMaterials(pd);
+            renderOwnedEquipment(pd);
+        });
+        document.getElementById('rebirth-tab-button')?.addEventListener('shown.bs.tab', () => {
+            renderRebirthSection();
         });
 
         // Сортировка инвентаря
@@ -374,6 +495,7 @@ const UI = (() => {
             base: t('base'),
             core: t('core'),
             prestige: t('prestige'),
+            collections: t('collections'),
             blackhole: t('blackhole'),
             equip: t('equip'),
             misfortune: t('misfortune'),
@@ -381,7 +503,7 @@ const UI = (() => {
             boosts: t('boosts')
         };
 
-        const leftItems = ['base','core','prestige','blackhole','equip','misfortune','motivation']
+        const leftItems = ['base','core','prestige','collections','blackhole','equip','misfortune','motivation']
             .map(key => {
             const comp = lb.components.find(c => c.key === key) || { value: 0 };
             return `
@@ -400,6 +522,11 @@ const UI = (() => {
         const multBadge = compBoosts.mult && compBoosts.mult !== 1
             ? `<span class="badge bg-warning text-dark ms-2">×${compBoosts.mult.toFixed(2)}</span>` : '';
 
+        // Глобальный множитель удачи от активных ивентов (если есть)
+        const eventLine = (lb.eventMultiplier && lb.eventMultiplier !== 1)
+            ? `<div class="small text-warning">${t('event')}: ×${lb.eventMultiplier.toFixed(2)}</div>`
+            : '';
+
         box.innerHTML = `
             <div class="card bg-dark-subtle">
             <div class="card-body">
@@ -413,6 +540,7 @@ const UI = (() => {
                     <strong>${t('boosts')}</strong> ${multBadge}
                     </div>
                     ${boostLines}
+                    ${eventLine}
                     <hr class="my-2">
                     <div class="d-flex justify-content-between">
                     <span><strong>${t('total')}</strong></span>
@@ -437,7 +565,7 @@ const UI = (() => {
         isShowingNewCard = true;
         const result = newCardQueue.shift();
 
-        newCardModalImage.src = result.card.image;
+        newCardModalImage.src = thumbOf(result.card.image);
         newCardModalName.textContent = result.card.name;
         newCardModalRarity.textContent = `${L.get('ui.rarity')}: ${result.rarity.name}`;
         newCardModalRarity.style.color = result.rarity.color;
@@ -565,6 +693,7 @@ const UI = (() => {
         updateLuckDisplay();
         updateActiveBoostsDisplay();
         renderEventBanner();
+        renderActiveEffectWidget();
         renderInventory(playerData);
         renderShop();
         renderRebirthSection();
@@ -589,31 +718,166 @@ const UI = (() => {
         }
     }
 
-    // --- Баннер события ---
+    // --- Виджет активного механического эффекта (шапка) ---
+    // Показывает, какой эффект «надет» сейчас, и позволяет переключить
+    // его в один клик (важно: джекпот стоит 5💎 с каждого ролла).
+    function injectEffectWidget() {
+        const statsRow = document.querySelector('.player-stats');
+        if (!statsRow || document.getElementById('activeEffectWidget')) return;
+
+        const widget = document.createElement('div');
+        widget.id = 'activeEffectWidget';
+        widget.className = 'effect-widget';
+        widget.title = L.get('ui.effectWidget.title');
+        widget.innerHTML = `<span id="activeEffectContent"></span>
+            <div id="activeEffectMenu" class="effect-widget-menu d-none"></div>`;
+        statsRow.appendChild(widget);
+
+        widget.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const menu = document.getElementById('activeEffectMenu');
+            menu.classList.toggle('d-none');
+            if (!menu.classList.contains('d-none')) {
+                renderActiveEffectMenu();
+            }
+        });
+        document.addEventListener('click', () => {
+            const menu = document.getElementById('activeEffectMenu');
+            menu && menu.classList.add('d-none');
+        });
+    }
+
+    function renderActiveEffectMenu() {
+        const menu = document.getElementById('activeEffectMenu');
+        if (!menu) return;
+        const playerData = Game.getPlayerData();
+        const owned = RARITIES_DATA.filter(r => r.mechanicalEffect && playerData.inventory.includes(r.id));
+
+        menu.innerHTML = '';
+        const makeItem = (label, id, thumb) => {
+            const item = document.createElement('div');
+            item.className = 'effect-menu-item';
+            if (thumb) {
+                item.innerHTML = `<img src="${thumb}" alt="">`;
+            }
+            const span = document.createElement('span');
+            span.textContent = label;
+            item.appendChild(span);
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menu.classList.add('d-none');
+                Game.setActiveMechanicalEffect(id); // null = снять
+            });
+            menu.appendChild(item);
+        };
+        makeItem(L.get('ui.effectWidget.nothing'), null);
+        owned.forEach(r => {
+            const name = L.get(r.card.nameKey) || r.id;
+            makeItem(name, r.id, thumbOf(r.card.image));
+        });
+    }
+
+    function renderActiveEffectWidget() {
+        const widget = document.getElementById('activeEffectWidget');
+        const content = document.getElementById('activeEffectContent');
+        if (!widget || !content) return;
+        const playerData = Game.getPlayerData();
+        const activeId = playerData.activeMechanicalEffect;
+        const activeData = activeId ? getRarityDataById(activeId, playerData) : null;
+
+        widget.classList.toggle('effect-widget-active', !!activeData);
+        if (activeData) {
+            widget.style.borderColor = activeData.color || '';
+            widget.style.boxShadow = `0 0 8px ${activeData.glowColor || 'transparent'}`;
+            const typeName = L.get(`ui.effectWidget.types.${activeData.mechanicalEffect.type}`);
+            let cost = '';
+            if (activeData.mechanicalEffect.type === 'high_risk_high_reward' && activeData.mechanicalEffect.rollCost > 0) {
+                cost = ` <span class="effect-jackpot-cost">${L.get('ui.effectWidget.jackpotCost').replace('{cost}', activeData.mechanicalEffect.rollCost)}</span>`;
+            }
+            content.innerHTML = `⚙️ ${L.get(activeData.card.nameKey) || activeId} · ${typeName}${cost}`;
+        } else {
+            widget.style.borderColor = '';
+            widget.style.boxShadow = '';
+            content.textContent = `⚙️ ${L.get('ui.effectWidget.none')}`;
+        }
+    }
+
+    // Лёгкое обновление для авторолла/AFK-догона: только то, что видно постоянно
+    // (валюта, удача, бусты, баннер, lucky roll, инвентарь) + открытая вкладка.
+    function updateHud(playerData) {
+        if (!playerData) return;
+
+        playerIdDisplay && (playerIdDisplay.value = playerData.playerId || '');
+        updateCurrencyDisplay(playerData.currency);
+        updateLuckDisplay();
+        updateActiveBoostsDisplay();
+        renderEventBanner();
+        renderActiveEffectWidget();
+        renderInventory(playerData);
+
+        if (typeof playerData.luckyRollCounter !== 'undefined') {
+            const currentThreshold = playerData.luckyRollThreshold || 11;
+            updateLuckyRollDisplay(playerData.luckyRollCounter, currentThreshold);
+        }
+
+        renderVisibleExpensiveTabs(playerData);
+    }
+
+    // Тяжёлые вкладки (магазин, мастерская, рюкзак, статы, ребирт) рендерим
+    // только если они сейчас открыты — иначе авторолл их зря перерисовывает.
+    function renderVisibleExpensiveTabs(playerData) {
+        const activeLink = document.querySelector('#mainTabs .nav-link.active');
+        const target = activeLink && activeLink.getAttribute('data-bs-target');
+        const id = target ? target.replace('#', '') : null;
+        if (!id) return;
+
+        if (id === 'shop') {
+            renderShop();
+            updateEquippedItemsDisplay(playerData.equippedItems);
+        } else if (id === 'workshop') {
+            renderWorkshop(playerData);
+        } else if (id === 'backpack') {
+            renderMaterials(playerData);
+            renderOwnedEquipment(playerData);
+        } else if (id === 'stats') {
+            renderStats(playerData);
+        } else if (id === 'rebirth') {
+            renderRebirthSection();
+        }
+    }
+
+    // --- Баннер событий (все активные ивенты) ---
     function renderEventBanner() {
         if (!eventBanner) return;
-        const activeEvent = Game.getActiveEvent();
-        if (activeEvent) {
-            const endDate = new Date(activeEvent.endDate);
-            const now = new Date();
-            const timeLeft = endDate - now;
+        const activeEvents = (typeof Game.getActiveEvents === 'function')
+            ? Game.getActiveEvents()
+            : (Game.getActiveEvent() ? [Game.getActiveEvent()] : []);
 
-            let timerHtml = '';
-            if (timeLeft > 0) {
-                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                timerHtml = `<small class="d-block">${L.get('events.timeLeft')}: ${days}д ${hours}ч</small>`;
-            }
+        if (activeEvents.length > 0) {
+            eventBanner.innerHTML = activeEvents.map(activeEvent => {
+                const endDate = new Date(activeEvent.endDate);
+                const now = new Date();
+                const timeLeft = endDate - now;
 
-            const extraClass = activeEvent.bannerClass || '';
+                let timerHtml = '';
+                if (timeLeft > 0) {
+                    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const dSuffix = L.get('ui.timeShort.days');
+                    const hSuffix = L.get('ui.timeShort.hours');
+                    timerHtml = `<small class="d-block">${L.get('events.timeLeft')}: ${days}${dSuffix} ${hours}${hSuffix}</small>`;
+                }
 
-            eventBanner.innerHTML = `
+                const extraClass = activeEvent.bannerClass || '';
+
+                return `
                 <div class="alert alert-info ${extraClass}" role="alert">
                     <h5 class="alert-heading">🎉 ${L.get(activeEvent.nameKey)}</h5>
                     <p>${L.get(activeEvent.descriptionKey)}</p>
                     ${timerHtml}
                 </div>
             `;
+            }).join('');
             eventBanner.style.display = 'block';
         } else {
             eventBanner.innerHTML = '';
@@ -652,11 +916,29 @@ const UI = (() => {
             const isCompleted = playerData.completedAchievements.includes(colId);
             const collectedCount = colData.cardIds.filter(id => playerData.inventory.includes(id)).length;
 
+            // Пассивный бонус за полную коллекцию (активен после сбора)
+            let bonusLine = '';
+            const pe = colData.passiveEffect;
+            if (pe) {
+                const bonusKeyMap = {
+                    luck_flat: 'luck',
+                    duplicate_currency_bonus_percent: 'duplicates',
+                    variant_chance_bonus: 'mutations',
+                    material_drop_bonus_percent: 'materials'
+                };
+                const v = (pe.type === 'luck_flat') ? pe.value.toFixed(2) : Math.round(pe.value * 100) + '%';
+                const bonusText = (L.get(`ui.collectionBonus.${bonusKeyMap[pe.type]}`) || '').replace('{v}', v);
+                if (bonusText) {
+                    bonusLine = `<small class="d-block mt-1 ${isCompleted ? 'text-success' : 'text-muted'}">${L.get('ui.achievements.collectionBonus')} ${bonusText}${isCompleted ? ' ✓' : ''}</small>`;
+                }
+            }
+
             collectionsHtml += `
                 <div class="list-group-item ${isCompleted ? 'bg-success-subtle' : 'bg-dark-subtle'}">
                     <strong>${L.get(colData.nameKey)} (${collectedCount}/${colData.cardIds.length})</strong>
                     <small class="d-block text-muted">${L.get(colData.descriptionKey)}</small>
                     <small class="d-block text-info-emphasis mt-1">${L.get('ui.achievements.reward')}: ${L.get(colData.reward.nameKey)}</small>
+                    ${bonusLine}
                 </div>
             `;
         }
@@ -1035,7 +1317,14 @@ const UI = (() => {
 
         showMutationToasts(results);
 
-        updateAll(Game.getPlayerData());
+        // Авторолл: обновляем только HUD (валюту, удачу, инвентарь, видимые вкладки).
+        // Полный updateAll на каждый тик перерисовывал ВСЕ вкладки (магазин, мастерская,
+        // рюкзак, ребирт, статы) — при AFK-догоне это был главный источник фриза.
+        if (isAutorolling) {
+            updateHud(Game.getPlayerData());
+        } else {
+            updateAll(Game.getPlayerData());
+        }
 
         if (isAutorolling && isTabActive) {
             clearTimeout(autorollTimer);
@@ -1139,7 +1428,7 @@ const UI = (() => {
         cardWrapper.className = 'received-card-animation-wrapper';
         const cardElement = document.createElement('div');
         cardElement.className = 'received-card';
-        cardElement.style.backgroundImage = `url('${rollResult.card.image}')`;
+        cardElement.style.backgroundImage = `url('${thumbOf(rollResult.card.image)}')`;
         cardElement.style.borderColor = rollResult.rarity.color;
         cardElement.style.setProperty('--rarity-glow-color', rollResult.rarity.glowColor);
         cardElement.setAttribute('title', `${L.get('ui.rarity')}: ${rollResult.rarity.name}`);
@@ -1198,7 +1487,7 @@ const UI = (() => {
             const cardMini = document.createElement('div');
             cardMini.style.textAlign = 'center';
             const img = document.createElement('img');
-            Object.assign(img, { src: result.card.image, alt: result.card.name });
+            Object.assign(img, { src: thumbOf(result.card.image), alt: result.card.name });
             Object.assign(img.style, { width: '60px', aspectRatio: '1024 / 1360', border: `2px solid ${result.rarity.color}`, borderRadius: '4px' });
             cardMini.appendChild(img);
             const nameP = document.createElement('p');
@@ -1249,7 +1538,7 @@ const UI = (() => {
         const query = (qEl?.value || '').trim().toLowerCase();
 
         const parentCards = sortedRarities.filter(r => !r.displayParentId);
-        const filteredParents = !query ? parentCards : parentCards.filter(parent => {
+        let filteredParents = !query ? parentCards : parentCards.filter(parent => {
             const versions = [parent, ...availableRarities.filter(r => r.displayParentId === parent.id)];
             return versions.some(v => {
                 const name = (L.get(v.card.nameKey) || '').toLowerCase();
@@ -1257,6 +1546,44 @@ const UI = (() => {
                 return name.includes(query) || rname.includes(query);
             });
         });
+
+        // 2.5. Фильтры (чипы + редкость) — на уровне семьи, AND-логика
+        const invFilters = getInvFilterState();
+        if (isAnyInvFilterActive(invFilters)) {
+            filteredParents = filteredParents.filter(parent => {
+                const versions = [parent, ...availableRarities.filter(r => r.displayParentId === parent.id)];
+                const hasUnseen = versions.some(v => playerData.unseenCardIds.includes(v.id));
+
+                if (invFilters.new && !hasUnseen) return false;
+                if (invFilters.limited && !versions.some(v => v.availability && v.availability.type === 'event')) return false;
+                if (invFilters.mutation) {
+                    const ov = playerData.ownedVariants || {};
+                    const hasMut = versions.some(v => {
+                        const vm = ov[v.id];
+                        return vm && Object.values(vm).some(cnt => cnt > 0);
+                    });
+                    if (!hasMut) return false;
+                }
+                if (invFilters.effect && !versions.some(v => v.mechanicalEffect || v.passiveEffect)) return false;
+                if (invFilters.alts && versions.length < 2) return false;
+
+                if (invFilters.rarity !== 'all') {
+                    // Диапазон редкости — по активной версии семьи (показываемой карте)
+                    const activeSkinId = playerData.activeSkins[parent.id] || parent.id;
+                    const skinData = getRarityDataById(playerData.inventory.includes(activeSkinId) ? activeSkinId : parent.id, playerData);
+                    const denom = (skinData && skinData.probabilityBase > 0) ? 1 / skinData.probabilityBase : Infinity;
+                    const ok =
+                        (invFilters.rarity === 'le1k'    && denom <= 1000) ||
+                        (invFilters.rarity === 'k1_10'   && denom > 1000 && denom <= 10000) ||
+                        (invFilters.rarity === 'k10_100' && denom > 10000 && denom <= 100000) ||
+                        (invFilters.rarity === 'm100_1'  && denom > 100000 && denom <= 1000000) ||
+                        (invFilters.rarity === 'm1_100'  && denom > 1000000 && denom <= 100000000) ||
+                        (invFilters.rarity === 'g100'    && denom > 100000000);
+                    if (!ok) return false;
+                }
+                return true;
+            });
+        }
 
         // 3. Создаем Map существующих элементов для быстрого доступа
         // Ключ: rarityId, Значение: DOM-элемент колонки (.col)
@@ -1282,7 +1609,7 @@ const UI = (() => {
 
             // Попытка найти существующий элемент
             let col = existingNodes.get(rarityData.id);
-            let cardDiv, img, nameDiv, variantChip, limitedBadge;
+            let cardDiv, img, nameDiv, variantChip, limitedBadge, mechBadge;
 
             if (!col) {
                 // СОЗДАНИЕ: Если элемента нет, создаем структуру
@@ -1351,9 +1678,11 @@ const UI = (() => {
             if (isAnyVersionOpened) {
                 const activeSkinData = getRarityDataById(activeSkinId, playerData) || getRarityDataById(rarityData.id, playerData);
                 
-                // Проверка: обновляем src только если он изменился (избегает мерцания)
-                if (img.getAttribute('src') !== activeSkinData.card.image) {
-                    img.src = activeSkinData.card.image;
+                // Проверка: обновляем src только если он изменился (избегает мерцания).
+                // В гриде — миниатюра (~50 КБ), полный арт грузится только в модалке.
+                const gridSrc = thumbOf(activeSkinData.card.image);
+                if (img.getAttribute('src') !== gridSrc) {
+                    img.src = gridSrc;
                 }
                 
                 nameDiv.textContent = L.get(activeSkinData.card.nameKey);
@@ -1403,8 +1732,9 @@ const UI = (() => {
                 cardDiv.style.borderColor = ''; // Сброс инлайн стиля
                 cardDiv.style.removeProperty('--rarity-glow-color');
                 if (mechBadge) mechBadge.style.display = 'none';
-                if (img.getAttribute('src') !== "img/silhouette_placeholder.png") {
-                    img.src = "img/silhouette_placeholder.png";
+                const silhouetteSrc = "img/webp/silhouette_placeholder-thumb.webp";
+                if (img.getAttribute('src') !== silhouetteSrc) {
+                    img.src = silhouetteSrc;
                 }
                 nameDiv.textContent = "?????";
                 cardDiv.onclick = null;
@@ -1449,7 +1779,14 @@ const UI = (() => {
              inventoryTabButton.classList.toggle('new-version', (playerData.unseenCardIds?.length || 0) > 0);
         }
 
-        inventoryCounterElement.textContent = `${L.get('ui.opened')}: ${uniqueOpenedCount} / ${totalPossibleCount}`;
+        // При активном фильтре: «Показано X» + обычный счётчик, чтобы не терять картину
+        if (isAnyInvFilterActive(getInvFilterState())) {
+            inventoryCounterElement.textContent =
+                `${L.get('ui.filter.shown')}: ${filteredParents.length} | ` +
+                `${L.get('ui.opened')}: ${uniqueOpenedCount} / ${totalPossibleCount}`;
+        } else {
+            inventoryCounterElement.textContent = `${L.get('ui.opened')}: ${uniqueOpenedCount} / ${totalPossibleCount}`;
+        }
     }
 
     // Рендер материалов в рюкзаке
@@ -2092,13 +2429,6 @@ const UI = (() => {
         equippedItemsDisplay.innerHTML = chips.join('');
         // обработчики снятия
         equippedItemsDisplay.querySelectorAll('.btn-remove-equip').forEach(btn => {
-        btn.addEventListener('click', () => {
-        Game.unequipItem(btn.dataset.itemId);
-        UI.updateAll(Game.getPlayerData());
-        });
-        });
-
-        equippedItemsDisplay.querySelectorAll('.btn-remove-equip').forEach(btn => {
             btn.addEventListener('click', () => {
                 Game.unequipItem(btn.dataset.itemId);
                 UI.updateAll(Game.getPlayerData());
@@ -2195,7 +2525,9 @@ const UI = (() => {
                 console.log("AFK catch-up finished.");
                 isRolling = false;
                 if (lastNewCardResult) showNewCard(lastNewCardResult);
-                updateAll(Game.getPlayerData());
+                // updateHud, а не updateAll: полный перерендер всех вкладок после
+                // десятков тысяч роллов догона — лишний фриз.
+                updateHud(Game.getPlayerData());
                 showAfkSummaryNotification(totalCycles * rollsPerCycle, totalCurrencyGained, newCardsCount);
 
                 performNextAutoroll();
