@@ -3,20 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0a14">
+    <meta name="description" content="Gal's RNG — коллекционная RNG-игра: ролли карты, собирай коллекцию, качай удачу.">
     <title>Gal's RNG</title>
     <!-- Bootstrap CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <!-- Custom CSS -->
+    <!-- Legacy theme (rarity / visual-effect styles) -->
     <link rel="stylesheet" href="css/style.css">
-    <!-- Google Fonts (Optional, for a more modern look) -->
+    <!-- Modern UI layer (loaded last — owns layout & components) -->
+    <link rel="stylesheet" href="css/modern-ui.css">
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Pirata+One&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="modern-ui">
+    <!-- Ambient animated background (default theme only, cheap: transform + opacity) -->
+    <div class="app-bg" aria-hidden="true">
+        <span class="app-bg__aurora app-bg__aurora--a"></span>
+        <span class="app-bg__aurora app-bg__aurora--b"></span>
+        <span class="app-bg__aurora app-bg__aurora--c"></span>
+        <span class="app-bg__grid"></span>
+    </div>
+
     <!-- <<< НАЧАЛО НОВОГО БЛОКА SVG ФИЛЬТРОВ >>> -->
-    <svg class="svg-filters-witchy">
+    <svg class="svg-filters-witchy" aria-hidden="true">
         <defs>
             <filter id="witchy-goo-filter">
                 <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
@@ -48,64 +60,73 @@
                 <feConvolveMatrix in="lit" order="3" kernelMatrix="-2 -1 0 -1 1 1 0 1 2" divisor="1" bias="0" edgeMode="duplicate" result="emboss"/>
                 <feBlend in="emboss" in2="warm" mode="overlay"/>
             </filter>
-            
+
         </defs>
     </svg>
     <!-- <<< КОНЕЦ НОВОГО БЛОКА SVG ФИЛЬТРОВ >>> -->
     <!-- Background Music Placeholder -->
-     <audio id="backgroundMusic" loop>       
+     <audio id="backgroundMusic" loop>
     </audio>
     <div id="effectTargetWrapper">
     <div id="gameWrapper">
-    <div class="container-fluid py-4">
-        <header class="text-center mb-4">
-            <h1>Gal's RNG</h1>
-            <!-- <<< НАЧАЛО НОВОГО БЛОКА ЭВЕНТОВ >>> -->
-            <div id="eventBanner" class="mt-3">
-                <!-- Баннер активного эвента будет здесь -->
-            </div>
-            <!-- <<< КОНЕЦ НОВОГО БЛОКА ЭВЕНТОВ >>> -->
-            <div class="player-stats d-flex justify-content-center align-items-center gap-3 mt-3">
-                <div>
-                    <span class="currency-icon">💎</span>
-                    <span id="currencyDisplay">0</span> <span data-i18n="ui.prismaticShards">Призматических осколков</span>
+    <div class="container-fluid py-4 app-shell">
+        <header class="app-header">
+            <div class="hud-bar">
+                <a class="hud-brand" href="#" onclick="return false;" aria-label="Gal's RNG">
+                    <span class="hud-brand__mark" aria-hidden="true">🎲</span>
+                    <h1 class="hud-brand__name">Gal's <em>RNG</em></h1>
+                </a>
+
+                <div class="player-stats hud-stats">
+                    <div class="stat-pill stat-pill--shards">
+                        <span class="stat-pill__icon" aria-hidden="true">💎</span>
+                        <span class="stat-pill__body">
+                            <span id="currencyDisplay" class="stat-pill__value">0</span>
+                            <span class="stat-pill__label" data-i18n="ui.prismaticShards">Призматических осколков</span>
+                        </span>
+                    </div>
+                    <div class="stat-pill stat-pill--luck" data-bs-toggle="tooltip" data-bs-placement="bottom" data-i18n-title="ui.luckTooltipTitle">
+                        <span class="stat-pill__icon" aria-hidden="true">🍀</span>
+                        <span class="stat-pill__body">
+                            <span id="luckDisplay" class="stat-pill__value">1.000</span>
+                            <span class="stat-pill__label" data-i18n="ui.luck">Удача</span>
+                        </span>
+                    </div>
+                    <!-- Сюда JS добавит виджет активного эффекта -->
                 </div>
-                <span data-bs-toggle="tooltip" data-bs-placement="bottom" data-i18n-title="ui.luckTooltipTitle">
-                <span data-i18n="ui.luck">🍀 Удача</span>: <span id="luckDisplay">1.00</span>
-                </span>
             </div>
-            <div id="activeBoostsDisplay" class="mt-2 small">
-                <!-- Активные бусты будут отображаться здесь -->
-            </div>
+            <div id="activeBoostsDisplay" class="hud-boosts"></div>
+            <div id="eventBanner" class="hud-events"></div>
         </header>
 
         <main>
             <!-- Roll Section -->
-            <section id="rollSection" class="text-center mb-4">
-                <div id="rollAnimationContainer" class="roll-animation-container mb-3">
-                    <!-- Одиночный слот для анимации -->
-                    <div class="roll-slot-wrapper single-roll-slot-wrapper">
-                         <div class="roll-slot" id="rollSlot">
-                            <!-- Сюда будут добавляться элементы редкостей для анимации -->
+            <section id="rollSection" class="roll-section">
+                <div class="roll-stage">
+                    <div id="rollAnimationContainer" class="roll-animation-container">
+                        <div class="roll-slot-wrapper single-roll-slot-wrapper">
+                             <div class="roll-slot" id="rollSlot"></div>
                         </div>
+                        <div id="multiRollSlotsContainer" class="multi-roll-slots-container d-none"></div>
                     </div>
-                    <!-- Слоты для мульти-ролла (скрыты по умолчанию) -->
-                    <div id="multiRollSlotsContainer" class="multi-roll-slots-container d-none">
-                        <!-- 5 слотов будут генерироваться здесь JS-ом -->
+                    <div id="rollResultContainer" class="roll-result-container">
+                        <div class="roll-placeholder">
+                            <span class="roll-placeholder__icon" aria-hidden="true">✨</span>
+                            <p class="roll-placeholder__text" data-i18n="ui.rollHint">Нажми Roll! — и удача решит, кто тебе попадётся</p>
+                        </div>
                     </div>
                 </div>
 
-                <div id="rollResultContainer" class="roll-result-container mb-3" style="min-height: 420px;">
-                    <!-- Результат ролла (карточка) будет отображаться здесь -->
+                <div class="roll-actions">
+                    <button id="rollButton" class="btn btn-primary btn-roll" data-i18n="ui.roll">Roll!</button>
+                    <button id="multiRollButton" class="btn btn-info btn-roll btn-roll--multi d-none">Multi-Roll x5</button>
+                    <button id="autorollButton" class="btn btn-success btn-roll btn-roll--auto" data-i18n="ui.autoroll">Autoroll</button>
                 </div>
-                <button id="rollButton" class="btn btn-primary btn-lg me-2">Roll!</button>
-                <button id="multiRollButton" class="btn btn-info btn-lg d-none me-2">Multi-Roll x5</button>
-                <button id="autorollButton" class="btn btn-success btn-lg">Autoroll</button>
-                <div id="luckyRollDisplay" class="text-center mt-2 small text-info"></div>
+                <div id="luckyRollDisplay" class="lucky-roll-display"></div>
             </section>
 
             <!-- Tabs for Inventory, Shop, Settings -->
-            <ul class="nav nav-tabs mb-3" id="mainTabs" role="tablist">
+            <ul class="nav nav-tabs app-tabs" id="mainTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventory" type="button" role="tab" aria-controls="inventory" aria-selected="true" data-i18n="ui.inventory">Инвентарь</button>
                 </li>
@@ -118,8 +139,8 @@
                     <button class="nav-link" id="shop-tab" data-bs-toggle="tab" data-bs-target="#shop" type="button" role="tab" aria-controls="shop" aria-selected="false" data-i18n="ui.shop">Магазин</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                     <button class="nav-link" id="backpack-tab" data-bs-toggle="tab" data-bs-target="#backpack" type="button" role="tab" aria-controls="backpack" aria-selected="false" data-i18n="ui.backpack">Рюкзак</button> 
-                </li> 
+                     <button class="nav-link" id="backpack-tab" data-bs-toggle="tab" data-bs-target="#backpack" type="button" role="tab" aria-controls="backpack" aria-selected="false" data-i18n="ui.backpack">Рюкзак</button>
+                </li>
                 <li class="nav-item" role="presentation">
                      <button class="nav-link" id="workshop-tab" data-bs-toggle="tab" data-bs-target="#workshop" type="button" role="tab" aria-controls="workshop" aria-selected="false" data-i18n="ui.workshop">Мастерская</button>
                 </li>
@@ -130,19 +151,19 @@
                 <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="false" data-i18n="ui.stats">Статистика</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link text-danger" id="rebirth-tab-button" data-bs-toggle="tab" data-bs-target="#rebirth" type="button" role="tab" aria-controls="rebirth" aria-selected="false" data-i18n="ui.rebirth.title">
+                    <button class="nav-link nav-link--danger" id="rebirth-tab-button" data-bs-toggle="tab" data-bs-target="#rebirth" type="button" role="tab" aria-controls="rebirth" aria-selected="false" data-i18n="ui.rebirth.title">
                         Перерождение
                     </button>
                 </li>
             </ul>
 
-            <div class="tab-content" id="mainTabsContent">
+            <div class="tab-content app-tab-content" id="mainTabsContent">
                 <!-- Inventory Tab -->
                 <div class="tab-pane fade show active" id="inventory" role="tabpanel" aria-labelledby="inventory-tab">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2 data-i18n="ui.openedCards">Открытые карточки</h2>
+                    <div class="d-flex inv-toolbar">
+                        <h2 class="section-title" data-i18n="ui.openedCards">Открытые карточки</h2>
                          <!-- НАЧАЛО НОВОГО БЛОКА СОРТИРОВКИ -->
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center inv-toolbar__sort">
                             <label for="inventorySort" class="form-label me-2 mb-0" data-i18n="ui.sortBy">Сортировать:</label>
                             <select class="form-select form-select-sm" id="inventorySort" style="width: auto;">
                                 <option value="rarity_desc" data-i18n="ui.sort.rarity_desc">По редкости (убыв.)</option>
@@ -151,9 +172,9 @@
                             </select>
                         </div>
                         <!-- КОНЕЦ НОВОГО БЛОКА -->
-                        <div id="inventoryCounter" class="text-muted">Открыто: 0 / 0</div>
+                        <div id="inventoryCounter" class="inv-counter">Открыто: 0 / 0</div>
                     </div>
-                    <div id="inventoryGrid" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3">
+                    <div id="inventoryGrid" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 row-cols-xxl-6 g-3">
                         <!-- Карточки инвентаря будут отображаться здесь -->
                     </div>
                 </div>
@@ -167,30 +188,30 @@
 
                 <!-- Shop Tab -->
                 <div class="tab-pane fade" id="shop" role="tabpanel" aria-labelledby="shop-tab">
-                    <h2 class="mb-3" data-i18n="ui.shop">Магазин</h2>
+                    <h2 class="section-title mb-3" data-i18n="ui.shop">Магазин</h2>
                     <div class="row">
                         <!-- Boosts -->
                         <div class="col-md-6 mb-4">
-                            <h4 data-i18n="ui.boostsTemporary">Бусты Удачи (временные)</h4>
-                            <div id="boostShop" class="list-group">
+                            <h4 class="subsection-title" data-i18n="ui.boostsTemporary">Бусты Удачи (временные)</h4>
+                            <div id="boostShop" class="list-group shop-list">
                                 <!-- Элементы бустов будут добавлены сюда JS -->
                             </div>
                         </div>
                         <!-- Equipment -->
                         <div class="col-md-6 mb-4">
-                            <h4 data-i18n="ui.equipmentPermanent">Экипировка (постоянная, макс. 3)</h4>
-                            <div id="equipmentShop" class="list-group">
+                            <h4 class="subsection-title" data-i18n="ui.equipmentPermanent">Экипировка (постоянная, макс. 3)</h4>
+                            <div id="equipmentShop" class="list-group shop-list">
                                 <!-- Элементы экипировки будут добавлены сюда JS -->
                             </div>
-                            <h5 class="mt-3" data-i18n="ui.equipped">Надето:</h5>
+                            <h5 class="mt-3 subsection-title subsection-title--sm" data-i18n="ui.equipped">Надето:</h5>
                             <div id="equippedItemsDisplay" class="d-flex flex-wrap gap-2">
                                 <!-- Отображение надетой экипировки -->
                             </div>
                         </div>
                     </div>
-                    <hr>
-                    <h4 data-i18n="ui.upgrades">Улучшения</h4>
-                    <div id="upgradesShop" class="list-group">
+                    <hr class="soft-hr">
+                    <h4 class="subsection-title" data-i18n="ui.upgrades">Улучшения</h4>
+                    <div id="upgradesShop" class="list-group shop-list">
                         <!-- Элементы улучшений будут добавлены сюда JS -->
                     </div>
                     <div id="luckCoreSection" class="mt-4"></div>
@@ -198,92 +219,152 @@
 
                 <!--Рюкзак и Мастерская-->
                 <div class="tab-pane fade" id="backpack" role="tabpanel" aria-labelledby="backpack-tab">
-                    <h2 data-i18n="ui.backpack">Рюкзак</h2>
-                    <div id="materialsGrid" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3">
-
-                    </div>
-                    <hr>
-                    <h4 data-i18n="ui.myEquipment">Моя экипировка</h4> 
-                    <div id="ownedEquipmentList" class="list-group">
-
-                    </div> 
+                    <h2 class="section-title mb-3" data-i18n="ui.backpack">Рюкзак</h2>
+                    <div id="materialsGrid" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3"></div>
+                    <hr class="soft-hr">
+                    <h4 class="subsection-title" data-i18n="ui.myEquipment">Моя экипировка</h4>
+                    <div id="ownedEquipmentList" class="list-group shop-list"></div>
                 </div>
-                <div class="tab-pane fade" id="workshop" role="tabpanel" aria-labelledby="workshop-tab"> 
-                    <h2 data-i18n="ui.workshop">Мастерская</h2> <div id="craftRecipesList" class="list-group">
-
-                    </div> 
+                <div class="tab-pane fade" id="workshop" role="tabpanel" aria-labelledby="workshop-tab">
+                    <h2 class="section-title mb-3" data-i18n="ui.workshop">Мастерская</h2>
+                    <div id="craftRecipesList" class="list-group shop-list"></div>
                 </div>
 
                 <!-- Settings Tab -->
                 <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
-                    <h2 class="mb-3" data-i18n="ui.settings">Настройки</h2>
-                    <hr>
-                    <h4>Player ID & Support</h4>
-                    <p class="form-text">Ваш уникальный ID для получения бонусов поддержки. Отправьте его разработчику после подписки на Boosty.</p>
-                    <div class="input-group mb-3">
-                        <input type="text" id="playerIdDisplay" class="form-control" readonly>
-                        <button class="btn btn-outline-secondary" type="button" id="copyPlayerIdBtn">Копировать</button>
+                    <h2 class="section-title mb-3" data-i18n="ui.settings">Настройки</h2>
+
+                    <div class="settings-grid">
+                        <section class="panel">
+                            <header class="panel__head">
+                                <span class="panel__icon" aria-hidden="true">🆔</span>
+                                <h3 class="panel__title">Player ID &amp; Support</h3>
+                            </header>
+                            <div class="panel__body">
+                                <p class="panel__hint">Ваш уникальный ID для получения бонусов поддержки. Отправьте его разработчику после подписки на Boosty.</p>
+                                <div class="input-group">
+                                    <input type="text" id="playerIdDisplay" class="form-control" readonly>
+                                    <button class="btn btn-outline-secondary" type="button" id="copyPlayerIdBtn">Копировать</button>
+                                </div>
+                                <button class="btn btn-info w-100 mt-2" id="checkSupportBtn">Проверить статус поддержки</button>
+                            </div>
+                        </section>
+
+                        <section class="panel">
+                            <header class="panel__head">
+                                <span class="panel__icon" aria-hidden="true">🌐</span>
+                                <h3 class="panel__title">Язык / Language</h3>
+                            </header>
+                            <div class="panel__body">
+                                <div class="btn-group w-100" role="group" aria-label="Language switch">
+                                  <button type="button" class="btn btn-outline-secondary" id="lang-ru">Русский</button>
+                                  <button type="button" class="btn btn-outline-secondary" id="lang-en">English</button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="panel">
+                            <header class="panel__head">
+                                <span class="panel__icon" aria-hidden="true">⚡</span>
+                                <h3 class="panel__title" data-i18n="ui.performance.title">Производительность</h3>
+                            </header>
+                            <div class="panel__body">
+                                <div class="form-check form-switch setting-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="perfModeToggle">
+                                    <label class="form-check-label" for="perfModeToggle" data-i18n="ui.performance.eco">Экономичный режим</label>
+                                </div>
+                                <p class="panel__hint" data-i18n="ui.performance.ecoHint">Выключает фоновые анимации, размытие и тяжёлые тени — игра работает заметно быстрее на слабых устройствах.</p>
+                                <div class="form-check form-switch setting-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="reduceMotionToggle">
+                                    <label class="form-check-label" for="reduceMotionToggle" data-i18n="ui.performance.reduceMotion">Уменьшить движение</label>
+                                </div>
+                                <p class="panel__hint" data-i18n="ui.performance.reduceMotionHint">Убирает параллакс и большинство CSS-анимаций интерфейса.</p>
+                            </div>
+                        </section>
+
+                        <section class="panel">
+                            <header class="panel__head">
+                                <span class="panel__icon" aria-hidden="true">🎚️</span>
+                                <h3 class="panel__title" data-i18n="ui.musicVolume">Громкость музыки</h3>
+                            </header>
+                            <div class="panel__body">
+                                <div class="d-flex align-items-center gap-3">
+                                    <input type="range" class="form-range flex-grow-1" id="musicVolumeSlider" min="0" max="1" step="0.01" value="0">
+                                    <span id="musicVolumeLabel" class="volume-badge">0%</span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="panel">
+                            <header class="panel__head">
+                                <span class="panel__icon" aria-hidden="true">🔔</span>
+                                <h3 class="panel__title" data-i18n="ui.notifications.title">Уведомления</h3>
+                            </header>
+                            <div class="panel__body">
+                                <div class="form-check form-switch setting-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="notificationsToggle" checked>
+                                    <label class="form-check-label" for="notificationsToggle" data-i18n="ui.notifications.enable">Включить уведомления</label>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="panel">
+                            <header class="panel__head">
+                                <span class="panel__icon" aria-hidden="true">🔞</span>
+                                <h3 class="panel__title" data-i18n="ui.specialContent.title">Особый контент</h3>
+                            </header>
+                            <div class="panel__body">
+                                <div class="form-check form-switch setting-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="specialContentToggle" checked>
+                                    <label class="form-check-label" for="specialContentToggle" data-i18n="ui.specialContent.enable">Показывать контент с особыми фетишами</label>
+                                </div>
+                                <p class="panel__hint" data-i18n="ui.specialContent.description">Отключите, чтобы заменить некоторый контент (например, футанари) на более стандартные версии. Изменения вступят в силу после перезагрузки страницы.</p>
+                            </div>
+                        </section>
+
+                        <section class="panel">
+                            <header class="panel__head">
+                                <span class="panel__icon" aria-hidden="true">💾</span>
+                                <h3 class="panel__title" data-i18n="ui.data.title">Экспорт / Импорт</h3>
+                            </header>
+                            <div class="panel__body">
+                                <p class="panel__hint" data-i18n="ui.data.description">Сохраните свой прогресс в файл или загрузите его на другом устройстве. Импорт перезапишет текущий прогресс!</p>
+                                <div class="d-flex gap-2">
+                                    <button id="exportSaveButton" class="btn btn-success" data-i18n="ui.data.export">Экспорт</button>
+                                    <label class="btn btn-warning mb-0">
+                                        <span data-i18n="ui.data.import">Импорт</span>
+                                        <input type="file" id="importSaveInput" class="d-none" accept=".json,.txt">
+                                    </label>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="panel panel--danger">
+                            <header class="panel__head">
+                                <span class="panel__icon" aria-hidden="true">⚠️</span>
+                                <h3 class="panel__title" data-i18n="ui.dataManagement">Управление данными</h3>
+                            </header>
+                            <div class="panel__body">
+                                <button id="resetProgressButton" class="btn btn-danger w-100" data-i18n="ui.resetProgress">Сбросить прогресс</button>
+                                <p class="panel__hint mt-2" data-i18n="ui.resetWarning">Внимание! Это действие удалит все ваши данные и не может быть отменено.</p>
+                            </div>
+                        </section>
                     </div>
-                    <button class="btn btn-info" id="checkSupportBtn">Проверить статус поддержки</button>
-                    <hr>
-                    <h4>Язык / Language</h4>
-                    <div class="btn-group" role="group" aria-label="Language switch">
-                      <button type="button" class="btn btn-outline-secondary" id="lang-ru">Русский</button>
-                      <button type="button" class="btn btn-outline-secondary" id="lang-en">English</button>
-                    </div>
-                    <hr>
-                    <h4 data-i18n="ui.dataManagement">Управление данными:</h4>
-                    <button id="resetProgressButton" class="btn btn-danger" data-i18n="ui.resetProgress">Сбросить прогресс</button>
-                    <p class="form-text mt-1" data-i18n="ui.resetWarning">Внимание! Это действие удалит все ваши данные и не может быть отменено.</p>
-                    
-                    <hr>
-                    <h4 data-i18n="ui.data.title">Экспорт / Импорт</h4>
-                    <p class="form-text" data-i18n="ui.data.description">Сохраните свой прогресс в файл или загрузите его на другом устройстве. Импорт перезапишет текущий прогресс!</p>
-                    <div class="d-flex gap-2">
-                        <button id="exportSaveButton" class="btn btn-success" data-i18n="ui.data.export">Экспорт</button>
-                        <label class="btn btn-warning">
-                            <span data-i18n="ui.data.import">Импорт</span>
-                            <input type="file" id="importSaveInput" class="d-none" accept=".json,.txt">
-                        </label>
-                    </div>
-                    <hr>
-                    <h4 data-i18n="ui.musicVolume">Громкость музыки:</h4>
-                    <div class="d-flex align-items-center">
-                        <input type="range" class="form-range me-2" id="musicVolumeSlider" min="0" max="1" step="0.01" value="0">
-                        <span id="musicVolumeLabel">0%</span>
-                    </div>
-                    <hr>
-                    <h4 data-i18n="ui.notifications.title">Уведомления</h4>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="notificationsToggle" checked>
-                        <label class="form-check-label" for="notificationsToggle" data-i18n="ui.notifications.enable">Включить уведомления</label>
-                    </div>
-                    <hr>
-                    <h4 data-i18n="ui.specialContent.title">Особый контент</h4>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="specialContentToggle" checked>
-                        <label class="form-check-label" for="specialContentToggle" data-i18n="ui.specialContent.enable">Показывать контент с особыми фетишами</label>
-                    </div>
-                    <p class="form-text mt-1" data-i18n="ui.specialContent.description">Отключите, чтобы заменить некоторый контент (например, футанари) на более стандартные версии. Изменения вступят в силу после перезагрузки страницы.</p>
                 </div>
                 <div class="tab-pane fade" id="stats" role="tabpanel" aria-labelledby="stats-tab">
-                <h2 class="mb-3"  data-i18n="ui.playerStats">Статистика Игрока</h2>
+                <h2 class="section-title mb-3" data-i18n="ui.playerStats">Статистика Игрока</h2>
                 <div id="playerStatsContainer" class="row">
-                    <div class="col-md-6 mb-3"> <!-- Добавил mb-3 для отступа на малых экранах -->
-                        <h4 data-i18n="ui.generalStats">Общая статистика:</h4>
-                        <ul class="list-group">
+                    <div class="col-md-6 mb-3">
+                        <h4 class="subsection-title" data-i18n="ui.generalStats">Общая статистика:</h4>
+                        <ul class="list-group stat-list">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span data-i18n="ui.totalRolls">Всего роллов сделано:</span>
                                 <span id="statsTotalRolls" class="badge bg-primary rounded-pill">0</span>
                             </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center ">
-                                <span data-i18n="ui.uniqueCardsOpened">Уникальных карт открыто:</span> 
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span data-i18n="ui.uniqueCardsOpened">Уникальных карт открыто:</span>
                                 <span id="statsUniqueCardsOpened" class="badge bg-primary rounded-pill">0 / 0</span>
                             </li>
-                            <!-- <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Потрачено осколков на роллы (WIP): 
-                                <span id="statsCurrencySpentOnRolls" class="badge bg-primary rounded-pill">0</span>
-                            </li> -->
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span data-i18n="ui.currencyFromDuplicates">Получено осколков за дубликаты:</span>
                                 <span id="statsCurrencyFromDuplicates" class="badge bg-primary rounded-pill">0</span>
@@ -294,9 +375,9 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="col-md-6 mb-3"> <!-- Добавил mb-3 -->
-                        <h4 data-i18n="ui.statsByRarity">Статистика по редкостям:</h4>
-                        <div id="statsByRarityContainer" class="list-group">
+                    <div class="col-md-6 mb-3">
+                        <h4 class="subsection-title" data-i18n="ui.statsByRarity">Статистика по редкостям:</h4>
+                        <div id="statsByRarityContainer" class="list-group stat-list">
                             <!-- Сюда будут добавлены статы по каждой редкости -->
                         </div>
                     </div>
@@ -309,46 +390,45 @@
         </main>
 
         <!-- НОВЫЙ ФУТЕР -->
-        <footer class="text-center mt-5 mb-3">
-            <hr>
-            <p class="text-muted small">
-                Gal's RNG - <span id="versionLabel">Version 0.2.15 "Optimization and Chill"</span>
-            </p>
-            <!-- Можно добавить еще что-то, например, копирайт или ссылку на вас -->
-            <p class="text-muted small">© 2026 BigCoolOppai</p>
+        <footer class="app-footer">
+            <div class="app-footer__inner">
+                <span class="app-footer__brand">Gal's RNG</span>
+                <span class="app-footer__sep" aria-hidden="true">•</span>
+                <span id="versionLabel" class="app-footer__version">Version 0.2.16 "Neon Glass"</span>
+                <span class="app-footer__sep" aria-hidden="true">•</span>
+                <span class="app-footer__copy">© 2026 BigCoolOppai</span>
+            </div>
         </footer>
         <!-- КОНЕЦ НОВОГО ФУТЕРА -->
     </div>
     </div>
 
     <div id="globalGlitchOverlay"></div>
-    </div> 
-    
+    </div>
+
         <!-- Modal for displaying full card image -->
         <div class="modal fade" id="cardModal" tabindex="-1" aria-labelledby="cardModalLabel" aria-hidden="true">
-            <div id="versionSwitcher" class="d-flex justify-content-center flex-wrap gap-2 mt-3">
-                <!-- Кнопки-переключатели версий будут здесь -->
-            </div>
             <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content bg-dark text-light">
-                    <div class="modal-header border-secondary">
+                <div class="modal-content">
+                    <div class="modal-header">
                         <h5 class="modal-title" id="cardModalLabel" data-i18n="ui.card">Карточка</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body text-center">
-                        <img id="modalCardImage" src="" alt="Card Image" class="img-fluid mb-3" style="max-height: 70vh;">
-                        <p id="modalCardRarity" class="mb-1"></p>
-                        <p id="modalCardChance" class="text-muted small mb-1"></p>
-                        <p id="modalCardDescription"></p>
-                        <div id="visualEffectControls" class="mt-3"> <!-- Контейнер для кнопки -->
-                        <button id="toggleVisualEffectButton" class="btn btn-sm"></button>
+                        <div id="versionSwitcher" class="version-switcher"></div>
+                        <div class="modal-card-frame">
+                            <img id="modalCardImage" src="" alt="Card Image" class="modal-card-image" loading="lazy" decoding="async">
                         </div>
-                        <div id="mechanicalEffectControls" class="mt-3"></div>
+                        <p id="modalCardRarity" class="modal-card-rarity mb-1"></p>
+                        <p id="modalCardChance" class="modal-card-chance mb-1"></p>
+                        <p id="modalCardDescription" class="modal-card-desc"></p>
+                        <div id="visualEffectControls" class="modal-controls"></div>
+                        <div id="mechanicalEffectControls" class="modal-controls"></div>
                     </div>
                 </div>
             </div>
         </div>
-    
+
 
     <!-- Bootstrap JS Bundle CDN -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -370,7 +450,7 @@
     <script src="js/crafting.js"></script>
 
     <script src="js/game.js"></script>
-    <script src="js/visualEffects.js"></script> 
+    <script src="js/visualEffects.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/debug.js"></script>
     <script>
@@ -436,9 +516,9 @@
      <!-- 18+ Age Disclaimer Modal -->
     <div class="modal fade" id="ageDisclaimerModal" tabindex="-1" aria-labelledby="ageDisclaimerModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content bg-dark text-light border-danger shadow-lg">
-                <div class="modal-header border-danger">
-                    <h5 class="modal-title text-danger" id="ageDisclaimerModalLabel" data-i18n="ui.ageDisclaimer.title">⚠️ Предупреждение 18+</h5>
+            <div class="modal-content modal-content--danger">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="ageDisclaimerModalLabel" data-i18n="ui.ageDisclaimer.title">⚠️ Предупреждение 18+</h5>
                 </div>
                 <div class="modal-body text-center py-4">
                     <p class="fs-5 mb-0" data-i18n="ui.ageDisclaimer.message" data-i18n-target="innerHTML">
@@ -447,7 +527,7 @@
                 </div>
                 <div class="modal-footer border-0 justify-content-center gap-3 pb-4">
                     <button type="button" class="btn btn-outline-secondary px-4" id="ageDeclineBtn" data-i18n="ui.ageDisclaimer.declineBtn">Нет, покинуть</button>
-                    <button type="button" class="btn btn-danger px-4 font-weight-bold" id="ageConfirmBtn" data-i18n="ui.ageDisclaimer.confirmBtn">Да, мне есть 18+</button>
+                    <button type="button" class="btn btn-danger px-4" id="ageConfirmBtn" data-i18n="ui.ageDisclaimer.confirmBtn">Да, мне есть 18+</button>
                 </div>
             </div>
         </div>
@@ -455,14 +535,16 @@
     <!-- New Card Notification Modal -->
     <div class="modal fade" id="newCardModal" tabindex="-1" aria-labelledby="newCardModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content text-center" style="background: radial-gradient(circle, #4a4e69 0%, #22223b 100%); border: 2px solid #c9ada7;">
+            <div class="modal-content modal-content--reveal">
                 <div class="modal-header border-0">
                     <h5 class="modal-title w-100" id="newCardModalLabel" data-i18n="ui.newCardNotification.title">✨ НОВАЯ КАРТА! ✨</h5>
                 </div>
                 <div class="modal-body">
-                    <img id="newCardModalImage" src="" alt="New Card" class="img-fluid mb-3" style="max-height: 50vh; border-radius: 10px; box-shadow: 0 0 20px #f2e9e4;">
-                    <h3 id="newCardModalName"></h3>
-                    <p id="newCardModalRarity" class="text-muted"></p>
+                    <div class="reveal-frame">
+                        <img id="newCardModalImage" src="" alt="New Card" class="reveal-image" loading="lazy" decoding="async">
+                    </div>
+                    <h3 id="newCardModalName" class="reveal-name"></h3>
+                    <p id="newCardModalRarity" class="reveal-rarity"></p>
                 </div>
                 <div class="modal-footer border-0 justify-content-center">
                     <button type="button" class="btn btn-lg btn-light" data-bs-dismiss="modal" data-i18n="ui.newCardNotification.closeBtn">Отлично!</button>

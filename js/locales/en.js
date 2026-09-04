@@ -441,6 +441,7 @@ window.locales.en = {
             declineBtn: "No, leave"
         },
         searchCards: "Search...",
+        rollHint: "Hit Roll! — and let luck decide who you get",
         variant: { normal: "Normal"},
         noVariants: "No variants owned for this card.",
         prismaticShards: "Prismatic Shards",
@@ -532,6 +533,13 @@ window.locales.en = {
             success: "Rebirth successful! Received a permanent luck bonus of:",
             unlock_alt_hint: "After your first rebirth, you will start finding exclusive cards and alternative versions of familiar characters!",
             locked_after: "after R{level}"
+        },
+        performance: {
+            title: "Performance",
+            eco: "Eco mode",
+            ecoHint: "Turns off ambient animations, blur and heavy shadows. Noticeably faster on weak devices and during AFK farming.",
+            reduceMotion: "Reduce motion",
+            reduceMotionHint: "Disables parallax and most interface animations."
         },
         notifications: { title: "Notifications", enable: "Enable notifications" },
         data: { 

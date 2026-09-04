@@ -17,6 +17,7 @@ const UI = (() => {
     let playerIdDisplay, copyPlayerIdBtn, checkSupportBtn;
     let musicVolumeSlider, musicVolumeLabel, backgroundMusicElement;
     let eventBanner, achievementsContainer, htmlRoot;
+    let perfModeToggle, reduceMotionToggle;
 
     // Модалка новой карты
     let newCardModal, newCardModalImage, newCardModalName, newCardModalRarity;
@@ -37,6 +38,9 @@ const UI = (() => {
 
     // Активность вкладки
     let isTabActive = true;
+
+    // Подпись последнего отрендеренного инвентаря (см. renderInventory)
+    let lastInventorySignature = null;
 
     // --- Утилиты ---
     const hasAnyMulti = (pd) => !!(pd?.purchasedUpgrades?.multiRollX10 || pd?.purchasedUpgrades?.multiRollX5);
@@ -108,6 +112,50 @@ const UI = (() => {
         eventBanner = document.getElementById('eventBanner');
         achievementsContainer = document.getElementById('achievements');
         htmlRoot = document.getElementById('htmlRoot');
+
+        perfModeToggle = document.getElementById('perfModeToggle');
+        reduceMotionToggle = document.getElementById('reduceMotionToggle');
+    }
+
+    // --- Режимы производительности (настройки) ---
+    // Хранятся в localStorage, живут как классы на <body>, вся магия — в CSS.
+    const PERF_KEYS = { eco: 'galsEcoMode', motion: 'galsReduceMotion' };
+
+    function readPerfFlag(key, fallback) {
+        const raw = localStorage.getItem(key);
+        return raw === null ? fallback : raw === 'true';
+    }
+
+    // На слабых устройствах «экономичный режим» включаем сами, если игрок
+    // ещё не выбирал ничего вручную.
+    function guessLowEndDevice() {
+        const cores = navigator.hardwareConcurrency || 8;
+        const memory = navigator.deviceMemory || 8;
+        return cores <= 2 || memory <= 4;
+    }
+
+    function applyPerfSettings() {
+        const eco = readPerfFlag(PERF_KEYS.eco, guessLowEndDevice());
+        const reduce = readPerfFlag(PERF_KEYS.motion, window.matchMedia
+            ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            : false);
+
+        document.body.classList.toggle('eco', eco);
+        document.body.classList.toggle('reduce-motion', reduce);
+
+        if (perfModeToggle) perfModeToggle.checked = eco;
+        if (reduceMotionToggle) reduceMotionToggle.checked = reduce;
+    }
+
+    function setupPerfListeners() {
+        perfModeToggle?.addEventListener('change', (e) => {
+            localStorage.setItem(PERF_KEYS.eco, e.target.checked ? 'true' : 'false');
+            applyPerfSettings();
+        });
+        reduceMotionToggle?.addEventListener('change', (e) => {
+            localStorage.setItem(PERF_KEYS.motion, e.target.checked ? 'true' : 'false');
+            applyPerfSettings();
+        });
     }
 
     function injectInventorySearch() {
@@ -227,6 +275,8 @@ const UI = (() => {
 
     function init() {
         cacheDOMElements();
+        applyPerfSettings();
+        setupPerfListeners();
         injectInventorySearch();
         injectInventoryFilters();
         injectEffectWidget();
@@ -1030,14 +1080,7 @@ const UI = (() => {
         if (!container) {
             container = document.createElement('div');
             container.id = 'notificationsContainer';
-            Object.assign(container.style, {
-                position: 'fixed',
-                top: '20px',
-                right: '20px',
-                zIndex: '1060',
-                width: 'auto',
-                maxWidth: '350px'
-            });
+            container.className = 'toast-stack';
             document.body.appendChild(container);
         }
 
@@ -1585,6 +1628,34 @@ const UI = (() => {
             });
         }
 
+        // 2.8. Быстрый выход: если ни один из входов не изменился — DOM уже актуален.
+        // renderInventory вызывается на КАЖДОМ ролле (в т.ч. в авторолле), а сетка
+        // из 170+ карточек меняется редко. Это убирает почти всю работу в AFK-фарме.
+        const inventorySignature = [
+            sortOrder,
+            query,
+            JSON.stringify(invFilters),
+            filteredParents.length,
+            availableRarities.length,
+            (playerData.inventory || []).length,
+            (playerData.unseenCardIds || []).length,
+            playerData.prestigeLevel || 0,
+            playerData.isSupporter ? 1 : 0,
+            playerData.activeSkins ? JSON.stringify(playerData.activeSkins) : '',
+            playerData.variantView ? JSON.stringify(playerData.variantView) : '',
+            playerData.ownedVariants ? JSON.stringify(playerData.ownedVariants) : '',
+            (typeof Game.getActiveEvents === 'function'
+                ? (Game.getActiveEvents() || []).map(e => e && e.id).join(',')
+                : ''),
+            inventoryGrid.children.length,
+            L.getCurrentLanguage ? L.getCurrentLanguage() : ''
+        ].join('|');
+
+        updateInventoryCounter(playerData, availableRarities, filteredParents.length, invFilters);
+
+        if (inventorySignature === lastInventorySignature) return;
+        lastInventorySignature = inventorySignature;
+
         // 3. Создаем Map существующих элементов для быстрого доступа
         // Ключ: rarityId, Значение: DOM-элемент колонки (.col)
         const existingNodes = new Map();
@@ -1622,6 +1693,10 @@ const UI = (() => {
 
                 img = document.createElement('img');
                 img.className = 'inventory-card-image';
+                // Грид может содержать 170+ превью — отдаём их браузеру лениво,
+                // чтобы первый рендер не тянул мегабайты сразу.
+                img.setAttribute('loading', 'lazy');
+                img.setAttribute('decoding', 'async');
                 
                 nameDiv = document.createElement('div');
                 nameDiv.className = 'inventory-card-name';
@@ -1769,10 +1844,18 @@ const UI = (() => {
         existingNodes.forEach(col => col.remove());
 
         // Обновление счетчиков
+        updateInventoryCounter(playerData, availableRarities, filteredParents.length, invFilters);
+    }
+
+    // Счётчик «Открыто X / Y» + точка на вкладке инвентаря.
+    // Выносим отдельно, чтобы быстрый выход из renderInventory его не ломал.
+    function updateInventoryCounter(playerData, availableRarities, shownCount, invFilters) {
+        if (!inventoryCounterElement) return;
+
         const viewableRarities = availableRarities.filter(r => !(r.id === 'diamond' && !playerData.isSupporter));
         const uniqueOpenedCount = new Set(playerData.inventory.filter(id => id !== 'garbage' && viewableRarities.some(r => r.id === id))).size;
         const totalPossibleCount = viewableRarities.filter(r => r.id !== 'garbage').length;
-        
+
         const inventoryTabButton = document.getElementById('inventory-tab');
         // Проверка на наличие .new-version класса на кнопке таба
         if (inventoryTabButton) {
@@ -1780,9 +1863,9 @@ const UI = (() => {
         }
 
         // При активном фильтре: «Показано X» + обычный счётчик, чтобы не терять картину
-        if (isAnyInvFilterActive(getInvFilterState())) {
+        if (isAnyInvFilterActive(invFilters || getInvFilterState())) {
             inventoryCounterElement.textContent =
-                `${L.get('ui.filter.shown')}: ${filteredParents.length} | ` +
+                `${L.get('ui.filter.shown')}: ${shownCount} | ` +
                 `${L.get('ui.opened')}: ${uniqueOpenedCount} / ${totalPossibleCount}`;
         } else {
             inventoryCounterElement.textContent = `${L.get('ui.opened')}: ${uniqueOpenedCount} / ${totalPossibleCount}`;
