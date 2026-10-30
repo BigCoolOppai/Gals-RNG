@@ -19,6 +19,10 @@ cd "$(dirname "$0")/.."
 FULL_Q=80        # качество полноразмерного WebP (1024x1360)
 THUMB_Q=78       # качество миниатюры
 THUMB_W=512      # ширина миниатюры (грид ~250-330px, x2 retina)
+LOSSLESS="${LOSSLESS:-0}"
+if [[ "${1:-}" == "--lossless" ]]; then
+    LOSSLESS=1
+fi
 
 mkdir -p img/webp
 
@@ -34,6 +38,8 @@ convert_img() {
         echo "  full  : $full"
         if [[ "$src" == *.webp ]]; then
             cp "$src" "$full"       # уже webp — копируем
+        elif [[ "$LOSSLESS" == "1" ]]; then
+            convert "$src" -define webp:lossless=true -define webp:method=6 "$full"
         else
             convert "$src" -quality "$FULL_Q" "$full"
         fi

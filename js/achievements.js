@@ -179,6 +179,19 @@ const ACHIEVEMENTS_DATA = {
             nameKey: 'achievements.get_dogma_card.rewardName' // "Theme 'Static'"
         }
     },
+    'get_hween_bennin': {
+        nameKey: 'achievements.get_hween_bennin.name',
+        descriptionKey: 'achievements.get_hween_bennin.description',
+        condition: (playerData) => playerData.inventory.includes('hween_bennin'),
+        reward: { type: 'currency', amount: 1800000 }
+    },
+    'hween_moth_pair': {
+        nameKey: 'achievements.hween_moth_pair.name',
+        descriptionKey: 'achievements.hween_moth_pair.description',
+        condition: (playerData) =>
+            playerData.inventory.includes('hween_tyria') && playerData.inventory.includes('hween_noctua'),
+        reward: { type: 'currency', amount: 2500000 }
+    },
 
     
 };
@@ -245,6 +258,17 @@ const COLLECTIONS_DATA = {
             nameKey: 'collections.creepypasta_set.rewardName'
         },
         passiveEffect: { type: 'material_drop_bonus_percent', value: 0.05 }
+    },
+    halloween_set_2026: {
+        nameKey: 'collections.halloween_set_2026.name',
+        descriptionKey: 'collections.halloween_set_2026.description',
+        cardIds: ['hween_thing', 'hween_kuchi', 'hween_tyria', 'hween_bennin', 'hween_noctua'],
+        reward: {
+            type: 'ui_theme',
+            themeId: 'theme-eclipse',
+            nameKey: 'collections.halloween_set_2026.rewardName'
+        },
+        passiveEffect: { type: 'luck_flat', value: 0.10 }
     }
     // Сюда можно будет добавлять новые коллекции
 };

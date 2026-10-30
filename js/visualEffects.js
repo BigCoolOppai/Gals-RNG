@@ -7,6 +7,10 @@ const VisualEffects = {
     // Активный cleanup текущего эффекта
     activeCleanupFunction: null,
 
+    // Отдельный one-shot слой (для Jackpot / Error proc), чтобы не сбивать ни основной эффект, ни музыку
+    activeOneShotCleanup: null,
+    activeOneShotTimer: null,
+
     // Музыка по умолчанию
     defaultMusicTrack: "audio/vibeOst1.mp3",
 
@@ -20,18 +24,54 @@ const VisualEffects = {
         caramella: "audio/CaramellaJester.wav" 
     },
 
-    // Воспроизведение трека (без автозапуска при volume=0 или ручной паузе)
+    // Нормализованное сравнение текущего трека и целевого пути (учитывает URL-кодирование и незавершённую загрузку)
+    _isSameAudioTrack(audioEl, trackSrc) {
+        if (!audioEl || !trackSrc) return false;
+        const normTarget = trackSrc.replace(/^\.?\//, '');
+        if (audioEl.dataset && audioEl.dataset.targetTrack === normTarget) {
+            return true;
+        }
+        const attrSrc = ((typeof audioEl.getAttribute === 'function' ? audioEl.getAttribute('src') : '') || '').replace(/^\.?\//, '');
+        if (attrSrc && attrSrc === normTarget) {
+            return true;
+        }
+        const rawCurrent = audioEl.currentSrc || audioEl.src || '';
+        if (!rawCurrent || rawCurrent === window.location?.href) return false;
+        try {
+            const decoded = decodeURIComponent(rawCurrent);
+            return decoded.endsWith(normTarget) || rawCurrent.endsWith(normTarget);
+        } catch (e) {
+            return rawCurrent.endsWith(normTarget);
+        }
+    },
+
+    // Безопасное добавление tween в массив с периодической очисткой завершённых анимаций (предотвращает утечку памяти)
+    _pushTween(tweens, t) {
+        if (!t) return t;
+        if (tweens.length > 64) {
+            for (let i = tweens.length - 1; i >= 0; i--) {
+                const item = tweens[i];
+                if (!item || (typeof item.progress === 'function' && item.progress() >= 1 && typeof item.repeat === 'function' && item.repeat() !== -1)) {
+                    tweens.splice(i, 1);
+                }
+            }
+        }
+        tweens.push(t);
+        return t;
+    },
+
+    // Воспроизведение трека (без автозапуска при volume=0 или ручной паузе и без рестарта уже выбранного трека)
     playMusic(trackSrc, audioEl, isUserInitiatedPlay = false) {
         if (!audioEl) { console.warn("VisualEffects.playMusic: audioEl is missing"); return; }
         if (!trackSrc) { console.warn("VisualEffects.playMusic: trackSrc is missing"); return; }
 
         const wasManuallyPausedByPlayer = audioEl.wasManuallyPaused === true;
         const volumeIsZero = (audioEl.volume || 0) === 0;
-        const currentFullSrc = audioEl.currentSrc || "";
-        const isSameTrack = currentFullSrc.endsWith(trackSrc);
+        const normTarget = trackSrc.replace(/^\.?\//, '');
+        const isSameTrack = this._isSameAudioTrack(audioEl, normTarget);
 
-        // Уже играет — ничего не делаем
-        if (isSameTrack && !audioEl.paused && !isUserInitiatedPlay) {
+        // Уже играет этот же трек — ничего не делаем (не начинаем сначала)
+        if (isSameTrack && !audioEl.paused) {
             if (this.debug) console.log("VisualEffects.playMusic: same track already playing");
             return;
         }
@@ -43,11 +83,11 @@ const VisualEffects = {
         }
 
         const attemptPlay = () => {
-            if (volumeIsZero) {
+            if ((audioEl.volume || 0) === 0) {
                 if (this.debug) console.log("VisualEffects.playMusic: volume is 0 -> skip play");
                 return;
             }
-            if (isUserInitiatedPlay || !wasManuallyPausedByPlayer) {
+            if (isUserInitiatedPlay || audioEl.wasManuallyPaused !== true) {
                 const p = audioEl.play();
                 if (p && typeof p.catch === 'function') {
                     p.catch(err => console.warn("VisualEffects.playMusic: play() failed:", err));
@@ -57,10 +97,21 @@ const VisualEffects = {
             }
         };
 
-        if (!isSameTrack || !currentFullSrc || audioEl.src === window.location.href) {
+        if (!isSameTrack) {
+            if (audioEl._pendingCanPlayHandler) {
+                audioEl.removeEventListener('canplaythrough', audioEl._pendingCanPlayHandler);
+                audioEl._pendingCanPlayHandler = null;
+            }
+            if (audioEl.dataset) audioEl.dataset.targetTrack = normTarget;
             audioEl.src = trackSrc;
             if (this.debug) console.log("VisualEffects.playMusic: set src, wait canplaythrough", trackSrc);
-            audioEl.addEventListener('canplaythrough', attemptPlay, { once: true });
+            if (!volumeIsZero) {
+                audioEl._pendingCanPlayHandler = () => {
+                    audioEl._pendingCanPlayHandler = null;
+                    attemptPlay();
+                };
+                audioEl.addEventListener('canplaythrough', audioEl._pendingCanPlayHandler, { once: true });
+            }
             audioEl.addEventListener('error', (e) => console.error("VisualEffects.playMusic: audio error:", e), { once: true });
             audioEl.load();
         } else {
@@ -72,19 +123,19 @@ const VisualEffects = {
     // Переключение на дефолтный трек (мягкая логика)
     switchToDefaultMusic(audioEl, isInitialLoad = false) {
         if (!audioEl) return;
-        const isAlreadyDefault = audioEl.currentSrc && audioEl.currentSrc.endsWith(this.defaultMusicTrack);
+        const isAlreadyDefault = this._isSameAudioTrack(audioEl, this.defaultMusicTrack);
         const shouldPlayNow = !isInitialLoad && audioEl.wasManuallyPaused !== true && (audioEl.volume || 0) > 0;
 
         if (!isAlreadyDefault) {
-            this.playMusic(this.defaultMusicTrack, audioEl, shouldPlayNow && audioEl.paused);
+            if (isInitialLoad) {
+                if (audioEl.dataset) audioEl.dataset.targetTrack = this.defaultMusicTrack.replace(/^\.?\//, '');
+                audioEl.src = this.defaultMusicTrack;
+                audioEl.load();
+            } else {
+                this.playMusic(this.defaultMusicTrack, audioEl, shouldPlayNow && audioEl.paused);
+            }
         } else if (audioEl.paused && shouldPlayNow) {
             this.playMusic(this.defaultMusicTrack, audioEl, true);
-        } else if (isInitialLoad && (!audioEl.currentSrc || !audioEl.currentSrc.endsWith(this.defaultMusicTrack))) {
-            audioEl.src = this.defaultMusicTrack;
-            audioEl.load();
-            if (this.debug) console.log("VisualEffects.switchToDefaultMusic: set default on initial load");
-        } else {
-            if (this.debug) console.log("VisualEffects.switchToDefaultMusic: no change");
         }
     },
 
@@ -155,7 +206,8 @@ const VisualEffects = {
             const musicForThisEffect = effectId ? this.effectMusicMap[effectId] : null;
             const targetTrack = musicForThisEffect || this.defaultMusicTrack;
             if (isInitialLoad) {
-                if (!audioPlayer.currentSrc || !audioPlayer.currentSrc.endsWith(targetTrack)) {
+                if (!this._isSameAudioTrack(audioPlayer, targetTrack)) {
+                    if (audioPlayer.dataset) audioPlayer.dataset.targetTrack = targetTrack.replace(/^\.?\//, '');
                     audioPlayer.src = targetTrack;
                     audioPlayer.load();
                     if (this.debug) console.log("VisualEffects.apply: set music src on initial load:", targetTrack);
@@ -177,8 +229,64 @@ const VisualEffects = {
                 this.activeCleanupFunction = cleanup;
             }
         } else {
-            console.log(`VisualEffects: no effect defined for ID '${effectId}'`);
+            if (this.debug) console.log(`VisualEffects: no effect defined for ID '${effectId}'`);
         }
+    },
+
+    // Кратковременный one-shot визуальный эффект (Jackpot / Error proc) поверх игры:
+    // НЕ трогает музыку (audioPlayer) и НЕ сбрасывает постоянный визуальный эффект игрока.
+    applyOneShot(effectId, targetElements, durationMs = 1200) {
+        if (!effectId) return;
+        const effectFunction = this.effects[effectId];
+        if (typeof effectFunction !== 'function') return;
+
+        if (this.activeOneShotTimer) {
+            clearTimeout(this.activeOneShotTimer);
+            this.activeOneShotTimer = null;
+        }
+        if (this.activeOneShotCleanup) {
+            try { this.activeOneShotCleanup(); } catch (e) {}
+            this.activeOneShotCleanup = null;
+        }
+
+        let oneShotOverlay = document.getElementById('oneShotGlitchOverlay');
+        if (!oneShotOverlay) {
+            oneShotOverlay = document.createElement('div');
+            oneShotOverlay.id = 'oneShotGlitchOverlay';
+            oneShotOverlay.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;display:none;overflow:hidden;';
+            document.body.appendChild(oneShotOverlay);
+        } else {
+            [...oneShotOverlay.classList].forEach(cls => {
+                if (cls.startsWith('active-effect-')) oneShotOverlay.classList.remove(cls);
+            });
+            while (oneShotOverlay.firstChild) oneShotOverlay.firstChild.remove();
+            oneShotOverlay.style.display = 'none';
+        }
+
+        try {
+            const cleanup = effectFunction.call(this, {
+                body: targetElements?.body || document.body,
+                glitchOverlay: oneShotOverlay,
+                audioPlayer: null
+            }, false);
+            if (typeof cleanup === 'function') {
+                this.activeOneShotCleanup = cleanup;
+            }
+        } catch (e) {
+            console.warn(`VisualEffects.applyOneShot("${effectId}") error:`, e);
+        }
+
+        this.activeOneShotTimer = setTimeout(() => {
+            this.activeOneShotTimer = null;
+            if (this.activeOneShotCleanup) {
+                try { this.activeOneShotCleanup(); } catch (e) {}
+                this.activeOneShotCleanup = null;
+            }
+            if (oneShotOverlay) {
+                while (oneShotOverlay.firstChild) oneShotOverlay.firstChild.remove();
+                oneShotOverlay.style.display = 'none';
+            }
+        }, durationMs);
     },
 
     // Список эффектов
@@ -790,7 +898,7 @@ const VisualEffects = {
                     repeat: -1,
                     overwrite: 'auto'
                 });
-                tweens.push(t);
+                VisualEffects._pushTween(tweens, t);
                 } else {
                 // fallback: без GSAP — простое плавание через CSS transition
                 b.style.transform = `translate(${startX}px, ${startY}px) rotate(${Math.random() * 360}deg)`;
@@ -804,7 +912,7 @@ const VisualEffects = {
                     // меняем направление
                     dx *= -1; dy *= -1; rot *= -1;
                 }, 6000);
-                tweens.push({ kill: () => clearInterval(it) });
+                VisualEffects._pushTween(tweens, { kill: () => clearInterval(it) });
                 }
             }
 
@@ -1010,7 +1118,7 @@ const VisualEffects = {
             tl.set(s, { opacity: .7, x: 0 })
                 .to(s, { duration: 0.055, x: dx, ease: 'steps(4)' })
                 .to(s, { duration: 0.085, x: 0,  opacity: 0, ease: 'steps(3)' });
-            tweens.push(tl);
+            VisualEffects._pushTween(tweens, tl);
             } else {
             s.style.opacity = '.7'; s.style.transform = 'translateX(100px)';
             setTimeout(()=>s.remove(), 200);
@@ -1027,7 +1135,7 @@ const VisualEffects = {
             const tl = gsap.timeline({ onComplete: () => b.remove() });
             tl.set(b, { opacity: .5 })
                 .to(b, { duration: 0.16, opacity: 0, ease: 'power1.in' });
-            tweens.push(tl);
+            VisualEffects._pushTween(tweens, tl);
             } else {
             b.style.opacity = '.5'; setTimeout(()=>b.remove(), 170);
             }
@@ -1049,7 +1157,7 @@ const VisualEffects = {
             tl.set(blk, { opacity: .75, x: 0, y: 0, skewX: rand(-12,12) })
                 .to(blk, { duration: 0.08, x: dx, y: dy, ease: 'steps(2)' })
                 .to(blk, { duration: 0.10, x: 0,  y: 0,  opacity: 0, ease: 'steps(2)' });
-            tweens.push(tl);
+            VisualEffects._pushTween(tweens, tl);
             } else {
             blk.style.opacity = '.7'; setTimeout(()=>blk.remove(), 180);
             }
@@ -1057,31 +1165,31 @@ const VisualEffects = {
 
         if (hasGSAP) {
             // RGB‑сдвиг
-            tweens.push(gsap.timeline({ repeat:-1, yoyo:true })
+            VisualEffects._pushTween(tweens, gsap.timeline({ repeat:-1, yoyo:true })
             .to(red,  { duration: .12, x:-3, y: 3, ease:'sine.inOut' })
             .to(red,  { duration: .12, x: 0, y: 0, ease:'sine.inOut' }));
-            tweens.push(gsap.timeline({ repeat:-1, yoyo:true })
+            VisualEffects._pushTween(tweens, gsap.timeline({ repeat:-1, yoyo:true })
             .to(cyan, { duration: .12, x: 3, y:-3, ease:'sine.inOut' })
             .to(cyan, { duration: .12, x: 0, y: 0, ease:'sine.inOut' }));
 
             // Дрожание кадра
-            tweens.push(gsap.timeline({ repeat:-1 })
+            VisualEffects._pushTween(tweens, gsap.timeline({ repeat:-1 })
             .to(scope, { duration: .06, x: 1.6, y:-1.2, rotation:-0.25, ease:'steps(1)' })
             .to(scope, { duration: .06, x:-1.2, y: 1.4, rotation: 0.25, ease:'steps(1)' })
             .to(scope, { duration: .06, x: 0,   y: 0,   rotation: 0,    ease:'steps(1)' }));
 
             // «Дыхание» сканлайнов и шум
-            tweens.push(gsap.to(scan,  { duration: 1.0, opacity: .3, yoyo:true, repeat:-1, ease:'sine.inOut' }));
-            tweens.push(gsap.to(noise, { duration: .9,  opacity: .18, yoyo:true, repeat:-1, ease:'sine.inOut' }));
+            VisualEffects._pushTween(tweens, gsap.to(scan,  { duration: 1.0, opacity: .3, yoyo:true, repeat:-1, ease:'sine.inOut' }));
+            VisualEffects._pushTween(tweens, gsap.to(noise, { duration: .9,  opacity: .18, yoyo:true, repeat:-1, ease:'sine.inOut' }));
 
             // Надпись и фантомы (мини‑джиттер)
-            tweens.push(gsap.timeline({ repeat:-1, yoyo:true })
+            VisualEffects._pushTween(tweens, gsap.timeline({ repeat:-1, yoyo:true })
             .to(label, { duration:.1, skewX: rand(-4,4), skewY: rand(-2,2), ease:'steps(1)' })
             .to(label, { duration:.1, skewX: 0, skewY: 0, ease:'steps(1)' }));
-            tweens.push(gsap.timeline({ repeat:-1, yoyo:true })
+            VisualEffects._pushTween(tweens, gsap.timeline({ repeat:-1, yoyo:true })
             .to(ghostR, { duration:.08, x:'+=2', y:'+=1', opacity:.6, ease:'steps(1)' })
             .to(ghostR, { duration:.08, x:'-=2', y:'-=1', opacity:.45, ease:'steps(1)' }));
-            tweens.push(gsap.timeline({ repeat:-1, yoyo:true })
+            VisualEffects._pushTween(tweens, gsap.timeline({ repeat:-1, yoyo:true })
             .to(ghostC, { duration:.08, x:'-=2', y:'-=1', opacity:.6, ease:'steps(1)' })
             .to(ghostC, { duration:.08, x:'+=2', y:'+=1', opacity:.45, ease:'steps(1)' }));
 
@@ -1170,7 +1278,7 @@ const VisualEffects = {
                             if (!reduceMotion) spawnPetal();
                         }
                     });
-                    tweens.push(t);
+                    VisualEffects._pushTween(tweens, t);
                 } else {
                     p.style.transition = `transform ${dur}s linear, opacity 1s linear`;
                     const timer = setTimeout(()=>{
@@ -1198,7 +1306,7 @@ const VisualEffects = {
                         opacity: rand(0.25, 0.55),
                         ease: 'sine.inOut', yoyo: true, repeat: -1
                     });
-                    tweens.push(t);
+                    VisualEffects._pushTween(tweens, t);
                 }
             }
 
@@ -1249,7 +1357,7 @@ const VisualEffects = {
 
             if (hasGSAP && !reduceMotion) {
                 const t = gsap.to(heat, { duration: 4, y: -10, yoyo:true, repeat:-1, ease:'sine.inOut' });
-                tweens.push(t);
+                VisualEffects._pushTween(tweens, t);
             }
 
             const vw = () => window.innerWidth;
@@ -1280,7 +1388,7 @@ const VisualEffects = {
                             if (!reduceMotion) spawnEmber();
                         }
                     });
-                    tweens.push(t);
+                    VisualEffects._pushTween(tweens, t);
                 } else {
                     e.style.transition = `transform ${dur}s ease-out, opacity ${dur}s linear`;
                     const tm = setTimeout(()=>{
@@ -1350,7 +1458,7 @@ const VisualEffects = {
                         ease: 'sine.inOut',
                         onComplete: () => { s.remove(); spores.splice(spores.indexOf(s),1); if (!reduceMotion) spawnSpore(); }
                     });
-                    tweens.push(t);
+                    VisualEffects._pushTween(tweens, t);
                 } else {
                     s.style.transition = `transform ${dur}s ease-in-out, opacity ${dur}s linear`;
                     const tm = setTimeout(()=>{
@@ -1383,7 +1491,7 @@ const VisualEffects = {
                             ease: 'power1.out',
                             onComplete: () => { s.remove(); spores.splice(spores.indexOf(s),1); }
                         });
-                        tweens.push(t);
+                        VisualEffects._pushTween(tweens, t);
                     } else {
                         s.style.transition = `transform 1.5s ease-out, opacity 1.5s linear`;
                         const tm = setTimeout(()=>{
@@ -1477,7 +1585,7 @@ const VisualEffects = {
                     ease: 'none',
                     repeat: -1
                 });
-                tweens.push(t);
+                VisualEffects._pushTween(tweens, t);
             } else {
                 let offs = totalLen;
                 let stopped = false;
@@ -1490,7 +1598,7 @@ const VisualEffects = {
                     ekgTimerId = setTimeout(tick, reduceMotion ? 60 : 30);
                 };
                 ekgTimerId = setTimeout(tick, 60);
-                tweens.push({ kill(){ stopped = true; clearTimeout(ekgTimerId); } });
+                VisualEffects._pushTween(tweens, { kill(){ stopped = true; clearTimeout(ekgTimerId); } });
             }
 
             const hearts = [];
@@ -1510,7 +1618,7 @@ const VisualEffects = {
                     });
                     t.to(h, { duration: 0.2, opacity: 1, scale: 1.0, ease:'sine.out' })
                     .to(h, { duration: 0.8, y: -20, opacity: 0, ease:'sine.in' });
-                    tweens.push(t);
+                    VisualEffects._pushTween(tweens, t);
                 } else {
                     h.style.transition = 'opacity .2s linear, transform 1s ease-in';
                     setTimeout(()=>{ h.style.opacity='1'; h.style.transform='translateY(-20px)'; }, 10);
@@ -1564,7 +1672,7 @@ const VisualEffects = {
             const tl = gsap.timeline({ onComplete:() => d.remove() });
             tl.fromTo(d,{scaleY:.2,opacity:0},{duration:.22,scaleY:1.4,opacity:1,ease:'power2.out'})
                 .to(d,{duration:.32,opacity:0,scaleY:.1,ease:'power2.in'});
-            tweens.push(tl);
+            VisualEffects._pushTween(tweens, tl);
             } else {
             d.style.opacity = '1'; setTimeout(()=>{ d.style.opacity='0'; setTimeout(()=>d.remove(), 160); }, 120);
             }
@@ -1581,7 +1689,7 @@ const VisualEffects = {
             if (hasGSAP) {
             const tl = gsap.timeline({ onComplete:()=>r.remove() });
             tl.fromTo(r,{scale:.2,opacity:.15},{duration:.8,scale:1.35,opacity:.0,ease:'sine.out'});
-            tweens.push(tl);
+            VisualEffects._pushTween(tweens, tl);
             } else {
             setTimeout(()=>r.remove(), 800);
             }
@@ -1744,14 +1852,14 @@ const VisualEffects = {
 
             if (hasGSAP) {
                 // Плавное появление фона
-                tweens.push(gsap.fromTo(coreGlow, { opacity: 0 }, { opacity: 1, duration: 2, ease: 'power1.inOut' }));
-                tweens.push(gsap.fromTo(rayWheel, { opacity: 0 }, { opacity: 1, duration: 3, ease: 'power1.inOut' }));
+                VisualEffects._pushTween(tweens, gsap.fromTo(coreGlow, { opacity: 0 }, { opacity: 1, duration: 2, ease: 'power1.inOut' }));
+                VisualEffects._pushTween(tweens, gsap.fromTo(rayWheel, { opacity: 0 }, { opacity: 1, duration: 3, ease: 'power1.inOut' }));
 
                 // Дыхание свечения
-                tweens.push(gsap.to(coreGlow, { opacity: 0.6, duration: 4, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
+                VisualEffects._pushTween(tweens, gsap.to(coreGlow, { opacity: 0.6, duration: 4, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
                 
                 // Бесконечное, очень медленное и величественное вращение лучей
-                tweens.push(gsap.to(rayWheel, { rotation: 360, duration: 120, repeat: -1, ease: 'none' }));
+                VisualEffects._pushTween(tweens, gsap.to(rayWheel, { rotation: 360, duration: 120, repeat: -1, ease: 'none' }));
             }
 
             // --- СПАВНЕР КОЛЕЦ (Холодная пульсация) ---
@@ -1778,7 +1886,7 @@ const VisualEffects = {
                     tl.to(ring, { opacity: 1, duration: 2, ease: 'power1.inOut' }, 0)
                       .to(ring, { opacity: 0, duration: 8, ease: 'power1.inOut' }, 2);
                       
-                    tweens.push(tl);
+                    VisualEffects._pushTween(tweens, tl);
                 } else {
                     setTimeout(() => ring.remove(), 1000);
                 }
@@ -1823,7 +1931,7 @@ const VisualEffects = {
                       .to(mote, { opacity: Math.random() * 0.5 + 0.3, duration: dur * 0.3, ease: 'power1.inOut' }, 0)
                       .to(mote, { opacity: 0, duration: dur * 0.4, ease: 'power1.inOut' }, dur * 0.6);
                       
-                    tweens.push(tl);
+                    VisualEffects._pushTween(tweens, tl);
                 } else {
                     setTimeout(() => mote.remove(), 1000);
                 }
@@ -2090,10 +2198,10 @@ const VisualEffects = {
 
             return () => {
                 clearInterval(glitchInterval);
-                // Сбрасываем стили с враппера
-                if(gameWrapper) { 
-                    gameWrapper.style.transform = ''; 
-                    gameWrapper.style.filter = ''; 
+                if (gameWrapper) {
+                    if (typeof gsap !== 'undefined') gsap.killTweensOf(gameWrapper);
+                    gameWrapper.style.transform = '';
+                    gameWrapper.style.filter = '';
                 }
                 this._cleanupScope(glitchOverlay, scope, 'active-effect-sadako');
             };
@@ -2118,8 +2226,10 @@ const VisualEffects = {
 
             return () => {
                 clearInterval(beatInterval);
-                if (typeof gsap !== 'undefined') {
-                    gsap.to(gameWrapper, { scale: 1, filter: '', duration: 0.1 });
+                if (gameWrapper) {
+                    if (typeof gsap !== 'undefined') gsap.killTweensOf(gameWrapper);
+                    gameWrapper.style.transform = '';
+                    gameWrapper.style.filter = '';
                 }
             };
         },
@@ -2247,8 +2357,8 @@ const VisualEffects = {
 
             if (hasGSAP) {
                 // Дыхание тумана
-                tweens.push(gsap.to(mist, { y: 30, opacity: 0.5, duration: 4, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
-                tweens.push(gsap.to(mist, { x: 50, duration: 7, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
+                VisualEffects._pushTween(tweens, gsap.to(mist, { y: 30, opacity: 0.5, duration: 4, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
+                VisualEffects._pushTween(tweens, gsap.to(mist, { x: 50, duration: 7, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
             }
 
             // Функция спавна ледяных осколков (летят по диагонали)
@@ -2277,7 +2387,7 @@ const VisualEffects = {
                         duration: dur, 
                         ease: 'none' 
                     });
-                    tweens.push(tl);
+                    VisualEffects._pushTween(tweens, tl);
                 } else {
                     setTimeout(() => shard.remove(), 1000);
                 }
@@ -2308,7 +2418,7 @@ const VisualEffects = {
                     tl.to(snow, { y: window.innerHeight + 50, x: `+=${Math.random() * 200 - 100}`, duration: dur, ease: 'none' }, 0)
                       .to(snow, { opacity: Math.random() * 0.5 + 0.3, duration: dur * 0.2 }, 0)
                       .to(snow, { opacity: 0, duration: dur * 0.3 }, dur * 0.7);
-                    tweens.push(tl);
+                    VisualEffects._pushTween(tweens, tl);
                 } else {
                     setTimeout(() => snow.remove(), 3000);
                 }
@@ -2382,9 +2492,9 @@ const VisualEffects = {
 
             if (hasGSAP) {
                 // Плавное вращение циркового пола
-                tweens.push(gsap.to(board, { rotation: 360, duration: 150, repeat: -1, ease: 'none' }));
+                VisualEffects._pushTween(tweens, gsap.to(board, { rotation: 360, duration: 150, repeat: -1, ease: 'none' }));
                 // Эффект дыхания/искажения (Cause and Effect manipulation)
-                tweens.push(gsap.to(board, { scale: 1.2, duration: 5, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
+                VisualEffects._pushTween(tweens, gsap.to(board, { scale: 1.2, duration: 5, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
             }
 
             const spawnDiamond = () => {
@@ -2411,7 +2521,7 @@ const VisualEffects = {
                                  { scale: scale * 2, opacity: 0.8, rotationZ: 135, rotationY: 360, duration: dur * 0.5, ease: 'power1.inOut' })
                       .to(d, { scale: scale * 4, opacity: 0, rotationZ: 225, duration: dur * 0.5, ease: 'power1.in' });
                       
-                    tweens.push(tl);
+                    VisualEffects._pushTween(tweens, tl);
                 } else {
                     setTimeout(() => d.remove(), 2000);
                 }
@@ -2465,6 +2575,194 @@ const VisualEffects = {
 
             return () => {
                 try { styleEl.remove(); } catch(e){}
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
+            };
+        },
+
+        // --- HWEEN_BENNIN: Drowned CRT Abyss ---
+        hween_bennin(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const overlayClass = 'active-effect-hween-bennin';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
+            Object.assign(scope.style, { position: 'absolute', inset: '0', pointerEvents: 'none', overflow: 'hidden' });
+
+            const tint = document.createElement('div');
+            tint.style.cssText = 'position:absolute;inset:0;background:radial-gradient(circle at 50% 80%, rgba(0,230,118,0.12), rgba(0,30,20,0.45) 85%);pointer-events:none;';
+            const scan = document.createElement('div');
+            scan.style.cssText = 'position:absolute;inset:0;background:repeating-linear-gradient(to bottom, transparent 0px, transparent 2px, rgba(0,255,128,0.06) 3px, rgba(0,0,0,0.22) 4px);pointer-events:none;';
+            const tear = document.createElement('div');
+            tear.style.cssText = 'position:absolute;left:0;right:0;height:6px;background:rgba(0,230,118,0.35);box-shadow:0 0 12px #00e676;opacity:0;pointer-events:none;';
+            scope.append(tint, scan, tear);
+
+            const tweens = [];
+            const timers = [];
+            const hasGSAP = typeof gsap !== 'undefined';
+
+            if (hasGSAP) {
+                const spawnBubble = () => {
+                    if (!scope.isConnected) return;
+                    const b = document.createElement('div');
+                    const sz = 6 + Math.random() * 14;
+                    b.style.cssText = `position:absolute;bottom:-20px;left:${Math.random()*100}%;width:${sz}px;height:${sz}px;border-radius:50%;border:1px solid rgba(105,240,174,0.55);background:radial-gradient(circle at 30% 30%, rgba(200,255,220,0.5), rgba(0,150,80,0.08));pointer-events:none;`;
+                    scope.appendChild(b);
+                    VisualEffects._pushTween(tweens, gsap.to(b, {
+                        y: -(window.innerHeight + 60),
+                        x: `+=${(Math.random() - 0.5) * 80}`,
+                        opacity: 0,
+                        duration: 4 + Math.random() * 4,
+                        ease: 'sine.out',
+                        onComplete: () => b.remove()
+                    }));
+                };
+                timers.push(setInterval(spawnBubble, 350));
+                timers.push(setInterval(() => {
+                    tear.style.top = `${Math.random() * 100}%`;
+                    VisualEffects._pushTween(tweens, gsap.fromTo(tear, { opacity: 0.75, scaleX: 1.05 }, { opacity: 0, scaleX: 1, duration: 0.25, ease: 'power2.out' }));
+                }, 2600));
+            }
+
+            return () => {
+                timers.forEach(id => clearInterval(id));
+                if (hasGSAP) tweens.forEach(t => { try { t.kill(); } catch(e){} });
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
+            };
+        },
+
+        // --- HWEEN_THING: Black Sun Eclipse ---
+        hween_thing(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const overlayClass = 'active-effect-hween-thing';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
+            Object.assign(scope.style, { position: 'absolute', inset: '0', pointerEvents: 'none', overflow: 'hidden' });
+
+            const vignette = document.createElement('div');
+            vignette.style.cssText = 'position:absolute;inset:0;background:radial-gradient(circle at 50% 18%, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.55) 85%);pointer-events:none;';
+            const sun = document.createElement('div');
+            sun.style.cssText = 'position:absolute;top:6%;left:50%;width:130px;height:130px;transform:translateX(-50%);border-radius:50%;background:#050505;box-shadow:0 0 25px 6px rgba(240,240,240,0.55), 0 0 70px 20px rgba(180,180,180,0.2);opacity:0.45;pointer-events:none;';
+            scope.append(vignette, sun);
+
+            const tweens = [];
+            const timers = [];
+            const hasGSAP = typeof gsap !== 'undefined';
+
+            if (hasGSAP) {
+                VisualEffects._pushTween(tweens, gsap.to(sun, { scale: 1.08, opacity: 0.65, duration: 3.2, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
+                const spawnAsh = () => {
+                    if (!scope.isConnected) return;
+                    const p = document.createElement('div');
+                    const sz = 3 + Math.random() * 5;
+                    p.style.cssText = `position:absolute;top:12%;left:${42 + Math.random()*16}%;width:${sz}px;height:${sz}px;border-radius:50%;background:rgba(20,20,20,0.85);box-shadow:0 0 6px rgba(255,255,255,0.35);pointer-events:none;`;
+                    scope.appendChild(p);
+                    VisualEffects._pushTween(tweens, gsap.to(p, {
+                        x: (Math.random() - 0.5) * window.innerWidth * 0.7,
+                        y: window.innerHeight * (0.4 + Math.random() * 0.5),
+                        opacity: 0,
+                        duration: 3.5 + Math.random() * 3,
+                        ease: 'power1.out',
+                        onComplete: () => p.remove()
+                    }));
+                };
+                timers.push(setInterval(spawnAsh, 320));
+            }
+
+            return () => {
+                timers.forEach(id => clearInterval(id));
+                if (hasGSAP) tweens.forEach(t => { try { t.kill(); } catch(e){} });
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
+            };
+        },
+
+        // --- HWEEN_TYRIA: Cinnabar Blood Scales ---
+        hween_tyria(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const overlayClass = 'active-effect-hween-tyria';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
+            Object.assign(scope.style, { position: 'absolute', inset: '0', pointerEvents: 'none', overflow: 'hidden' });
+
+            const aura = document.createElement('div');
+            aura.style.cssText = 'position:absolute;inset:0;background:radial-gradient(circle, transparent 55%, rgba(183,28,28,0.32) 100%);pointer-events:none;';
+            scope.appendChild(aura);
+
+            const tweens = [];
+            const timers = [];
+            const hasGSAP = typeof gsap !== 'undefined';
+
+            if (hasGSAP) {
+                VisualEffects._pushTween(tweens, gsap.to(aura, { opacity: 0.55, duration: 2.2, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
+                const spawnScale = () => {
+                    if (!scope.isConnected) return;
+                    const s = document.createElement('div');
+                    const sz = 5 + Math.random() * 7;
+                    s.style.cssText = `position:absolute;top:-15px;left:${Math.random()*100}%;width:${sz}px;height:${sz*0.65}px;border-radius:50%;background:#ff1744;box-shadow:0 0 8px #ff5252;opacity:0.85;pointer-events:none;`;
+                    scope.appendChild(s);
+                    VisualEffects._pushTween(tweens, gsap.to(s, {
+                        y: window.innerHeight + 30,
+                        x: `+=${(Math.random() - 0.5) * 160}`,
+                        rotation: Math.random() * 360,
+                        opacity: 0,
+                        duration: 3.5 + Math.random() * 3,
+                        ease: 'sine.inOut',
+                        onComplete: () => s.remove()
+                    }));
+                };
+                timers.push(setInterval(spawnScale, 260));
+            }
+
+            return () => {
+                timers.forEach(id => clearInterval(id));
+                if (hasGSAP) tweens.forEach(t => { try { t.kill(); } catch(e){} });
+                this._cleanupScope(glitchOverlay, scope, overlayClass);
+            };
+        },
+
+        // --- HWEEN_NOCTUA: Streetlamp Moth Glow ---
+        hween_noctua(targets) {
+            const { glitchOverlay } = targets || {};
+            if (!glitchOverlay) return null;
+            const overlayClass = 'active-effect-hween-noctua';
+            const scope = this._createScope(glitchOverlay, overlayClass);
+            if (!scope) return null;
+            Object.assign(scope.style, { position: 'absolute', inset: '0', pointerEvents: 'none', overflow: 'hidden' });
+
+            const cone = document.createElement('div');
+            cone.style.cssText = 'position:absolute;top:-10%;left:50%;width:70vw;height:85vh;transform:translateX(-50%);background:radial-gradient(ellipse at 50% 0%, rgba(255,213,79,0.24) 0%, rgba(255,183,77,0.08) 45%, transparent 75%);pointer-events:none;';
+            scope.appendChild(cone);
+
+            const tweens = [];
+            const timers = [];
+            const hasGSAP = typeof gsap !== 'undefined';
+
+            if (hasGSAP) {
+                VisualEffects._pushTween(tweens, gsap.to(cone, { opacity: 0.7, duration: 2.6, yoyo: true, repeat: -1, ease: 'sine.inOut' }));
+                const spawnMote = () => {
+                    if (!scope.isConnected) return;
+                    const m = document.createElement('div');
+                    const sz = 4 + Math.random() * 6;
+                    const startX = 15 + Math.random() * 70;
+                    m.style.cssText = `position:absolute;top:${35 + Math.random()*55}%;left:${startX}%;width:${sz}px;height:${sz}px;border-radius:50%;background:#fff8e1;box-shadow:0 0 10px 2px rgba(255,193,7,0.8);pointer-events:none;`;
+                    scope.appendChild(m);
+                    VisualEffects._pushTween(tweens, gsap.to(m, {
+                        top: `${4 + Math.random() * 14}%`,
+                        left: `${46 + (Math.random() - 0.5) * 12}%`,
+                        opacity: 0,
+                        scale: 0.4,
+                        duration: 3 + Math.random() * 2.5,
+                        ease: 'power1.inOut',
+                        onComplete: () => m.remove()
+                    }));
+                };
+                timers.push(setInterval(spawnMote, 280));
+            }
+
+            return () => {
+                timers.forEach(id => clearInterval(id));
+                if (hasGSAP) tweens.forEach(t => { try { t.kill(); } catch(e){} });
                 this._cleanupScope(glitchOverlay, scope, overlayClass);
             };
         },

@@ -134,6 +134,28 @@ window.RARITIES_DATA = [
         card: { nameKey: "cards.hween_tar.cardName", image: "img/webp/limited/halloween2025/cardTar.webp", descriptionKey: "cards.hween_tar.description" }
     },
     {
+        id: "hween_noctua",
+        nameKey: "cards.hween_noctua.name",
+        displayParentId: "hween_tyria",
+        minPrestige: 3,
+        probabilityBase: 1 / 220000000,
+        color: "#FFF3E0",
+        glowColor: "#FFB74D",
+        cssClass: "rarity-hween-noctua",
+        currencyOnDuplicate: 22000000,
+        availability: { type: 'event', eventId: 'halloween_luck_2025' },
+        passiveEffect: {
+            type: "luck_flat",
+            value: 0.15
+        },
+        card: {
+            name: "Noctua",
+            nameKey: "cards.hween_noctua.cardName",
+            image: "img/webp/limited/halloween2026/altMoth.webp",
+            descriptionKey: "cards.hween_noctua.description"
+        }
+    },
+    {
         id: "hween_jeff",
         nameKey: "cards.hween_jeff.name",
         minPrestige: 2,
@@ -143,6 +165,27 @@ window.RARITIES_DATA = [
         currencyOnDuplicate: 20000000,
         availability: { type: 'event', eventId: 'halloween_luck_2025' },
         card: { nameKey: "cards.hween_jeff.cardName", image: "img/webp/limited/halloween2025/cardJeff.webp", descriptionKey: "cards.hween_jeff.description" }
+    },
+    {
+        id: "hween_bennin",
+        nameKey: "cards.hween_bennin.name",
+        minPrestige: 1,
+        probabilityBase: 1 / 180000000,
+        color: "#2E7D32",
+        glowColor: "#00E676",
+        cssClass: "rarity-hween-bennin",
+        currencyOnDuplicate: 18000000,
+        availability: { type: 'event', eventId: 'halloween_luck_2025' },
+        passiveEffect: {
+            type: "duplicate_currency_bonus_percent",
+            value: 0.10
+        },
+        card: {
+            name: "Bennin the Drowned",
+            nameKey: "cards.hween_bennin.cardName",
+            image: "img/webp/limited/halloween2026/cardBennin.webp",
+            descriptionKey: "cards.hween_bennin.description"
+        }
     },
     {
         id: "hween_eyeless",
@@ -218,6 +261,27 @@ window.RARITIES_DATA = [
             nameKey: "cards.blackhole_alt_1.cardName",
             image: "img/webp/altBlackhole.webp",
             descriptionKey: "cards.blackhole_alt_1.description"
+        }
+    },
+    {
+        id: "hween_tyria",
+        nameKey: "cards.hween_tyria.name",
+        minPrestige: 2,
+        probabilityBase: 1 / 95000000,
+        color: "#C62828",
+        glowColor: "#FF5252",
+        cssClass: "rarity-hween-tyria",
+        currencyOnDuplicate: 9500000,
+        availability: { type: 'event', eventId: 'halloween_luck_2025' },
+        passiveEffect: {
+            type: "luck_flat",
+            value: 0.08
+        },
+        card: {
+            name: "Tyria",
+            nameKey: "cards.hween_tyria.cardName",
+            image: "img/webp/limited/halloween2026/cardMoth.webp",
+            descriptionKey: "cards.hween_tyria.description"
         }
     },
     {
@@ -446,6 +510,27 @@ window.RARITIES_DATA = [
         }
     },
     {
+        id: "hween_kuchi",
+        nameKey: "cards.hween_kuchi.name",
+        minPrestige: 0,
+        probabilityBase: 1 / 15500000,
+        color: "#AD1457",
+        glowColor: "#FF80AB",
+        cssClass: "rarity-hween-kuchi",
+        currencyOnDuplicate: 1550000,
+        availability: { type: 'event', eventId: 'halloween_luck_2025' },
+        passiveEffect: {
+            type: "material_drop_bonus_percent",
+            value: 0.08
+        },
+        card: {
+            name: "Kuchi",
+            nameKey: "cards.hween_kuchi.cardName",
+            image: "img/webp/limited/halloween2026/cardKuchi.webp",
+            descriptionKey: "cards.hween_kuchi.description"
+        }
+    },
+    {
         id: "hween_eyeling",
         nameKey: "cards.hween_eyeling.name",
         probabilityBase: 1 / 15000660,
@@ -533,7 +618,27 @@ window.RARITIES_DATA = [
             descriptionKey: "cards.kefla.description"
         }
     },
-    
+    {
+        id: "hween_thing",
+        nameKey: "cards.hween_thing.name",
+        minPrestige: 0,
+        probabilityBase: 1 / 12700000,
+        color: "#424242",
+        glowColor: "#E0E0E0",
+        cssClass: "rarity-hween-thing",
+        currencyOnDuplicate: 1270000,
+        availability: { type: 'event', eventId: 'halloween_luck_2025' },
+        passiveEffect: {
+            type: "variant_chance_bonus",
+            value: 0.15
+        },
+        card: {
+            name: "The Entity",
+            nameKey: "cards.hween_thing.cardName",
+            image: "img/webp/limited/halloween2026/cardThing.webp",
+            descriptionKey: "cards.hween_thing.description"
+        }
+    },
     {
         id: "famine",
         nameKey: "cards.famine.name",
@@ -686,9 +791,9 @@ window.RARITIES_DATA = [
         glowColor: "#ffca28",
         cssClass: "rarity-blackhole",
         currencyOnDuplicate: 987654,
-        mechanicalEffect: {
+        passiveEffect: {
             type: "duplicate_collector",
-            luckBonusPerDuplicate: 0.01 
+            luckBonusPerDuplicate: 0.01
         },
         card: {
             name: "FY-3741 alpha",
