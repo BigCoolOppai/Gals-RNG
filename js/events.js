@@ -75,12 +75,19 @@ const EVENTS_DATA = [
         id: 'halloween_luck_2025',
         nameKey: 'events.halloween_2025.name',
         descriptionKey: 'events.halloween_2025.description',
-        startDate: '2025-10-10T00:00:00Z',
-        endDate:   '2025-11-09T23:59:59Z',
+        startDate: '2026-10-31T00:00:00',
+        endDate:   '2026-11-14T23:59:59',
         bannerClass: 'halloween-banner',
         effect: {
             type: 'boost_specific_cards',
-            cardIds: ['hween_slender', 'hween_goth', 'hween_tar', 'hween_jeff', 'hween_eyeless', 'hween_dullahan', 'hween_sadako', 'hween_nurse', 'hween_furina', 'hween_hybrid', 'hween_scarecrow', 'hween_mime', 'hween_clown', 'hween_ghostface', 'hween_witch', 'hween_ghost', 'hween_eyeling', 'hween_piggy', 'hween_jack'],
+            cardIds: [
+                'hween_slender', 'hween_goth', 'hween_tar', 'hween_noctua', 'hween_jeff',
+                'hween_bennin', 'hween_eyeless', 'hween_dullahan', 'hween_sadako',
+                'hween_tyria', 'hween_nurse', 'hween_furina', 'hween_hybrid',
+                'hween_scarecrow', 'hween_mime', 'hween_clown', 'hween_ghostface',
+                'hween_witch', 'hween_ghost', 'hween_kuchi', 'hween_eyeling',
+                'hween_thing', 'hween_piggy', 'hween_jack'
+            ],
             multiplier: 2
         }
     },

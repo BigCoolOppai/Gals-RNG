@@ -1164,13 +1164,31 @@ body.visual-effect-uranium::before {
     to { box-shadow: inset 0 0 35px #d95d1e; }
 }
 
-/* Alt Space (Primordial) */
-.roll-slot.rarity-space-alt {
+/* Alt Space (Primordial / Catalyst) */
+.roll-slot.rarity-space-alt,
+.roll-slot.rarity-space-alt-1 {
     color: #0d47a1;
     background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%);
     text-shadow: 0 0 10px #fff, 0 0 20px #b3e5fc;
     border: 1px solid #90caf9;
     font-family: 'Playfair Display SC', serif;
+}
+
+.roll-slot.rarity-space-alt-2 {
+    color: #ede7f6;
+    background: radial-gradient(circle at 50% 50%, #311b92 0%, #0d0221 100%);
+    text-shadow: 0 0 8px #b388ff, 0 0 18px #7c4dff;
+    border: 1px solid #9575cd;
+    font-family: 'Playfair Display SC', serif;
+}
+
+.roll-slot.rarity-godly {
+    color: #fffde7;
+    background: linear-gradient(135deg, #1a237e 0%, #283593 45%, #ffd54f 100%);
+    text-shadow: 0 0 8px #fff59d, 0 0 18px #ffd700, 0 1px 2px #000;
+    border: 2px solid #ffe082;
+    font-family: 'Cinzel Decorative', 'Georgia', serif;
+    font-weight: bold;
 }
 
 /* --- New Alternative Card Styles --- */
@@ -4731,13 +4749,16 @@ html.theme-synthwave {
 }
 
 /* --- Контейнеры и Карточки --- */
+.theme-synthwave .tab-content {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
 .theme-synthwave .tab-content,
 .theme-synthwave .list-group-item,
 .theme-synthwave .card.bg-dark-subtle {
     background: var(--sw-panel) !important;
     border: 1px solid var(--sw-border) !important;
     box-shadow: 0 0 15px rgba(255, 0, 255, 0.15), inset 0 0 20px rgba(0, 255, 255, 0.05);
-    backdrop-filter: blur(4px);
     color: var(--sw-text);
 }
 
@@ -4880,14 +4901,16 @@ html.theme-cosmic-deep {
     100% { background-position: -150px 150px, -250px 250px, -350px 350px, -100px 100px, -400px 400px; }
 }
 
-/* --- Sharp Glassmorphism (Стекломорфизм) --- */
+/* --- Sharp Glassmorphism (Стекломорфизм — blur только на внешнем контейнере для высокого FPS) --- */
+.theme-cosmic-deep .tab-content {
+    backdrop-filter: blur(12px) saturate(120%);
+    -webkit-backdrop-filter: blur(12px) saturate(120%);
+}
 .theme-cosmic-deep .tab-content,
 .theme-cosmic-deep .list-group-item,
 .theme-cosmic-deep .card.bg-dark-subtle {
     background: var(--co-panel) !important;
     border: 1px solid var(--co-border) !important;
-    backdrop-filter: blur(12px) saturate(120%);
-    -webkit-backdrop-filter: blur(12px) saturate(120%);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     color: var(--co-text);
@@ -4985,33 +5008,6 @@ html.theme-cosmic-deep {
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
 }
 
-/* --- DOGMA ROLL ANIMATION (Monochrome Glitch) --- */
-.roll-slot.rarity-dogma {
-    font-family: 'Courier New', Courier, monospace;
-    color: #ffffff;
-    background-color: #000000;
-    text-shadow: 2px 0px 0px #aaa, -2px 0px 0px #555; /* Серые глитчи вместо цветных */
-    border: 2px solid #ffffff;
-    position: relative;
-    overflow: hidden;
-    animation: dogma-flicker 0.2s infinite;
-}
-.roll-slot.rarity-dogma::before,
-.roll-slot.rarity-dogma::after {
-    content: attr(data-text);
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background-color: #000; display: flex; justify-content: center; align-items: center;
-}
-.roll-slot.rarity-dogma::before {
-    left: 3px; text-shadow: -2px 0 #fff;
-    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
-    animation: error-glitch-anim-1 0.8s infinite linear alternate-reverse;
-}
-.roll-slot.rarity-dogma::after {
-    left: -3px; text-shadow: 2px 0 #fff;
-    clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
-    animation: error-glitch-anim-2 1s infinite linear alternate-reverse;
-}
 @keyframes dogma-flicker {
     0%, 100% { filter: invert(0); }
     50% { filter: invert(1); } /* Резко моргает негативом (Черный становится белым) */
@@ -5108,16 +5104,16 @@ html.theme-dogma {
     text-shadow: none !important; /* Убираем тени, чтобы шум было видно чётко */
 }
 
-/* Обновленный ролл-слот для Догмы: черный фон, шумный текст */
+/* Обновленный ролл-слот для Догмы: черный фон, статик-шум и белое свечение */
 .roll-slot.rarity-dogma {
     font-family: 'Courier New', Courier, monospace;
-    background-color: #000000;
+    background-color: #050505;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.72)), url('../img/effects/noise1.webp');
+    background-size: cover;
     border: 2px solid #ffffff;
-    /* Делаем сам текст шумным */
-    background-image: url('../img/effects/noise1.webp');
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: #ffffff;
+    font-weight: bold;
+    text-shadow: 2px 0 0 #aaaaaa, -2px 0 0 #555555, 0 0 8px rgba(255, 255, 255, 0.75);
     animation: dogma-real-noise 0.2s infinite;
 }
 
@@ -5257,4 +5253,114 @@ html.theme-dogma {
     color: #b8c7d4;
     font-style: italic;
     margin-bottom: 0;
+}
+
+/* ============================================================
+   Хэллоуин 2026 — Стили слотов новых карт + тема «Затмение»
+   ============================================================ */
+
+/* Беннин Утопленница — Утонувшая (CRT зеленоватая бездна) */
+.roll-slot.rarity-hween-bennin {
+    color: #b9f6ca;
+    background:
+        repeating-linear-gradient(to bottom, transparent 0px, transparent 2px, rgba(0, 230, 118, 0.1) 3px, rgba(0, 0, 0, 0.35) 4px),
+        linear-gradient(160deg, #041b15 0%, #0d3b26 55%, #062118 100%);
+    border: 2px solid #00e676;
+    box-shadow: inset 0 0 14px rgba(0, 230, 118, 0.35), 0 0 10px rgba(0, 230, 118, 0.45);
+    text-shadow: 0 0 8px #00e676, 2px 0 0 rgba(255, 23, 68, 0.5);
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+}
+
+/* Сущность — Нечто (Чёрное Солнце, монохромное затмение) */
+.roll-slot.rarity-hween-thing {
+    color: #f5f5f5;
+    background: radial-gradient(circle at 50% 50%, #000000 35%, #262626 68%, #0a0a0a 100%);
+    border: 2px solid #e0e0e0;
+    box-shadow: inset 0 0 18px rgba(255, 255, 255, 0.25), 0 0 12px rgba(224, 224, 224, 0.4);
+    text-shadow: 0 0 10px #ffffff, 0 0 3px #000000;
+    font-family: 'Georgia', serif;
+    letter-spacing: 0.08em;
+}
+
+/* Кучи — Стеснительная (бледно-розовый шёлк и алая сталь) */
+.roll-slot.rarity-hween-kuchi {
+    color: #fce4ec;
+    background: linear-gradient(135deg, #2b0918 0%, #6a1035 55%, #3a0718 100%);
+    border: 1px solid #ff80ab;
+    box-shadow: inset 0 0 12px rgba(255, 64, 129, 0.35);
+    text-shadow: 0 0 8px #ff80ab, 0 1px 2px #000;
+    font-weight: 600;
+}
+
+/* Тирия — Атакующая (киноварно-алый мотылёк) */
+.roll-slot.rarity-hween-tyria {
+    color: #ffebee;
+    background: linear-gradient(145deg, #1a0505 0%, #7f0000 50%, #b71c1c 100%);
+    border: 2px solid #ff5252;
+    box-shadow: inset 0 0 16px rgba(255, 23, 68, 0.45), 0 0 10px rgba(255, 82, 82, 0.4);
+    text-shadow: 0 0 8px #ff5252, 0 0 16px #d50000;
+    font-weight: bold;
+    letter-spacing: 0.04em;
+}
+
+/* Ноктуа — Ночная (тёплый свет ночного фонаря во тьме) */
+.roll-slot.rarity-hween-noctua {
+    color: #fff8e1;
+    background: radial-gradient(ellipse at 50% 15%, rgba(255, 213, 79, 0.55) 0%, #2d1e12 55%, #0c090d 100%);
+    border: 2px solid #ffb74d;
+    box-shadow: inset 0 0 18px rgba(255, 193, 7, 0.45), 0 0 14px rgba(255, 183, 77, 0.55);
+    text-shadow: 0 0 10px #ffe082, 0 0 20px #ffb300, 0 1px 2px #000;
+    font-family: 'Playfair Display SC', 'Georgia', serif;
+    font-weight: bold;
+}
+
+/* Тема «Затмение» (награда за коллекцию Хэллоуина 2026) */
+html.theme-eclipse {
+    --ec-bg: #07060a;
+    --ec-panel: #110f17;
+    --ec-border: rgba(255, 183, 77, 0.32);
+    --ec-amber: #ffb74d;
+    --ec-crimson: #ef5350;
+    --ec-text: #f3ece1;
+    color-scheme: dark;
+}
+.theme-eclipse body {
+    background-color: var(--ec-bg);
+    background-image:
+        radial-gradient(circle at 50% -10%, rgba(255, 183, 77, 0.16) 0%, rgba(239, 83, 80, 0.06) 35%, transparent 65%);
+    color: var(--ec-text);
+}
+.theme-eclipse .tab-content,
+.theme-eclipse .list-group-item,
+.theme-eclipse .card.bg-dark-subtle {
+    background-color: var(--ec-panel) !important;
+    border: 1px solid var(--ec-border) !important;
+    color: var(--ec-text);
+}
+.theme-eclipse .nav-tabs {
+    border-bottom-color: var(--ec-border);
+}
+.theme-eclipse .nav-tabs .nav-link {
+    color: #a89f94;
+}
+.theme-eclipse .nav-tabs .nav-link.active {
+    background-color: var(--ec-panel);
+    color: var(--ec-amber);
+    border-color: var(--ec-border) var(--ec-border) var(--ec-panel);
+    box-shadow: inset 0 -2px 0 var(--ec-amber);
+}
+.theme-eclipse .btn-primary {
+    background: linear-gradient(145deg, #ff9800 0%, #c66900 100%);
+    border-color: #ffb74d;
+    color: #120c05;
+    font-weight: 700;
+}
+.theme-eclipse .inventory-card {
+    background-color: #131019;
+    border-color: var(--ec-border);
+}
+.theme-eclipse .inventory-card:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), 0 0 16px rgba(255, 183, 77, 0.45);
 }

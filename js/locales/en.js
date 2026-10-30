@@ -381,6 +381,11 @@ window.locales.en = {
         space_marine: { name: "Zealous", cardName: "Inimica Anima", description: "She annihilates the enemies of mankind in His name. Anyone who does not look human will be cut down by her massive sword, only fueling her battle-fury even more." },
         lucy: { name: "Office", cardName: "Lucy", description: "This red-haired girl works as a secretary in the most ordinary office of the most ordinary company. Did you believe her resume? Well, I didn't either. Things just can't be that ordinary here..." },
         lucy_alt: { name: "Runaway", cardName: "Amelia", description: "Lucy's daughter who ran away under the cover of night into a massive ruin complex. Coming of age, she decided to split her life into 'before' and 'after'. Oddly enough, how on earth does she manage to keep her body so impeccably clean... in the middle of ruins?" },
+        hween_bennin: { name: "Drowned", cardName: "Bennin the Drowned", description: "Bennin hit rock bottom once, yet clawed her way back up. Now she won't stop trying to make someone else feel that exact same sensation." },
+        hween_thing: { name: "The Thing", cardName: "The Entity", description: "She was born from the Black Sun, and now she watches over all creation. Watching with a smirk and a pinch of sadism." },
+        hween_kuchi: { name: "Shy", cardName: "Kuchi", description: "You might think she's just a cutie who walked up to ask for directions. But please, I beg you—do not answer her questions. Just walk away." },
+        hween_tyria: { name: "Attacking", cardName: "Tyria", description: "A special subspecies of moth-women notorious for their ruthless bloodlust—I wouldn't advise catching their eye. Oops, too late." },
+        hween_noctua: { name: "Nocturnal", cardName: "Noctua", description: "Moth-women like her are known for their endless obsession with light. The moment she spots any source of it, you'll know exactly what I mean." },
 
     },
     // Shop Items
@@ -563,6 +568,7 @@ window.locales.en = {
             'theme-synthwave': 'Synthwave',
             'theme-cosmic-deep': 'Deep Cosmos',
             'theme-dogma': 'Static',
+            'theme-eclipse': 'Eclipse',
         },
         luckCoreFragments: "Core Fragments:",
         effectiveChance: "Effective Chance (with your luck):",
@@ -580,6 +586,7 @@ window.locales.en = {
             core: "Luck Core",
             prestige: "Prestige",
             collections: "Collections",
+            passives: "Card passives",
             blackhole: "Blackhole dupes",
             equip: "Equipment (flat)",
             misfortune: "Misfortune stacks",
@@ -695,8 +702,12 @@ window.locales.en = {
     passive_effects: {
         description_title: "Passive Effect:",
         active_label: "(Active)",
-        duplicate_currency_bonus_percent: "Increases shards from duplicates by 15%. Stacks with equipment.",
-        global_purchase_discount: "Reduces the cost of all purchases (items, upgrades, core, rebirth) by 10%."
+        duplicate_currency_bonus_percent: "Increases shards from duplicates by {value}%. Stacks with equipment.",
+        global_purchase_discount: "Reduces the cost of all purchases (items, upgrades, core, rebirth) by {value}%.",
+        duplicate_collector: "Each duplicate of this card permanently increases your luck by {value}.",
+        luck_flat: "Permanently increases your luck by +{value}.",
+        variant_chance_bonus: "Permanently increases card mutation chance by {value}%.",
+        material_drop_bonus_percent: "Permanently increases material drop chance by {value}%."
     },
     events: {
         timeLeft: "Time left",
@@ -758,6 +769,8 @@ window.locales.en = {
             description: "Get a Golden mutation on the 'Goldy' card.",
         },
         get_dogma_card: { name: "Blasphemy", description: "Obtain the 'Dogma' card.", rewardName: "Theme 'Static'" },
+        get_hween_bennin: { name: "You Shouldn't Have Done That", description: "Obtain the 'Bennin the Drowned' card." },
+        hween_moth_pair: { name: "Moth to a Flame", description: "Unlock both moth-woman versions: 'Tyria' and 'Noctua'." },
 
     },
     collections: {
@@ -780,6 +793,11 @@ window.locales.en = {
             name: "Creepypasta Archive",
             description: "Collect the 3 legends of horror.",
             rewardName: "'Creepypasta' Theme"
+        },
+        halloween_set_2026: {
+            name: "New Nightmares",
+            description: "Collect all 5 new Halloween cards (The Entity, Kuchi, Tyria, Bennin, Noctua).",
+            rewardName: "'Eclipse' Theme"
         }
     },
     materials: {

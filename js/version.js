@@ -1,6 +1,6 @@
 // Единый источник версии игры.
 // При обновлении меняем версию здесь — и в README.md / CHANGELOG.md.
-window.GAME_VERSION = "0.2.15";
+window.GAME_VERSION = "0.2.16";
 
 // Подставляем версию в футер (если есть #versionLabel)
 (function () {
