@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Досье автора — Gal's RNG</title>
+<style>
+  :root{
+    --bg:#0b0812; --panel:#140f1f; --panel2:#1a1228; --line:#2b2340;
+    --fg:#eae5f6; --dim:#9c92b8; --pink:#ff4fa3; --purple:#a86bff;
+    --cyan:#38e8ff; --gold:#ffd166; --green:#7cf29c;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:radial-gradient(1200px 600px at 15% -10%, #2a1240 0%, transparent 60%),
+      radial-gradient(900px 500px at 90% 0%, #10233a 0%, transparent 55%), var(--bg);
+    color:var(--fg);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1060px;margin:0 auto;padding:56px 24px 96px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+  .kicker{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--pink);font-weight:700}
+  h1{font-size:clamp(30px,5vw,52px);line-height:1.06;margin:14px 0 16px;letter-spacing:-.02em}
+  h1 .grad{background:linear-gradient(92deg,var(--pink),var(--purple) 45%,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{font-size:18px;color:#c6bcdd;max-width:74ch}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+  .chip{font-size:12.5px;color:var(--dim);border:1px solid var(--line);background:#120d1d;border-radius:999px;padding:6px 12px}
+  .chip b{color:var(--fg)}
+  section{margin-top:64px}
+  h2{font-size:clamp(22px,3vw,30px);margin:0 0 6px;letter-spacing:-.01em}
+  h2 .n{color:var(--pink);font-size:.62em;margin-right:10px;vertical-align:2px}
+  .sub{color:var(--dim);margin:0 0 22px;max-width:80ch}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px;margin-top:26px}
+  .tile{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:16px;padding:16px 16px 14px;position:relative;overflow:hidden}
+  .tile:before{content:"";position:absolute;inset:0 auto auto 0;width:100%;height:2px;background:linear-gradient(90deg,var(--pink),var(--purple),var(--cyan));opacity:.85}
+  .tile .v{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+  .tile .c{font-size:12.5px;color:var(--dim);margin-top:6px}
+  .ratios{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+  .ratio{background:linear-gradient(180deg,#181026,#120d1d);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:8px}
+  .ratio .big{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1}
+  .ratio .big span{color:var(--dim);font-weight:600}
+  .ratio .lab{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--purple);font-weight:700}
+  .ratio p{margin:0;color:#c2b8d9;font-size:14.5px}
+  .ratio .tag{font-size:11.5px;color:var(--dim);border-top:1px dashed var(--line);padding-top:8px;margin-top:auto}
+  figure{margin:26px 0 0}
+  figure img{width:100%;border-radius:16px;border:1px solid var(--line);display:block}
+  figcaption{font-size:12.5px;color:var(--dim);margin-top:8px}
+  ul.clean{margin:18px 0 0;padding:0;list-style:none}
+  ul.clean li{position:relative;padding-left:22px;margin:10px 0;color:#cec5e2}
+  ul.clean li:before{content:"";position:absolute;left:2px;top:11px;width:7px;height:7px;border-radius:2px;background:linear-gradient(135deg,var(--pink),var(--purple))}
+  b.hl{color:#fff}
+  .num{color:var(--gold);font-weight:700}
+  .quote{border-left:2px solid var(--pink);padding:2px 0 2px 16px;margin:18px 0;color:#d9d1ea;font-style:italic}
+  .quote small{display:block;font-style:normal;color:var(--dim);margin-top:6px;font-size:12.5px}
+  table{width:100%;border-collapse:collapse;margin-top:18px;font-size:14.5px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line)}
+  th{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:700}
+  td.v{text-align:right;font-weight:700;color:#fff;width:70px}
+  tr:hover td{background:#151022}
+  .bars{display:flex;flex-direction:column;gap:9px;margin-top:18px}
+  .bar{display:grid;grid-template-columns:190px 1fr 44px;gap:12px;align-items:center;font-size:14px}
+  .bar .fillwrap{background:#181026;border-radius:999px;height:12px;overflow:hidden}
+  .bar .fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--purple),var(--pink))}
+  .bar .n{text-align:right;color:#fff;font-weight:700}
+  .note{background:linear-gradient(180deg,#1b1128,#140e1f);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:14px;padding:18px 20px;margin-top:20px}
+  .note h3{margin:0 0 8px;font-size:16px}
+  .note p{margin:8px 0;color:#cbc2e0;font-size:14.5px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}.bar{grid-template-columns:120px 1fr 40px}}
+  footer{margin-top:72px;border-top:1px solid var(--line);padding-top:24px;color:var(--dim);font-size:13.5px}
+  code{background:#1b1428;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:.9em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker">Досье автора · Gal's RNG 0.2.16</div>
+  <h1>Что говорит о тебе <span class="grad">игра, которую ты сделал</span></h1>
+  <p class="lede">Я прочитал все карточки, всю локализацию, весь код и посмотрел на все арты.
+  Ниже — статистика не про игру, а про её автора: что ты любишь, как шутишь, где халтуришь и в какие числа веришь.</p>
+  <div class="chips">
+    <span class="chip"><b>178</b> карт</span>
+    <span class="chip"><b>956</b> ключей локализации</span>
+    <span class="chip"><b>18 772</b> строки кода</span>
+    <span class="chip"><b>41 МБ</b> арта</span>
+    <span class="chip"><b>23 232</b> символа описаний</span>
+  </div>
+
+  <section>
+    <div class="tiles">
+      <div class="tile"><div class="v">178</div><div class="c">карт в данных, из них роллятся 175 — три только крафтом</div></div>
+      <div class="tile"><div class="v">54%</div><div class="c">карт нельзя увидеть без престижа</div></div>
+      <div class="tile"><div class="v">31%</div><div class="c">карт цитируют чужую вселенную</div></div>
+      <div class="tile"><div class="v">93%</div><div class="c">комментариев в коде — на русском</div></div>
+      <div class="tile"><div class="v">1 : 1 010 101 010</div><div class="c">твой предел редкости (Догма)</div></div>
+      <div class="tile"><div class="v">130</div><div class="c">символов — среднее описание карты</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">01</span>Соотношения</h2>
+    <p class="sub">То самое, из-за чего всё затевалось: «X к Y». Считал по данным, а не на глаз.</p>
+    <div class="ratios">
+
+      <div class="ratio">
+        <div class="lab">альты ↔ базовые</div>
+        <div class="big mono">46 : 132</div>
+        <p>Каждый четвёртый арт — вариация уже знакомой героини. Самая большая семья — «Пустая» (5 эмоций), потом углеродное древо: Мать Природа, Эмбер, Скетчи, Дайм.</p>
+        <div class="tag">39 семей с альтами · 93 карты-одиночки</div>
+      </div>
+
+      <div class="ratio">
+        <div class="lab">база ↔ лимитки</div>
+        <div class="big mono">146 : 32 <span>= 4.6 : 1</span></div>
+        <p>Внутри ивентов всё ровно: Хэллоуин против шоколада — ровно <b class="hl">24 : 8 = 3 : 1</b>. Шоколад ты закрыл, а Хэллоуин всё наращиваешь.</p>
+        <div class="tag">32 лимитки = 18% коллекции</div>
+      </div>
+
+      <div class="ratio">
+        <div class="lab">маньячки ↔ горничные</div>
+        <div class="big mono">20 : 3 <span>= 6.7 : 1</span></div>
+        <p>Вот и твоё «шесть к одному», только оно про жанр, а не про анатомию: на трёх горничных (Эллен, студентка, С.А.К.У.Я.) — двадцать карт с ножом, бензопилой и дурными намерениями.</p>
+        <div class="tag">если что, «ушки : горничные» = 17 : 3 = 5.7 : 1</div>
+      </div>
+
+      <div class="ratio">
+        <div class="lab">с престижем ↔ без</div>
+        <div class="big mono">96 : 82</div>
+        <p>Больше половины коллекции — «для тех, кто дошёл». Три карты заперты до 6-го перерождения: Гал, Догма, Тето. Половина новичков этих артов не увидит никогда.</p>
+        <div class="tag">37 карт с порогом «престиж 1», 3 — с порогом «престиж 6»</div>
+      </div>
+
+      <div class="ratio">
+        <div class="lab">русский ↔ английский в комментариях</div>
+        <div class="big mono">507 : 40 <span>= 12.7 : 1</span></div>
+        <p>Код английский, а мысли — нет. Ты даже заметки для будущего себя пишешь по-русски: «при желании можно дополнять дальше», «ПОМЕНЯТЬ НАГРАДУ НА ТЕМУ В БУДУЩЕМ».</p>
+        <div class="tag">TODO/FIXME в проекте — ноль. Планы живут в русских комментариях</div>
+      </div>
+
+      <div class="ratio">
+        <div class="lab">многоточие ↔ восклицание</div>
+        <div class="big mono">63 : 27 <span>= 2.3 : 1</span></div>
+        <p>Твоя интонация — не крик, а «…». Больше трети карточек обрываются многоточием, и почти половина из них — с намёком вместо вывода.</p>
+        <div class="tag">ещё 12 карт шутят ремаркой в скобках, 5 — тильдой «~»</div>
+      </div>
+
+      <div class="ratio">
+        <div class="lab">славянское ↔ античное</div>
+        <div class="big mono">7 : 5</div>
+        <p>Родина побеждает: Медведева в трёх лицах (Клюква, Товарищ, Кола Либерти), Лешиха, Домовушка, Яга, Царевна-Лягушка против Зевса, Дионисии, Селены, Инпута и Орочи.</p>
+        <div class="tag">а вот химия и материалы бьют обоих: 17 карт</div>
+      </div>
+
+      <div class="ratio">
+        <div class="lab">экипировка ↔ всё остальное</div>
+        <div class="big mono">21 : 12</div>
+        <p>В магазине 33 позиции: 21 предмет «на себя», 7 бустов и 5 апгрейдов. Ты строишь не гачу, а гардероб и билд — редкости вторичны, множители первичны.</p>
+        <div class="tag">плюс 20 материалов → 15 рецептов крафта</div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">02</span>Математика редкости</h2>
+    <p class="sub">Как ты раскладываешь удачу. Спойлер: у тебя нет ни одного честного «колеса» — и это правильно.</p>
+    <figure><img src="{{C1}}" alt="Распределение карт по порядку редкости"></figure>
+    <ul class="clean">
+      <li>Медианная карта — <b class="hl">1 к 1,6 млн</b>. Это, наверное, самый «средний» гacha-шанс в инди-проектах: не жалко, но и не за просто так.</li>
+      <li><span class="num">102</span> карты реже 1 к миллиону, <span class="num">51</span> реже 1 к 10 млн, <span class="num">15</span> реже 1 к 100 млн и ровно <span class="num">1</span> — реже миллиарда (Догма, 1 : 1 010 101 010).</li>
+      <li>Низ лестницы — три карты подряд: <code>1/1</code>, <code>1/4</code>, <code>1/8</code>. Классический RNG-зачин: самое частое специально сделано «мусором».</li>
+      <li>Сумма всех шансов — <b class="hl">159%</b>. Если бы ты собрал одно честное колесо, оно было бы размером в полтора — поэтому ролл и идёт по независимым проверкам от редкого к частому.</li>
+      <li>Только <span class="num">29</span> чисел из 178 — идеально круглые. Ещё <span class="num">12</span> «подогнаны под персонажа»: 1/10 000 002, 1/50 000 441, 1/2 000 333 (Леди Яга), 1/702 001 (@Nagibator2001).</li>
+      <li><span class="num">10</span> репдиджитов: 666 и 777 у демона с джекпотом, 66 666 у «Демона под контролем», 7 777 777 у дочери Калидона, 1010101010 у Догмы. Числа у тебя — часть шутки, а не только баланс.</li>
+      <li>Мем-номера в шансах: <code>404403</code> (Ошибка), <code>9876543</code> (чёрная дыра), <code>401040104</code> (Тето), <code>1999</code> и <code>199900</code> (S.S.S.), <code>0023</code> (медсестра), <code>3741</code> (FY-3741).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="n">03</span>Интонация: как ты пишешь</h2>
+    <p class="sub">23 232 символа описаний — это примерно 15 минут чтения вслух. Вот из чего они состоят.</p>
+    <figure><img src="{{C3}}" alt="Распределение длины описаний"></figure>
+    <ul class="clean">
+      <li>Среднее описание — <b class="hl">130 символов / 20 слов</b>, медиана 132. Ты не рассказываешь историю, ты ставишь подпись под характером: одна деталь, один крючок, один намёк.</li>
+      <li><span class="num">45</span> карт (25%) прямо обращаются к игроку на «ты» — всего 59 обращений. Игра не про девушек, игра про вас двоих.</li>
+      <li>Словарь описаний — <span class="num">1 695</span> уникальных слов, и <span class="num">1 449</span> из них (85%) встречаются ровно один раз. Ты не переиспользуешь эпитеты — ты каждый раз ищешь новый.</li>
+      <li>Слова-визитки: «кажется» (18 карт), «девушка» (14), «лишь» (12), «решила» (12), «взгляд» (11), «возможно» (10). Осторожная, оценивающая интонация — «кажется, она что-то задумала».</li>
+      <li>Самое длинное описание — Амелия (247 символов), самое короткое — Мусорный идол (53). И самое короткое при этом лучшее:</li>
+    </ul>
+    <div class="quote">«Она никому не нужна... может хоть ты не выбросишь её?»<small>Мусорный идол · 1 к 1 · 53 символа</small></div>
+    <div class="quote">«...это её первый выход, она смущается :3»<small>Гал · собственный аватар игры, 1 к миллиарду</small></div>
+    <ul class="clean">
+      <li>6 карт с пропущенным пробелом после точки — «страну!Просто», «километр.Но». Мелочь, по которой автора узнают быстрее, чем по стилю.</li>
+      <li>8 английских вставок на всю коллекцию: <code>EDITO! EGALE!</code>, <code>CUMALITY</code>, <code>TUCA DONKA!</code>, <code>GYATT</code>. Английский у тебя — punchline, а не язык.</li>
+    </ul>
+    <figure><img src="{{C4}}" alt="Слова-визитки"></figure>
+  </section>
+
+  <section>
+    <h2><span class="n">04</span>Что ты любишь</h2>
+    <p class="sub">Ручная разметка 178 карт: отсылки, архетипы и любимые героини.</p>
+    <div class="grid2">
+      <div>
+        <table>
+          <tr><th>Откуда взято</th><th style="text-align:right">Карт</th></tr>
+          <tr><td>Славянский фольклор</td><td class="v">7</td></tr>
+          <tr><td>Хоррор-кино и крипипаста (Звонок, Слендер, Джефф, Крик)</td><td class="v">4</td></tr>
+          <tr><td>Четыре всадника Апокалипсиса</td><td class="v">4</td></tr>
+          <tr><td>Bleach</td><td class="v">3</td></tr>
+          <tr><td>Античная мифология</td><td class="v">5</td></tr>
+          <tr><td>Berserk · JJK · JoJo · Undertale · DMC · Chainsaw Man · Tokyo Revengers</td><td class="v">2×7</td></tr>
+          <tr><td>Genshin · Touhou · Naruto · Dragon Ball · Hollow Knight · Elden Ring · Hazbin Hotel · Hellsing · Mortal Kombat · Vocaloid</td><td class="v">1×10</td></tr>
+        </table>
+        <p class="sub" style="margin-top:14px">Итого <b class="hl">55 карт (31%)</b> — почти треть коллекции это цитата. И <span class="num">8</span> карт живут на интернет-мемах: брейнрот, GYATT, «TUCA DONKA», «Гипнодэнс», ник @Nagibator2001.</p>
+      </div>
+      <div>
+        <div class="bars">
+          <div class="bar"><span>маньячки и монстры</span><span class="fillwrap"><span class="fill" style="width:100%"></span></span><span class="n">20</span></div>
+          <div class="bar"><span>ушки и хвосты</span><span class="fillwrap"><span class="fill" style="width:85%"></span></span><span class="n">17</span></div>
+          <div class="bar"><span>боевые девы</span><span class="fillwrap"><span class="fill" style="width:85%"></span></span><span class="n">17</span></div>
+          <div class="bar"><span>химия и материалы</span><span class="fillwrap"><span class="fill" style="width:85%"></span></span><span class="n">17</span></div>
+          <div class="bar"><span>богини и высшие</span><span class="fillwrap"><span class="fill" style="width:55%"></span></span><span class="n">11</span></div>
+          <div class="bar"><span>умершие и нежить</span><span class="fillwrap"><span class="fill" style="width:45%"></span></span><span class="n">9</span></div>
+          <div class="bar"><span>тёти-мамочки</span><span class="fillwrap"><span class="fill" style="width:30%"></span></span><span class="n">6</span></div>
+          <div class="bar"><span>горничные</span><span class="fillwrap"><span class="fill" style="width:15%"></span></span><span class="n">3</span></div>
+        </div>
+        <p class="sub" style="margin-top:14px">Профиль автора, если в двух словах: <b class="hl">опасная девушка с ушками, которая скорее убьёт, чем обнимет</b> — но с обязательной богиней-мамочкой наверху редкости.</p>
+      </div>
+    </div>
+    <ul class="clean">
+      <li>Твоя самая эксплуатируемая героиня — <b class="hl">Ева</b>: обычная Ева, «Ризз Ева» с GYATT и «Ева в шоколаде» из ивента. Три карты у одной девушки.</li>
+      <li>По три карты также у Медведевой (Клюква / Товарищ / Кола Либерти) и Ткачихи (туманностей / реальности / галактик). По две — у Алекс, Айри, Стаг, Ханмы, Мисы, Гаэль, Милы, Ли́бры, Ханы Акано, Тур'гаты, Ураночки, Туториэль.</li>
+      <li>Хэллоуин — <span class="num">24</span> карты, это 13,5% всей коллекции. Больше, чем у любого другого ивента, и в 2026-м ты добавил к нему ещё 5. Хэллоуин у тебя не ивент, а второй основной пул.</li>
+      <li>Системами ты обвесил контент плотно: <span class="num">43</span> визуальных эффекта (у 24% карт есть собственная анимация), 12 тем оформления, 23 достижения, 5 коллекций с пассивками, 20 материалов, 15 рецептов, 8 объявленных ивентов.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="n">05</span>Цвет и арт</h2>
+    <p class="sub">178 артов, 41 МБ WebP. Измерил яркость каждого кадра — получился портрет палитры.</p>
+    <div class="grid2">
+      <figure style="margin-top:0"><img src="{{C6}}" alt="Распределение светлоты артов"></figure>
+      <div>
+        <ul class="clean" style="margin-top:0">
+          <li>Средняя яркость кадра — <b class="hl">57%</b>, у 22% карт больше пятой части картинки — тёмные пиксели. Ты снимаешь ночь.</li>
+          <li>Самые тёмные арты: Сущность (10,6%), Безглазая Джекки (13,6%), Пугало (18,8%). Самые светлые: Радость (90,9%), Лисья морда (88,5%), Тина (87,1%).</li>
+          <li>Единого стандарта нет: 145 артов в 1024×1360, остальные — ещё в шести разрешениях вплоть до 2048×2760.</li>
+          <li>Насыщенность в среднем 43% — ты не уходишь ни в кислотный неон, ни в пастель. Тёмный фон + один цветовой акцент на карту.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">06</span>Код: где ты на самом деле живёшь</h2>
+    <p class="sub">18 772 строки. И большая часть веса — не в логике, а в контенте и оформлении.</p>
+    <figure><img src="{{C5}}" alt="Строки кода по файлам"></figure>
+    <ul class="clean">
+      <li>CSS (<span class="num">5 367</span>) в три раза больше игрового движка (<span class="num">1 686</span>). А <code>cards.js</code> (3 022) тяжелее, чем <code>game.js</code> и <code>achievements.js</code> вместе: у тебя игра — это контент, а не механика.</li>
+      <li><span class="num">507</span> русских комментариев против <span class="num">40</span> английских. При этом TODO/FIXME — ноль: ты не помечаешь долги, ты пишешь себе записки обычным текстом.</li>
+      <li><span class="num">171</span> вызов <code>Math.random()</code>, <code>gsap</code> — 151 раз, <code>console.log</code> — 51. Слово <i>luck</i> в коде встречается <span class="num">277</span> раз. Это уже не механика, это мировоззрение.</li>
+      <li>Локализация: <b class="hl">956 ключей</b> в RU и EN — и 39 064 против 39 066 символов. Паритет с точностью до двух символов.</li>
+      <li>CHANGELOG — 9 версий и 214 пунктов на 3 413 слов: ты документируешь игру тщательнее, чем большинство коммерческих команд.</li>
+      <li>В <code>tools/</code> у тебя два симулятора (<code>balance-sim.js</code>, <code>econ-sim.js</code>) и пайплайн оптимизации ассетов. Баланс ты считал скриптами, а не на глаз.</li>
+    </ul>
+    <div class="note">
+      <h3>Прямо сейчас</h3>
+      <p>Сегодня <b class="hl">1 ноября 2026</b> — хэллоуинский ивент «Halloween Return» идёт второй день (31.10 → 14.11). Из восьми объявленных ивентов лимитные карты есть только у двух: хэллоуина и шоколада. Остальные шесть — эффекты, бусты и витрины прошлогоднего контента.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">07</span>Про Биг Буб и Смолл Буб</h2>
+    <p class="sub">Тот самый вопрос, с которого всё началось.</p>
+    <div class="note" style="border-left-color:var(--pink)">
+      <h3>Честный ответ: 6 : 1 я не подтвержу</h3>
+      <p>Этот счёт — про арты, а не про данные: в <code>cards.js</code> нет ни одного поля про фигуру, так что «6 к 1» — это чей-то пересчёт картинок глазами. Оценивать тела персонажей по 178 артам я не буду — не тот жанр анализа, и цифра всё равно выйдет вкусовой.</p>
+      <p>Зато по <b>текстам</b> шутки про размер видно точно, и они есть в обе стороны: «маленький секретик ;)... а может и не маленький» (Алекс), «пара «небольших» деталей» (Орочи), против «две больших пасхальных радости» (Пасхальный кролик), «два очень весомых аргумента» (Ризз Ева), «большие... таланты» (Женя) и «большие... пушки» (Кола Либерти).</p>
+      <p>А настоящие «6 к 1» в твоих данных уже есть, и их много: маньячки к горничным (6,7 : 1), «ушки» к горничным (5,7 : 1), русские комментарии к английским (12,7 : 1).</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">08</span>Если совсем коротко</h2>
+    <ul class="clean">
+      <li><b class="hl">Ты автор контента, а не механик.</b> Данные карт тяжелее движка, CSS больше логики, а 31% коллекции — цитаты.</li>
+      <li><b class="hl">Ты пишешь как стендап-подпись:</b> 130 символов, «кажется», многоточие и ремарка в скобках. Восемьдесят пять процентов слов использованы один раз.</li>
+      <li><b class="hl">Ты веришь в числа как в шутку:</b> 1/666, 1/777, 1/1010101010, 1/702001. Половина шансов подогнана под характер карты.</li>
+      <li><b class="hl">Ты прячешь половину игры за престижем</b> и строишь не гачу, а билд: 21 предмет экипировки на 7 бустов.</li>
+      <li><b class="hl">Ты очень любишь Хэллоуин</b> — 13,5% всех карт, и в 2026-м ты вернул его на второй круг.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p><b>Методика.</b> Всё считается из репозитория: <code>js/cards.js</code> (178 редкостей), <code>js/locales/ru.js</code> и <code>en.js</code> (956 ключей), <code>js/achievements.js</code>, <code>js/crafting.js</code>, <code>js/events.js</code>, CSS и <code>CHANGELOG.md</code>. Скрипты — в <code>tools/author-stats/</code>: <code>extract.js</code> (сбор данных), <code>analyze.py</code> (числа и тексты), <code>tagging.py</code> (ручная разметка отсылок и архетипов), <code>image-analysis.py</code> (яркость и палитра 178 артов), <code>charts.py</code> (графики).</p>
+    <p><b>Оговорки.</b> Архетипы размечены вручную по названиям и описаниям, поэтому «маньячки» и «ушки» — это разметка, а не формула: пограничные карты отнесены по доминирующему мотиву. Палитра считается по усреднённой яркости и насыщенности кадра, а не по цвету фона. Символы описаний считаны по русской локализации.</p>
+  </footer>
+</div>
+</body>
+</html>

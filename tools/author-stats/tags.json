@@ -1,0 +1,235 @@
+{
+ "refs": {
+  "Berserk": [
+   "berserk",
+   "berserk_alt_1"
+  ],
+  "Bleach": [
+   "bleached",
+   "aizen",
+   "aizen_traitor"
+  ],
+  "Jujutsu Kaisen": [
+   "gojo",
+   "gojo_alt"
+  ],
+  "Genshin Impact": [
+   "hween_furina"
+  ],
+  "JoJo": [
+   "timestop",
+   "gyro"
+  ],
+  "Touhou": [
+   "timestop_alt_1"
+  ],
+  "Naruto": [
+   "naruko"
+  ],
+  "Dragon Ball": [
+   "kefla"
+  ],
+  "Undertale": [
+   "maternal",
+   "alt_maternal"
+  ],
+  "Hollow Knight": [
+   "hornet"
+  ],
+  "Elden Ring": [
+   "marika"
+  ],
+  "Hazbin Hotel": [
+   "alastor"
+  ],
+  "Devil May Cry": [
+   "smokinsexystyle",
+   "sss_dt"
+  ],
+  "Chainsaw Man": [
+   "devil",
+   "altDevil"
+  ],
+  "Tokyo Revengers": [
+   "unbound",
+   "unbound_alt_1"
+  ],
+  "Hellsing": [
+   "alt_mythic"
+  ],
+  "Mortal Kombat": [
+   "jade"
+  ],
+  "Vocaloid": [
+   "kasane_teto"
+  ],
+  "Хоррор-кино/крипипаста (Звонок, Слендер, Джефф, Крик)": [
+   "hween_sadako",
+   "hween_slender",
+   "hween_jeff",
+   "hween_ghostface"
+  ],
+  "Славянский фольклор": [
+   "russian",
+   "russian_alt_ussr",
+   "russian_alt_usa",
+   "leshy",
+   "domovoi",
+   "yaga",
+   "frog_princess"
+  ],
+  "Античная мифология": [
+   "zeus",
+   "dionysia",
+   "moon",
+   "anubis",
+   "orochi"
+  ],
+  "Четыре всадника Апокалипсиса": [
+   "war",
+   "famine",
+   "pestilence",
+   "death"
+  ],
+  "Массовая культура/мемы": [
+   "brainrot",
+   "common_alt_1",
+   "jackpot",
+   "afro",
+   "gamer",
+   "metalhead",
+   "western",
+   "bazil"
+  ]
+ },
+ "refs_cards": 55,
+ "ref_cards_share": 30.9,
+ "arch": {
+  "маньячки и монстры": [
+   "berserk",
+   "chlorine",
+   "death",
+   "drow",
+   "empty_angry",
+   "famine",
+   "hween_clown",
+   "hween_dullahan",
+   "hween_eyeless",
+   "hween_ghostface",
+   "hween_jeff",
+   "hween_kuchi",
+   "hween_nurse",
+   "hween_piggy",
+   "hween_scarecrow",
+   "hween_thing",
+   "hween_tyria",
+   "pestilence",
+   "shroom",
+   "war"
+  ],
+  "умершие и нежить": [
+   "death",
+   "hween_bennin",
+   "hween_dullahan",
+   "hween_eyeless",
+   "hween_ghost",
+   "hween_sadako",
+   "hween_slender",
+   "hween_tar",
+   "midday"
+  ],
+  "тёти-мамочки": [
+   "alice",
+   "alice_alt_night",
+   "alt_maternal",
+   "krampus",
+   "maternal",
+   "yaga"
+  ],
+  "горничные": [
+   "ellen",
+   "ellen_alt_student",
+   "timestop_alt_1"
+  ],
+  "звериные ушки и хвосты": [
+   "bazil",
+   "bee",
+   "easter_bunny",
+   "ellen",
+   "ensnared",
+   "fenek",
+   "fenek_alt",
+   "frog_princess",
+   "goblin",
+   "guide",
+   "harpy",
+   "hornet",
+   "hween_noctua",
+   "hween_tyria",
+   "miyabi",
+   "slime",
+   "tamer"
+  ],
+  "богини и высшие существа": [
+   "anubis",
+   "carbon",
+   "celestial_being",
+   "death",
+   "dionysia",
+   "gal",
+   "marika",
+   "moon",
+   "orochi",
+   "time_eternal",
+   "zeus"
+  ],
+  "боевые девы": [
+   "berserk",
+   "berserk_alt_1",
+   "drow",
+   "drow_alt",
+   "gyro",
+   "hween_bennin",
+   "jade",
+   "kefla",
+   "motivation",
+   "space_marine",
+   "sss_dt",
+   "tungsten",
+   "unbound",
+   "unbound_alt_1",
+   "uranium",
+   "war",
+   "western"
+  ],
+  "химия и физика": [
+   "carbon",
+   "celestial_being",
+   "chlorine",
+   "coal",
+   "diamond",
+   "gold",
+   "graphite",
+   "lava",
+   "moon",
+   "neon",
+   "obsidian",
+   "platinum",
+   "salt",
+   "sodium",
+   "tungsten",
+   "uranium",
+   "uranium_alt_1"
+  ]
+ },
+ "memes": {
+  "brainrot": "брейнрот-мем «Bub Bub Bub Sahur»",
+  "common_alt_1": "GYATT / rizz-сленг",
+  "jackpot": "«TUCA DONKA» — гача-мем",
+  "jade": "«CUMALITY» — мем из Mortal Kombat",
+  "afro": "«Гипнодэнс»",
+  "gamer": "ник @Nagibator2001",
+  "hybrid": "гяру-архетип",
+  "error_alt_1": "глитч-эстетика"
+ }
+}
