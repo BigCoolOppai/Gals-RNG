@@ -130,3 +130,41 @@ ax.grid(axis='x', visible=False)
 save(fig, '06-lightness.png')
 
 print('charts done')
+
+# ---------- 7. перепись артов (визуальная разметка) ----------
+cen = json.load(open(os.path.join(ROOT, 'tools/author-stats/art-census.json')))
+CL = {'L': '#ff4fa3', 'M': '#a86bff', 'S': '#38e8ff', 'C': '#4a4160'}
+NAME = {'L': 'крупная', 'M': 'средняя', 'S': 'маленькая', 'C': 'не видно'}
+
+cnt = cen['all']['counts']
+fig, ax = plt.subplots(figsize=(5.4, 5.4))
+sizes = [cnt[k] for k in 'LMSC']
+wedges, _ = ax.pie(sizes, colors=[CL[k] for k in 'LMSC'], startangle=90,
+                   wedgeprops=dict(width=0.34, edgecolor=BG, linewidth=3))
+ax.text(0, 0.1, '126 : 9', ha='center', va='center', fontsize=30, fontweight='bold', color=FG)
+ax.text(0, -0.16, 'крупная : маленькая', ha='center', va='center', fontsize=11, color='#9d92b8')
+ax.legend(wedges, [f'{NAME[k]} — {cnt[k]}' for k in 'LMSC'], loc='upper center',
+          bbox_to_anchor=(0.5, 0.08), frameon=False, fontsize=11)
+ax.set_title('Перепись 178 артов', fontsize=16, fontweight='bold', loc='left', color=FG)
+save(fig, '07-census-donut.png')
+
+groups = [('все арты', cen['all']), ('базовый пул', cen['base']), ('Хэллоуин', cen['halloween']),
+          ('Шоколад', cen['choco']), ('альты', cen['alts']), ('престиж 3+', cen['prestige_hi'])]
+fig, ax = plt.subplots(figsize=(9.4, 4.8))
+ys = list(range(len(groups)))[::-1]
+for y, (label, g) in zip(ys, groups):
+    left = 0
+    for k in 'LMSC':
+        v = g['counts'][k]
+        if v:
+            ax.barh(y, v, left=left, color=CL[k], height=0.62, edgecolor=BG, linewidth=1.2)
+            if v >= 4:
+                ax.text(left + v / 2, y, str(v), ha='center', va='center', fontsize=10.5,
+                        color='#0b0812', fontweight='bold')
+        left += v
+ax.set_yticks(ys)
+ax.set_yticklabels([f'{label} · {g["n"]}' for label, g in groups], fontsize=11)
+style(ax, 'Кто где: срез по пулам', 'карт в каждой категории — крупная / средняя / маленькая / не видно')
+ax.grid(axis='y', visible=False)
+ax.set_xlabel('карт')
+save(fig, '07-census-groups.png')

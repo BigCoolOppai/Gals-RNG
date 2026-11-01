@@ -10,6 +10,7 @@ node tools/author-stats/extract.js                    # -> game-data.json (ка�
 python3 tools/author-stats/image-analysis.py           # -> image-stats.json (яркость/палитра 178 артов)
 python3 tools/author-stats/analyze.py                  # -> stats.json (числа: редкости, тексты, код)
 python3 tools/author-stats/tagging.py                  # -> tags.json (ручная разметка отсылок и архетипов)
+python3 tools/author-stats/art-census.py               # -> art-census.json (перепись артов: L/M/S/не видно)
 python3 tools/author-stats/charts.py                   # -> charts/*.png
 ```
 
@@ -21,6 +22,10 @@ python3 tools/author-stats/charts.py                   # -> charts/*.png
 
 * **архетипы и отсылки** размечены вручную в `tagging.py` — это разметка, а не формула;
 * **палитра** считается по усреднённой яркости/насыщенности кадра, а не по цвету фона;
+* **перепись артов** — ручная разметка 178 изображений по контактным листам
+  (`sheets/` генерируются отдельно и не коммитятся): категории `L` крупная, `M` средняя,
+  `S` маленькая, `C` не видно (спина, броня, силуэт, крупный кроп). Граница «M/L» вкусовая;
+  чтобы пересчитать по своей разметке — поменяйте строку `LABELS` и запустите скрипт заново;
 * **тексты** берутся из русской локализации (`js/locales/ru.js`);
 * **шансы** — из `probabilityBase` в `js/cards.js`, включая 3 невыпадающие крафтовые карты
   (в отчёте они отделены: «178 карт, из них роллятся 175»).
